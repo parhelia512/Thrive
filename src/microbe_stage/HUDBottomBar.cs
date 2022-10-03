@@ -14,15 +14,25 @@ public class HUDBottomBar : HBoxContainer
     [Export]
     public NodePath ProcessPanelButtonPath = null!;
 
-    private PlayButton pauseButton = null!;
+    [Export]
+    public NodePath ChatButtonPath = null!;
+
+    private PlayButton? pauseButton;
 
     private TextureButton? compoundsButton;
     private TextureButton? environmentButton;
     private TextureButton? processPanelButton;
+    private TextureButton? chatButton;
 
     private bool compoundsPressed = true;
     private bool environmentPressed = true;
     private bool processPanelPressed;
+    private bool chatPressed;
+
+    private bool showPauseButton = true;
+    private bool showChatButton;
+
+    private bool paused;
 
     [Signal]
     public delegate void OnMenuPressed();
@@ -45,10 +55,17 @@ public class HUDBottomBar : HBoxContainer
     [Signal]
     public delegate void OnHelpPressed();
 
+    [Signal]
+    public delegate void OnChatPressed(bool opened);
+
     public bool Paused
     {
-        get => pauseButton.Paused;
-        set => pauseButton.Paused = value;
+        get => paused;
+        set
+        {
+            paused = value;
+            UpdatePauseButton();
+        }
     }
 
     public bool CompoundsPressed
@@ -81,6 +98,36 @@ public class HUDBottomBar : HBoxContainer
         }
     }
 
+    public bool ChatPressed
+    {
+        get => chatPressed;
+        set
+        {
+            chatPressed = value;
+            UpdateChatButton();
+        }
+    }
+
+    public bool ShowPauseButton
+    {
+        get => showPauseButton;
+        set
+        {
+            showPauseButton = value;
+            UpdatePauseButton();
+        }
+    }
+
+    public bool ShowChatButton
+    {
+        get => showChatButton;
+        set
+        {
+            showChatButton = value;
+            UpdateChatButton();
+        }
+    }
+
     public override void _Ready()
     {
         pauseButton = GetNode<PlayButton>(PauseButtonPath);
@@ -88,10 +135,12 @@ public class HUDBottomBar : HBoxContainer
         compoundsButton = GetNode<TextureButton>(CompoundsButtonPath);
         environmentButton = GetNode<TextureButton>(EnvironmentButtonPath);
         processPanelButton = GetNode<TextureButton>(ProcessPanelButtonPath);
+        chatButton = GetNode<TextureButton>(ChatButtonPath);
 
         UpdateCompoundButton();
         UpdateEnvironmentButton();
         UpdateProcessPanelButton();
+        UpdateChatButton();
     }
 
     private void MenuPressed()
@@ -144,6 +193,13 @@ public class HUDBottomBar : HBoxContainer
         EmitSignal(nameof(OnPausePressed), paused);
     }
 
+    private void ChatButtonPressed()
+    {
+        GUICommon.Instance.PlayButtonPressSound();
+        ChatPressed = !ChatPressed;
+        EmitSignal(nameof(OnChatPressed), ChatPressed);
+    }
+
     private void UpdateCompoundButton()
     {
         if (compoundsButton == null)
@@ -166,5 +222,23 @@ public class HUDBottomBar : HBoxContainer
             return;
 
         processPanelButton.Pressed = ProcessesPressed;
+    }
+
+    private void UpdatePauseButton()
+    {
+        if (pauseButton == null)
+            return;
+
+        pauseButton.Paused = Paused;
+        pauseButton.GetParent<Control>().Visible = ShowPauseButton;
+    }
+
+    private void UpdateChatButton()
+    {
+        if (chatButton == null)
+            return;
+
+        chatButton.Visible = ShowChatButton;
+        chatButton.Pressed = ChatPressed;
     }
 }

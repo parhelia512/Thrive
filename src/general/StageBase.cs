@@ -76,6 +76,9 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
     public bool HasPlayer => Player != null;
 
     [JsonIgnore]
+    public bool IsMultiplayer => GetTree().HasNetworkPeer();
+
+    [JsonIgnore]
     public Node GameStateRoot => this;
 
     public bool IsLoadedFromSave { get; set; }

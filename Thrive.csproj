@@ -323,6 +323,7 @@
     <Compile Include="src\microbe_stage\ISpawnSystem.cs" />
     <Compile Include="src\microbe_stage\Microbe.Interior.cs" />
     <Compile Include="src\microbe_stage\Microbe.Contact.cs" />
+    <Compile Include="src\microbe_stage\Microbe.Network.cs" />
     <Compile Include="src\microbe_stage\MicrobeCheatMenu.cs" />
     <Compile Include="src\microbe_stage\ChunkConfiguration.cs" />
     <Compile Include="src\microbe_stage\ColonyCompoundBag.cs" />
@@ -462,6 +463,11 @@
     <Compile Include="src\modding\ModUploader.cs" />
     <Compile Include="src\modding\NewModGUI.cs" />
     <Compile Include="src\modding\WorkshopData.cs" />
+    <Compile Include="src\networking\ChatBox.cs" />
+    <Compile Include="src\networking\LobbyMemberGUI.cs" />
+    <Compile Include="src\networking\MultiplayerMenu.cs" />
+    <Compile Include="src\networking\NetworkManager.cs" />
+    <Compile Include="src\networking\PlayerState.cs" />
     <Compile Include="src\saving\FileHelpers.cs" />
     <Compile Include="src\saving\IChildPropertiesLoadCallback.cs" />
     <Compile Include="src\saving\IGodotEarlyNodeResolve.cs" />

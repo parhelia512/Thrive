@@ -11,6 +11,7 @@ public class CustomConfirmationDialog : CustomDialog
     public bool HideOnOk = true;
 
     private bool hideCancelButton;
+    private bool hideConfirmButton;
 
     private string dialogText = string.Empty;
     private string confirmText = "OK";
@@ -40,6 +41,22 @@ public class CustomConfirmationDialog : CustomDialog
             hideCancelButton = value;
 
             if (cancelButton != null)
+                UpdateButtons();
+        }
+    }
+
+    /// <summary>
+    ///   If true, turns this dialog into its AcceptDialog form (only Ok button visible).
+    /// </summary>
+    [Export]
+    public bool HideConfirmButton
+    {
+        get => hideConfirmButton;
+        set
+        {
+            hideConfirmButton = value;
+
+            if (confirmButton != null)
                 UpdateButtons();
         }
     }
@@ -147,6 +164,7 @@ public class CustomConfirmationDialog : CustomDialog
 
         cancelButton.Visible = !hideCancelButton;
         cancelEndSpacer.Visible = !hideCancelButton;
+        confirmButton.Visible = !hideConfirmButton;
 
         confirmButton.Text = TranslationServer.Translate(confirmText);
         cancelButton.Text = TranslationServer.Translate(cancelText);

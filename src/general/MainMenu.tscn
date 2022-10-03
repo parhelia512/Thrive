@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=2]
+[gd_scene load_steps=20 format=2]
 
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=1]
 [ext_resource path="res://src/saving/SaveManagerGUI.tscn" type="PackedScene" id=2]
@@ -12,6 +12,7 @@
 [ext_resource path="res://assets/textures/gui/logo.png" type="Texture" id=10]
 [ext_resource path="res://src/gui_common/CreditsScroll.tscn" type="PackedScene" id=11]
 [ext_resource path="res://src/gui_common/dialogs/LicensesDisplay.tscn" type="PackedScene" id=12]
+[ext_resource path="res://src/networking/MultiplayerMenu.tscn" type="PackedScene" id=13]
 [ext_resource path="res://src/modding/ModManager.tscn" type="PackedScene" id=14]
 [ext_resource path="res://src/gui_common/dialogs/ErrorDialog.tscn" type="PackedScene" id=15]
 [ext_resource path="res://src/gui_common/fonts/Thrive-Regular-Small.tres" type="DynamicFont" id=16]
@@ -77,6 +78,7 @@ ModLoadFailuresPath = NodePath("ModFailureDialog")
 StoreLoggedInDisplayPath = NodePath("StoreUser")
 ModManagerPath = NodePath("ModManager")
 GalleryViewerPath = NodePath("GalleryViewer")
+MultiplayerMenuPath = NodePath("MultiplayerMenu")
 
 [node name="Background" type="TextureRect" parent="."]
 anchor_right = 1.0
@@ -422,7 +424,7 @@ __meta__ = {
 "_editor_description_": ""
 }
 
-[node name="unknown3" type="Button" parent="MenuContainers/Menus/MarginContainer/Extras"]
+[node name="Multiplayer" type="Button" parent="MenuContainers/Menus/MarginContainer/Extras"]
 margin_left = 515.0
 margin_top = 200.0
 margin_right = 765.0
@@ -432,8 +434,7 @@ focus_mode = 0
 mouse_filter = 1
 size_flags_horizontal = 4
 size_flags_vertical = 0
-disabled = true
-text = "???"
+text = "MULTIPLAYER"
 __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
@@ -498,6 +499,9 @@ __meta__ = {
 [node name="ModManager" parent="." instance=ExtResource( 14 )]
 visible = false
 
+[node name="MultiplayerMenu" parent="." instance=ExtResource( 13 )]
+visible = false
+
 [node name="GUIAnimations" type="AnimationPlayer" parent="."]
 anims/MenuSlide = SubResource( 1 )
 
@@ -531,6 +535,7 @@ ErrorMessage = "MOD_LOAD_ERRORS_OCCURRED"
 [connection signal="pressed" from="MenuContainers/Menus/MarginContainer/Extras/ArtGallery" to="." method="ArtGalleryPressed"]
 [connection signal="pressed" from="MenuContainers/Menus/MarginContainer/Extras/Licenses" to="." method="LicensesPressed"]
 [connection signal="pressed" from="MenuContainers/Menus/MarginContainer/Extras/VisitSuggestionsSite" to="." method="VisitSuggestionsSitePressed"]
+[connection signal="pressed" from="MenuContainers/Menus/MarginContainer/Extras/Multiplayer" to="." method="MultiplayerPressed"]
 [connection signal="pressed" from="MenuContainers/Menus/MarginContainer/Extras/Back" to="." method="BackFromToolsPressed"]
 [connection signal="OnOptionsClosed" from="OptionsMenu" to="." method="OnReturnFromOptions"]
 [connection signal="OnBackPressed" from="SaveManagerGUI" to="." method="OnReturnFromLoadGame"]
@@ -541,3 +546,4 @@ ErrorMessage = "MOD_LOAD_ERRORS_OCCURRED"
 [connection signal="OnFinishedSignal" from="CreditsView/CreditsScroll" to="." method="OnReturnFromCredits"]
 [connection signal="pressed" from="CreditsView/Back" to="." method="OnReturnFromCredits"]
 [connection signal="OnClosed" from="ModManager" to="." method="OnReturnFromMods"]
+[connection signal="OnClosed" from="MultiplayerMenu" to="." method="OnReturnFromMultiplayerMenu"]

@@ -33,6 +33,18 @@ public class PauseMenu : CustomDialog
     [Export]
     public NodePath UnsavedProgressWarningPath = null!;
 
+    [Export]
+    public NodePath ResumeButtonPath = null!;
+
+    [Export]
+    public NodePath SaveGameButtonPath = null!;
+
+    [Export]
+    public NodePath LoadGameButtonPath = null!;
+
+    [Export]
+    public NodePath ReturnToMenuButtonPath = null!;
+
     private Control primaryMenu = null!;
     private HelpScreen helpScreen = null!;
     private Control loadMenu = null!;
@@ -41,7 +53,14 @@ public class PauseMenu : CustomDialog
     private CustomConfirmationDialog unsavedProgressWarning = null!;
     private AnimationPlayer animationPlayer = null!;
 
+    private Button? resumeButton;
+    private Button? saveGameButton;
+    private Button? loadGameButton;
+    private Button? returnToMenuButton;
+
     private bool paused;
+
+    private bool multiplayerMode;
 
     /// <summary>
     ///   The assigned pending exit type, will be used to specify what kind of
@@ -121,6 +140,17 @@ public class PauseMenu : CustomDialog
         }
     }
 
+    [Export]
+    public bool MultiplayerMode
+    {
+        get => multiplayerMode;
+        set
+        {
+            multiplayerMode = value;
+            UpdateState();
+        }
+    }
+
     private ActiveMenuType ActiveMenu
     {
         get
@@ -169,7 +199,7 @@ public class PauseMenu : CustomDialog
     {
         set
         {
-            if (paused == value)
+            if (paused == value || MultiplayerMode)
                 return;
 
             if (paused)
@@ -214,10 +244,17 @@ public class PauseMenu : CustomDialog
         optionsMenu = GetNode<OptionsMenu>(OptionsMenuPath);
         saveMenu = GetNode<NewSaveMenu>(SaveMenuPath);
         unsavedProgressWarning = GetNode<CustomConfirmationDialog>(UnsavedProgressWarningPath);
+        resumeButton = GetNode<Button>(ResumeButtonPath);
+        saveGameButton = GetNode<Button>(SaveGameButtonPath);
+        loadGameButton = GetNode<Button>(LoadGameButtonPath);
+        returnToMenuButton = GetNode<Button>(ReturnToMenuButtonPath);
+
         animationPlayer = GetNode<AnimationPlayer>("AnimationPlayer");
 
         unsavedProgressWarning.Connect(nameof(Closed), this, nameof(CancelExit));
         unsavedProgressWarning.Connect(nameof(CustomConfirmationDialog.Cancelled), this, nameof(CancelExit));
+
+        UpdateState();
     }
 
     public override void _Notification(int notification)
@@ -331,6 +368,21 @@ public class PauseMenu : CustomDialog
         };
     }
 
+    private void UpdateState()
+    {
+        if (resumeButton != null)
+            resumeButton.Text = MultiplayerMode ? "BACK_TO_GAME" : "RESUME";
+
+        if (saveGameButton != null)
+            saveGameButton.Visible = !MultiplayerMode;
+
+        if (loadGameButton != null)
+            loadGameButton.Visible = !MultiplayerMode;
+
+        if (returnToMenuButton != null)
+            returnToMenuButton.Text = MultiplayerMode ? "LEAVE" : "RETURN_TO_MENU";
+    }
+
     private void ClosePressed()
     {
         GUICommon.Instance.PlayButtonPressSound();
@@ -344,7 +396,7 @@ public class PauseMenu : CustomDialog
 
         exitType = ExitType.ReturnToMenu;
 
-        if (SaveHelper.SavedRecently || !Settings.Instance.ShowUnsavedProgressWarning)
+        if (SaveHelper.SavedRecently || !Settings.Instance.ShowUnsavedProgressWarning || MultiplayerMode)
         {
             ConfirmExit();
         }
@@ -362,7 +414,7 @@ public class PauseMenu : CustomDialog
         ++exitTries;
 
         if (SaveHelper.SavedRecently || !Settings.Instance.ShowUnsavedProgressWarning
-            || exitTries >= Constants.FORCE_CLOSE_AFTER_TRIES)
+            || exitTries >= Constants.FORCE_CLOSE_AFTER_TRIES || MultiplayerMode)
         {
             ConfirmExit();
         }
@@ -409,7 +461,14 @@ public class PauseMenu : CustomDialog
     {
         Paused = false;
 
-        TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.1f, OnSwitchToMenu, false);
+        if (MultiplayerMode)
+        {
+            NetworkManager.Instance.EndGameSession();
+        }
+        else
+        {
+            TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.1f, OnSwitchToMenu, false);
+        }
     }
 
     private void Quit()

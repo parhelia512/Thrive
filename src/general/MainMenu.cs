@@ -52,10 +52,14 @@ public class MainMenu : NodeWithInput
     [Export]
     public NodePath GalleryViewerPath = null!;
 
+    [Export]
+    public NodePath MultiplayerMenuPath = null!;
+
     public Array? MenuArray;
     public TextureRect Background = null!;
 
     public bool IsReturningToMenu;
+    public bool IsReturningToLobby;
 
     private TextureRect thriveLogo = null!;
     private OptionsMenu options = null!;
@@ -64,6 +68,7 @@ public class MainMenu : NodeWithInput
     private SaveManagerGUI saves = null!;
     private ModManager modManager = null!;
     private GalleryViewer galleryViewer = null!;
+    private MultiplayerMenu multiplayerMenu = null!;
 
     private Control creditsContainer = null!;
     private CreditsScroll credits = null!;
@@ -183,6 +188,7 @@ public class MainMenu : NodeWithInput
         storeLoggedInDisplay = GetNode<Label>(StoreLoggedInDisplayPath);
         modManager = GetNode<ModManager>(ModManagerPath);
         galleryViewer = GetNode<GalleryViewer>(GalleryViewerPath);
+        multiplayerMenu = GetNode<MultiplayerMenu>(MultiplayerMenuPath);
 
         MenuArray?.Clear();
 
@@ -213,6 +219,13 @@ public class MainMenu : NodeWithInput
             gles2Popup.PopupCenteredShrink();
 
         UpdateStoreNameLabel();
+
+        if (IsReturningToLobby)
+        {
+            SetCurrentMenu(uint.MaxValue, false);
+            multiplayerMenu.Show();
+            multiplayerMenu.CurrentMenu = MultiplayerMenu.Menus.Lobby;
+        }
     }
 
     /// <summary>
@@ -494,5 +507,18 @@ public class MainMenu : NodeWithInput
     {
         SetCurrentMenu(2, false);
         Jukebox.Instance.PlayCategory("Menu");
+    }
+
+    private void MultiplayerPressed()
+    {
+        GUICommon.Instance.PlayButtonPressSound();
+        SetCurrentMenu(uint.MaxValue, false);
+        multiplayerMenu.Show();
+    }
+
+    private void OnReturnFromMultiplayerMenu()
+    {
+        multiplayerMenu.Hide();
+        SetCurrentMenu(2, false);
     }
 }

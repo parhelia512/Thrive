@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Godot;
 using Newtonsoft.Json;
@@ -37,6 +38,8 @@ public class MicrobeStage : StageBase<Microbe>
     private Vector3? guidancePosition;
 
     private List<GuidanceLine> chemoreceptionLines = new();
+
+    private Dictionary<int, Microbe> peers = new();
 
     /// <summary>
     ///   Used to control how often compound position info is sent to the tutorial
@@ -102,6 +105,12 @@ public class MicrobeStage : StageBase<Microbe>
         tutorialGUI.Visible = true;
         HUD.Init(this);
         HoverInfo.Init(Camera, Clouds);
+
+        GetTree().Connect("network_peer_disconnected", this, nameof(OnPeerDisconnected));
+        GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
+
+        NetworkManager.Instance.Connect(nameof(NetworkManager.SpawnRequested), this, nameof(SpawnNetworkedMicrobe));
+        NetworkManager.Instance.Connect(nameof(NetworkManager.DespawnRequested), this, nameof(RemoveNetworkedMicrobe));
 
         // Do stage setup to spawn things and setup all parts of the stage
         SetupStage();
@@ -279,6 +288,9 @@ public class MicrobeStage : StageBase<Microbe>
     [RunOnKeyDown("g_pause")]
     public void PauseKeyPressed()
     {
+        if (IsMultiplayer)
+            return;
+
         // Check nothing else has keyboard focus and pause the game
         if (HUD.GetFocusOwner() == null)
         {
@@ -534,6 +546,9 @@ public class MicrobeStage : StageBase<Microbe>
         {
             UpdatePatchSettings();
         }
+
+        spawner.Enabled = !IsMultiplayer;
+        pauseMenu.MultiplayerMode = IsMultiplayer;
     }
 
     protected override void OnGameStarted()
@@ -543,6 +558,13 @@ public class MicrobeStage : StageBase<Microbe>
         UpdatePatchSettings(!TutorialState.Enabled);
 
         SpawnPlayer();
+
+        foreach (var peer in NetworkManager.Instance.ConnectedPeers)
+        {
+            // Spawn already existing players in-game
+            if (!peers.ContainsKey(peer.Key) && peer.Value.CurrentStatus == PlayerState.Status.InGame)
+                SpawnNetworkedMicrobe(peer.Key);
+        }
     }
 
     protected override void SpawnPlayer()
@@ -550,8 +572,18 @@ public class MicrobeStage : StageBase<Microbe>
         if (HasPlayer)
             return;
 
-        Player = SpawnHelpers.SpawnMicrobe(GameWorld.PlayerSpecies, new Vector3(0, 0, 0),
-            rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
+        if (IsMultiplayer)
+        {
+            var id = GetTree().GetNetworkUniqueId();
+            SpawnNetworkedMicrobe(id);
+            Player = peers[id];
+        }
+        else
+        {
+            Player = SpawnHelpers.SpawnMicrobe(GameWorld.PlayerSpecies, new Vector3(0, 0, 0),
+                rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
+        }
+
         Player.AddToGroup(Constants.PLAYER_GROUP);
 
         Player.OnDeath = OnPlayerDied;
@@ -817,5 +849,36 @@ public class MicrobeStage : StageBase<Microbe>
         }
 
         return chemoreceptionLines[index];
+    }
+
+    private void SpawnNetworkedMicrobe(int peerId)
+    {
+        if (peers.ContainsKey(peerId))
+            return;
+
+        var microbe = (Microbe)SpawnHelpers.SpawnMicrobe(GameWorld.PlayerSpecies, new Vector3(0, 0, 0),
+            rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
+        microbe.Name = peerId.ToString(CultureInfo.CurrentCulture);
+        microbe.SetupPlayerClient(peerId);
+        peers.Add(peerId, microbe);
+    }
+
+    private void RemoveNetworkedMicrobe(int peerId)
+    {
+        if (peers.TryGetValue(peerId, out Microbe peer))
+        {
+            peer.DestroyDetachAndQueueFree();
+            peers.Remove(peerId);
+        }
+    }
+
+    private void OnPeerDisconnected(int peerId)
+    {
+        RemoveNetworkedMicrobe(peerId);
+    }
+
+    private void OnServerDisconnected()
+    {
+        SceneManager.Instance.ReturnToMenu();
     }
 }

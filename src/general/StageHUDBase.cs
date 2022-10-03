@@ -21,6 +21,9 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     public NodePath EnvironmentGroupAnimationPlayerPath = null!;
 
     [Export]
+    public NodePath ChatBoxAnimationPlayerPath = null!;
+
+    [Export]
     public NodePath PanelsTweenPath = null!;
 
     [Export]
@@ -194,6 +197,9 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     [Export]
     public NodePath BottomLeftBarPath = null!;
 
+    [Export]
+    public NodePath ChatBoxPath = null!;
+
     // Inspections and cleanup disagree here
     // ReSharper disable RedundantNameQualifier
     protected readonly System.Collections.Generic.Dictionary<Species, int> hoveredSpeciesCounts = new();
@@ -222,6 +228,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     protected Compound temperature = null!;
     protected AnimationPlayer compoundsGroupAnimationPlayer = null!;
     protected AnimationPlayer environmentGroupAnimationPlayer = null!;
+    protected AnimationPlayer chatBoxAnimationPlayer = null!;
     protected MarginContainer mouseHoverPanel = null!;
     protected Panel environmentPanel = null!;
     protected GridContainer? environmentPanelBarContainer;
@@ -243,6 +250,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     // ReSharper disable once NotAccessedField.Local
     protected ProgressBar pressure = null!;
 
+    protected VBoxContainer leftPanels = null!;
     protected GridContainer? compoundsPanelBarContainer;
     protected ProgressBar glucoseBar = null!;
     protected ProgressBar ammoniaBar = null!;
@@ -253,6 +261,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     protected Button environmentPanelCompressButton = null!;
     protected Button compoundsPanelExpandButton = null!;
     protected Button compoundsPanelCompressButton = null!;
+    protected ChatBox chatBox = null!;
     protected TextureProgress atpBar = null!;
     protected TextureProgress healthBar = null!;
     protected TextureProgress ammoniaReproductionBar = null!;
@@ -301,6 +310,8 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     private bool compoundsPanelActive;
 
     private bool environmentPanelActive;
+
+    private bool chatBoxActive = true;
 
     private VBoxContainer hoveredCompoundsContainer = null!;
     private HSeparator hoveredCellsSeparator = null!;
@@ -388,6 +399,8 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
         winExtinctBoxHolder = GetNode<Control>("../WinExtinctBoxHolder");
 
+        leftPanels = GetNode<VBoxContainer>(LeftPanelsPath);
+
         panelsTween = GetNode<Tween>(PanelsTweenPath);
         mouseHoverPanel = GetNode<MarginContainer>(MouseHoverPanelPath);
         agentsPanel = GetNode<Control>(AgentsPanelPath);
@@ -409,6 +422,8 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         hydrogenSulfideBar = GetNode<ProgressBar>(HydrogenSulfideBarPath);
         ironBar = GetNode<ProgressBar>(IronBarPath);
 
+        chatBox = GetNode<ChatBox>(ChatBoxPath);
+
         environmentPanelExpandButton = GetNode<Button>(EnvironmentPanelExpandButtonPath);
         environmentPanelCompressButton = GetNode<Button>(EnvironmentPanelCompressButtonPath);
         compoundsPanelExpandButton = GetNode<Button>(CompoundsPanelExpandButtonPath);
@@ -427,6 +442,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         menu = GetNode<PauseMenu>(MenuPath);
         compoundsGroupAnimationPlayer = GetNode<AnimationPlayer>(CompoundsGroupAnimationPlayerPath);
         environmentGroupAnimationPlayer = GetNode<AnimationPlayer>(EnvironmentGroupAnimationPlayerPath);
+        chatBoxAnimationPlayer = GetNode<AnimationPlayer>(ChatBoxAnimationPlayerPath);
         hoveredCompoundsContainer = GetNode<VBoxContainer>(HoveredCompoundsContainerPath);
         hoveredCellsSeparator = GetNode<HSeparator>(HoverPanelSeparatorPath);
         hoveredCellsContainer = GetNode<VBoxContainer>(HoveredCellsContainerPath);
@@ -488,6 +504,10 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     public void Init(TStage containedInStage)
     {
         stage = containedInStage;
+
+        bottomLeftBar.ShowPauseButton = chatBoxActive = !stage.IsMultiplayer;
+        bottomLeftBar.ShowChatButton = bottomLeftBar.ChatPressed = chatBox.Visible = stage.IsMultiplayer;
+        chatBoxAnimationPlayer.Play(stage.IsMultiplayer ? "Open" : "Close");
     }
 
     public void SendEditorButtonToTutorial(TutorialState tutorialState)
@@ -1388,6 +1408,23 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         else
         {
             pauseInfo.Visible = false;
+        }
+    }
+
+    private void ChatButtonPressed(bool wantedState)
+    {
+        if (chatBoxActive == !wantedState)
+            return;
+
+        if (!chatBoxActive)
+        {
+            chatBoxActive = true;
+            chatBoxAnimationPlayer.Play("Close");
+        }
+        else
+        {
+            chatBoxActive = false;
+            chatBoxAnimationPlayer.Play("Open");
         }
     }
 }
