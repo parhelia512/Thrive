@@ -43,7 +43,7 @@ public partial class Microbe
 
     public void NetworkSendMovementInputs(Vector3 movementDirection, Vector3 lookAtPoint)
     {
-        RpcUnreliable(nameof(NetworkReceiveMovementInputs), movementDirection, lookAtPoint);
+        RpcUnreliableId(1, nameof(NetworkReceiveMovementInputs), movementDirection, lookAtPoint);
     }
 
     private void HandleNetworking(float delta)

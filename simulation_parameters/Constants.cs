@@ -1077,7 +1077,7 @@ public static class Constants
     public const int FORCE_CLOSE_AFTER_TRIES = 3;
 
     public const int MULTIPLAYER_DEFAULT_PORT = 4321;
-    public const int MULTIPLAYER_DEFAULT_MAX_PLAYERS = 2;
+    public const int MULTIPLAYER_DEFAULT_MAX_PLAYERS = 32;
     public const float MULTIPLAYER_DEFAULT_TICK_RATE_DELAY_SECONDS = 0.03f;
     public const int MULTIPLAYER_DEFAULT_TIMEOUT_LIMIT_SECONDS = 32;
 

@@ -68,7 +68,7 @@ public class MainMenu : NodeWithInput
     private SaveManagerGUI saves = null!;
     private ModManager modManager = null!;
     private GalleryViewer galleryViewer = null!;
-    private MultiplayerMenu multiplayerMenu = null!;
+    private MultiplayerGUI multiplayerMenu = null!;
 
     private Control creditsContainer = null!;
     private CreditsScroll credits = null!;
@@ -188,7 +188,7 @@ public class MainMenu : NodeWithInput
         storeLoggedInDisplay = GetNode<Label>(StoreLoggedInDisplayPath);
         modManager = GetNode<ModManager>(ModManagerPath);
         galleryViewer = GetNode<GalleryViewer>(GalleryViewerPath);
-        multiplayerMenu = GetNode<MultiplayerMenu>(MultiplayerMenuPath);
+        multiplayerMenu = GetNode<MultiplayerGUI>(MultiplayerMenuPath);
 
         MenuArray?.Clear();
 
@@ -224,7 +224,7 @@ public class MainMenu : NodeWithInput
         {
             SetCurrentMenu(uint.MaxValue, false);
             multiplayerMenu.Show();
-            multiplayerMenu.CurrentMenu = MultiplayerMenu.Menus.Lobby;
+            multiplayerMenu.CurrentMenu = MultiplayerGUI.Menus.Lobby;
         }
     }
 

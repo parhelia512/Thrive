@@ -371,7 +371,10 @@ public class PauseMenu : CustomDialog
     private void UpdateState()
     {
         if (resumeButton != null)
-            resumeButton.Text = MultiplayerMode ? "BACK_TO_GAME" : "RESUME";
+        {
+            resumeButton.Text = MultiplayerMode ?
+                TranslationServer.Translate("BACK_TO_GAME") : TranslationServer.Translate("RESUME");
+        }
 
         if (saveGameButton != null)
             saveGameButton.Visible = !MultiplayerMode;
@@ -380,7 +383,10 @@ public class PauseMenu : CustomDialog
             loadGameButton.Visible = !MultiplayerMode;
 
         if (returnToMenuButton != null)
-            returnToMenuButton.Text = MultiplayerMode ? "LEAVE" : "RETURN_TO_MENU";
+        {
+            returnToMenuButton.Text = MultiplayerMode ?
+                TranslationServer.Translate("LEAVE") : TranslationServer.Translate("RETURN_TO_MENU");
+        }
     }
 
     private void ClosePressed()

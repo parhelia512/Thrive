@@ -1,6 +1,6 @@
-﻿using Godot;
+using Godot;
 
-public class LobbyMemberGUI : PanelContainer
+public class LobbyPlayerInfo : PanelContainer
 {
     [Export]
     public NodePath NamePath = null!;

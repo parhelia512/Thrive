@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public class MultiplayerMenu : CenterContainer
+public class MultiplayerGUI : CenterContainer
 {
     [Export]
     public NodePath NameBoxPath = null!;
@@ -21,6 +21,9 @@ public class MultiplayerMenu : CenterContainer
 
     [Export]
     public NodePath ServerNamePath = null!;
+
+    [Export]
+    public NodePath InProgressLabelPath = null!;
 
     [Export]
     public NodePath PeerCountPath = null!;
@@ -56,6 +59,7 @@ public class MultiplayerMenu : CenterContainer
     private LineEdit kickReasonLineEdit = null!;
     private CustomConfirmationDialog kickedDialog = null!;
     private Label serverName = null!;
+    private Label inProgressLabel = null!;
     private ChatBox chatBox = null!;
 
     private Control? primaryMenu;
@@ -63,7 +67,7 @@ public class MultiplayerMenu : CenterContainer
 
     private Menus currentMenu = Menus.Main;
 
-    private Dictionary<int, LobbyMemberGUI> party = new();
+    private Dictionary<int, LobbyPlayerInfo> party = new();
 
     private int idToKick;
 
@@ -105,6 +109,7 @@ public class MultiplayerMenu : CenterContainer
         kickDialog = GetNode<CustomConfirmationDialog>(KickDialogPath);
         kickedDialog = GetNode<CustomConfirmationDialog>(KickedDialogPath);
         serverName = GetNode<Label>(ServerNamePath);
+        inProgressLabel = GetNode<Label>(InProgressLabelPath);
         chatBox = GetNode<ChatBox>(ChatBoxPath);
 
         generalDialog = GetNode<CustomConfirmationDialog>("GeneralDialog");
@@ -116,7 +121,7 @@ public class MultiplayerMenu : CenterContainer
         GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
 
         NetworkManager.Instance.Connect(nameof(NetworkManager.ConnectionFailed), this, nameof(OnConnectionFailed));
-        NetworkManager.Instance.Connect(nameof(NetworkManager.ConnectedPeersChanged), this, nameof(UpdateLobby));
+        NetworkManager.Instance.Connect(nameof(NetworkManager.ServerStateUpdated), this, nameof(UpdateLobby));
         NetworkManager.Instance.Connect(nameof(NetworkManager.Kicked), this, nameof(OnKicked));
         NetworkManager.Instance.Connect(nameof(NetworkManager.ReadyForSessionReceived), this, nameof(UpdateReadyStatus));
 
@@ -174,29 +179,30 @@ public class MultiplayerMenu : CenterContainer
 
         // For self
         if (!network.IsDedicated)
-            CreateMember(GetTree().GetNetworkUniqueId(), network.State!.Name);
+            CreatePlayerInfo(GetTree().GetNetworkUniqueId(), network.State!.Name);
 
         // For other peers
         foreach (var peer in network.ConnectedPeers)
-            CreateMember(peer.Key, peer.Value.Name);
+            CreatePlayerInfo(peer.Key, peer.Value.Name);
 
         peerCount.Text = 1 + network.ConnectedPeers.Count + " / " + Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS;
-        serverName.Text = network.ServerName;
+        serverName.Text = network.Settings?.Name;
+        inProgressLabel.Visible = network.GameInSession;
 
         UpdateStartButton();
     }
 
-    private void CreateMember(int peerId, string name)
+    private void CreatePlayerInfo(int peerId, string name)
     {
-        var member = LobbyItemScene.Instance<LobbyMemberGUI>();
-        member.ID = peerId;
-        member.PlayerName = name + (peerId == NetworkManager.DEFAULT_SERVER_ID ? " (Host)" : string.Empty);
-        member.Current = peerId == GetTree().GetNetworkUniqueId();
+        var playerInfo = LobbyItemScene.Instance<LobbyPlayerInfo>();
+        playerInfo.ID = peerId;
+        playerInfo.PlayerName = name + (peerId == NetworkManager.DEFAULT_SERVER_ID ? " (Host)" : string.Empty);
+        playerInfo.Current = peerId == GetTree().GetNetworkUniqueId();
 
-        member.Connect(nameof(LobbyMemberGUI.Kicked), this, nameof(OnLobbyMemberKicked));
+        playerInfo.Connect(nameof(LobbyPlayerInfo.Kicked), this, nameof(OnLobbyMemberKicked));
 
-        lobbyPlayerList.AddChild(member);
-        party.Add(peerId, member);
+        lobbyPlayerList.AddChild(playerInfo);
+        party.Add(peerId, playerInfo);
     }
 
     private void ValidateFields()
@@ -211,7 +217,8 @@ public class MultiplayerMenu : CenterContainer
         if (GetTree().IsNetworkServer())
         {
             startButton.Text = TranslationServer.Translate("START");
-            startButton.Disabled = network.ConnectedPeers.Any(p => !p.Value.CurrentStatus.HasFlag(PlayerState.Status.ReadyForSession));
+            startButton.Disabled = network.ConnectedPeers.Any(
+                p => !p.Value.CurrentStatus.HasFlag(PlayerState.Status.ReadyForSession));
             startButton.ToggleMode = false;
         }
         else
@@ -226,7 +233,7 @@ public class MultiplayerMenu : CenterContainer
 
     private void UpdateReadyStatus(int peerId, bool ready)
     {
-        if (party.TryGetValue(peerId, out LobbyMemberGUI list))
+        if (party.TryGetValue(peerId, out LobbyPlayerInfo list))
             list.Ready = ready;
 
         UpdateStartButton();
@@ -261,7 +268,7 @@ public class MultiplayerMenu : CenterContainer
 
         var name = string.IsNullOrEmpty(nameBox.Text) ? Settings.Instance.ActiveUsername : nameBox.Text;
 
-        var error = NetworkManager.Instance.CreateServer(addressBox.Text, name);
+        var error = NetworkManager.Instance.CreateServer(name);
         if (error != Error.Ok)
         {
             connectingDialog.Hide();
@@ -294,6 +301,9 @@ public class MultiplayerMenu : CenterContainer
     {
         connectingDialog.Hide();
         CurrentMenu = Menus.Lobby;
+
+        NetworkManager.Instance.PrintWithRole(
+            "Connection to ", addressBox.Text, " succeeded, with network ID (", GetTree().GetNetworkUniqueId(), ")");
     }
 
     private void OnConnectionFailed(string reason)
@@ -302,6 +312,8 @@ public class MultiplayerMenu : CenterContainer
         generalDialog.WindowTitle = TranslationServer.Translate("CONNECTION_FAILED");
         generalDialog.DialogText = "Failed to establish connection: " + reason;
         generalDialog.PopupCenteredShrink();
+
+        NetworkManager.Instance.PrintErrorWithRole("Connection to ", addressBox.Text, " failed: ", reason);
     }
 
     private void OnServerDisconnected()
@@ -334,7 +346,7 @@ public class MultiplayerMenu : CenterContainer
 
     private void OnKicked(string reason)
     {
-        kickedDialog.DialogText = "You have been kicked. Reason for kick: " + (string.IsNullOrEmpty(reason) ? "not specified" : reason);
+        kickedDialog.DialogText = "You have been kicked. Reason for kick: " + (string.IsNullOrEmpty(reason) ? "unspecified" : reason);
         kickedDialog.PopupCenteredShrink();
         CurrentMenu = Menus.Main;
     }
