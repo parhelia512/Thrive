@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Godot;
 using Newtonsoft.Json;
 
@@ -16,9 +17,8 @@ public class NetworkManager : Node
 
     private readonly Dictionary<int, PlayerState> connectedPeers = new();
 
-    private int maxPlayers;
-
-    private NetworkedMultiplayerENet? network;
+    private NetworkedMultiplayerENet? peer;
+    private UPNP? upnp;
 
     private NetworkManager()
     {
@@ -26,8 +26,11 @@ public class NetworkManager : Node
     }
 
     [Signal]
-    public delegate void ConnectionFailed(string reason)
-;
+    public delegate void UPNPCallResultReceived(UPNP.UPNPResult result, UPNPActionStep step);
+
+    [Signal]
+    public delegate void ConnectionFailed(string reason);
+
     [Signal]
     public delegate void ServerStateUpdated();
 
@@ -46,6 +49,12 @@ public class NetworkManager : Node
     [Signal]
     public delegate void ReadyForSessionReceived(int peerId, bool ready);
 
+    public enum UPNPActionStep
+    {
+        Setup,
+        PortMapping,
+    }
+
     public static NetworkManager Instance => instance ?? throw new InstanceNotLoadedYetException();
 
     /// <summary>
@@ -53,9 +62,9 @@ public class NetworkManager : Node
     /// </summary>
     public IReadOnlyDictionary<int, PlayerState> ConnectedPeers => connectedPeers;
 
-    public PlayerState? State { get; private set; }
+    public PlayerState? PlayerState { get; private set; }
 
-    public bool IsDedicated => GetTree().IsNetworkServer() && State == null;
+    public bool IsDedicated => GetTree().IsNetworkServer() && PlayerState == null;
 
     public ServerSettings? Settings { get; private set; }
 
@@ -64,7 +73,7 @@ public class NetworkManager : Node
     [RemoteSync]
     public bool GameInSession { get; private set; }
 
-    public bool Connected => network?.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connected;
+    public bool Connected => peer?.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connected;
 
     public float TimePassedConnecting { get; private set; }
 
@@ -75,96 +84,104 @@ public class NetworkManager : Node
         GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
         GetTree().Connect("connection_failed", this, nameof(OnConnectionFailed));
         GetTree().Multiplayer.Connect("network_peer_packet", this, nameof(OnReceivedPacket));
+
+        Connect(nameof(UPNPCallResultReceived), this, nameof(OnUPNPCallResultReceived));
     }
 
     public override void _Process(float delta)
     {
-        if (network == null)
+        if (peer == null)
             return;
 
-        if (network.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connecting)
+        if (peer.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connecting)
         {
             TimePassedConnecting += delta;
         }
     }
 
     /// <summary>
-    ///   Creates a dedicated server.
+    ///   Creates a server without creating player for this peer.
     /// </summary>
-    public Error CreateServer(int maxPlayers = Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS)
+    public Error CreateServer(ServerSettings settings)
     {
         TimePassedConnecting = 0;
 
-        network = new NetworkedMultiplayerENet();
+        peer = new NetworkedMultiplayerENet();
+        peer.SetBindIp(settings.Address);
 
-        var error = network.CreateServer(Constants.MULTIPLAYER_DEFAULT_PORT, maxPlayers);
+        // TODO: enable DTLS for secure transport?
+
+        var error = peer.CreateServer(settings.Port, settings.MaxPlayers);
         if (error != Error.Ok)
         {
             PrintErrorWithRole("An error occurred while trying to create server: ", error);
             return error;
         }
 
-        GetTree().NetworkPeer = network;
-        Settings = new ServerSettings { Name = IP.ResolveHostname(OS.GetEnvironment("COMPUTERNAME"), IP.Type.Ipv4) };
-        this.maxPlayers = maxPlayers;
+        Settings = settings;
 
-        PrintWithRole("Created server with address: ", Settings.Name, " and max player count: ", maxPlayers);
+        GetTree().NetworkPeer = peer;
+
+        PrintWithRole("Created server with the following settings ", settings);
 
         return error;
     }
 
     /// <summary>
-    ///   Creates a player hosted server.
+    ///   Creates a server while creating player for this peer.
     /// </summary>
-    public Error CreateServer(string playerName, int maxPlayers = Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS)
+    public Error CreatePlayerHostedServer(string playerName, ServerSettings settings)
     {
-        var error = CreateServer(maxPlayers);
-        if (error != Error.Ok)
+        var result = CreateServer(settings);
+        if (result != Error.Ok)
+            return result;
+
+        if (settings.UseUPNP)
         {
-            PrintErrorWithRole("An error occurred while trying to create server host: ", error);
-            return error;
+            // Automatic port mapping/forwarding with UPnP
+            TaskExecutor.Instance.AddTask(new Task(() => SetupUPNP()));
         }
 
-        State = new PlayerState { Name = playerName };
+        PlayerState = new PlayerState { Name = playerName };
         NotifyPeerStatusChange(
             GetTree().GetNetworkUniqueId(), PlayerState.Status.Lobby | PlayerState.Status.ReadyForSession);
 
         PrintWithRole("Server is created with client as the host");
 
-        return error;
+        return result;
     }
 
     public Error ConnectToServer(string address, string playerName)
     {
         TimePassedConnecting = 0;
 
-        network = new NetworkedMultiplayerENet();
+        peer = new NetworkedMultiplayerENet();
+
+        // TODO: enable DTLS for secure transport?
 
         GetTree().CheckAndConnect(
             "connected_to_server", this, nameof(OnConnectedToServer), new Godot.Collections.Array { playerName },
             (int)ConnectFlags.Oneshot);
 
-        var error = network.CreateClient(address, Constants.MULTIPLAYER_DEFAULT_PORT);
-        if (error != Error.Ok)
+        var result = peer.CreateClient(address, Constants.MULTIPLAYER_DEFAULT_PORT);
+        if (result != Error.Ok)
         {
-            PrintErrorWithRole("An error occurred while trying to create client: ", error);
-            return error;
+            PrintErrorWithRole("An error occurred while trying to create client: ", result);
+            return result;
         }
 
-        GetTree().NetworkPeer = network;
+        GetTree().NetworkPeer = peer;
 
-        State = new PlayerState { Name = playerName };
+        PlayerState = new PlayerState { Name = playerName };
 
-        return error;
+        return result;
     }
 
-    public void Disconnect(int id = 0)
+    public void Disconnect()
     {
-        if (!Connected)
-            return;
-
         PrintWithRole("Disconnecting...");
-        network?.CloseConnection();
+        peer?.CloseConnection();
+        upnp?.DeletePortMapping(Settings!.Port);
         connectedPeers.Clear();
         GameInSession = false;
     }
@@ -190,7 +207,7 @@ public class NetworkManager : Node
         }
         else if (!IsDedicated && GetTree().GetNetworkUniqueId() == peerId)
         {
-            return State!;
+            return PlayerState!;
         }
 
         return null;
@@ -264,6 +281,40 @@ public class NetworkManager : Node
         GD.PrintErr(GetTree().IsNetworkServer() ? "[Server] " : "[Client] ", str);
     }
 
+    private void SetupUPNP()
+    {
+        upnp ??= new UPNP();
+
+        var result = (UPNP.UPNPResult)upnp.Discover();
+
+        if (result != UPNP.UPNPResult.Success)
+            PrintErrorWithRole("UPnP devices discovery failed: ", result);
+
+        EmitSignal(nameof(UPNPCallResultReceived), result, UPNPActionStep.Setup);
+    }
+
+    private void AddPortMapping(int port)
+    {
+        if (upnp == null)
+            return;
+
+        if (upnp.GetDeviceCount() <= 0)
+            return;
+
+        if (upnp.GetGateway()?.IsValidGateway() == true)
+        {
+            // TODO: not tested and not sure if this really works since I can't seem to get my router's UPnP to work?
+            var pmResult = (UPNP.UPNPResult)upnp.AddPortMapping(port, 0, "ThriveGame");
+
+            // TODO: error handling
+
+            EmitSignal(nameof(UPNPCallResultReceived), pmResult, UPNPActionStep.PortMapping);
+            return;
+        }
+
+        EmitSignal(nameof(UPNPCallResultReceived), UPNP.UPNPResult.Success, UPNPActionStep.PortMapping);
+    }
+
     private void OnPeerConnected(int id)
     {
         // Will probaby be useful later.
@@ -312,14 +363,28 @@ public class NetworkManager : Node
 
     private void OnReceivedPacket(int senderId, byte[] packet)
     {
-        ServerSettings? lobbyData;
+        ServerSettings? parsedSettings;
         using (var stream = new MemoryStream(packet))
         {
             using (var reader = new StreamReader(stream, Encoding.UTF8))
-                lobbyData = JsonSerializer.Create().Deserialize(reader, typeof(ServerSettings)) as ServerSettings;
+                parsedSettings = JsonSerializer.Create().Deserialize(reader, typeof(ServerSettings)) as ServerSettings;
         }
 
-        Settings = lobbyData;
+        Settings = parsedSettings;
+    }
+
+    private void OnUPNPCallResultReceived(UPNP.UPNPResult result, UPNPActionStep step)
+    {
+        switch (step)
+        {
+            case UPNPActionStep.Setup:
+            {
+                if (result == UPNP.UPNPResult.Success)
+                    TaskExecutor.Instance.AddTask( new Task(() => AddPortMapping(Settings!.Port)));
+
+                break;
+            }
+        }
     }
 
     [Remote]
@@ -334,8 +399,8 @@ public class NetworkManager : Node
 
             if (!IsDedicated)
             {
-                RpcId(id, nameof(NotifyPlayerConnected), GetTree().GetNetworkUniqueId(), State!.Name);
-                RpcId(id, nameof(NotifyPeerStatusChange), GetTree().GetNetworkUniqueId(), State!.CurrentStatus);
+                RpcId(id, nameof(NotifyPlayerConnected), GetTree().GetNetworkUniqueId(), PlayerState!.Name);
+                RpcId(id, nameof(NotifyPeerStatusChange), GetTree().GetNetworkUniqueId(), PlayerState!.CurrentStatus);
             }
 
             // TODO: might not be true...
@@ -355,7 +420,8 @@ public class NetworkManager : Node
         connectedPeers.Add(id, new PlayerState { Name = playerName });
         EmitSignal(nameof(ServerStateUpdated));
 
-        GetTree().RefuseNewNetworkConnections = GetTree().IsNetworkServer() && connectedPeers.Count + 1 >= maxPlayers;
+        var peerCount = IsDedicated ? connectedPeers.Count : connectedPeers.Count + 1;
+        GetTree().RefuseNewNetworkConnections = GetTree().IsNetworkServer() && peerCount >= Settings!.MaxPlayers;
     }
 
     [Remote]
@@ -430,7 +496,7 @@ public class NetworkManager : Node
     [RemoteSync]
     private void NotifyGameStart()
     {
-        if (!IsDedicated && State!.CurrentStatus == PlayerState.Status.InGame)
+        if (!IsDedicated && PlayerState!.CurrentStatus == PlayerState.Status.InGame)
             return;
 
         var microbeStage = (MicrobeStage)SceneManager.Instance.LoadScene(MainGameState.MicrobeStage).Instance();
@@ -442,7 +508,7 @@ public class NetworkManager : Node
     [RemoteSync]
     private void NotifyGameEnd()
     {
-        if (!IsDedicated && State!.CurrentStatus.HasFlag(PlayerState.Status.Lobby))
+        if (!IsDedicated && PlayerState!.CurrentStatus.HasFlag(PlayerState.Status.Lobby))
             return;
 
         SetPlayerStatus(

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=1]
 [ext_resource path="res://src/networking/MultiplayerGUI.cs" type="Script" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://src/gui_common/fonts/Lato-Bold-Smaller.tres" type="DynamicFont" id=4]
 [ext_resource path="res://src/gui_common/fonts/Lato-Regular-Small.tres" type="DynamicFont" id=5]
 [ext_resource path="res://src/networking/LobbyPlayerInfo.tscn" type="PackedScene" id=6]
+[ext_resource path="res://src/networking/ServerSetup.tscn" type="PackedScene" id=7]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-AlmostSmaller.tres" type="DynamicFont" id=8]
 [ext_resource path="res://src/gui_common/dialogs/CustomConfirmationDialog.tscn" type="PackedScene" id=9]
 
@@ -15,7 +16,8 @@ anchor_bottom = 1.0
 theme = ExtResource( 1 )
 script = ExtResource( 2 )
 NameBoxPath = NodePath("PrimaryMenu/VBoxContainer/HBoxContainer/NameBox")
-AddressBoxPath = NodePath("PrimaryMenu/VBoxContainer/HBoxContainer2/AddressBox")
+AddressBoxPath = NodePath("PrimaryMenu/VBoxContainer/HBoxContainer2/Address")
+PortBoxPath = NodePath("PrimaryMenu/VBoxContainer/HBoxContainer3/Port")
 ConnectButtonPath = NodePath("PrimaryMenu/HBoxContainer2/Connect")
 CreateServerButtonPath = NodePath("PrimaryMenu/HBoxContainer2/Host")
 LobbyPlayerListPath = NodePath("Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/PanelContainer/MarginContainer/PlayerList")
@@ -30,68 +32,91 @@ ChatBoxPath = NodePath("Lobby/HBoxContainer2/ChatPanel/MarginContainer/VBoxConta
 LobbyItemScene = ExtResource( 6 )
 
 [node name="PrimaryMenu" type="VBoxContainer" parent="."]
-margin_left = 488.0
-margin_top = 300.0
-margin_right = 791.0
-margin_bottom = 420.0
+margin_left = 491.0
+margin_top = 282.0
+margin_right = 788.0
+margin_bottom = 437.0
 custom_constants/separation = 9
 
 [node name="VBoxContainer" type="VBoxContainer" parent="PrimaryMenu"]
-margin_right = 303.0
-margin_bottom = 66.0
+margin_right = 297.0
+margin_bottom = 101.0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PrimaryMenu/VBoxContainer"]
-margin_right = 303.0
+margin_right = 297.0
 margin_bottom = 31.0
 
 [node name="Label3" type="Label" parent="PrimaryMenu/VBoxContainer/HBoxContainer"]
 margin_top = 3.0
-margin_right = 99.0
+margin_right = 93.0
 margin_bottom = 28.0
 size_flags_horizontal = 3
 text = "NAME"
 
 [node name="NameBox" type="LineEdit" parent="PrimaryMenu/VBoxContainer/HBoxContainer"]
-margin_left = 103.0
-margin_right = 303.0
+margin_left = 97.0
+margin_right = 297.0
 margin_bottom = 31.0
 rect_min_size = Vector2( 200, 0 )
 placeholder_text = "Use default"
+caret_blink = true
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="PrimaryMenu/VBoxContainer"]
 margin_top = 35.0
-margin_right = 303.0
+margin_right = 297.0
 margin_bottom = 66.0
-custom_constants/separation = 10
 
-[node name="Label2" type="Label" parent="PrimaryMenu/VBoxContainer/HBoxContainer2"]
+[node name="Label3" type="Label" parent="PrimaryMenu/VBoxContainer/HBoxContainer2"]
 margin_top = 3.0
 margin_right = 93.0
 margin_bottom = 28.0
 size_flags_horizontal = 3
 text = "ADDRESS"
 
-[node name="AddressBox" type="LineEdit" parent="PrimaryMenu/VBoxContainer/HBoxContainer2"]
-margin_left = 103.0
-margin_right = 303.0
+[node name="Address" type="LineEdit" parent="PrimaryMenu/VBoxContainer/HBoxContainer2"]
+margin_left = 97.0
+margin_right = 297.0
 margin_bottom = 31.0
 rect_min_size = Vector2( 200, 0 )
 text = "127.0.0.1"
+placeholder_text = "Use default"
+caret_blink = true
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="PrimaryMenu/VBoxContainer"]
+margin_top = 70.0
+margin_right = 297.0
+margin_bottom = 101.0
+
+[node name="Label3" type="Label" parent="PrimaryMenu/VBoxContainer/HBoxContainer3"]
+margin_top = 3.0
+margin_right = 93.0
+margin_bottom = 28.0
+size_flags_horizontal = 3
+text = "PORT"
+
+[node name="Port" type="LineEdit" parent="PrimaryMenu/VBoxContainer/HBoxContainer3"]
+margin_left = 97.0
+margin_right = 297.0
+margin_bottom = 31.0
+rect_min_size = Vector2( 200, 0 )
+text = "4321"
+placeholder_text = "Use default"
+caret_blink = true
 
 [node name="HSeparator" type="HSeparator" parent="PrimaryMenu"]
-margin_top = 75.0
-margin_right = 303.0
-margin_bottom = 79.0
+margin_top = 110.0
+margin_right = 297.0
+margin_bottom = 114.0
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="PrimaryMenu"]
-margin_top = 88.0
-margin_right = 303.0
-margin_bottom = 120.0
+margin_top = 123.0
+margin_right = 297.0
+margin_bottom = 155.0
 alignment = 1
 
 [node name="Back" type="Button" parent="PrimaryMenu/HBoxContainer2"]
-margin_left = 25.0
-margin_right = 100.0
+margin_left = 22.0
+margin_right = 97.0
 margin_bottom = 32.0
 rect_min_size = Vector2( 75, 0 )
 size_flags_horizontal = 0
@@ -99,8 +124,8 @@ custom_fonts/font = ExtResource( 8 )
 text = "BACK"
 
 [node name="Host" type="Button" parent="PrimaryMenu/HBoxContainer2"]
-margin_left = 104.0
-margin_right = 179.0
+margin_left = 101.0
+margin_right = 176.0
 margin_bottom = 32.0
 rect_min_size = Vector2( 75, 0 )
 size_flags_horizontal = 0
@@ -108,8 +133,8 @@ custom_fonts/font = ExtResource( 8 )
 text = "HOST"
 
 [node name="Connect" type="Button" parent="PrimaryMenu/HBoxContainer2"]
-margin_left = 183.0
-margin_right = 278.0
+margin_left = 180.0
+margin_right = 275.0
 margin_bottom = 32.0
 rect_min_size = Vector2( 75, 0 )
 custom_fonts/font = ExtResource( 8 )
@@ -349,14 +374,20 @@ rect_min_size = Vector2( 400, 0 )
 WindowTitle = "KICKED"
 HideCancelButton = true
 
-[node name="ConnectingDialog" parent="." instance=ExtResource( 9 )]
-margin_left = 430.0
+[node name="LoadingDialog" parent="." instance=ExtResource( 9 )]
+margin_left = 440.0
 margin_top = 360.0
-margin_right = 850.0
+margin_right = 840.0
 margin_bottom = 360.0
 rect_min_size = Vector2( 400, 0 )
 HideCancelButton = true
 HideConfirmButton = true
+
+[node name="ServerSetup" parent="." instance=ExtResource( 7 )]
+margin_left = 640.0
+margin_top = 360.0
+margin_right = 640.0
+margin_bottom = 360.0
 
 [connection signal="pressed" from="PrimaryMenu/HBoxContainer2/Back" to="." method="OnBackPressed"]
 [connection signal="pressed" from="PrimaryMenu/HBoxContainer2/Host" to="." method="OnCreatePressed"]
@@ -366,4 +397,5 @@ HideConfirmButton = true
 [connection signal="toggled" from="Lobby/HBoxContainer/Start" to="." method="OnReadyToggled"]
 [connection signal="Cancelled" from="KickDialog" to="." method="OnKickCancelled"]
 [connection signal="Confirmed" from="KickDialog" to="." method="OnKickConfirmed"]
-[connection signal="Cancelled" from="ConnectingDialog" to="." method="OnConnectingCancelled"]
+[connection signal="Cancelled" from="LoadingDialog" to="." method="OnLoadingCancelled"]
+[connection signal="Confirmed" from="ServerSetup" to="." method="OnServerSetupConfirmed"]

@@ -64,7 +64,7 @@ public class PlayerMicrobeInput : NodeWithInput
             stage.Player.MovementDirection = direction;
             stage.Player.LookAtPoint = stage.Camera.CursorWorldPos;
 
-            if (!IsNetworkMaster())
+            if (GetTree().HasNetworkPeer() && !IsNetworkMaster())
             {
                 stage.Player.NetworkSendMovementInputs(direction, stage.Camera.CursorWorldPos);
             }

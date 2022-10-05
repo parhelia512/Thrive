@@ -469,6 +469,7 @@
     <Compile Include="src\networking\MultiplayerGUI.cs" />
     <Compile Include="src\networking\NetworkManager.cs" />
     <Compile Include="src\networking\PlayerState.cs" />
+    <Compile Include="src\networking\ServerSetup.cs" />
     <Compile Include="src\saving\FileHelpers.cs" />
     <Compile Include="src\saving\IChildPropertiesLoadCallback.cs" />
     <Compile Include="src\saving\IGodotEarlyNodeResolve.cs" />
