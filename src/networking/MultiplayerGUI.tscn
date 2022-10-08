@@ -5,7 +5,7 @@
 [ext_resource path="res://src/networking/ChatBox.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/gui_common/fonts/Lato-Bold-Smaller.tres" type="DynamicFont" id=4]
 [ext_resource path="res://src/gui_common/fonts/Lato-Regular-Small.tres" type="DynamicFont" id=5]
-[ext_resource path="res://src/networking/LobbyPlayerInfo.tscn" type="PackedScene" id=6]
+[ext_resource path="res://src/gui_common/NetworkedPlayerLabel.tscn" type="PackedScene" id=6]
 [ext_resource path="res://src/networking/ServerSetup.tscn" type="PackedScene" id=7]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-AlmostSmaller.tres" type="DynamicFont" id=8]
 [ext_resource path="res://src/gui_common/dialogs/CustomConfirmationDialog.tscn" type="PackedScene" id=9]
@@ -29,7 +29,7 @@ KickDialogPath = NodePath("KickDialog")
 KickReasonLineEditPath = NodePath("KickDialog/VBoxContainer2/LineEdit")
 KickedDialogPath = NodePath("KickedDialog")
 ChatBoxPath = NodePath("Lobby/HBoxContainer2/ChatPanel/MarginContainer/VBoxContainer/ChatBox")
-LobbyItemScene = ExtResource( 6 )
+NetworkedPlayerLabelScene = ExtResource( 6 )
 
 [node name="PrimaryMenu" type="VBoxContainer" parent="."]
 margin_left = 491.0

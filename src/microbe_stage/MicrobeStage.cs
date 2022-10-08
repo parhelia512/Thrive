@@ -574,7 +574,7 @@ public partial class MicrobeStage : StageBase<Microbe>
         {
             var id = GetTree().GetNetworkUniqueId();
             SpawnPeer(id);
-            Player = peers[id];
+            Player = peers[id].Value;
 
             Rpc(nameof(SpawnPeer), id);
         }
@@ -584,7 +584,7 @@ public partial class MicrobeStage : StageBase<Microbe>
                 rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
         }
 
-        Player.AddToGroup(Constants.PLAYER_GROUP);
+        Player!.AddToGroup(Constants.PLAYER_GROUP);
 
         Player.OnDeath = OnPlayerDied;
 

@@ -22,9 +22,22 @@ public class PlayerState
         switch (CurrentEnvironment)
         {
             case Environment.InGame:
-                return TranslationServer.Translate("IN_GAME");
+                return TranslationServer.Translate("IN_GAME_LOWERCASE");
             case Environment.Lobby:
-                return TranslationServer.Translate("LOBBY");
+                return TranslationServer.Translate("LOBBY_LOWERCASE");
+            default:
+                return TranslationServer.Translate("N_A");
+        }
+    }
+
+    public string GetEnvironmentReadableShort()
+    {
+        switch (CurrentEnvironment)
+        {
+            case Environment.InGame:
+                return TranslationServer.Translate("G_LETTER");
+            case Environment.Lobby:
+                return TranslationServer.Translate("L_LETTER");
             default:
                 return TranslationServer.Translate("N_A");
         }

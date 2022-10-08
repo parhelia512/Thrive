@@ -1,4 +1,4 @@
-[gd_scene load_steps=113 format=2]
+[gd_scene load_steps=114 format=2]
 
 [ext_resource path="res://src/microbe_stage/MicrobeStage.cs" type="Script" id=1]
 [ext_resource path="res://src/microbe_stage/MicrobeCamera.tscn" type="PackedScene" id=2]
@@ -20,6 +20,7 @@
 [ext_resource path="res://assets/textures/gui/bevel/mucilage.png" type="Texture" id=18]
 [ext_resource path="res://assets/textures/gui/bevel/parts/slimeJetAction.png" type="Texture" id=19]
 [ext_resource path="res://src/networking/ChatBox.tscn" type="PackedScene" id=20]
+[ext_resource path="res://src/gui_common/ScoreBoard.tscn" type="PackedScene" id=21]
 [ext_resource path="res://assets/textures/gui/bevel/LargeTwoNormal.png" type="Texture" id=39]
 [ext_resource path="res://assets/textures/gui/bevel/LargeTwoHover.png" type="Texture" id=40]
 [ext_resource path="res://assets/textures/gui/bevel/LargeTwoDisabled.png" type="Texture" id=41]
@@ -659,6 +660,7 @@ PatchExtinctionBoxScene = ExtResource( 94 )
 FireToxinHotkeyPath = NodePath("ScrollContainer/HotBar/FireToxin")
 BottomLeftBarPath = NodePath("BottomLeft/HUDBottomBar")
 ChatBoxPath = NodePath("BottomLeft/LeftPanels/ChatBox")
+ScoreBoardPath = NodePath("ScoreBoard")
 MulticellularButtonPath = NodePath("BottomRight/VBoxContainer/Control/Multicellular")
 MulticellularConfirmPopupPath = NodePath("StagePrototypeConfirm")
 MacroscopicButtonPath = NodePath("BottomRight/VBoxContainer/Control/Macroscopic")
@@ -2352,6 +2354,9 @@ __meta__ = {
 
 [node name="StagePrototypeConfirm" parent="MicrobeHUD" instance=ExtResource( 88 )]
 rect_min_size = Vector2( 450, 0 )
+
+[node name="ScoreBoard" parent="MicrobeHUD" instance=ExtResource( 21 )]
+visible = false
 
 [node name="TutorialGUI" parent="." instance=ExtResource( 74 )]
 visible = false

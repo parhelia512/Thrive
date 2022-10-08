@@ -51,9 +51,9 @@ public class MultiplayerGUI : CenterContainer
     public NodePath ChatBoxPath = null!;
 
     [Export]
-    public PackedScene LobbyItemScene = null!;
+    public PackedScene NetworkedPlayerLabelScene = null!;
 
-    private readonly string[] ellipsisAnimSequence = { " ", " .", " ..", " ..." };
+    private readonly string[] ellipsisAnimationSequence = { " ", " .", " ..", " ..." };
 
     private LineEdit nameBox = null!;
     private LineEdit addressBox = null!;
@@ -62,7 +62,7 @@ public class MultiplayerGUI : CenterContainer
     private CustomConfirmationDialog loadingDialog = null!;
     private Button connectButton = null!;
     private Button createServerButton = null!;
-    private VBoxContainer lobbyPlayerList = null!;
+    private VBoxContainer list = null!;
     private ServerSetup serverSetup = null!;
     private Label peerCount = null!;
     private Button startButton = null!;
@@ -78,15 +78,15 @@ public class MultiplayerGUI : CenterContainer
 
     private Menus currentMenu = Menus.Main;
 
-    private Dictionary<int, LobbyPlayerInfo> party = new();
+    private Dictionary<int, NetworkedPlayerLabel> playerLabels = new();
 
     private int idToKick;
 
     private string loadingDialogTitle = string.Empty;
     private string loadingDialogText = string.Empty;
 
-    private float ellipsisAnimTimer = 1.0f;
-    private int ellipsisAnimStep;
+    private float ellipsisAnimationTimer = 1.0f;
+    private int ellipsisAnimationStep;
 
     private WorkStatus currentWorkStatus = WorkStatus.None;
 
@@ -126,7 +126,7 @@ public class MultiplayerGUI : CenterContainer
         portBox = GetNode<LineEdit>(PortBoxPath);
         connectButton = GetNode<Button>(ConnectButtonPath);
         createServerButton = GetNode<Button>(CreateServerButtonPath);
-        lobbyPlayerList = GetNode<VBoxContainer>(LobbyPlayerListPath);
+        list = GetNode<VBoxContainer>(LobbyPlayerListPath);
         peerCount = GetNode<Label>(PeerCountPath);
         startButton = GetNode<Button>(StartButtonPath);
         kickReasonLineEdit = GetNode<LineEdit>(KickReasonLineEditPath);
@@ -144,12 +144,15 @@ public class MultiplayerGUI : CenterContainer
 
         GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
 
-        NetworkManager.Instance.Connect(nameof(NetworkManager.RegistrationToServerResultReceived), this, nameof(OnRegisteredToServer));
+        NetworkManager.Instance.Connect(
+            nameof(NetworkManager.RegistrationToServerResultReceived), this, nameof(OnRegisteredToServer));
         NetworkManager.Instance.Connect(nameof(NetworkManager.ConnectionFailed), this, nameof(OnConnectionFailed));
         NetworkManager.Instance.Connect(nameof(NetworkManager.ServerStateUpdated), this, nameof(UpdateLobby));
         NetworkManager.Instance.Connect(nameof(NetworkManager.Kicked), this, nameof(OnKicked));
-        NetworkManager.Instance.Connect(nameof(NetworkManager.ReadyForSessionReceived), this, nameof(UpdateReadyStatus));
-        NetworkManager.Instance.Connect(nameof(NetworkManager.UPNPCallResultReceived), this, nameof(OnUPNPCallResultReceived));
+        NetworkManager.Instance.Connect(
+            nameof(NetworkManager.ReadyForSessionReceived), this, nameof(UpdateReadyStatus));
+        NetworkManager.Instance.Connect(
+            nameof(NetworkManager.UPNPCallResultReceived), this, nameof(OnUPNPCallResultReceived));
 
         UpdateMenu();
         ResetFields();
@@ -161,16 +164,16 @@ public class MultiplayerGUI : CenterContainer
         if (!loadingDialog.Visible)
             return;
 
-        // 1 whitespace and 3 trailing dots loading animation ( . .. ...)
-        ellipsisAnimTimer += delta;
-        if (ellipsisAnimTimer >= 1.0f)
+        // 1 whitespace and 3 trailing dots loading animation (  . .. ...)
+        ellipsisAnimationTimer += delta;
+        if (ellipsisAnimationTimer >= 1.0f)
         {
-            ellipsisAnimStep = (ellipsisAnimStep + 1) % ellipsisAnimSequence.Length;
-            ellipsisAnimTimer = 0;
+            ellipsisAnimationStep = (ellipsisAnimationStep + 1) % ellipsisAnimationSequence.Length;
+            ellipsisAnimationTimer = 0;
         }
 
         loadingDialog.WindowTitle = loadingDialogTitle;
-        loadingDialog.DialogText = loadingDialogText + ellipsisAnimSequence[ellipsisAnimStep];
+        loadingDialog.DialogText = loadingDialogText + ellipsisAnimationSequence[ellipsisAnimationStep];
 
         if (GetTree().NetworkPeer.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connecting)
         {
@@ -184,11 +187,11 @@ public class MultiplayerGUI : CenterContainer
         if (!network.Connected)
             return;
 
-        lobbyPlayerList.FreeChildren();
-        party.Clear();
+        list.QueueFreeChildren();
+        playerLabels.Clear();
 
         foreach (var peer in network.PlayerList)
-            CreatePlayerInfo(peer.Key, peer.Value.Name);
+            CreatePlayerLabel(peer.Key, peer.Value.Name);
 
         peerCount.Text = network.PlayerList.Count + " / " + network.Settings?.MaxPlayers;
         serverName.Text = network.Settings?.Name;
@@ -197,18 +200,17 @@ public class MultiplayerGUI : CenterContainer
         UpdateStartButton();
     }
 
-    private void CreatePlayerInfo(int peerId, string name)
+    private void CreatePlayerLabel(int peerId, string name)
     {
-        var playerInfo = LobbyItemScene.Instance<LobbyPlayerInfo>();
-        playerInfo.ID = peerId;
-        playerInfo.PlayerName = name + (peerId == NetworkManager.DEFAULT_SERVER_ID ? " (Host)" : string.Empty);
-        playerInfo.Current = peerId == GetTree().GetNetworkUniqueId();
-        playerInfo.Ready = NetworkManager.Instance.GetPlayerState(peerId)!.ReadyForSession;
+        var label = NetworkedPlayerLabelScene.Instance<NetworkedPlayerLabel>();
+        label.ID = peerId;
+        label.PlayerName = name;
+        label.Highlight = NetworkManager.Instance.GetPlayerState(peerId)!.ReadyForSession;
 
-        playerInfo.Connect(nameof(LobbyPlayerInfo.Kicked), this, nameof(OnLobbyMemberKicked));
+        label.Connect(nameof(NetworkedPlayerLabel.Kicked), this, nameof(OnLobbyMemberKicked));
 
-        lobbyPlayerList.AddChild(playerInfo);
-        party.Add(peerId, playerInfo);
+        list.AddChild(label);
+        playerLabels.Add(peerId, label);
     }
 
     private void ResetFields()
@@ -248,8 +250,8 @@ public class MultiplayerGUI : CenterContainer
 
     private void UpdateReadyStatus(int peerId, bool ready)
     {
-        if (party.TryGetValue(peerId, out LobbyPlayerInfo list))
-            list.Ready = ready;
+        if (playerLabels.TryGetValue(peerId, out NetworkedPlayerLabel list))
+            list.Highlight = ready;
 
         UpdateStartButton();
     }
@@ -389,8 +391,11 @@ public class MultiplayerGUI : CenterContainer
         currentWorkStatus = WorkStatus.None;
     }
 
-    private void OnRegisteredToServer(NetworkManager.RegistrationToServerResult result)
+    private void OnRegisteredToServer(int peerId, NetworkManager.RegistrationToServerResult result)
     {
+        if (peerId != GetTree().GetNetworkUniqueId())
+            return;
+
         loadingDialog.Hide();
 
         if (result == NetworkManager.RegistrationToServerResult.ServerFull)

@@ -29,7 +29,7 @@ public class NetworkManager : Node
     public delegate void UPNPCallResultReceived(UPNP.UPNPResult result, UPNPActionStep step);
 
     [Signal]
-    public delegate void RegistrationToServerResultReceived(RegistrationToServerResult result);
+    public delegate void RegistrationToServerResultReceived(int peerId, RegistrationToServerResult result);
 
     [Signal]
     public delegate void ConnectionFailed(string reason);
@@ -51,6 +51,9 @@ public class NetworkManager : Node
 
     [Signal]
     public delegate void ReadyForSessionReceived(int peerId, bool ready);
+
+    [Signal]
+    public delegate void PlayerEnvironmentChanged(int peerId, PlayerState.Environment environment);
 
     public enum UPNPActionStep
     {
@@ -404,7 +407,7 @@ public class NetworkManager : Node
         {
             if (playerList.Count >= Settings!.MaxPlayers)
             {
-                RpcId(id, nameof(NotifyRegistrationToServerResult), RegistrationToServerResult.ServerFull);
+                NotifyRegistrationToServerResult(id, RegistrationToServerResult.ServerFull);
                 peer!.DisconnectPeer(id);
                 return;
             }
@@ -444,9 +447,12 @@ public class NetworkManager : Node
         playerList.Add(id, new PlayerState { Name = playerName });
         EmitSignal(nameof(ServerStateUpdated));
 
-        // If this is the host, tell the client that they've been successfully registered to the server
-        if (GetTree().IsNetworkServer() && id != DEFAULT_SERVER_ID)
-            RpcId(id, nameof(NotifyRegistrationToServerResult), RegistrationToServerResult.Success);
+        if (GetTree().IsNetworkServer())
+        {
+            // Tell all peers (and ourselves if this is client hosted) that a new peer have
+            // been successfully registered to the server
+            NotifyRegistrationToServerResult(id, RegistrationToServerResult.Success);
+        }
     }
 
     [Remote]
@@ -459,10 +465,21 @@ public class NetworkManager : Node
         EmitSignal(nameof(ServerStateUpdated));
     }
 
-    [Remote]
-    private void NotifyRegistrationToServerResult(RegistrationToServerResult result)
+    [RemoteSync]
+    private void NotifyRegistrationToServerResult(int peerId, RegistrationToServerResult result)
     {
-        EmitSignal(nameof(RegistrationToServerResultReceived), result);
+        if (GetTree().IsNetworkServer())
+        {
+            foreach (var player in playerList)
+            {
+                if (player.Key != DEFAULT_SERVER_ID)
+                    RpcId(player.Key, nameof(NotifyRegistrationToServerResult), peerId, result);
+            }
+        }
+
+        EmitSignal(nameof(RegistrationToServerResultReceived), peerId, result);
+
+        PrintWithRole("Registration to server result received for ", peerId, " result ", result);
     }
 
     [RemoteSync]
@@ -481,7 +498,10 @@ public class NetworkManager : Node
 
         var state = GetPlayerState(id);
         if (state != null)
+        {
             state.CurrentEnvironment = environment;
+            EmitSignal(nameof(PlayerEnvironmentChanged), id, environment);
+        }
     }
 
     [Remote]
@@ -546,6 +566,7 @@ public class NetworkManager : Node
         {
             state.CurrentEnvironment = PlayerState.Environment.InGame;
             EmitSignal(nameof(SpawnRequested), peerId);
+            EmitSignal(nameof(PlayerEnvironmentChanged), peerId, state.CurrentEnvironment);
         }
 
         if (GetTree().IsNetworkServer())
@@ -579,6 +600,8 @@ public class NetworkManager : Node
             state.CurrentEnvironment = PlayerState.Environment.Lobby;
             EmitSignal(nameof(DespawnRequested), peerId);
             EmitSignal(nameof(ReadyForSessionReceived), peerId, state.ReadyForSession);
+            EmitSignal(nameof(ServerStateUpdated));
+            EmitSignal(nameof(PlayerEnvironmentChanged), peerId, state.CurrentEnvironment);
         }
 
         if (GetTree().IsNetworkServer())
@@ -606,8 +629,6 @@ public class NetworkManager : Node
             if (peerId == DEFAULT_SERVER_ID && Player!.CurrentEnvironment == PlayerState.Environment.Lobby)
                 RpcId(1, nameof(NotifyPeerEnvironmentChange), GetTree().GetNetworkUniqueId(), Player.CurrentEnvironment);
         }
-
-        EmitSignal(nameof(ServerStateUpdated));
     }
 
     [RemoteSync]
@@ -623,7 +644,7 @@ public class NetworkManager : Node
         }
         else
         {
-            formatted = $"[b]({senderState.GetEnvironmentReadable()}) [{senderState.Name}]:[/b] {message}";
+            formatted = $"[b]({senderState.GetEnvironmentReadableShort()}) [{senderState.Name}]:[/b] {message}";
         }
 
         EmitSignal(nameof(ChatReceived), formatted);

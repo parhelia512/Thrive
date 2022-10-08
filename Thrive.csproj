@@ -466,8 +466,9 @@
     <Compile Include="src\modding\NewModGUI.cs" />
     <Compile Include="src\modding\WorkshopData.cs" />
     <Compile Include="src\networking\ChatBox.cs" />
+    <Compile Include="src\gui_common\ScoreBoard.cs" />
     <Compile Include="src\networking\ServerSettings.cs" />
-    <Compile Include="src\networking\LobbyPlayerInfo.cs" />
+    <Compile Include="src\gui_common\NetworkedPlayerLabel.cs" />
     <Compile Include="src\networking\MultiplayerGUI.cs" />
     <Compile Include="src\networking\NetworkManager.cs" />
     <Compile Include="src\networking\PlayerState.cs" />

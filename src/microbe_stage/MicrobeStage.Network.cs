@@ -8,7 +8,7 @@ using Godot;
 /// </summary>
 public partial class MicrobeStage : StageBase<Microbe>
 {
-    private Dictionary<int, Microbe> peers = new();
+    private Dictionary<int, EntityReference<Microbe>> peers = new();
 
     private float networkTick;
 
@@ -26,24 +26,24 @@ public partial class MicrobeStage : StageBase<Microbe>
         networkTick += delta;
 
         // Send network updates at 30 FPS
-        if (networkTick > NetworkManager.Instance.TickRateDelay)
+        if (NetworkManager.Instance.GameInSession && networkTick > NetworkManager.Instance.TickRateDelay)
         {
             foreach (var peer in peers)
             {
                 if (IsNetworkMaster())
                 {
-                    peer.Value.Sync();
+                    peer.Value.Value?.Sync();
                 }
                 else
                 {
-                    peer.Value.Send();
+                    peer.Value.Value?.Send();
                 }
             }
 
-            if (peers.Any(p => p.Value.Dead))
+            if (peers.Any(p => p.Value.Value?.Dead == true))
             {
                 peers = peers
-                    .Where(p => !p.Value.Dead)
+                    .Where(p => p.Value.Value?.Dead == false)
                     .ToDictionary(p => p.Key, p => p.Value);
             }
 
@@ -61,14 +61,14 @@ public partial class MicrobeStage : StageBase<Microbe>
             rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
         microbe.Name = peerId.ToString(CultureInfo.CurrentCulture);
         microbe.SetupPlayerClient(peerId);
-        peers.Add(peerId, microbe);
+        peers.Add(peerId, new EntityReference<Microbe>(microbe));
     }
 
     private void RemovePeer(int peerId)
     {
-        if (peers.TryGetValue(peerId, out Microbe peer))
+        if (peers.TryGetValue(peerId, out EntityReference<Microbe> peer))
         {
-            peer.DestroyDetachAndQueueFree();
+            peer.Value?.DestroyDetachAndQueueFree();
             peers.Remove(peerId);
         }
     }

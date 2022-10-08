@@ -207,6 +207,21 @@ public class PlayerMicrobeInput : NodeWithInput
         }
     }
 
+    [RunOnKeyDown("g_show_scoreboard")]
+    public bool ShowScoreBoard()
+    {
+        stage.HUD.ToggleScoreBoard();
+
+        // We need to not consume the input, otherwise the key up for this will not run
+        return false;
+    }
+
+    [RunOnKeyUp("g_show_scoreboard")]
+    public void HideScoreBoard()
+    {
+        stage.HUD.ToggleScoreBoard();
+    }
+
     private void RemoveCellFromColony(Microbe target)
     {
         if (target.Colony == null)

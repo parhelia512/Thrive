@@ -39,9 +39,6 @@ public partial class Microbe
 
             // TODO: offset tag above the membrane (Z-axis)
         }
-
-        if (!IsNetworkMaster())
-            SetPhysicsProcess(false);
     }
 
     public void Send()
@@ -57,7 +54,14 @@ public partial class Microbe
         if (!GetTree().HasNetworkPeer() || !IsNetworkMaster())
             return;
 
-        RpcUnreliable(nameof(NetworkSync), GlobalTransform.origin, Rotation, Dead);
+        foreach (var player in NetworkManager.Instance.PlayerList)
+        {
+            if (IsNetworkMaster() && player.Key == GetTree().GetNetworkUniqueId())
+                continue;
+
+            if (player.Value.CurrentEnvironment == PlayerState.Environment.InGame)
+                RpcUnreliableId(player.Key, nameof(NetworkSync), GlobalTransform.origin, Rotation, Dead);
+        }
     }
 
     [Puppet]

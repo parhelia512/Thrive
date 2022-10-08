@@ -200,6 +200,9 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     [Export]
     public NodePath ChatBoxPath = null!;
 
+    [Export]
+    public NodePath ScoreBoardPath = null!;
+
     // Inspections and cleanup disagree here
     // ReSharper disable RedundantNameQualifier
     protected readonly System.Collections.Generic.Dictionary<Species, int> hoveredSpeciesCounts = new();
@@ -276,6 +279,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     protected Tween panelsTween = null!;
     protected Label hintText = null!;
     protected RadialPopup packControlRadial = null!;
+    protected ScoreBoard scoreBoard = null!;
 
     protected HUDBottomBar bottomLeftBar = null!;
 
@@ -423,6 +427,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         ironBar = GetNode<ProgressBar>(IronBarPath);
 
         chatBox = GetNode<ChatBox>(ChatBoxPath);
+        scoreBoard = GetNode<ScoreBoard>(ScoreBoardPath);
 
         environmentPanelExpandButton = GetNode<Button>(EnvironmentPanelExpandButtonPath);
         environmentPanelCompressButton = GetNode<Button>(EnvironmentPanelCompressButtonPath);
@@ -734,6 +739,11 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         temperatureBar.GetNode<Label>("Value").Text = unitFormat.FormatSafe(averageTemperature, temperature.Unit);
 
         // TODO: pressure?
+    }
+
+    public void ToggleScoreBoard()
+    {
+        scoreBoard.Visible = !scoreBoard.Visible;
     }
 
     /// <summary>
