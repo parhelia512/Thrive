@@ -13,7 +13,7 @@ public class ServerSettings
 
     public string Name { get; set; } = TranslationServer.Translate("N_A");
 
-    public string Address { get; set; } = TranslationServer.Translate("N_A");
+    public string Address { get; set; } = Constants.LOCAL_HOST;
 
     public int Port { get; set; } = Constants.MULTIPLAYER_DEFAULT_PORT;
 

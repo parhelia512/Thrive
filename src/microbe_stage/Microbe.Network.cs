@@ -1,5 +1,8 @@
 using Godot;
 
+/// <summary>
+///   The networking part of Microbe class for multiplayer.
+/// </summary>
 public partial class Microbe
 {
     private MeshInstance tagBox = null!;
@@ -28,7 +31,7 @@ public partial class Microbe
             var tag = tagBox.GetChild<Label3D>(0);
 
             tagBox.Visible = true;
-            tag.Text = network.ConnectedPeers[peerId].Name;
+            tag.Text = network.PlayerList[peerId].Name;
 
             tagBoxMesh.Size = tag.Font.GetStringSize(tag.Text) * tag.PixelSize * 1.2f;
             tagBoxMaterial.RenderPriority = RenderPriority + 1;
@@ -41,47 +44,42 @@ public partial class Microbe
             SetPhysicsProcess(false);
     }
 
-    public void NetworkSendMovementInputs(Vector3 movementDirection, Vector3 lookAtPoint)
+    public void Send()
     {
-        RpcUnreliableId(1, nameof(NetworkReceiveMovementInputs), movementDirection, lookAtPoint);
-    }
-
-    private void HandleNetworking(float delta)
-    {
-        if (!GetTree().HasNetworkPeer())
+        if (!GetTree().HasNetworkPeer() || IsNetworkMaster())
             return;
 
-        if (IsNetworkMaster())
-        {
-            networkTick += delta;
+        RpcUnreliableId(1, nameof(NetworkStateReceived), MovementDirection, LookAtPoint, Dead);
+    }
 
-            // Send network updates at 30 FPS
-            if (networkTick > NetworkManager.Instance.TickRateDelay)
-            {
-                foreach (var peer in NetworkManager.Instance.ConnectedPeers)
-                {
-                    // TODO: fix desync during scene change
-                    if (peer.Value.CurrentStatus == PlayerState.Status.InGame)
-                        RpcUnreliableId(peer.Key, nameof(NetworkReceiveMovementState), GlobalTransform.origin, Rotation);
-                }
+    public void Sync()
+    {
+        if (!GetTree().HasNetworkPeer() || !IsNetworkMaster())
+            return;
 
-                networkTick = 0;
-            }
-        }
+        RpcUnreliable(nameof(NetworkSync), GlobalTransform.origin, Rotation, Dead);
     }
 
     [Puppet]
-    private void NetworkReceiveMovementState(Vector3 position, Vector3 rotation)
+    private void NetworkSync(Vector3 position, Vector3 rotation, bool dead)
     {
+        // TODO: maybe pass in a structured object
+
         Rotation = rotation;
         movementTween?.InterpolateProperty(this, "global_transform", null, new Transform(GlobalTransform.basis, position), 0.1f);
         movementTween?.Start();
+
+        if (dead)
+            Kill();
     }
 
     [Master]
-    private void NetworkReceiveMovementInputs(Vector3 movementDirection, Vector3 lookAtPoint)
+    private void NetworkStateReceived(Vector3 movementDirection, Vector3 lookAtPoint, bool dead)
     {
+        // TODO: maybe pass in a structured object
+
         MovementDirection = movementDirection;
         LookAtPoint = lookAtPoint;
+        Dead = dead;
     }
 }

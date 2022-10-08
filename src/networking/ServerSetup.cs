@@ -82,7 +82,7 @@ public class ServerSetup : CustomDialog
             Address = address,
             Port = port,
             MaxPlayers = Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS,
-            UseUPNP = true,
+            UseUPNP = false,
         };
 
         ApplySettingsToControls();

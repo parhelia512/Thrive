@@ -774,8 +774,6 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
                 OnReproductionStatus(this, true);
             }
         }
-
-        HandleNetworking(delta);
     }
 
     public override void _Process(float delta)

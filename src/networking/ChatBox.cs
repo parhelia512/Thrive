@@ -62,7 +62,7 @@ public class ChatBox : VBoxContainer
 
     private void OnMessageReceived(string message)
     {
-        if (chatHistory.Count > 10)
+        if (chatHistory.Count > Constants.CHAT_HISTORY_RANGE)
             chatHistory.RemoveFromFront();
 
         chatHistory.AddToBack(message);

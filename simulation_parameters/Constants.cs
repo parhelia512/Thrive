@@ -1034,6 +1034,8 @@ public static class Constants
 
     public const string DISABLE_VIDEOS_LAUNCH_OPTION = "--thrive-disable-videos";
 
+    public const string RUN_AS_SERVER_LAUNCH_OPTION = "--server";
+
     // Min/max values for each customisable difficulty option
     public const float MIN_MP_MULTIPLIER = 0.2f;
     public const float MAX_MP_MULTIPLIER = 2;
@@ -1076,10 +1078,14 @@ public static class Constants
 
     public const int FORCE_CLOSE_AFTER_TRIES = 3;
 
-    public const int MULTIPLAYER_DEFAULT_PORT = 4321;
+    public const string LOCAL_HOST = "127.0.0.1";
+    public const int MULTIPLAYER_DEFAULT_PORT = 4242;
     public const int MULTIPLAYER_DEFAULT_MAX_PLAYERS = 32;
+    public const int MULTIPLAYER_DEFAULT_MAX_CLIENTS = 100;
     public const float MULTIPLAYER_DEFAULT_TICK_RATE_DELAY_SECONDS = 0.03f;
     public const int MULTIPLAYER_DEFAULT_TIMEOUT_LIMIT_SECONDS = 32;
+
+    public const int CHAT_HISTORY_RANGE = 50;
 
     /// <summary>
     ///   The duration for which a save is considered recently performed.

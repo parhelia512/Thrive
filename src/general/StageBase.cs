@@ -210,7 +210,7 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
             return;
         }
 
-        if (!HasPlayer)
+        if (!HasPlayer && !NetworkManager.Instance.IsDedicated)
         {
             if (!spawnedPlayer)
             {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using Godot;
@@ -52,6 +53,8 @@ public class MultiplayerGUI : CenterContainer
     [Export]
     public PackedScene LobbyItemScene = null!;
 
+    private readonly string[] ellipsisAnimSequence = { " ", " .", " ..", " ..." };
+
     private LineEdit nameBox = null!;
     private LineEdit addressBox = null!;
     private LineEdit portBox = null!;
@@ -83,18 +86,9 @@ public class MultiplayerGUI : CenterContainer
     private string loadingDialogText = string.Empty;
 
     private float ellipsisAnimTimer = 1.0f;
-    private string[] ellipsisAnimSequence = { " ", " .", " ..", " ..." };
     private int ellipsisAnimStep;
 
     private WorkStatus currentWorkStatus = WorkStatus.None;
-
-    private enum WorkStatus
-    {
-        None,
-        Connecting,
-        SettingUpUPNP,
-        PortForwarding,
-    }
 
     [Signal]
     public delegate void OnClosed();
@@ -103,6 +97,14 @@ public class MultiplayerGUI : CenterContainer
     {
         Main,
         Lobby,
+    }
+
+    private enum WorkStatus
+    {
+        None,
+        Connecting,
+        SettingUpUPNP,
+        PortForwarding,
     }
 
     public Menus CurrentMenu
@@ -140,9 +142,9 @@ public class MultiplayerGUI : CenterContainer
         lobbyMenu = GetNode<Control>("Lobby");
         serverSetup = GetNode<ServerSetup>("ServerSetup");
 
-        GetTree().Connect("connected_to_server", this, nameof(OnConnectedToServer));
         GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
 
+        NetworkManager.Instance.Connect(nameof(NetworkManager.RegistrationToServerResultReceived), this, nameof(OnRegisteredToServer));
         NetworkManager.Instance.Connect(nameof(NetworkManager.ConnectionFailed), this, nameof(OnConnectionFailed));
         NetworkManager.Instance.Connect(nameof(NetworkManager.ServerStateUpdated), this, nameof(UpdateLobby));
         NetworkManager.Instance.Connect(nameof(NetworkManager.Kicked), this, nameof(OnKicked));
@@ -150,6 +152,7 @@ public class MultiplayerGUI : CenterContainer
         NetworkManager.Instance.Connect(nameof(NetworkManager.UPNPCallResultReceived), this, nameof(OnUPNPCallResultReceived));
 
         UpdateMenu();
+        ResetFields();
         ValidateFields();
     }
 
@@ -184,15 +187,10 @@ public class MultiplayerGUI : CenterContainer
         lobbyPlayerList.FreeChildren();
         party.Clear();
 
-        // For self
-        if (!network.IsDedicated)
-            CreatePlayerInfo(GetTree().GetNetworkUniqueId(), network.PlayerState!.Name);
-
-        // For other peers
-        foreach (var peer in network.ConnectedPeers)
+        foreach (var peer in network.PlayerList)
             CreatePlayerInfo(peer.Key, peer.Value.Name);
 
-        peerCount.Text = 1 + network.ConnectedPeers.Count + " / " + Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS;
+        peerCount.Text = network.PlayerList.Count + " / " + network.Settings?.MaxPlayers;
         serverName.Text = network.Settings?.Name;
         inProgressLabel.Visible = network.GameInSession;
 
@@ -205,11 +203,18 @@ public class MultiplayerGUI : CenterContainer
         playerInfo.ID = peerId;
         playerInfo.PlayerName = name + (peerId == NetworkManager.DEFAULT_SERVER_ID ? " (Host)" : string.Empty);
         playerInfo.Current = peerId == GetTree().GetNetworkUniqueId();
+        playerInfo.Ready = NetworkManager.Instance.GetPlayerState(peerId)!.ReadyForSession;
 
         playerInfo.Connect(nameof(LobbyPlayerInfo.Kicked), this, nameof(OnLobbyMemberKicked));
 
         lobbyPlayerList.AddChild(playerInfo);
         party.Add(peerId, playerInfo);
+    }
+
+    private void ResetFields()
+    {
+        portBox.Text = Constants.MULTIPLAYER_DEFAULT_PORT.ToString(CultureInfo.CurrentCulture);
+        addressBox.Text = Constants.LOCAL_HOST;
     }
 
     private void ValidateFields()
@@ -224,8 +229,8 @@ public class MultiplayerGUI : CenterContainer
         if (GetTree().IsNetworkServer())
         {
             startButton.Text = TranslationServer.Translate("START");
-            startButton.Disabled = network.ConnectedPeers.Any(
-                p => !p.Value.CurrentStatus.HasFlag(PlayerState.Status.ReadyForSession));
+            startButton.Disabled = network.PlayerList.Any(
+                p => p.Key != NetworkManager.DEFAULT_SERVER_ID && !p.Value.ReadyForSession);
             startButton.ToggleMode = false;
         }
         else
@@ -235,6 +240,9 @@ public class MultiplayerGUI : CenterContainer
                 TranslationServer.Translate("READY");
             startButton.Disabled = false;
             startButton.ToggleMode = !network.GameInSession;
+
+            if (network.Player != null)
+                startButton.SetPressedNoSignal(network.Player.ReadyForSession);
         }
     }
 
@@ -280,15 +288,22 @@ public class MultiplayerGUI : CenterContainer
         }
     }
 
+    private void ReadNameAndPort(out string name, out int port)
+    {
+        name = string.IsNullOrEmpty(nameBox.Text) ? Settings.Instance.ActiveUsername : nameBox.Text;
+        port = string.IsNullOrEmpty(portBox.Text) || !int.TryParse(portBox.Text, out int parsedPort) ?
+            Constants.MULTIPLAYER_DEFAULT_PORT : parsedPort;
+    }
 
     private void OnConnectPressed()
     {
         GUICommon.Instance.PlayButtonPressSound();
 
         ShowLoadingDialog(TranslationServer.Translate("CONNECTING"), "Establishing connection to: " + addressBox.Text);
-        var name = string.IsNullOrEmpty(nameBox.Text) ? Settings.Instance.ActiveUsername : nameBox.Text;
 
-        var error = NetworkManager.Instance.ConnectToServer(addressBox.Text, name);
+        ReadNameAndPort(out string name, out int port);
+
+        var error = NetworkManager.Instance.ConnectToServer(addressBox.Text, port, name);
         if (error != Error.Ok)
         {
             loadingDialog.Hide();
@@ -302,11 +317,7 @@ public class MultiplayerGUI : CenterContainer
     private void OnCreatePressed()
     {
         GUICommon.Instance.PlayButtonPressSound();
-
-        var name = string.IsNullOrEmpty(nameBox.Text) ? Settings.Instance.ActiveUsername : nameBox.Text;
-        var port = string.IsNullOrEmpty(portBox.Text) || !int.TryParse(portBox.Text, out int parsedPort) ?
-            Constants.MULTIPLAYER_DEFAULT_PORT : parsedPort;
-
+        ReadNameAndPort(out string name, out int port);
         serverSetup.Open(name, addressBox.Text, port);
     }
 
@@ -342,7 +353,7 @@ public class MultiplayerGUI : CenterContainer
         if (parsedData.UseUPNP)
         {
             ShowLoadingDialog(
-                TranslationServer.Translate("UPNP_SETUP"), "[UPnP] Setting up UPnP and discovering devices", false);
+                TranslationServer.Translate("UPNP_SETUP"), "[UPnP] discovering devices", false);
 
             currentWorkStatus = WorkStatus.SettingUpUPNP;
         }
@@ -371,15 +382,23 @@ public class MultiplayerGUI : CenterContainer
                 NetworkManager.Instance.PrintWithRole("Cancelling connection");
                 NetworkManager.Instance.Disconnect();
                 break;
+
             // TODO: handle upnp work cancellations, currently you can't cancel these
         }
 
         currentWorkStatus = WorkStatus.None;
     }
 
-    private void OnConnectedToServer()
+    private void OnRegisteredToServer(NetworkManager.RegistrationToServerResult result)
     {
         loadingDialog.Hide();
+
+        if (result == NetworkManager.RegistrationToServerResult.ServerFull)
+        {
+            ShowGeneralDialog(TranslationServer.Translate("SERVER_FULL"), "Server is full");
+            return;
+        }
+
         CurrentMenu = Menus.Lobby;
 
         currentWorkStatus = WorkStatus.None;
@@ -449,8 +468,7 @@ public class MultiplayerGUI : CenterContainer
 
     private void OnReadyToggled(bool active)
     {
-        NetworkManager.Instance.SetPlayerStatus(
-            active ? PlayerState.Status.Lobby | PlayerState.Status.ReadyForSession : PlayerState.Status.Lobby);
+        NetworkManager.Instance.SetReadyForSessionStatus(active);
     }
 
     private void OnUPNPCallResultReceived(UPNP.UPNPResult result, NetworkManager.UPNPActionStep step)
