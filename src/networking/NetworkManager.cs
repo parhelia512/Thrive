@@ -157,7 +157,7 @@ public class NetworkManager : Node
         var id = GetTree().GetNetworkUniqueId();
         NotifyPlayerConnected(id, playerName);
 
-        PrintWithRole("Server is created with client as the host");
+        PrintWithRole("Server is created with player as the host");
 
         return result;
     }
@@ -393,7 +393,7 @@ public class NetworkManager : Node
             case UPNPActionStep.Setup:
             {
                 if (result == UPNP.UPNPResult.Success)
-                    TaskExecutor.Instance.AddTask( new Task(() => AddPortMapping(Settings!.Port)));
+                    TaskExecutor.Instance.AddTask(new Task(() => AddPortMapping(Settings!.Port)));
 
                 break;
             }
@@ -478,8 +478,6 @@ public class NetworkManager : Node
         }
 
         EmitSignal(nameof(RegistrationToServerResultReceived), peerId, result);
-
-        PrintWithRole("Registration to server result received for ", peerId, " result ", result);
     }
 
     [RemoteSync]
@@ -540,21 +538,21 @@ public class NetworkManager : Node
     [Remote]
     private void NotifySceneSwitchToGame()
     {
-        var microbeStage = (MicrobeStage)SceneManager.Instance.LoadScene(MainGameState.MicrobeStage).Instance();
-        SceneManager.Instance.SwitchToScene(microbeStage);
+        switch (Settings?.SelectedGameMode)
+        {
+            case MultiplayerGameMode.MicrobialArena:
+                var scene = SceneManager.Instance.LoadScene(MultiplayerGameMode.MicrobialArena);
+                var arena = (MicrobialArena)scene.Instance();
+                SceneManager.Instance.SwitchToScene(arena);
+                break;
+        }
     }
 
     [Remote]
     private void NotifySceneSwitchToLobby()
     {
-        var scene = SceneManager.Instance.LoadScene("res://src/general/MainMenu.tscn");
-
-        var mainMenu = (MainMenu)scene.Instance();
-
-        mainMenu.IsReturningToMenu = true;
-        mainMenu.IsReturningToLobby = true;
-
-        SceneManager.Instance.SwitchToScene(mainMenu);
+        var menu = SceneManager.Instance.ReturnToMenu();
+        menu.OpenMultiplayerMenu(MultiplayerGUI.Submenu.Lobby);
     }
 
     [RemoteSync]

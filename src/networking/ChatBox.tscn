@@ -17,7 +17,7 @@ theme = ExtResource( 2 )
 custom_constants/separation = 0
 script = ExtResource( 1 )
 MessagesPath = NodePath("PanelContainer/MarginContainer/Messages")
-TextBoxPath = NodePath("HBoxContainer/LineEdit")
+LineEditPath = NodePath("HBoxContainer/LineEdit")
 SendButtonPath = NodePath("HBoxContainer/Send")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
@@ -68,6 +68,8 @@ custom_fonts/font = ExtResource( 6 )
 text = "SEND"
 expand_icon = true
 
+[connection signal="mouse_entered" from="HBoxContainer/LineEdit" to="." method="OnControlMouseEntered"]
+[connection signal="mouse_exited" from="HBoxContainer/LineEdit" to="." method="OnControlMouseExited"]
 [connection signal="text_changed" from="HBoxContainer/LineEdit" to="." method="OnMessageChanged"]
 [connection signal="text_entered" from="HBoxContainer/LineEdit" to="." method="OnMessageEntered"]
 [connection signal="pressed" from="HBoxContainer/Send" to="." method="OnSendPressed"]

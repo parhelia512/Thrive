@@ -197,11 +197,8 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     [Export]
     public NodePath BottomLeftBarPath = null!;
 
-    [Export]
-    public NodePath ChatBoxPath = null!;
-
-    [Export]
-    public NodePath ScoreBoardPath = null!;
+    [Signal]
+    public delegate void Clicked();
 
     // Inspections and cleanup disagree here
     // ReSharper disable RedundantNameQualifier
@@ -231,7 +228,6 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     protected Compound temperature = null!;
     protected AnimationPlayer compoundsGroupAnimationPlayer = null!;
     protected AnimationPlayer environmentGroupAnimationPlayer = null!;
-    protected AnimationPlayer chatBoxAnimationPlayer = null!;
     protected MarginContainer mouseHoverPanel = null!;
     protected Panel environmentPanel = null!;
     protected GridContainer? environmentPanelBarContainer;
@@ -264,7 +260,6 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     protected Button environmentPanelCompressButton = null!;
     protected Button compoundsPanelExpandButton = null!;
     protected Button compoundsPanelCompressButton = null!;
-    protected ChatBox chatBox = null!;
     protected TextureProgress atpBar = null!;
     protected TextureProgress healthBar = null!;
     protected TextureProgress ammoniaReproductionBar = null!;
@@ -279,7 +274,6 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     protected Tween panelsTween = null!;
     protected Label hintText = null!;
     protected RadialPopup packControlRadial = null!;
-    protected ScoreBoard scoreBoard = null!;
 
     protected HUDBottomBar bottomLeftBar = null!;
 
@@ -314,8 +308,6 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     private bool compoundsPanelActive;
 
     private bool environmentPanelActive;
-
-    private bool chatBoxActive = true;
 
     private VBoxContainer hoveredCompoundsContainer = null!;
     private HSeparator hoveredCellsSeparator = null!;
@@ -426,9 +418,6 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         hydrogenSulfideBar = GetNode<ProgressBar>(HydrogenSulfideBarPath);
         ironBar = GetNode<ProgressBar>(IronBarPath);
 
-        chatBox = GetNode<ChatBox>(ChatBoxPath);
-        scoreBoard = GetNode<ScoreBoard>(ScoreBoardPath);
-
         environmentPanelExpandButton = GetNode<Button>(EnvironmentPanelExpandButtonPath);
         environmentPanelCompressButton = GetNode<Button>(EnvironmentPanelCompressButtonPath);
         compoundsPanelExpandButton = GetNode<Button>(CompoundsPanelExpandButtonPath);
@@ -447,7 +436,6 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         menu = GetNode<PauseMenu>(MenuPath);
         compoundsGroupAnimationPlayer = GetNode<AnimationPlayer>(CompoundsGroupAnimationPlayerPath);
         environmentGroupAnimationPlayer = GetNode<AnimationPlayer>(EnvironmentGroupAnimationPlayerPath);
-        chatBoxAnimationPlayer = GetNode<AnimationPlayer>(ChatBoxAnimationPlayerPath);
         hoveredCompoundsContainer = GetNode<VBoxContainer>(HoveredCompoundsContainerPath);
         hoveredCellsSeparator = GetNode<HSeparator>(HoverPanelSeparatorPath);
         hoveredCellsContainer = GetNode<VBoxContainer>(HoveredCellsContainerPath);
@@ -506,13 +494,9 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         UpdatePausePrompt();
     }
 
-    public void Init(TStage containedInStage)
+    public virtual void Init(TStage containedInStage)
     {
         stage = containedInStage;
-
-        bottomLeftBar.ShowPauseButton = chatBoxActive = !stage.IsMultiplayer;
-        bottomLeftBar.ShowChatButton = bottomLeftBar.ChatPressed = chatBox.Visible = stage.IsMultiplayer;
-        chatBoxAnimationPlayer.Play(stage.IsMultiplayer ? "Open" : "Close");
     }
 
     public void SendEditorButtonToTutorial(TutorialState tutorialState)
@@ -540,6 +524,24 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         UpdatePopulation();
         UpdateProcessPanel();
         UpdatePanelSizing(delta);
+    }
+
+    /// <summary>
+    ///   Detects presses anywhere to notify the name input to unfocus
+    /// </summary>
+    /// <param name="event">The input event</param>
+    /// <remarks>
+    ///   <para>
+    ///     This doesn't use <see cref="Control._GuiInput"/> as this needs to always see events, even ones that are
+    ///     handled elsewhere
+    ///   </para>
+    /// </remarks>
+    public override void _Input(InputEvent @event)
+    {
+        if (@event is InputEventMouseButton { Pressed: true })
+        {
+            EmitSignal(nameof(Clicked));
+        }
     }
 
     public void PauseButtonPressed(bool buttonState)
@@ -739,11 +741,6 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         temperatureBar.GetNode<Label>("Value").Text = unitFormat.FormatSafe(averageTemperature, temperature.Unit);
 
         // TODO: pressure?
-    }
-
-    public void ToggleScoreBoard()
-    {
-        scoreBoard.Visible = !scoreBoard.Visible;
     }
 
     /// <summary>
@@ -1418,23 +1415,6 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         else
         {
             pauseInfo.Visible = false;
-        }
-    }
-
-    private void ChatButtonPressed(bool wantedState)
-    {
-        if (chatBoxActive == !wantedState)
-            return;
-
-        if (!chatBoxActive)
-        {
-            chatBoxActive = true;
-            chatBoxAnimationPlayer.Play("Close");
-        }
-        else
-        {
-            chatBoxActive = false;
-            chatBoxAnimationPlayer.Play("Open");
         }
     }
 }

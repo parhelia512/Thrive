@@ -1,84 +1,84 @@
-[gd_scene load_steps=114 format=2]
+[gd_scene load_steps=110 format=2]
 
-[ext_resource path="res://src/microbe_stage/MicrobeStage.cs" type="Script" id=1]
-[ext_resource path="res://src/microbe_stage/MicrobeCamera.tscn" type="PackedScene" id=2]
-[ext_resource path="res://assets/textures/gui/bevel/AmmoniaInv.png" type="Texture" id=3]
-[ext_resource path="res://assets/textures/gui/bevel/PhosphateInv.png" type="Texture" id=4]
-[ext_resource path="res://assets/textures/gui/bevel/PhosphatesBW.png" type="Texture" id=5]
-[ext_resource path="res://assets/textures/gui/bevel/AmmoniaBW.png" type="Texture" id=6]
-[ext_resource path="res://src/microbe_stage/PlayerMicrobeInput.cs" type="Script" id=7]
-[ext_resource path="res://assets/sounds/soundeffects/microbe-pickup-organelle.ogg" type="AudioStream" id=8]
-[ext_resource path="res://src/microbe_stage/MicrobeHUD.cs" type="Script" id=9]
-[ext_resource path="res://src/microbe_stage/CompoundCloudSystem.cs" type="Script" id=10]
-[ext_resource path="res://src/general/PauseMenu.tscn" type="PackedScene" id=11]
-[ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Tiny.tres" type="DynamicFont" id=12]
-[ext_resource path="res://assets/textures/gui/bevel/hSeparatorCentered.png" type="Texture" id=13]
-[ext_resource path="res://assets/textures/gui/bevel/parts/VacuoleIcon.png" type="Texture" id=14]
-[ext_resource path="res://assets/textures/gui/bevel/parts/ToxinVacuoleIcon.png" type="Texture" id=15]
-[ext_resource path="res://src/microbe_stage/HUDBottomBar.tscn" type="PackedScene" id=16]
-[ext_resource path="res://assets/textures/gui/bevel/ingestedmatter.png" type="Texture" id=17]
-[ext_resource path="res://assets/textures/gui/bevel/mucilage.png" type="Texture" id=18]
-[ext_resource path="res://assets/textures/gui/bevel/parts/slimeJetAction.png" type="Texture" id=19]
-[ext_resource path="res://src/networking/ChatBox.tscn" type="PackedScene" id=20]
-[ext_resource path="res://src/gui_common/ScoreBoard.tscn" type="PackedScene" id=21]
-[ext_resource path="res://assets/textures/gui/bevel/LargeTwoNormal.png" type="Texture" id=39]
-[ext_resource path="res://assets/textures/gui/bevel/LargeTwoHover.png" type="Texture" id=40]
-[ext_resource path="res://assets/textures/gui/bevel/LargeTwoDisabled.png" type="Texture" id=41]
-[ext_resource path="res://assets/textures/gui/bevel/compressPanel.png" type="Texture" id=42]
-[ext_resource path="res://assets/textures/gui/bevel/expandPanel.png" type="Texture" id=43]
-[ext_resource path="res://assets/textures/gui/bevel/expandPanelActive.png" type="Texture" id=44]
-[ext_resource path="res://assets/textures/gui/bevel/compressPanelActive.png" type="Texture" id=45]
-[ext_resource path="res://assets/textures/gui/bevel/glucose.png" type="Texture" id=46]
-[ext_resource path="res://assets/textures/gui/bevel/hydrogensulfide.png" type="Texture" id=47]
-[ext_resource path="res://assets/textures/gui/bevel/ammonia.png" type="Texture" id=48]
-[ext_resource path="res://assets/textures/gui/bevel/iron.png" type="Texture" id=49]
-[ext_resource path="res://assets/textures/gui/bevel/phosphates.png" type="Texture" id=50]
-[ext_resource path="res://assets/textures/gui/bevel/oxygen.png" type="Texture" id=51]
-[ext_resource path="res://assets/textures/gui/bevel/Pressure.png" type="Texture" id=52]
-[ext_resource path="res://assets/textures/gui/bevel/sunlight.png" type="Texture" id=53]
-[ext_resource path="res://assets/textures/gui/bevel/Temperature.png" type="Texture" id=54]
-[ext_resource path="res://assets/textures/gui/bevel/carbondioxide.png" type="Texture" id=55]
-[ext_resource path="res://assets/textures/gui/bevel/nitrogen.png" type="Texture" id=56]
-[ext_resource path="res://assets/textures/gui/bevel/oxytoxy.png" type="Texture" id=57]
-[ext_resource path="res://src/microbe_stage/ProcessPanel.tscn" type="PackedScene" id=58]
-[ext_resource path="res://assets/textures/gui/bevel/LargeTwoPressed.png" type="Texture" id=59]
-[ext_resource path="res://assets/textures/gui/bevel/atp.png" type="Texture" id=60]
-[ext_resource path="res://assets/textures/gui/bevel/Hitpoints.png" type="Texture" id=61]
-[ext_resource path="res://assets/textures/gui/bevel/dataValueBackground.png" type="Texture" id=62]
-[ext_resource path="res://assets/textures/gui/bevel/AtpBar.png" type="Texture" id=63]
-[ext_resource path="res://assets/textures/gui/bevel/HealthBar.png" type="Texture" id=64]
-[ext_resource path="res://assets/textures/gui/bevel/ReproductionBar.png" type="Texture" id=65]
-[ext_resource path="res://src/gui_common/ActionButton.tscn" type="PackedScene" id=66]
-[ext_resource path="res://src/engine/ChromaticFilter.tscn" type="PackedScene" id=67]
-[ext_resource path="res://src/gui_common/fonts/Lato-Regular-AlmostSmall.tres" type="DynamicFont" id=68]
+[ext_resource path="res://src/microbe_stage/MicrobeCamera.tscn" type="PackedScene" id=1]
+[ext_resource path="res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs" type="Script" id=7]
+[ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Bigger.tres" type="DynamicFont" id=8]
+[ext_resource path="res://src/gui_common/fonts/Lato-Regular-Small.tres" type="DynamicFont" id=9]
+[ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=10]
+[ext_resource path="res://assets/textures/gui/bevel/hSeparatorCentered.png" type="Texture" id=11]
+[ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-AlmostSmaller.tres" type="DynamicFont" id=12]
+[ext_resource path="res://src/gui_common/fonts/Lato-Regular-AlmostSmall.tres" type="DynamicFont" id=13]
+[ext_resource path="res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs" type="Script" id=14]
+[ext_resource path="res://src/gui_common/fonts/Lato-Bold-AlmostSmall.tres" type="DynamicFont" id=15]
+[ext_resource path="res://assets/textures/gui/bevel/parts/VacuoleIcon.png" type="Texture" id=16]
+[ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Tiny.tres" type="DynamicFont" id=17]
+[ext_resource path="res://assets/textures/gui/bevel/expandPanel.png" type="Texture" id=18]
+[ext_resource path="res://assets/textures/gui/bevel/dataValueBackground.png" type="Texture" id=19]
+[ext_resource path="res://assets/textures/gui/bevel/phosphates.png" type="Texture" id=20]
+[ext_resource path="res://assets/textures/gui/bevel/ReproductionBar.png" type="Texture" id=21]
+[ext_resource path="res://assets/textures/gui/bevel/Temperature.png" type="Texture" id=22]
+[ext_resource path="res://assets/textures/gui/bevel/glucose.png" type="Texture" id=23]
+[ext_resource path="res://assets/textures/gui/bevel/oxytoxy.png" type="Texture" id=24]
+[ext_resource path="res://assets/textures/gui/bevel/LargeTwoPressed.png" type="Texture" id=25]
+[ext_resource path="res://assets/textures/gui/bevel/LargeTwoDisabled.png" type="Texture" id=26]
+[ext_resource path="res://assets/textures/gui/bevel/iron.png" type="Texture" id=27]
+[ext_resource path="res://assets/textures/gui/bevel/Pressure.png" type="Texture" id=28]
+[ext_resource path="res://assets/textures/gui/bevel/carbondioxide.png" type="Texture" id=29]
+[ext_resource path="res://assets/textures/gui/bevel/AtpBar.png" type="Texture" id=30]
+[ext_resource path="res://assets/textures/gui/bevel/expandPanelActive.png" type="Texture" id=31]
+[ext_resource path="res://assets/textures/gui/bevel/LargeTwoHover.png" type="Texture" id=32]
+[ext_resource path="res://assets/textures/gui/bevel/atp.png" type="Texture" id=33]
+[ext_resource path="res://assets/textures/gui/bevel/HealthBar.png" type="Texture" id=34]
+[ext_resource path="res://assets/textures/gui/bevel/parts/BindingAgentIcon.png" type="Texture" id=35]
+[ext_resource path="res://assets/textures/gui/bevel/parts/membraneAmoeba.png" type="Texture" id=36]
+[ext_resource path="res://assets/textures/gui/bevel/sunlight.png" type="Texture" id=37]
+[ext_resource path="res://assets/textures/gui/bevel/nitrogen.png" type="Texture" id=38]
+[ext_resource path="res://assets/textures/gui/bevel/oxygen.png" type="Texture" id=39]
+[ext_resource path="res://assets/textures/gui/bevel/Hitpoints.png" type="Texture" id=40]
+[ext_resource path="res://assets/textures/gui/bevel/compressPanel.png" type="Texture" id=41]
+[ext_resource path="res://assets/textures/gui/bevel/ammonia.png" type="Texture" id=42]
+[ext_resource path="res://assets/textures/background_particle_fuzzy.png" type="Texture" id=43]
+[ext_resource path="res://assets/textures/gui/bevel/LargeTwoNormal.png" type="Texture" id=44]
+[ext_resource path="res://assets/textures/gui/bevel/hydrogensulfide.png" type="Texture" id=45]
+[ext_resource path="res://assets/textures/gui/bevel/unbind.png" type="Texture" id=46]
+[ext_resource path="res://assets/textures/gui/bevel/parts/SignalingAgentIcon.png" type="Texture" id=47]
+[ext_resource path="res://assets/textures/gui/bevel/compressPanelActive.png" type="Texture" id=48]
+[ext_resource path="res://src/gui_common/fonts/EmptyFont.tres" type="DynamicFont" id=49]
+[ext_resource path="res://src/microbe_stage/multiplayer/microbial_arena/PlayerMicrobialArenaInput.cs" type="Script" id=50]
+[ext_resource path="res://src/gui_common/ActionButton.tscn" type="PackedScene" id=51]
+[ext_resource path="res://src/gui_common/ScoreBoard.tscn" type="PackedScene" id=52]
+[ext_resource path="res://src/networking/ChatBox.tscn" type="PackedScene" id=53]
+[ext_resource path="res://src/microbe_stage/HUDBottomBar.tscn" type="PackedScene" id=54]
+[ext_resource path="res://src/microbe_stage/ProcessPanel.tscn" type="PackedScene" id=55]
+[ext_resource path="res://src/microbe_stage/PlayerHoverInfo.cs" type="Script" id=56]
+[ext_resource path="res://src/microbe_stage/gui/PatchExtinctionBox.tscn" type="PackedScene" id=57]
+[ext_resource path="res://src/microbe_stage/MicrobeCheatMenu.tscn" type="PackedScene" id=58]
+[ext_resource path="res://src/microbe_stage/PausePrompt.tscn" type="PackedScene" id=59]
+[ext_resource path="res://assets/textures/gui/bevel/PhosphatesBW.png" type="Texture" id=60]
+[ext_resource path="res://assets/textures/gui/bevel/parts/ToxinVacuoleIcon.png" type="Texture" id=61]
+[ext_resource path="res://assets/textures/gui/bevel/AmmoniaInv.png" type="Texture" id=62]
+[ext_resource path="res://assets/textures/gui/bevel/PhosphateInv.png" type="Texture" id=63]
+[ext_resource path="res://assets/textures/gui/bevel/AmmoniaBW.png" type="Texture" id=64]
+[ext_resource path="res://assets/sounds/soundeffects/microbe-pickup-organelle.ogg" type="AudioStream" id=65]
+[ext_resource path="res://assets/textures/gui/bevel/ingestedmatter.png" type="Texture" id=66]
+[ext_resource path="res://assets/textures/gui/bevel/parts/slimeJetAction.png" type="Texture" id=67]
+[ext_resource path="res://assets/textures/gui/bevel/mucilage.png" type="Texture" id=68]
 [ext_resource path="res://src/microbe_stage/gui/WinBox.tscn" type="PackedScene" id=69]
 [ext_resource path="res://src/microbe_stage/gui/ExtinctionBox.tscn" type="PackedScene" id=70]
-[ext_resource path="res://src/gui_common/fonts/Lato-Bold-AlmostSmall.tres" type="DynamicFont" id=71]
-[ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=72]
-[ext_resource path="res://src/microbe_stage/MicrobeCheatMenu.tscn" type="PackedScene" id=73]
-[ext_resource path="res://src/tutorial/microbe_stage/MicrobeTutorialGUI.tscn" type="PackedScene" id=74]
-[ext_resource path="res://src/engine/GuidanceLine.tscn" type="PackedScene" id=75]
-[ext_resource path="res://assets/textures/background_particle_fuzzy.png" type="Texture" id=76]
-[ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-AlmostSmaller.tres" type="DynamicFont" id=77]
-[ext_resource path="res://src/gui_common/fonts/Lato-Regular-Small.tres" type="DynamicFont" id=80]
-[ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Bigger.tres" type="DynamicFont" id=81]
-[ext_resource path="res://assets/textures/gui/bevel/parts/BindingAgentIcon.png" type="Texture" id=82]
-[ext_resource path="res://assets/textures/gui/bevel/parts/membraneAmoeba.png" type="Texture" id=83]
-[ext_resource path="res://src/microbe_stage/PlayerHoverInfo.cs" type="Script" id=84]
-[ext_resource path="res://src/microbe_stage/PatchNameOverlay.tscn" type="PackedScene" id=85]
-[ext_resource path="res://src/gui_common/fonts/EmptyFont.tres" type="DynamicFont" id=86]
-[ext_resource path="res://src/gui_common/RadialPopup.tscn" type="PackedScene" id=87]
-[ext_resource path="res://src/gui_common/dialogs/StagePrototypeConfirm.tscn" type="PackedScene" id=88]
-[ext_resource path="res://assets/textures/gui/bevel/parts/SignalingAgentIcon.png" type="Texture" id=89]
-[ext_resource path="res://assets/textures/gui/bevel/unbind.png" type="Texture" id=90]
-[ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Smaller.tres" type="DynamicFont" id=91]
-[ext_resource path="res://src/microbe_stage/gui/PatchExtinctionBox.tscn" type="PackedScene" id=94]
-[ext_resource path="res://src/microbe_stage/PausePrompt.tscn" type="PackedScene" id=95]
+[ext_resource path="res://src/gui_common/RadialPopup.tscn" type="PackedScene" id=71]
+[ext_resource path="res://src/general/PauseMenu.tscn" type="PackedScene" id=72]
+[ext_resource path="res://src/microbe_stage/PatchNameOverlay.tscn" type="PackedScene" id=73]
+[ext_resource path="res://src/microbe_stage/CompoundCloudSystem.cs" type="Script" id=74]
 
-[sub_resource type="Theme" id=1]
-default_font = ExtResource( 80 )
+[sub_resource type="Environment" id=2]
+background_mode = 1
+background_color = Color( 0.435294, 0.458824, 0.509804, 1 )
+ambient_light_color = Color( 0.847059, 0.847059, 0.847059, 1 )
 
-[sub_resource type="StyleBoxFlat" id=2]
+[sub_resource type="Theme" id=3]
+default_font = ExtResource( 9 )
+
+[sub_resource type="StyleBoxFlat" id=4]
 bg_color = Color( 0, 0.129412, 0.141176, 0.784314 )
 border_width_left = 1
 border_width_top = 1
@@ -90,8 +90,8 @@ corner_radius_top_right = 7
 corner_radius_bottom_right = 7
 corner_radius_bottom_left = 7
 
-[sub_resource type="StyleBoxTexture" id=3]
-texture = ExtResource( 43 )
+[sub_resource type="StyleBoxTexture" id=5]
+texture = ExtResource( 18 )
 region_rect = Rect2( 0, 0, 20, 20 )
 expand_margin_left = 1.0
 expand_margin_right = 1.0
@@ -99,91 +99,91 @@ expand_margin_top = 1.0
 expand_margin_bottom = 1.0
 modulate_color = Color( 0, 0.435294, 0.52549, 1 )
 
-[sub_resource type="StyleBoxTexture" id=4]
-texture = ExtResource( 44 )
+[sub_resource type="StyleBoxTexture" id=6]
+texture = ExtResource( 31 )
 region_rect = Rect2( 0, 0, 20, 20 )
-
-[sub_resource type="StyleBoxTexture" id=5]
-texture = ExtResource( 43 )
-region_rect = Rect2( 0, 0, 20, 20 )
-
-[sub_resource type="ButtonGroup" id=6]
 
 [sub_resource type="StyleBoxTexture" id=7]
-texture = ExtResource( 42 )
+texture = ExtResource( 18 )
 region_rect = Rect2( 0, 0, 20, 20 )
-modulate_color = Color( 0, 0.435294, 0.52549, 1 )
 
-[sub_resource type="StyleBoxTexture" id=8]
-texture = ExtResource( 45 )
-region_rect = Rect2( 0, 0, 20, 20 )
+[sub_resource type="ButtonGroup" id=8]
 
 [sub_resource type="StyleBoxTexture" id=9]
-texture = ExtResource( 42 )
-region_rect = Rect2( 0, 0, 20, 20 )
-
-[sub_resource type="StyleBoxTexture" id=10]
-texture = ExtResource( 13 )
-region_rect = Rect2( 0, 0, 429, 1 )
-
-[sub_resource type="StyleBoxFlat" id=11]
-bg_color = Color( 0, 0.596078, 0.764706, 1 )
-
-[sub_resource type="StyleBoxFlat" id=12]
-bg_color = Color( 0, 0, 0, 0.196078 )
-
-[sub_resource type="StyleBoxFlat" id=13]
-bg_color = Color( 0.141176, 0.278431, 0.682353, 1 )
-
-[sub_resource type="StyleBoxFlat" id=14]
-bg_color = Color( 0.407843, 0.698039, 0.431373, 1 )
-
-[sub_resource type="ButtonGroup" id=15]
-
-[sub_resource type="StyleBoxTexture" id=16]
-texture = ExtResource( 42 )
+texture = ExtResource( 41 )
 region_rect = Rect2( 0, 0, 20, 20 )
 modulate_color = Color( 0, 0.435294, 0.52549, 1 )
 
-[sub_resource type="StyleBoxTexture" id=17]
-texture = ExtResource( 45 )
+[sub_resource type="StyleBoxTexture" id=10]
+texture = ExtResource( 48 )
 region_rect = Rect2( 0, 0, 20, 20 )
+
+[sub_resource type="StyleBoxTexture" id=11]
+texture = ExtResource( 41 )
+region_rect = Rect2( 0, 0, 20, 20 )
+
+[sub_resource type="StyleBoxTexture" id=12]
+texture = ExtResource( 11 )
+region_rect = Rect2( 0, 0, 429, 1 )
+
+[sub_resource type="StyleBoxFlat" id=13]
+bg_color = Color( 0, 0.596078, 0.764706, 1 )
+
+[sub_resource type="StyleBoxFlat" id=14]
+bg_color = Color( 0, 0, 0, 0.196078 )
+
+[sub_resource type="StyleBoxFlat" id=15]
+bg_color = Color( 0.141176, 0.278431, 0.682353, 1 )
+
+[sub_resource type="StyleBoxFlat" id=16]
+bg_color = Color( 0.407843, 0.698039, 0.431373, 1 )
+
+[sub_resource type="ButtonGroup" id=17]
 
 [sub_resource type="StyleBoxTexture" id=18]
-texture = ExtResource( 42 )
+texture = ExtResource( 41 )
+region_rect = Rect2( 0, 0, 20, 20 )
+modulate_color = Color( 0, 0.435294, 0.52549, 1 )
+
+[sub_resource type="StyleBoxTexture" id=19]
+texture = ExtResource( 48 )
 region_rect = Rect2( 0, 0, 20, 20 )
 
-[sub_resource type="StyleBoxFlat" id=19]
-bg_color = Color( 0.568627, 0.611765, 0.615686, 1 )
-
-[sub_resource type="StyleBoxFlat" id=20]
-bg_color = Color( 0, 0, 0, 0.196078 )
+[sub_resource type="StyleBoxTexture" id=20]
+texture = ExtResource( 41 )
+region_rect = Rect2( 0, 0, 20, 20 )
 
 [sub_resource type="StyleBoxFlat" id=21]
-bg_color = Color( 0.631373, 0.396078, 0, 1 )
+bg_color = Color( 0.568627, 0.611765, 0.615686, 1 )
 
 [sub_resource type="StyleBoxFlat" id=22]
-bg_color = Color( 0.380392, 0.141176, 0.8, 1 )
-
-[sub_resource type="StyleBoxFlat" id=23]
-bg_color = Color( 0.462745, 0.470588, 0.184314, 1 )
-
-[sub_resource type="StyleBoxFlat" id=24]
-bg_color = Color( 0.541176, 0.141176, 0.0745098, 1 )
-
-[sub_resource type="StyleBoxFlat" id=38]
-bg_color = Color( 0.882353, 0.498039, 0.498039, 1 )
-
-[sub_resource type="StyleBoxFlat" id=40]
-bg_color = Color( 0.623529, 0.0745098, 0.376471, 1 )
-
-[sub_resource type="StyleBoxFlat" id=26]
 bg_color = Color( 0, 0, 0, 0.196078 )
 
-[sub_resource type="StyleBoxFlat" id=44]
+[sub_resource type="StyleBoxFlat" id=23]
+bg_color = Color( 0.631373, 0.396078, 0, 1 )
+
+[sub_resource type="StyleBoxFlat" id=24]
+bg_color = Color( 0.380392, 0.141176, 0.8, 1 )
+
+[sub_resource type="StyleBoxFlat" id=25]
+bg_color = Color( 0.462745, 0.470588, 0.184314, 1 )
+
+[sub_resource type="StyleBoxFlat" id=26]
+bg_color = Color( 0.541176, 0.141176, 0.0745098, 1 )
+
+[sub_resource type="StyleBoxFlat" id=27]
+bg_color = Color( 0.882353, 0.498039, 0.498039, 1 )
+
+[sub_resource type="StyleBoxFlat" id=28]
+bg_color = Color( 0.623529, 0.0745098, 0.376471, 1 )
+
+[sub_resource type="StyleBoxFlat" id=29]
+bg_color = Color( 0, 0, 0, 0.196078 )
+
+[sub_resource type="StyleBoxFlat" id=30]
 bg_color = Color( 0, 0.498039, 0.4, 1 )
 
-[sub_resource type="Animation" id=39]
+[sub_resource type="Animation" id=31]
 resource_name = "HideCompoundsPanels"
 length = 0.4
 tracks/0/type = "value"
@@ -223,7 +223,7 @@ tracks/2/keys = {
 "values": [ 0, -350 ]
 }
 
-[sub_resource type="Animation" id=45]
+[sub_resource type="Animation" id=32]
 resource_name = "ShowCompoundsPanels"
 length = 0.4
 tracks/0/type = "value"
@@ -263,7 +263,7 @@ tracks/2/keys = {
 "values": [ -350, 0 ]
 }
 
-[sub_resource type="Animation" id=41]
+[sub_resource type="Animation" id=33]
 resource_name = "HideEnvironmentPanel"
 length = 0.4
 tracks/0/type = "value"
@@ -303,7 +303,7 @@ tracks/2/keys = {
 "values": [ 0, -350 ]
 }
 
-[sub_resource type="Animation" id=42]
+[sub_resource type="Animation" id=34]
 resource_name = "ShowEnvironmentPanel"
 length = 0.4
 tracks/0/type = "value"
@@ -343,7 +343,7 @@ tracks/2/keys = {
 "values": [ -350, 0 ]
 }
 
-[sub_resource type="Animation" id=48]
+[sub_resource type="Animation" id=35]
 resource_name = "Close"
 length = 0.4
 tracks/0/type = "value"
@@ -383,7 +383,7 @@ tracks/2/keys = {
 "values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
 }
 
-[sub_resource type="Animation" id=46]
+[sub_resource type="Animation" id=36]
 resource_name = "Open"
 length = 0.4
 tracks/0/type = "value"
@@ -423,7 +423,7 @@ tracks/2/keys = {
 "values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
 }
 
-[sub_resource type="Animation" id=47]
+[sub_resource type="Animation" id=37]
 length = 0.001
 tracks/0/type = "value"
 tracks/0/path = NodePath("BottomLeft/LeftPanels/ChatBox:rect_scale")
@@ -498,7 +498,7 @@ tracks/5/keys = {
 "values": [ Color( 1, 1, 1, 1 ) ]
 }
 
-[sub_resource type="StyleBoxFlat" id=28]
+[sub_resource type="StyleBoxFlat" id=38]
 bg_color = Color( 0.47451, 0.560784, 0.588235, 0.392157 )
 border_width_left = 2
 border_width_top = 2
@@ -506,11 +506,11 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color( 0.533333, 0.745098, 0.815686, 0.392157 )
 
-[sub_resource type="StyleBoxTexture" id=29]
-texture = ExtResource( 62 )
+[sub_resource type="StyleBoxTexture" id=39]
+texture = ExtResource( 19 )
 region_rect = Rect2( 0, 0, 86, 52 )
 
-[sub_resource type="Animation" id=30]
+[sub_resource type="Animation" id=40]
 length = 5.0
 loop = true
 tracks/0/type = "value"
@@ -538,7 +538,7 @@ tracks/1/keys = {
 "values": [ 0.0, 0.8, 0.8, 0.0 ]
 }
 
-[sub_resource type="StyleBoxFlat" id=43]
+[sub_resource type="StyleBoxFlat" id=41]
 draw_center = false
 border_width_left = 2
 border_width_top = 2
@@ -550,51 +550,45 @@ corner_radius_top_right = 1
 corner_radius_bottom_right = 1
 corner_radius_bottom_left = 1
 
-[node name="MicrobeStage" type="Node"]
-process_priority = -1
-script = ExtResource( 1 )
+[node name="MicrobialArena" type="Node"]
+script = ExtResource( 7 )
 PauseMenuPath = NodePath("PauseMenu")
-HUDRootPath = NodePath("MicrobeHUD")
-GuidanceLinePath = NodePath("World/GuidanceLine")
+HUDRootPath = NodePath("MicrobialArenaHUD")
 
 [node name="World" type="Node" parent="."]
 
-[node name="PrimaryCamera" parent="World" instance=ExtResource( 2 )]
-pause_mode = 2
+[node name="PrimaryCamera" parent="World" instance=ExtResource( 1 )]
 
 [node name="DynamicallySpawned" type="Node" parent="World"]
 
 [node name="CompoundClouds" type="Node" parent="World"]
-script = ExtResource( 10 )
+script = ExtResource( 74 )
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="World"]
+environment = SubResource( 2 )
 
 [node name="WorldLight" type="DirectionalLight" parent="World"]
 transform = Transform( -0.687551, 0.322878, -0.650403, 0.0453496, 0.913048, 0.405323, 0.724719, 0.249185, -0.642409, 0, 1.19209e-07, 0 )
 shadow_enabled = true
 
-[node name="GuidanceLine" parent="World" instance=ExtResource( 75 )]
-visible = false
-
 [node name="PlayerHoverInfo" type="Node" parent="."]
 pause_mode = 2
-script = ExtResource( 84 )
+script = ExtResource( 56 )
 
-[node name="PlayerMicrobeInput" type="Node" parent="."]
-script = ExtResource( 7 )
+[node name="PlayerMicrobialArenaInput" type="Node" parent="."]
+script = ExtResource( 50 )
 
-[node name="ChromaticFilter" parent="." instance=ExtResource( 67 )]
-margin_left = -0.943848
-margin_right = -0.943848
-
-[node name="MicrobeHUD" type="Control" parent="."]
+[node name="MicrobialArenaHUD" type="Control" parent="."]
 pause_mode = 2
 process_priority = 4
 anchor_right = 1.0
 anchor_bottom = 1.0
+rect_pivot_offset = Vector2( -353, -107 )
 mouse_filter = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme = ExtResource( 72 )
-script = ExtResource( 9 )
+theme = ExtResource( 10 )
+script = ExtResource( 14 )
 __meta__ = {
 "_editor_description_": ""
 }
@@ -637,11 +631,11 @@ PhosphateReproductionBarPath = NodePath("BottomRight/EditorButton/ReproductionBa
 EditorButtonFlashPath = NodePath("BottomRight/EditorButton/Highlight/Light2D")
 ProcessPanelPath = NodePath("ProcessPanel")
 HintTextPath = NodePath("HintText")
-MicrobePickupOrganelleSound = ExtResource( 8 )
-AmmoniaBW = ExtResource( 6 )
-PhosphatesBW = ExtResource( 5 )
-AmmoniaInv = ExtResource( 3 )
-PhosphatesInv = ExtResource( 4 )
+MicrobePickupOrganelleSound = ExtResource( 65 )
+AmmoniaBW = ExtResource( 64 )
+PhosphatesBW = ExtResource( 60 )
+AmmoniaInv = ExtResource( 62 )
+PhosphatesInv = ExtResource( 63 )
 HotBarPath = NodePath("ScrollContainer/HotBar")
 EngulfHotkeyPath = NodePath("ScrollContainer/HotBar/Engulfment")
 SecreteSlimeHotkeyPath = NodePath("ScrollContainer/HotBar/SecreteSlime")
@@ -656,29 +650,28 @@ OxytoxyBarPath = NodePath("BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBox
 MucilageBarPath = NodePath("BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage")
 AgentsPanelBarContainerPath = NodePath("BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer")
 ExtinctionBoxScene = ExtResource( 70 )
-PatchExtinctionBoxScene = ExtResource( 94 )
+PatchExtinctionBoxScene = ExtResource( 57 )
 FireToxinHotkeyPath = NodePath("ScrollContainer/HotBar/FireToxin")
 BottomLeftBarPath = NodePath("BottomLeft/HUDBottomBar")
-MulticellularButtonPath = NodePath("BottomRight/VBoxContainer/Control/Multicellular")
-MulticellularConfirmPopupPath = NodePath("StagePrototypeConfirm")
-MacroscopicButtonPath = NodePath("BottomRight/VBoxContainer/Control/Macroscopic")
+ChatBoxPath = NodePath("BottomLeft/LeftPanels/ChatBox")
+ScoreBoardPath = NodePath("ScoreBoard")
 IngestedMatterBarPath = NodePath("BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested")
 WinBoxScene = ExtResource( 69 )
 BindingModeHotkeyPath = NodePath("ScrollContainer/HotBar/BindingMode")
 UnbindAllHotkeyPath = NodePath("ScrollContainer/HotBar/UnbindAll")
 
-[node name="MouseHoverPanel" type="MarginContainer" parent="MicrobeHUD"]
+[node name="MouseHoverPanel" type="MarginContainer" parent="MicrobialArenaHUD"]
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_bottom = -300.0
 grow_horizontal = 0
 mouse_filter = 2
-theme = ExtResource( 72 )
+theme = ExtResource( 10 )
 custom_constants/margin_right = 10
 custom_constants/margin_top = 10
 
-[node name="PanelContainer" type="PanelContainer" parent="MicrobeHUD/MouseHoverPanel"]
+[node name="PanelContainer" type="PanelContainer" parent="MicrobialArenaHUD/MouseHoverPanel"]
 margin_top = 10.0
 margin_right = 250.0
 margin_bottom = 79.0
@@ -690,7 +683,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="MarginContainer" type="MarginContainer" parent="MicrobeHUD/MouseHoverPanel/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer"]
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 249.0
@@ -701,82 +694,82 @@ custom_constants/margin_top = 5
 custom_constants/margin_left = 10
 custom_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer"]
 margin_left = 10.0
 margin_top = 5.0
 margin_right = 238.0
 margin_bottom = 57.0
 mouse_filter = 2
 
-[node name="MousePos" type="Label" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="MousePos" type="Label" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 margin_right = 228.0
 margin_bottom = 19.0
-custom_fonts/font = ExtResource( 71 )
+custom_fonts/font = ExtResource( 15 )
 text = "AT_CURSOR"
 align = 1
 __meta__ = {
 "_editor_description_": ""
 }
 
-[node name="TitleSeparator" type="HSeparator" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="TitleSeparator" type="HSeparator" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 margin_top = 23.0
 margin_right = 228.0
 margin_bottom = 28.0
 rect_min_size = Vector2( 0, 5 )
 mouse_filter = 2
 
-[node name="NothingHere" type="MarginContainer" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="NothingHere" type="MarginContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 margin_top = 32.0
 margin_right = 228.0
 margin_bottom = 52.0
 mouse_filter = 2
 custom_constants/margin_left = 10
 
-[node name="NothingHereLabel" type="Label" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/NothingHere"]
+[node name="NothingHereLabel" type="Label" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/NothingHere"]
 margin_left = 10.0
 margin_right = 228.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 0, 20 )
-custom_fonts/font = ExtResource( 68 )
+custom_fonts/font = ExtResource( 13 )
 text = "NOTHING_HERE"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HoveredCompounds" type="VBoxContainer" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HoveredCompounds" type="VBoxContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 visible = false
 margin_top = 56.0
 margin_right = 218.0
 margin_bottom = 80.0
 mouse_filter = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds"]
+[node name="MarginContainer" type="MarginContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds"]
 margin_right = 218.0
 margin_bottom = 20.0
 mouse_filter = 2
 custom_constants/margin_left = 10
 
-[node name="CompoundsLabel" type="Label" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds/MarginContainer"]
+[node name="CompoundsLabel" type="Label" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds/MarginContainer"]
 margin_left = 10.0
 margin_right = 218.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 0, 20 )
-custom_fonts/font = ExtResource( 68 )
+custom_fonts/font = ExtResource( 13 )
 text = "COMPOUNDS_COLON"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="List" type="VBoxContainer" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds"]
+[node name="List" type="VBoxContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds"]
 margin_top = 24.0
 margin_right = 218.0
 margin_bottom = 24.0
 mouse_filter = 2
-theme = SubResource( 1 )
+theme = SubResource( 3 )
 
-[node name="SpeciesSeparator" type="HSeparator" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="SpeciesSeparator" type="HSeparator" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 visible = false
 margin_top = 56.0
 margin_right = 218.0
@@ -784,46 +777,46 @@ margin_bottom = 61.0
 rect_min_size = Vector2( 0, 5 )
 mouse_filter = 2
 
-[node name="HoveredCells" type="VBoxContainer" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HoveredCells" type="VBoxContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 visible = false
 margin_top = 56.0
 margin_right = 208.0
 margin_bottom = 97.0
 mouse_filter = 2
 
-[node name="MarginContainer2" type="MarginContainer" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells"]
+[node name="MarginContainer2" type="MarginContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells"]
 margin_right = 208.0
 margin_bottom = 20.0
 mouse_filter = 2
 custom_constants/margin_left = 10
 
-[node name="SpeciesLabel" type="Label" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells/MarginContainer2"]
+[node name="SpeciesLabel" type="Label" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells/MarginContainer2"]
 margin_left = 10.0
 margin_right = 208.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 0, 20 )
-custom_fonts/font = ExtResource( 68 )
+custom_fonts/font = ExtResource( 13 )
 text = "SPECIES_COLON"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="List" type="VBoxContainer" parent="MicrobeHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells"]
+[node name="List" type="VBoxContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells"]
 margin_top = 24.0
 margin_right = 208.0
 margin_bottom = 41.0
 mouse_filter = 2
-theme = SubResource( 1 )
+theme = SubResource( 3 )
 
-[node name="BottomLeft" type="Control" parent="MicrobeHUD"]
+[node name="BottomLeft" type="Control" parent="MicrobialArenaHUD"]
 anchor_top = 1.0
 anchor_bottom = 1.0
 margin_top = -632.0
 margin_right = 455.0
 mouse_filter = 2
 
-[node name="LeftPanels" type="VBoxContainer" parent="MicrobeHUD/BottomLeft"]
+[node name="LeftPanels" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft"]
 anchor_top = 1.0
 anchor_bottom = 1.0
 margin_left = 10.0
@@ -837,20 +830,20 @@ size_flags_vertical = 0
 custom_constants/separation = 10
 alignment = 2
 
-[node name="EnvironmentGroup" type="VBoxContainer" parent="MicrobeHUD/BottomLeft/LeftPanels"]
+[node name="EnvironmentGroup" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels"]
 margin_right = 313.0
 margin_bottom = 234.0
 
-[node name="EnvironmentPanel" type="Panel" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup"]
+[node name="EnvironmentPanel" type="Panel" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup"]
 margin_right = 197.0
 margin_bottom = 234.0
 rect_min_size = Vector2( 197, 234 )
 rect_clip_content = true
 size_flags_horizontal = 0
 size_flags_vertical = 0
-custom_styles/panel = SubResource( 2 )
+custom_styles/panel = SubResource( 4 )
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel"]
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 196.0
@@ -860,7 +853,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Header" type="MarginContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
+[node name="Header" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
 margin_right = 197.0
 margin_bottom = 52.0
 rect_min_size = Vector2( 195, 35 )
@@ -869,7 +862,7 @@ custom_constants/margin_right = 10
 custom_constants/margin_top = 5
 custom_constants/margin_left = 10
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header"]
 margin_left = 10.0
 margin_top = 5.0
 margin_right = 184.0
@@ -878,58 +871,56 @@ rect_min_size = Vector2( 174, 0 )
 size_flags_horizontal = 0
 custom_constants/separation = 6
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
 margin_right = 126.0
 margin_bottom = 47.0
 size_flags_horizontal = 3
-custom_fonts/font = ExtResource( 77 )
+custom_fonts/font = ExtResource( 12 )
 text = "ENVIRONMENT"
 autowrap = true
 
-[node name="EnvironmentExpandButton" type="Button" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="EnvironmentExpandButton" type="Button" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 132.0
 margin_top = 14.0
 margin_right = 150.0
 margin_bottom = 32.0
 rect_min_size = Vector2( 18, 18 )
-focus_mode = 0
 size_flags_horizontal = 0
 size_flags_vertical = 4
-custom_fonts/font = ExtResource( 86 )
-custom_styles/hover = SubResource( 3 )
-custom_styles/pressed = SubResource( 4 )
-custom_styles/normal = SubResource( 5 )
+custom_fonts/font = ExtResource( 49 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 toggle_mode = true
 pressed = true
 action_mode = 0
-group = SubResource( 6 )
+group = SubResource( 8 )
 
-[node name="EnvironmentCompressButton" type="Button" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="EnvironmentCompressButton" type="Button" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 156.0
 margin_top = 14.0
 margin_right = 174.0
 margin_bottom = 32.0
 rect_min_size = Vector2( 18, 18 )
-focus_mode = 0
 size_flags_horizontal = 0
 size_flags_vertical = 4
-custom_fonts/font = ExtResource( 86 )
-custom_styles/hover = SubResource( 7 )
-custom_styles/pressed = SubResource( 8 )
-custom_styles/normal = SubResource( 9 )
+custom_fonts/font = ExtResource( 49 )
+custom_styles/hover = SubResource( 9 )
+custom_styles/pressed = SubResource( 10 )
+custom_styles/normal = SubResource( 11 )
 toggle_mode = true
 action_mode = 0
-group = SubResource( 6 )
+group = SubResource( 8 )
 
-[node name="HSeparator" type="HSeparator" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
 margin_top = 56.0
 margin_right = 197.0
 margin_bottom = 60.0
 rect_min_size = Vector2( 197, 0 )
 size_flags_horizontal = 0
-custom_styles/separator = SubResource( 10 )
+custom_styles/separator = SubResource( 12 )
 
-[node name="Body" type="MarginContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
+[node name="Body" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
 margin_top = 64.0
 margin_right = 197.0
 margin_bottom = 249.0
@@ -940,36 +931,36 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="BarContainer" type="GridContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body"]
+[node name="BarContainer" type="GridContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body"]
 margin_left = 22.0
 margin_top = 5.0
 margin_right = 197.0
 margin_bottom = 175.0
 
-[node name="Oxygen" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="Oxygen" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 show_behind_parent = true
 margin_right = 162.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 162, 25 )
-custom_styles/fg = SubResource( 11 )
-custom_styles/bg = SubResource( 12 )
+custom_styles/fg = SubResource( 13 )
+custom_styles/bg = SubResource( 14 )
 step = 0.1
 percent_visible = false
 
-[node name="OxygenIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
+[node name="OxygenIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 30, 25 )
 size_flags_horizontal = 0
 size_flags_vertical = 0
-texture = ExtResource( 51 )
+texture = ExtResource( 39 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -977,14 +968,14 @@ margin_top = -12.5
 margin_right = 38.0
 margin_bottom = 12.5
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "O₂"
 valign = 1
 __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -995,7 +986,7 @@ margin_right = -6.99998
 margin_bottom = 12.5
 grow_horizontal = 0
 rect_min_size = Vector2( 55, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0%"
 align = 2
 valign = 1
@@ -1003,31 +994,31 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CarbonDioxide" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="CarbonDioxide" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 show_behind_parent = true
 margin_top = 29.0
 margin_right = 162.0
 margin_bottom = 54.0
 rect_min_size = Vector2( 162, 25 )
-custom_styles/fg = SubResource( 13 )
-custom_styles/bg = SubResource( 12 )
+custom_styles/fg = SubResource( 15 )
+custom_styles/bg = SubResource( 14 )
 step = 0.1
 percent_visible = false
 
-[node name="CO2Icon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
+[node name="CO2Icon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 30, 25 )
 size_flags_horizontal = 0
 size_flags_vertical = 0
-texture = ExtResource( 55 )
+texture = ExtResource( 29 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -1035,7 +1026,7 @@ margin_top = -12.5
 margin_right = 46.0
 margin_bottom = 12.5
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "CO₂"
 valign = 1
 __meta__ = {
@@ -1043,7 +1034,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -1054,7 +1045,7 @@ margin_right = -6.99998
 margin_bottom = 12.5
 grow_horizontal = 0
 rect_min_size = Vector2( 55, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0%"
 align = 2
 valign = 1
@@ -1062,31 +1053,31 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Nitrogen" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="Nitrogen" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 show_behind_parent = true
 margin_top = 58.0
 margin_right = 162.0
 margin_bottom = 83.0
 rect_min_size = Vector2( 162, 25 )
-custom_styles/fg = SubResource( 14 )
-custom_styles/bg = SubResource( 12 )
+custom_styles/fg = SubResource( 16 )
+custom_styles/bg = SubResource( 14 )
 step = 0.1
 percent_visible = false
 
-[node name="NitrogenIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
+[node name="NitrogenIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 30, 25 )
 size_flags_horizontal = 0
 size_flags_vertical = 0
-texture = ExtResource( 56 )
+texture = ExtResource( 38 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": true
 }
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -1094,7 +1085,7 @@ margin_top = -12.5
 margin_right = 49.0
 margin_bottom = 12.5
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "N₂"
 valign = 1
 __meta__ = {
@@ -1102,7 +1093,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -1113,7 +1104,7 @@ margin_right = -6.99998
 margin_bottom = 12.5
 grow_horizontal = 0
 rect_min_size = Vector2( 55, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0%"
 align = 2
 valign = 1
@@ -1121,7 +1112,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Temperature" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="Temperature" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 self_modulate = Color( 1, 1, 1, 0 )
 show_behind_parent = true
 margin_top = 87.0
@@ -1129,20 +1120,20 @@ margin_right = 162.0
 margin_bottom = 112.0
 rect_min_size = Vector2( 162, 25 )
 
-[node name="TemperatureIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
+[node name="TemperatureIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 30, 25 )
 size_flags_horizontal = 0
 size_flags_vertical = 0
-texture = ExtResource( 54 )
+texture = ExtResource( 22 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": true
 }
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -1150,14 +1141,14 @@ margin_top = -12.5
 margin_right = 60.0
 margin_bottom = 12.5
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "TEMPERATURE_SHORT"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -1168,7 +1159,7 @@ margin_right = -6.99998
 margin_bottom = 12.5
 grow_horizontal = 0
 rect_min_size = Vector2( 55, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "55° C"
 align = 2
 valign = 1
@@ -1177,7 +1168,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="Sunlight" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="Sunlight" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 self_modulate = Color( 1, 1, 1, 0 )
 show_behind_parent = true
 margin_top = 116.0
@@ -1185,20 +1176,20 @@ margin_right = 162.0
 margin_bottom = 141.0
 rect_min_size = Vector2( 162, 25 )
 
-[node name="LightIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
+[node name="LightIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 30, 25 )
 size_flags_horizontal = 0
 size_flags_vertical = 0
-texture = ExtResource( 53 )
+texture = ExtResource( 37 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": true
 }
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -1206,14 +1197,14 @@ margin_top = -12.5
 margin_right = 66.0
 margin_bottom = 12.5
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "LIGHT"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -1224,7 +1215,7 @@ margin_right = -6.99998
 margin_bottom = 12.5
 grow_horizontal = 0
 rect_min_size = Vector2( 55, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0%"
 align = 2
 valign = 1
@@ -1232,7 +1223,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Pressure" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="Pressure" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 self_modulate = Color( 1, 1, 1, 0 )
 show_behind_parent = true
 margin_top = 145.0
@@ -1240,20 +1231,20 @@ margin_right = 162.0
 margin_bottom = 170.0
 rect_min_size = Vector2( 162, 25 )
 
-[node name="PressureIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
+[node name="PressureIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 30, 25 )
 size_flags_horizontal = 0
 size_flags_vertical = 0
-texture = ExtResource( 52 )
+texture = ExtResource( 28 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": true
 }
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -1261,14 +1252,14 @@ margin_top = -12.5
 margin_right = 69.0
 margin_bottom = 12.5
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "PRESSURE_SHORT"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -1279,7 +1270,7 @@ margin_right = -4.0
 margin_bottom = 12.5
 grow_horizontal = 0
 rect_min_size = Vector2( 55, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "200 kPa"
 align = 2
 valign = 1
@@ -1288,20 +1279,20 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="CompoundsGroup" type="VBoxContainer" parent="MicrobeHUD/BottomLeft/LeftPanels"]
+[node name="CompoundsGroup" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels"]
 margin_top = 244.0
 margin_right = 313.0
 margin_bottom = 587.0
 
-[node name="CompoundsPanel" type="Panel" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup"]
+[node name="CompoundsPanel" type="Panel" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup"]
 margin_right = 254.0
 margin_bottom = 219.0
 rect_min_size = Vector2( 254, 219 )
 rect_clip_content = true
 size_flags_horizontal = 0
-custom_styles/panel = SubResource( 2 )
+custom_styles/panel = SubResource( 4 )
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel"]
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 253.0
@@ -1310,7 +1301,7 @@ rect_min_size = Vector2( 252, 0 )
 size_flags_horizontal = 0
 size_flags_vertical = 0
 
-[node name="Header" type="MarginContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
+[node name="Header" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
 margin_right = 254.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 0, 40 )
@@ -1318,7 +1309,7 @@ custom_constants/margin_right = 10
 custom_constants/margin_top = 5
 custom_constants/margin_left = 5
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header"]
 margin_left = 5.0
 margin_top = 5.0
 margin_right = 239.0
@@ -1330,69 +1321,67 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Icon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="Icon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_right = 35.0
 margin_bottom = 35.0
 rect_min_size = Vector2( 35, 35 )
 size_flags_vertical = 4
-texture = ExtResource( 14 )
+texture = ExtResource( 16 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 41.0
 margin_top = 6.0
 margin_right = 186.0
 margin_bottom = 28.0
 rect_min_size = Vector2( 145, 0 )
 size_flags_horizontal = 3
-custom_fonts/font = ExtResource( 77 )
+custom_fonts/font = ExtResource( 12 )
 text = "COMPOUNDS"
 autowrap = true
 
-[node name="CompoundExpandButton" type="Button" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="CompoundExpandButton" type="Button" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 192.0
 margin_top = 8.0
 margin_right = 210.0
 margin_bottom = 26.0
 rect_min_size = Vector2( 18, 18 )
-focus_mode = 0
 size_flags_horizontal = 0
 size_flags_vertical = 4
-custom_fonts/font = ExtResource( 86 )
-custom_styles/hover = SubResource( 3 )
-custom_styles/pressed = SubResource( 4 )
-custom_styles/normal = SubResource( 5 )
+custom_fonts/font = ExtResource( 49 )
+custom_styles/hover = SubResource( 5 )
+custom_styles/pressed = SubResource( 6 )
+custom_styles/normal = SubResource( 7 )
 toggle_mode = true
 pressed = true
 action_mode = 0
-group = SubResource( 15 )
+group = SubResource( 17 )
 
-[node name="CompoundCompressButton" type="Button" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="CompoundCompressButton" type="Button" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 216.0
 margin_top = 8.0
 margin_right = 234.0
 margin_bottom = 26.0
 rect_min_size = Vector2( 18, 18 )
-focus_mode = 0
 size_flags_horizontal = 0
 size_flags_vertical = 4
-custom_fonts/font = ExtResource( 86 )
-custom_styles/hover = SubResource( 16 )
-custom_styles/pressed = SubResource( 17 )
-custom_styles/normal = SubResource( 18 )
+custom_fonts/font = ExtResource( 49 )
+custom_styles/hover = SubResource( 18 )
+custom_styles/pressed = SubResource( 19 )
+custom_styles/normal = SubResource( 20 )
 toggle_mode = true
 action_mode = 0
-group = SubResource( 15 )
+group = SubResource( 17 )
 
-[node name="HSeparator" type="HSeparator" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
 margin_top = 44.0
 margin_right = 254.0
 margin_bottom = 48.0
 rect_min_size = Vector2( 254, 0 )
 size_flags_horizontal = 0
-custom_styles/separator = SubResource( 10 )
+custom_styles/separator = SubResource( 12 )
 
-[node name="Body" type="MarginContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
+[node name="Body" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
 margin_top = 52.0
 margin_right = 254.0
 margin_bottom = 247.0
@@ -1404,7 +1393,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="BarContainer" type="GridContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body"]
+[node name="BarContainer" type="GridContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body"]
 margin_left = 22.0
 margin_top = 5.0
 margin_right = 242.0
@@ -1415,39 +1404,39 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="glucose" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="glucose" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_right = 220.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 220, 25 )
 size_flags_horizontal = 0
-custom_styles/fg = SubResource( 19 )
-custom_styles/bg = SubResource( 20 )
+custom_styles/fg = SubResource( 21 )
+custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="GlucoseIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
+[node name="GlucoseIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 25, 25 )
 size_flags_horizontal = 0
-texture = ExtResource( 46 )
+texture = ExtResource( 23 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
 margin_left = 20.0
 margin_right = 83.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "GLUCOSE"
 valign = 1
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1455,48 +1444,48 @@ margin_right = -4.0
 margin_bottom = 25.0
 grow_horizontal = 0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0.0 / 4"
 align = 2
 valign = 1
 
-[node name="ammonia" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="ammonia" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_top = 30.0
 margin_right = 220.0
 margin_bottom = 55.0
 rect_min_size = Vector2( 220, 25 )
 size_flags_horizontal = 0
-custom_styles/fg = SubResource( 21 )
-custom_styles/bg = SubResource( 20 )
+custom_styles/fg = SubResource( 23 )
+custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="AmmoniaIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
+[node name="AmmoniaIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 25, 25 )
 size_flags_horizontal = 0
-texture = ExtResource( 48 )
+texture = ExtResource( 42 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
 margin_left = 20.0
 margin_right = 81.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "AMMONIA"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1504,7 +1493,7 @@ margin_right = -4.0
 margin_bottom = 25.0
 grow_horizontal = 0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0.0 / 4"
 align = 2
 valign = 1
@@ -1512,40 +1501,40 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="phosphates" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="phosphates" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_top = 60.0
 margin_right = 220.0
 margin_bottom = 85.0
 rect_min_size = Vector2( 220, 25 )
 size_flags_horizontal = 0
-custom_styles/fg = SubResource( 22 )
-custom_styles/bg = SubResource( 20 )
+custom_styles/fg = SubResource( 24 )
+custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="PhospateIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
+[node name="PhospateIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 25, 25 )
 size_flags_horizontal = 0
-texture = ExtResource( 50 )
+texture = ExtResource( 20 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
 margin_left = 20.0
 margin_right = 95.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "PHOSPHATE"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1553,7 +1542,7 @@ margin_right = -3.99998
 margin_bottom = 25.0
 grow_horizontal = 0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0.0 / 4"
 align = 2
 valign = 1
@@ -1561,40 +1550,40 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="hydrogensulfide" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="hydrogensulfide" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_top = 90.0
 margin_right = 220.0
 margin_bottom = 115.0
 rect_min_size = Vector2( 220, 25 )
 size_flags_horizontal = 0
-custom_styles/fg = SubResource( 23 )
-custom_styles/bg = SubResource( 20 )
+custom_styles/fg = SubResource( 25 )
+custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="HydrogenSulfideIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
+[node name="HydrogenSulfideIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 25, 25 )
 size_flags_horizontal = 0
-texture = ExtResource( 47 )
+texture = ExtResource( 45 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
 margin_left = 20.0
 margin_right = 141.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "HYDROGEN_SULFIDE"
 valign = 1
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1602,7 +1591,7 @@ margin_right = -3.99998
 margin_bottom = 25.0
 grow_horizontal = 0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0.0 / 4"
 align = 2
 valign = 1
@@ -1610,40 +1599,40 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="iron" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="iron" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_top = 120.0
 margin_right = 220.0
 margin_bottom = 145.0
 rect_min_size = Vector2( 220, 25 )
 size_flags_horizontal = 0
-custom_styles/fg = SubResource( 24 )
-custom_styles/bg = SubResource( 20 )
+custom_styles/fg = SubResource( 26 )
+custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="IronIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
+[node name="IronIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 25, 25 )
 size_flags_horizontal = 0
-texture = ExtResource( 49 )
+texture = ExtResource( 27 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
 margin_left = 20.0
 margin_right = 47.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "IRON"
 valign = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1651,7 +1640,7 @@ margin_right = -3.99998
 margin_bottom = 25.0
 grow_horizontal = 0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0.0 / 4"
 align = 2
 valign = 1
@@ -1659,38 +1648,38 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ingested" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="ingested" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_top = 150.0
 margin_right = 220.0
 margin_bottom = 175.0
 rect_min_size = Vector2( 220, 25 )
 size_flags_horizontal = 0
-custom_styles/fg = SubResource( 38 )
-custom_styles/bg = SubResource( 20 )
+custom_styles/fg = SubResource( 27 )
+custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="IngestedMatterIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
+[node name="IngestedMatterIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
 modulate = Color( 0.882353, 0.882353, 0.882353, 1 )
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
 rect_min_size = Vector2( 25, 25 )
 size_flags_horizontal = 0
-texture = ExtResource( 17 )
+texture = ExtResource( 66 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
 margin_left = 20.0
 margin_right = 47.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "INGESTED_MATTER"
 valign = 1
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1698,12 +1687,12 @@ margin_right = -3.99998
 margin_bottom = 25.0
 grow_horizontal = 0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0.0 / 4"
 align = 2
 valign = 1
 
-[node name="AgentsPanel" type="Panel" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup"]
+[node name="AgentsPanel" type="Panel" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup"]
 margin_top = 223.0
 margin_right = 254.0
 margin_bottom = 343.0
@@ -1711,15 +1700,15 @@ rect_min_size = Vector2( 254, 120 )
 rect_clip_content = true
 size_flags_horizontal = 0
 size_flags_vertical = 0
-custom_styles/panel = SubResource( 2 )
+custom_styles/panel = SubResource( 4 )
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel"]
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 255.0
 margin_bottom = 122.0
 
-[node name="Header" type="MarginContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
+[node name="Header" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
 margin_right = 254.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 230, 35 )
@@ -1727,39 +1716,39 @@ custom_constants/margin_right = 10
 custom_constants/margin_top = 5
 custom_constants/margin_left = 5
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header"]
 margin_left = 5.0
 margin_top = 5.0
 margin_right = 244.0
 margin_bottom = 40.0
 
-[node name="Icon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="Icon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_right = 35.0
 margin_bottom = 35.0
 rect_min_size = Vector2( 35, 35 )
 size_flags_vertical = 4
-texture = ExtResource( 15 )
+texture = ExtResource( 61 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 39.0
 margin_top = 6.0
 margin_right = 239.0
 margin_bottom = 28.0
 size_flags_horizontal = 3
-custom_fonts/font = ExtResource( 77 )
+custom_fonts/font = ExtResource( 12 )
 text = "AGENTS"
 autowrap = true
 
-[node name="HSeparator" type="HSeparator" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
 margin_top = 44.0
 margin_right = 254.0
 margin_bottom = 48.0
 rect_min_size = Vector2( 254, 0 )
 size_flags_horizontal = 0
-custom_styles/separator = SubResource( 10 )
+custom_styles/separator = SubResource( 12 )
 
-[node name="Body" type="MarginContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
+[node name="Body" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
 margin_top = 52.0
 margin_right = 254.0
 margin_bottom = 121.0
@@ -1771,23 +1760,23 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="BarContainer" type="GridContainer" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body"]
+[node name="BarContainer" type="GridContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body"]
 margin_left = 22.0
 margin_top = 5.0
 margin_right = 244.0
 margin_bottom = 59.0
 
-[node name="oxytoxy" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="oxytoxy" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 margin_right = 220.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 220, 25 )
 size_flags_horizontal = 0
-custom_styles/fg = SubResource( 40 )
-custom_styles/bg = SubResource( 26 )
+custom_styles/fg = SubResource( 28 )
+custom_styles/bg = SubResource( 29 )
 step = 0.1
 percent_visible = false
 
-[node name="OxyToxyIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
+[node name="OxyToxyIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
 anchor_left = -0.00454545
 anchor_right = -0.00454545
 margin_left = -12.0
@@ -1796,19 +1785,19 @@ margin_bottom = 20.0
 rect_min_size = Vector2( 25, 25 )
 size_flags_horizontal = 0
 size_flags_vertical = 0
-texture = ExtResource( 57 )
+texture = ExtResource( 24 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
 margin_left = 18.0
 margin_right = 97.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "OXYTOXY_NT"
 valign = 1
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -45.0
@@ -1816,7 +1805,7 @@ margin_right = -4.99998
 margin_bottom = 25.0
 grow_horizontal = 0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0.0 / 4"
 align = 2
 valign = 1
@@ -1824,18 +1813,18 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="mucilage" type="ProgressBar" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="mucilage" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 margin_top = 29.0
 margin_right = 220.0
 margin_bottom = 54.0
 rect_min_size = Vector2( 220, 25 )
 size_flags_horizontal = 0
-custom_styles/fg = SubResource( 44 )
-custom_styles/bg = SubResource( 26 )
+custom_styles/fg = SubResource( 30 )
+custom_styles/bg = SubResource( 29 )
 step = 0.1
 percent_visible = false
 
-[node name="MucilageIcon" type="TextureRect" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
+[node name="MucilageIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
 anchor_left = -0.00454545
 anchor_right = -0.00454545
 margin_left = -12.0
@@ -1844,19 +1833,19 @@ margin_bottom = 20.0
 rect_min_size = Vector2( 25, 25 )
 size_flags_horizontal = 0
 size_flags_vertical = 0
-texture = ExtResource( 18 )
+texture = ExtResource( 68 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
 margin_left = 18.0
 margin_right = 97.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "MUCILAGE"
 valign = 1
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -45.0
@@ -1864,7 +1853,7 @@ margin_right = -4.99998
 margin_bottom = 25.0
 grow_horizontal = 0
 rect_min_size = Vector2( 0, 25 )
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "0.0 / 4"
 align = 2
 valign = 1
@@ -1872,7 +1861,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ChatBox" parent="MicrobeHUD/BottomLeft/LeftPanels" instance=ExtResource( 20 )]
+[node name="ChatBox" parent="MicrobialArenaHUD/BottomLeft/LeftPanels" instance=ExtResource( 53 )]
 anchor_top = 0.0
 anchor_bottom = 0.0
 margin_top = 417.0
@@ -1882,27 +1871,27 @@ rect_min_size = Vector2( 313, 150 )
 rect_pivot_offset = Vector2( 0, 170 )
 size_flags_horizontal = 0
 
-[node name="PanelsTween" type="Tween" parent="MicrobeHUD/BottomLeft/LeftPanels"]
+[node name="PanelsTween" type="Tween" parent="MicrobialArenaHUD/BottomLeft/LeftPanels"]
 
-[node name="HUDBottomBar" parent="MicrobeHUD/BottomLeft" instance=ExtResource( 16 )]
+[node name="HUDBottomBar" parent="MicrobialArenaHUD/BottomLeft" instance=ExtResource( 54 )]
 margin_top = -43.0
 margin_bottom = -8.0
 
-[node name="CompoundsPanelAnimationPlayer" type="AnimationPlayer" parent="MicrobeHUD"]
-anims/HideCompoundsPanels = SubResource( 39 )
-anims/ShowCompoundsPanels = SubResource( 45 )
+[node name="CompoundsPanelAnimationPlayer" type="AnimationPlayer" parent="MicrobialArenaHUD"]
+anims/HideCompoundsPanels = SubResource( 31 )
+anims/ShowCompoundsPanels = SubResource( 32 )
 
-[node name="EnvironmentPanelAnimationPlayer" type="AnimationPlayer" parent="MicrobeHUD"]
-anims/HideEnvironmentPanel = SubResource( 41 )
-anims/ShowEnvironmentPanel = SubResource( 42 )
+[node name="EnvironmentPanelAnimationPlayer" type="AnimationPlayer" parent="MicrobialArenaHUD"]
+anims/HideEnvironmentPanel = SubResource( 33 )
+anims/ShowEnvironmentPanel = SubResource( 34 )
 
-[node name="ChatBoxAnimationPlayer" type="AnimationPlayer" parent="MicrobeHUD"]
+[node name="ChatBoxAnimationPlayer" type="AnimationPlayer" parent="MicrobialArenaHUD"]
 autoplay = "Close"
-anims/Close = SubResource( 48 )
-anims/Open = SubResource( 46 )
-anims/RESET = SubResource( 47 )
+anims/Close = SubResource( 35 )
+anims/Open = SubResource( 36 )
+anims/RESET = SubResource( 37 )
 
-[node name="BottomRight" type="Control" parent="MicrobeHUD"]
+[node name="BottomRight" type="Control" parent="MicrobialArenaHUD"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -1913,7 +1902,7 @@ margin_right = 1.0
 margin_bottom = -1.0
 mouse_filter = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MicrobeHUD/BottomRight"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -1927,36 +1916,7 @@ grow_vertical = 0
 custom_constants/separation = 8
 alignment = 2
 
-[node name="Control" type="MarginContainer" parent="MicrobeHUD/BottomRight/VBoxContainer"]
-margin_left = 16.0
-margin_right = 219.0
-margin_bottom = 30.0
-size_flags_horizontal = 8
-size_flags_vertical = 0
-
-[node name="Multicellular" type="Button" parent="MicrobeHUD/BottomRight/VBoxContainer/Control"]
-margin_right = 203.0
-margin_bottom = 30.0
-grow_horizontal = 0
-grow_vertical = 0
-hint_tooltip = "MOVE_TO_MULTICELLULAR_STAGE_TOOLTIP"
-size_flags_horizontal = 8
-size_flags_vertical = 0
-custom_fonts/font = ExtResource( 91 )
-text = "BECOME_MULTICELLULAR"
-
-[node name="Macroscopic" type="Button" parent="MicrobeHUD/BottomRight/VBoxContainer/Control"]
-margin_left = 10.0
-margin_right = 203.0
-margin_bottom = 30.0
-grow_horizontal = 0
-grow_vertical = 0
-size_flags_horizontal = 8
-size_flags_vertical = 0
-custom_fonts/font = ExtResource( 91 )
-text = "BECOME_MACROSCOPIC"
-
-[node name="PopulationData" type="HBoxContainer" parent="MicrobeHUD/BottomRight/VBoxContainer"]
+[node name="PopulationData" type="HBoxContainer" parent="MicrobialArenaHUD/BottomRight/VBoxContainer"]
 margin_left = 88.0
 margin_top = 38.0
 margin_right = 219.0
@@ -1967,13 +1927,13 @@ rect_min_size = Vector2( 0, 17 )
 size_flags_horizontal = 8
 size_flags_vertical = 0
 
-[node name="Label" type="Label" parent="MicrobeHUD/BottomRight/VBoxContainer/PopulationData"]
+[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomRight/VBoxContainer/PopulationData"]
 margin_right = 87.0
 margin_bottom = 37.0
 rect_min_size = Vector2( 87, 0 )
 size_flags_horizontal = 3
-custom_fonts/font = ExtResource( 12 )
-custom_styles/normal = SubResource( 28 )
+custom_fonts/font = ExtResource( 17 )
+custom_styles/normal = SubResource( 38 )
 text = "POPULATION_CAPITAL"
 align = 1
 autowrap = true
@@ -1981,22 +1941,22 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobeHUD/BottomRight/VBoxContainer/PopulationData"]
+[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomRight/VBoxContainer/PopulationData"]
 margin_left = 91.0
 margin_top = 9.0
 margin_right = 131.0
 margin_bottom = 28.0
 rect_min_size = Vector2( 40, 0 )
 size_flags_horizontal = 3
-custom_fonts/font = ExtResource( 12 )
-custom_styles/normal = SubResource( 28 )
+custom_fonts/font = ExtResource( 17 )
+custom_styles/normal = SubResource( 38 )
 text = "100"
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="DataValue" type="PanelContainer" parent="MicrobeHUD/BottomRight"]
+[node name="DataValue" type="PanelContainer" parent="MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -2008,9 +1968,9 @@ margin_bottom = -183.0
 mouse_filter = 2
 size_flags_horizontal = 0
 size_flags_vertical = 0
-custom_styles/panel = SubResource( 29 )
+custom_styles/panel = SubResource( 39 )
 
-[node name="Margin" type="MarginContainer" parent="MicrobeHUD/BottomRight/DataValue"]
+[node name="Margin" type="MarginContainer" parent="MicrobialArenaHUD/BottomRight/DataValue"]
 margin_right = 80.0
 margin_bottom = 52.0
 mouse_filter = 2
@@ -2019,7 +1979,7 @@ custom_constants/margin_top = 5
 custom_constants/margin_left = 5
 custom_constants/margin_bottom = 5
 
-[node name="VBox" type="VBoxContainer" parent="MicrobeHUD/BottomRight/DataValue/Margin"]
+[node name="VBox" type="VBoxContainer" parent="MicrobialArenaHUD/BottomRight/DataValue/Margin"]
 margin_left = 5.0
 margin_top = 5.0
 margin_right = 75.0
@@ -2027,30 +1987,30 @@ margin_bottom = 47.0
 custom_constants/separation = 8
 alignment = 1
 
-[node name="HPValue" type="Label" parent="MicrobeHUD/BottomRight/DataValue/Margin/VBox"]
+[node name="HPValue" type="Label" parent="MicrobialArenaHUD/BottomRight/DataValue/Margin/VBox"]
 margin_right = 70.0
 margin_bottom = 17.0
 mouse_filter = 0
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "Hitpoints"
 clip_text = true
 __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="ATPValue" type="Label" parent="MicrobeHUD/BottomRight/DataValue/Margin/VBox"]
+[node name="ATPValue" type="Label" parent="MicrobialArenaHUD/BottomRight/DataValue/Margin/VBox"]
 margin_top = 25.0
 margin_right = 70.0
 margin_bottom = 42.0
 mouse_filter = 0
-custom_fonts/font = ExtResource( 80 )
+custom_fonts/font = ExtResource( 9 )
 text = "ATP"
 clip_text = true
 __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="HealthBar" type="TextureProgress" parent="MicrobeHUD/BottomRight"]
+[node name="HealthBar" type="TextureProgress" parent="MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -2062,26 +2022,26 @@ margin_bottom = 34.22
 mouse_filter = 2
 step = 0.1
 value = 100.0
-texture_under = ExtResource( 64 )
-texture_progress = ExtResource( 64 )
+texture_under = ExtResource( 34 )
+texture_progress = ExtResource( 34 )
 fill_mode = 4
 tint_under = Color( 0, 0, 0, 0.752941 )
 tint_progress = Color( 0.960784, 0.270588, 0.478431, 1 )
 radial_initial_angle = 237.0
 radial_fill_degrees = 126.0
 
-[node name="HitpointIcon" type="TextureRect" parent="MicrobeHUD/BottomRight/HealthBar"]
+[node name="HitpointIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/HealthBar"]
 margin_left = 21.46
 margin_top = 197.749
 margin_right = 41.46
 margin_bottom = 217.749
-texture = ExtResource( 61 )
+texture = ExtResource( 40 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ATPBar" type="TextureProgress" parent="MicrobeHUD/BottomRight"]
+[node name="ATPBar" type="TextureProgress" parent="MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -2093,26 +2053,26 @@ margin_bottom = 7.47501
 mouse_filter = 2
 step = 0.1
 value = 100.0
-texture_under = ExtResource( 63 )
-texture_progress = ExtResource( 63 )
+texture_under = ExtResource( 30 )
+texture_progress = ExtResource( 30 )
 fill_mode = 4
 tint_under = Color( 0, 0, 0, 0.752941 )
 tint_progress = Color( 0.439216, 0.956863, 0.137255, 1 )
 radial_initial_angle = 237.0
 radial_fill_degrees = 129.0
 
-[node name="ATPIcon" type="TextureRect" parent="MicrobeHUD/BottomRight/ATPBar"]
+[node name="ATPIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/ATPBar"]
 margin_left = 18.5
 margin_top = 156.5
 margin_right = 38.5
 margin_bottom = 176.5
-texture = ExtResource( 60 )
+texture = ExtResource( 33 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="EditorButton" type="TextureButton" parent="MicrobeHUD/BottomRight"]
+[node name="EditorButton" type="TextureButton" parent="MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -2125,31 +2085,31 @@ rect_min_size = Vector2( 160, 160 )
 hint_tooltip = "EDITOR_BUTTON_TOOLTIP"
 focus_mode = 0
 disabled = true
-texture_normal = ExtResource( 39 )
-texture_pressed = ExtResource( 59 )
-texture_hover = ExtResource( 40 )
-texture_disabled = ExtResource( 41 )
+texture_normal = ExtResource( 44 )
+texture_pressed = ExtResource( 25 )
+texture_hover = ExtResource( 32 )
+texture_disabled = ExtResource( 26 )
 expand = true
 
-[node name="Highlight" type="TextureRect" parent="MicrobeHUD/BottomRight/EditorButton"]
+[node name="Highlight" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/EditorButton"]
 visible = false
 modulate = Color( 1, 1, 1, 0 )
 anchor_right = 1.0
 anchor_bottom = 1.0
-texture = ExtResource( 40 )
+texture = ExtResource( 32 )
 expand = true
 stretch_mode = 6
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Light2D" type="Light2D" parent="MicrobeHUD/BottomRight/EditorButton/Highlight"]
+[node name="Light2D" type="Light2D" parent="MicrobialArenaHUD/BottomRight/EditorButton/Highlight"]
 position = Vector2( 79.2703, 78.2703 )
 scale = Vector2( 0.845357, 0.845357 )
-texture = ExtResource( 76 )
+texture = ExtResource( 43 )
 energy = 0.0
 
-[node name="ReproductionBar" type="Control" parent="MicrobeHUD/BottomRight/EditorButton"]
+[node name="ReproductionBar" type="Control" parent="MicrobialArenaHUD/BottomRight/EditorButton"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
@@ -2157,7 +2117,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="BarBackground" type="TextureRect" parent="MicrobeHUD/BottomRight/EditorButton/ReproductionBar"]
+[node name="BarBackground" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
 modulate = Color( 0, 0, 0, 1 )
 anchor_left = 0.5
 anchor_top = 0.5
@@ -2167,14 +2127,14 @@ margin_left = -70.0
 margin_top = -70.0
 margin_right = 70.0
 margin_bottom = 70.0
-texture = ExtResource( 65 )
+texture = ExtResource( 21 )
 expand = true
 stretch_mode = 6
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="AmmoniaReproductionBar" type="TextureProgress" parent="MicrobeHUD/BottomRight/EditorButton/ReproductionBar"]
+[node name="AmmoniaReproductionBar" type="TextureProgress" parent="MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -2184,7 +2144,7 @@ margin_top = -70.0
 margin_right = 70.0
 margin_bottom = 70.0
 step = 0.1
-texture_progress = ExtResource( 65 )
+texture_progress = ExtResource( 21 )
 fill_mode = 5
 tint_progress = Color( 1, 0.627451, 0.121569, 1 )
 radial_fill_degrees = 180.0
@@ -2193,7 +2153,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PhosphateReproductionBar" type="TextureProgress" parent="MicrobeHUD/BottomRight/EditorButton/ReproductionBar"]
+[node name="PhosphateReproductionBar" type="TextureProgress" parent="MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -2203,53 +2163,67 @@ margin_top = -70.0
 margin_right = 70.0
 margin_bottom = 70.0
 step = 0.1
-texture_progress = ExtResource( 65 )
+texture_progress = ExtResource( 21 )
 fill_mode = 5
 tint_progress = Color( 0.690196, 0.423529, 1, 1 )
 radial_initial_angle = 180.0
 radial_fill_degrees = 180.0
 nine_patch_stretch = true
 
-[node name="AmmoniaIcon" type="TextureRect" parent="MicrobeHUD/BottomRight/EditorButton/ReproductionBar"]
+[node name="AmmoniaIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
 margin_left = 70.0
 margin_top = 5.5
 margin_right = 90.0
 margin_bottom = 25.5
-texture = ExtResource( 3 )
+texture = ExtResource( 62 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PhosphateIcon" type="TextureRect" parent="MicrobeHUD/BottomRight/EditorButton/ReproductionBar"]
+[node name="PhosphateIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
 margin_left = 70.0
 margin_top = 134.5
 margin_right = 90.0
 margin_bottom = 154.5
-texture = ExtResource( 4 )
+texture = ExtResource( 63 )
 expand = true
 __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="MicrobeHUD/BottomRight/EditorButton"]
-anims/EditorButtonFlash = SubResource( 30 )
+[node name="AnimationPlayer" type="AnimationPlayer" parent="MicrobialArenaHUD/BottomRight/EditorButton"]
+anims/EditorButtonFlash = SubResource( 40 )
 
-[node name="ProcessPanel" parent="MicrobeHUD" instance=ExtResource( 58 )]
+[node name="ProcessPanel" parent="MicrobialArenaHUD" instance=ExtResource( 55 )]
 margin_left = 8.0
 margin_top = 72.0
 margin_right = -872.0
 margin_bottom = -48.0
 
-[node name="MicrobeCheatMenu" parent="MicrobeHUD" instance=ExtResource( 73 )]
+[node name="MicrobeCheatMenu" parent="MicrobialArenaHUD" instance=ExtResource( 58 )]
 margin_left = 10.0
 margin_top = 30.0
 margin_right = 207.0
 
-[node name="PausePrompt" parent="MicrobeHUD" instance=ExtResource( 95 )]
+[node name="PausePrompt" parent="MicrobialArenaHUD" instance=ExtResource( 59 )]
 visible = false
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MicrobeHUD"]
+[node name="VScrollBar2" type="VScrollBar" parent="MicrobialArenaHUD/PausePrompt/PauseInfo" index="0"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+max_value = 22.0
+step = 1.0
+page = 40.0
+
+[node name="VScrollBar3" type="VScrollBar" parent="MicrobialArenaHUD/PausePrompt/PauseInfo" index="1"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+step = 1.0
+
+[node name="ScrollContainer" type="ScrollContainer" parent="MicrobialArenaHUD"]
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -2257,10 +2231,10 @@ anchor_bottom = 1.0
 margin_left = -274.0
 margin_top = -69.0
 rect_min_size = Vector2( 550, 69 )
-theme = ExtResource( 72 )
+theme = ExtResource( 10 )
 scroll_vertical_enabled = false
 
-[node name="HotBar" type="HBoxContainer" parent="MicrobeHUD/ScrollContainer"]
+[node name="HotBar" type="HBoxContainer" parent="MicrobialArenaHUD/ScrollContainer"]
 margin_right = 550.0
 size_flags_horizontal = 3
 custom_constants/separation = 6
@@ -2269,7 +2243,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Engulfment" parent="MicrobeHUD/ScrollContainer/HotBar" instance=ExtResource( 66 )]
+[node name="Engulfment" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2277,12 +2251,13 @@ margin_left = 277.0
 margin_right = 323.0
 margin_bottom = 51.0
 hint_tooltip = "TOGGLE_ENGULF"
-custom_styles/disabled = SubResource( 43 )
+focus_mode = 2
+custom_styles/disabled = SubResource( 41 )
 toggle_mode = true
-ActionIcon = ExtResource( 83 )
+ActionIcon = ExtResource( 36 )
 ActionName = "g_toggle_engulf"
 
-[node name="FireToxin" parent="MicrobeHUD/ScrollContainer/HotBar" instance=ExtResource( 66 )]
+[node name="FireToxin" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2290,10 +2265,11 @@ margin_left = 277.0
 margin_right = 323.0
 margin_bottom = 51.0
 hint_tooltip = "FIRE_TOXIN"
-ActionIcon = ExtResource( 15 )
+focus_mode = 2
+ActionIcon = ExtResource( 61 )
 ActionName = "g_fire_toxin"
 
-[node name="BindingMode" parent="MicrobeHUD/ScrollContainer/HotBar" instance=ExtResource( 66 )]
+[node name="BindingMode" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2301,11 +2277,12 @@ margin_left = 277.0
 margin_right = 323.0
 margin_bottom = 51.0
 hint_tooltip = "TOGGLE_BINDING"
+focus_mode = 2
 toggle_mode = true
-ActionIcon = ExtResource( 82 )
+ActionIcon = ExtResource( 35 )
 ActionName = "g_toggle_binding"
 
-[node name="UnbindAll" parent="MicrobeHUD/ScrollContainer/HotBar" instance=ExtResource( 66 )]
+[node name="UnbindAll" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2313,10 +2290,11 @@ margin_left = 277.0
 margin_right = 323.0
 margin_bottom = 51.0
 hint_tooltip = "UNBIND_ALL"
-ActionIcon = ExtResource( 90 )
+focus_mode = 2
+ActionIcon = ExtResource( 46 )
 ActionName = "g_unbind_all"
 
-[node name="SignalingAgents" parent="MicrobeHUD/ScrollContainer/HotBar" instance=ExtResource( 66 )]
+[node name="SignalingAgents" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2325,10 +2303,10 @@ margin_right = 323.0
 margin_bottom = 51.0
 focus_mode = 2
 toggle_mode = true
-ActionIcon = ExtResource( 89 )
+ActionIcon = ExtResource( 47 )
 ActionName = "g_pack_commands"
 
-[node name="SecreteSlime" parent="MicrobeHUD/ScrollContainer/HotBar" instance=ExtResource( 66 )]
+[node name="SecreteSlime" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2336,33 +2314,28 @@ margin_left = 277.0
 margin_right = 323.0
 margin_bottom = 51.0
 hint_tooltip = "SECRETE_SLIME"
-ActionIcon = ExtResource( 19 )
+focus_mode = 2
+ActionIcon = ExtResource( 67 )
 ActionName = "g_secrete_slime"
 
-[node name="HintText" type="Label" parent="MicrobeHUD"]
+[node name="HintText" type="Label" parent="MicrobialArenaHUD"]
 anchor_right = 1.0
 margin_top = 35.0
 margin_bottom = 59.0
-custom_fonts/font = ExtResource( 81 )
+custom_fonts/font = ExtResource( 8 )
 align = 1
 __meta__ = {
 "_edit_use_anchors_": false,
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="StagePrototypeConfirm" parent="MicrobeHUD" instance=ExtResource( 88 )]
-rect_min_size = Vector2( 450, 0 )
-
-[node name="ScoreBoard" parent="MicrobeHUD" instance=ExtResource( 21 )]
+[node name="ScoreBoard" parent="MicrobialArenaHUD" instance=ExtResource( 52 )]
 visible = false
 
-[node name="TutorialGUI" parent="." instance=ExtResource( 74 )]
+[node name="PatchNameOverlay" parent="." instance=ExtResource( 73 )]
 visible = false
 
-[node name="PatchNameOverlay" parent="." instance=ExtResource( 85 )]
-visible = false
-
-[node name="RadialPopup" parent="." instance=ExtResource( 87 )]
+[node name="RadialPopup" parent="." instance=ExtResource( 71 )]
 
 [node name="WinExtinctBoxHolder" type="Control" parent="."]
 visible = false
@@ -2375,39 +2348,25 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PauseMenu" parent="." instance=ExtResource( 11 )]
+[node name="PauseMenu" parent="." instance=ExtResource( 72 )]
 visible = true
 
-[connection signal="Clicked" from="MicrobeHUD" to="MicrobeHUD/BottomLeft/LeftPanels/ChatBox" method="OnClickedOffTextBox"]
-[connection signal="OnOpenMenu" from="MicrobeHUD" to="PauseMenu" method="Open"]
-[connection signal="OnOpenMenuToHelp" from="MicrobeHUD" to="PauseMenu" method="OpenToHelp"]
-[connection signal="pressed" from="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer/EnvironmentExpandButton" to="MicrobeHUD" method="OnEnvironmentPanelSizeButtonPressed" binds= [ "expand" ]]
-[connection signal="pressed" from="MicrobeHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer/EnvironmentCompressButton" to="MicrobeHUD" method="OnEnvironmentPanelSizeButtonPressed" binds= [ "compress" ]]
-[connection signal="pressed" from="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer/CompoundExpandButton" to="MicrobeHUD" method="OnCompoundsPanelSizeButtonPressed" binds= [ "expand" ]]
-[connection signal="pressed" from="MicrobeHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer/CompoundCompressButton" to="MicrobeHUD" method="OnCompoundsPanelSizeButtonPressed" binds= [ "compress" ]]
-[connection signal="OnChatPressed" from="MicrobeHUD/BottomLeft/HUDBottomBar" to="MicrobeHUD" method="ChatButtonPressed"]
-[connection signal="OnCompoundsToggled" from="MicrobeHUD/BottomLeft/HUDBottomBar" to="MicrobeHUD" method="CompoundButtonPressed"]
-[connection signal="OnEnvironmentToggled" from="MicrobeHUD/BottomLeft/HUDBottomBar" to="MicrobeHUD" method="EnvironmentButtonPressed"]
-[connection signal="OnHelpPressed" from="MicrobeHUD/BottomLeft/HUDBottomBar" to="MicrobeHUD" method="OpenHelp"]
-[connection signal="OnMenuPressed" from="MicrobeHUD/BottomLeft/HUDBottomBar" to="MicrobeHUD" method="OpenMenu"]
-[connection signal="OnPausePressed" from="MicrobeHUD/BottomLeft/HUDBottomBar" to="MicrobeHUD" method="PauseButtonPressed"]
-[connection signal="OnProcessesPressed" from="MicrobeHUD/BottomLeft/HUDBottomBar" to="MicrobeHUD" method="ProcessPanelButtonPressed"]
-[connection signal="OnSuicidePressed" from="MicrobeHUD/BottomLeft/HUDBottomBar" to="MicrobeHUD" method="OnSuicide"]
-[connection signal="pressed" from="MicrobeHUD/BottomRight/VBoxContainer/Control/Multicellular" to="MicrobeHUD" method="OnBecomeMulticellularPressed"]
-[connection signal="pressed" from="MicrobeHUD/BottomRight/VBoxContainer/Control/Macroscopic" to="MicrobeHUD" method="OnBecomeMacroscopicPressed"]
-[connection signal="mouse_entered" from="MicrobeHUD/BottomRight/EditorButton" to="MicrobeHUD" method="OnEditorButtonMouseEnter"]
-[connection signal="mouse_exited" from="MicrobeHUD/BottomRight/EditorButton" to="MicrobeHUD" method="OnEditorButtonMouseExit"]
-[connection signal="pressed" from="MicrobeHUD/BottomRight/EditorButton" to="MicrobeHUD" method="EditorButtonPressed"]
-[connection signal="OnClosed" from="MicrobeHUD/ProcessPanel" to="MicrobeHUD" method="OnProcessPanelClosed"]
-[connection signal="pressed" from="MicrobeHUD/ScrollContainer/HotBar/Engulfment" to="PlayerMicrobeInput" method="ToggleEngulf"]
-[connection signal="pressed" from="MicrobeHUD/ScrollContainer/HotBar/FireToxin" to="PlayerMicrobeInput" method="EmitToxin"]
-[connection signal="pressed" from="MicrobeHUD/ScrollContainer/HotBar/BindingMode" to="PlayerMicrobeInput" method="ToggleBinding"]
-[connection signal="pressed" from="MicrobeHUD/ScrollContainer/HotBar/UnbindAll" to="PlayerMicrobeInput" method="UnbindAll"]
-[connection signal="pressed" from="MicrobeHUD/ScrollContainer/HotBar/SecreteSlime" to="PlayerMicrobeInput" method="SecreteSlime" binds= [ 1.0 ]]
-[connection signal="Cancelled" from="MicrobeHUD/StagePrototypeConfirm" to="MicrobeHUD" method="OnBecomeMulticellularCancelled"]
-[connection signal="Confirmed" from="MicrobeHUD/StagePrototypeConfirm" to="MicrobeHUD" method="OnBecomeMulticellularConfirmed"]
-[connection signal="OnHelpMenuOpenRequested" from="TutorialGUI" to="MicrobeHUD" method="HelpButtonPressed"]
-[connection signal="OnItemSelected" from="RadialPopup" to="MicrobeHUD" method="OnRadialItemSelected"]
-[connection signal="MakeSave" from="PauseMenu" to="." method="SaveGame"]
+[connection signal="Clicked" from="MicrobialArenaHUD" to="MicrobialArenaHUD/BottomLeft/LeftPanels/ChatBox" method="OnClickedOffTextBox"]
+[connection signal="pressed" from="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer/EnvironmentExpandButton" to="MicrobialArenaHUD" method="OnEnvironmentPanelSizeButtonPressed" binds= [ "expand" ]]
+[connection signal="pressed" from="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer/EnvironmentCompressButton" to="MicrobialArenaHUD" method="OnEnvironmentPanelSizeButtonPressed" binds= [ "compress" ]]
+[connection signal="pressed" from="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer/CompoundExpandButton" to="MicrobialArenaHUD" method="OnCompoundsPanelSizeButtonPressed" binds= [ "expand" ]]
+[connection signal="pressed" from="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer/CompoundCompressButton" to="MicrobialArenaHUD" method="OnCompoundsPanelSizeButtonPressed" binds= [ "compress" ]]
+[connection signal="OnChatPressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="ChatButtonPressed"]
+[connection signal="OnCompoundsToggled" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="CompoundButtonPressed"]
+[connection signal="OnEnvironmentToggled" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="EnvironmentButtonPressed"]
+[connection signal="OnHelpPressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="OpenHelp"]
+[connection signal="OnMenuPressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="OpenMenu"]
+[connection signal="OnPausePressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="PauseButtonPressed"]
+[connection signal="OnProcessesPressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="ProcessPanelButtonPressed"]
+[connection signal="OnSuicidePressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="OnSuicide"]
+[connection signal="mouse_entered" from="MicrobialArenaHUD/BottomRight/EditorButton" to="MicrobialArenaHUD" method="OnEditorButtonMouseEnter"]
+[connection signal="mouse_exited" from="MicrobialArenaHUD/BottomRight/EditorButton" to="MicrobialArenaHUD" method="OnEditorButtonMouseExit"]
+[connection signal="pressed" from="MicrobialArenaHUD/BottomRight/EditorButton" to="MicrobialArenaHUD" method="EditorButtonPressed"]
+[connection signal="OnClosed" from="MicrobialArenaHUD/ProcessPanel" to="MicrobialArenaHUD" method="OnProcessPanelClosed"]
 
-[editable path="MicrobeHUD/PausePrompt"]
+[editable path="MicrobialArenaHUD/PausePrompt"]

@@ -135,6 +135,9 @@
     <Compile Include="src\general\AssetType.cs" />
     <Compile Include="src\general\CustomDifficulty.cs" />
     <Compile Include="src\general\IDifficulty.cs" />
+    <Compile Include="src\general\MultiplayerStageBase.cs" />
+    <Compile Include="src\general\MultiplayerStageHUDBase.cs" />
+    <Compile Include="src\general\PlayerInputBase.cs" />
     <Compile Include="src\gui_common\art_gallery\TextureThumbnailResource.cs" />
     <Compile Include="src\gui_common\FocusFlowDynamicChildrenHelper.cs" />
     <Compile Include="src\gui_common\PhotographablePreview.cs" />
@@ -334,6 +337,9 @@
     <Compile Include="src\microbe_stage\CompoundCloudPlane.cs" />
     <Compile Include="src\microbe_stage\MicrobeStage.Network.cs" />
     <Compile Include="src\microbe_stage\MicrobeSystem.cs" />
+    <Compile Include="src\microbe_stage\multiplayer\microbial_arena\MicrobialArena.cs" />
+    <Compile Include="src\microbe_stage\multiplayer\microbial_arena\MicrobialArenaHUD.cs" />
+    <Compile Include="src\microbe_stage\multiplayer\microbial_arena\PlayerMicrobialArenaInput.cs" />
     <Compile Include="src\microbe_stage\organelle_components\CiliaComponent.cs" />
     <Compile Include="src\microbe_stage\organelle_components\SlimeJetComponent.cs" />
     <Compile Include="src\microbe_stage\organelle_components\EmptyOrganelleComponent.cs" />
@@ -467,6 +473,8 @@
     <Compile Include="src\modding\WorkshopData.cs" />
     <Compile Include="src\networking\ChatBox.cs" />
     <Compile Include="src\gui_common\ScoreBoard.cs" />
+    <Compile Include="src\networking\KickPlayerDialog.cs" />
+    <Compile Include="src\networking\MultiplayerGameMode.cs" />
     <Compile Include="src\networking\ServerSettings.cs" />
     <Compile Include="src\gui_common\NetworkedPlayerLabel.cs" />
     <Compile Include="src\networking\MultiplayerGUI.cs" />

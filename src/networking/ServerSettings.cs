@@ -5,12 +5,6 @@
 /// </summary>
 public class ServerSettings
 {
-    public enum GameMode
-    {
-        CellVersusCell,
-        OpenWorld,
-    }
-
     public string Name { get; set; } = TranslationServer.Translate("N_A");
 
     public string Address { get; set; } = Constants.LOCAL_HOST;
@@ -19,12 +13,23 @@ public class ServerSettings
 
     public int MaxPlayers { get; set; } = Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS;
 
-    public GameMode Mode { get; set; } = GameMode.CellVersusCell;
-
     public bool UseUPNP { get; set; }
+
+    public MultiplayerGameMode SelectedGameMode { get; set; } = MultiplayerGameMode.MicrobialArena;
 
     public override string ToString()
     {
         return $"(Name: {Name}, Address: {Address}, Port: {Port}, MaxPlayers: {MaxPlayers})";
+    }
+
+    public string GetGameModeReadable()
+    {
+        switch (SelectedGameMode)
+        {
+            case MultiplayerGameMode.MicrobialArena:
+                return TranslationServer.Translate("MICROBIAL_ARENA");
+            default:
+                return TranslationServer.Translate("N_A");
+        }
     }
 }

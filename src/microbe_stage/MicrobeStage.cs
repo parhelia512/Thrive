@@ -76,6 +76,9 @@ public partial class MicrobeStage : StageBase<Microbe>
     public PlayerHoverInfo HoverInfo { get; private set; } = null!;
 
     [JsonIgnore]
+    public PlayerMicrobeInput PlayerInput { get; private set; } = null!;
+
+    [JsonIgnore]
     public TutorialState TutorialState =>
         CurrentGame?.TutorialState ?? throw new InvalidOperationException("Game not started yet");
 
@@ -103,9 +106,7 @@ public partial class MicrobeStage : StageBase<Microbe>
         tutorialGUI.Visible = true;
         HUD.Init(this);
         HoverInfo.Init(Camera, Clouds);
-
-        if (IsMultiplayer)
-            SetupNetworking();
+        PlayerInput.Init(this);
 
         // Do stage setup to spawn things and setup all parts of the stage
         SetupStage();
@@ -135,6 +136,7 @@ public partial class MicrobeStage : StageBase<Microbe>
         HUD = GetNode<MicrobeHUD>("MicrobeHUD");
         tutorialGUI = GetNode<MicrobeTutorialGUI>("TutorialGUI");
         HoverInfo = GetNode<PlayerHoverInfo>("PlayerHoverInfo");
+        PlayerInput = GetNode<PlayerMicrobeInput>("PlayerMicrobeInput");
         Camera = world.GetNode<MicrobeCamera>("PrimaryCamera");
         Clouds = world.GetNode<CompoundCloudSystem>("CompoundClouds");
         guidanceLine = GetNode<GuidanceLine>(GuidanceLinePath);
@@ -207,9 +209,6 @@ public partial class MicrobeStage : StageBase<Microbe>
         floatingChunkSystem.Process(delta, Player?.Translation);
         microbeAISystem.Process(delta);
         microbeSystem.Process(delta);
-
-        if (IsMultiplayer)
-            HandleNetworking(delta);
 
         if (gameOver)
             return;
@@ -286,9 +285,6 @@ public partial class MicrobeStage : StageBase<Microbe>
     [RunOnKeyDown("g_pause")]
     public void PauseKeyPressed()
     {
-        if (IsMultiplayer)
-            return;
-
         // Check nothing else has keyboard focus and pause the game
         if (HUD.GetFocusOwner() == null)
         {
@@ -545,8 +541,8 @@ public partial class MicrobeStage : StageBase<Microbe>
             UpdatePatchSettings();
         }
 
-        spawner.Enabled = !IsMultiplayer;
-        pauseMenu.MultiplayerMode = IsMultiplayer;
+        // spawner.Enabled = !MultiplayerRunning;
+        // pauseMenu.MultiplayerMode = MultiplayerRunning;
     }
 
     protected override void OnGameStarted()
@@ -556,13 +552,6 @@ public partial class MicrobeStage : StageBase<Microbe>
         UpdatePatchSettings(!TutorialState.Enabled);
 
         SpawnPlayer();
-
-        // Spawn already existing peers in the game.
-        foreach (var peer in NetworkManager.Instance.PlayerList)
-        {
-            if (!peers.ContainsKey(peer.Key) && peer.Value.CurrentEnvironment == PlayerState.Environment.InGame)
-                SpawnPeer(peer.Key);
-        }
     }
 
     protected override void SpawnPlayer()
@@ -570,21 +559,10 @@ public partial class MicrobeStage : StageBase<Microbe>
         if (HasPlayer || NetworkManager.Instance.IsDedicated)
             return;
 
-        if (IsMultiplayer)
-        {
-            var id = GetTree().GetNetworkUniqueId();
-            SpawnPeer(id);
-            Player = peers[id].Value;
+        Player = SpawnHelpers.SpawnMicrobe(GameWorld.PlayerSpecies, new Vector3(0, 0, 0),
+            rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
 
-            Rpc(nameof(SpawnPeer), id);
-        }
-        else
-        {
-            Player = SpawnHelpers.SpawnMicrobe(GameWorld.PlayerSpecies, new Vector3(0, 0, 0),
-                rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
-        }
-
-        Player!.AddToGroup(Constants.PLAYER_GROUP);
+        Player.AddToGroup(Constants.PLAYER_GROUP);
 
         Player.OnDeath = OnPlayerDied;
 

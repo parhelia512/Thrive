@@ -7,6 +7,11 @@ using Array = Godot.Collections.Array;
 /// <summary>
 ///   Class managing the main menu and everything in it
 /// </summary>
+/// <remarks>
+///   <para>
+///     This needs a major refactoring.
+///   </para>
+/// </remarks>
 public class MainMenu : NodeWithInput
 {
     /// <summary>
@@ -59,7 +64,6 @@ public class MainMenu : NodeWithInput
     public TextureRect Background = null!;
 
     public bool IsReturningToMenu;
-    public bool IsReturningToLobby;
 
     private TextureRect thriveLogo = null!;
     private OptionsMenu options = null!;
@@ -146,6 +150,18 @@ public class MainMenu : NodeWithInput
         }
     }
 
+    public void OpenMultiplayerMenu(MultiplayerGUI.Submenu submenu)
+    {
+        SetCurrentMenu(uint.MaxValue, false);
+        multiplayerMenu.Show();
+        multiplayerMenu.CurrentMenu = submenu;
+    }
+
+    public void ShowKickedDialog(string reason)
+    {
+        multiplayerMenu.ShowKickedDialog(reason);
+    }
+
     /// <summary>
     ///   This is when ESC is pressed. Main menu priority is lower than Options Menu
     ///   to avoid capturing ESC presses in the Options Menu.
@@ -219,13 +235,6 @@ public class MainMenu : NodeWithInput
             gles2Popup.PopupCenteredShrink();
 
         UpdateStoreNameLabel();
-
-        if (IsReturningToLobby)
-        {
-            SetCurrentMenu(uint.MaxValue, false);
-            multiplayerMenu.Show();
-            multiplayerMenu.CurrentMenu = MultiplayerGUI.Menus.Lobby;
-        }
     }
 
     /// <summary>

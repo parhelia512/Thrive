@@ -10,15 +10,23 @@ public class ScoreBoard : CenterContainer
     public NodePath ListPath = null!;
 
     [Export]
+    public NodePath PlayerCountPath = null!;
+
+    [Export]
     public PackedScene NetworkedPlayerLabelScene = null!;
 
-    public Dictionary<int, NetworkedPlayerLabel> playerLabels = new();
+    private Dictionary<int, NetworkedPlayerLabel> playerLabels = new();
 
     private VBoxContainer list = null!;
+    private Label playerCount = null!;
+    private KickPlayerDialog kickDialog = null!;
 
     public override void _Ready()
     {
         list = GetNode<VBoxContainer>(ListPath);
+        playerCount = GetNode<Label>(PlayerCountPath);
+
+        kickDialog = GetNode<KickPlayerDialog>("KickPlayerDialog");
 
         NetworkManager.Instance.Connect(
             nameof(NetworkManager.RegistrationToServerResultReceived), this, nameof(OnPlayerRegistered));
@@ -36,8 +44,15 @@ public class ScoreBoard : CenterContainer
         var label = (NetworkedPlayerLabel)NetworkedPlayerLabelScene.Instance();
         label.ID = id;
         label.PlayerName = name;
+        label.Highlight = true;
+
+        label.Connect(nameof(NetworkedPlayerLabel.KickRequested), this, nameof(OnKickButtonPressed));
+
         list.AddChild(label);
         playerLabels.Add(id, label);
+
+        playerCount.Text = $"{NetworkManager.Instance.PlayerList.Count}/" +
+            $"{NetworkManager.Instance.Settings?.MaxPlayers}";
     }
 
     private void UnRegisterPlayer(int id)
@@ -58,5 +73,10 @@ public class ScoreBoard : CenterContainer
     private void OnPlayerDisconnected(int peerId)
     {
         UnRegisterPlayer(peerId);
+    }
+
+    private void OnKickButtonPressed(int peerId)
+    {
+        kickDialog.RequestKick(peerId);
     }
 }

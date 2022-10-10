@@ -7,8 +7,6 @@ public partial class Microbe
 {
     private MeshInstance tagBox = null!;
 
-    private float networkTick;
-
     private Tween? movementTween;
 
     public void SetupPlayerClient(int peerId)

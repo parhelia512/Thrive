@@ -9,9 +9,6 @@ public interface IStage : IReturnableGameState
     public bool HasPlayer { get; }
 
     [JsonIgnore]
-    public bool IsMultiplayer { get; }
-
-    [JsonIgnore]
     public bool MovingToEditor { get; set; }
 
     [JsonIgnore]

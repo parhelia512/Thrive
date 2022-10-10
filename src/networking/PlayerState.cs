@@ -2,6 +2,7 @@
 
 public class PlayerState
 {
+    /// TODO: better name
     public enum Environment
     {
         InGame,

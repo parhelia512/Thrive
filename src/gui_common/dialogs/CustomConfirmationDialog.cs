@@ -46,7 +46,7 @@ public class CustomConfirmationDialog : CustomDialog
     }
 
     /// <summary>
-    ///   If true, turns this dialog into its AcceptDialog form (only Ok button visible).
+    ///   If true, hides this dialog's confirm (Ok) button.
     /// </summary>
     [Export]
     public bool HideConfirmButton

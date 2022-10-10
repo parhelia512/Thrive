@@ -63,7 +63,7 @@ public class SceneManager : Node
     /// <summary>
     ///   Switches a scene to the main menu
     /// </summary>
-    public void ReturnToMenu()
+    public MainMenu ReturnToMenu()
     {
         var scene = LoadScene("res://src/general/MainMenu.tscn");
 
@@ -72,6 +72,8 @@ public class SceneManager : Node
         mainMenu.IsReturningToMenu = true;
 
         SwitchToScene(mainMenu);
+
+        return mainMenu;
     }
 
     /// <summary>
@@ -125,6 +127,17 @@ public class SceneManager : Node
                 return LoadScene("res://src/late_multicellular_stage/editor/LateMulticellularEditor.tscn");
             default:
                 throw new ArgumentException("unknown scene path for given game state");
+        }
+    }
+
+    public PackedScene LoadScene(MultiplayerGameMode gameMode)
+    {
+        switch (gameMode)
+        {
+            case MultiplayerGameMode.MicrobialArena:
+                return LoadScene("res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn");
+            default:
+                throw new ArgumentException("unknown scene path for given multiplayer game mode");
         }
     }
 

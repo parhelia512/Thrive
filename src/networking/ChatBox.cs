@@ -8,21 +8,26 @@ public class ChatBox : VBoxContainer
     public NodePath MessagesPath = null!;
 
     [Export]
-    public NodePath TextBoxPath = null!;
+    public NodePath LineEditPath = null!;
 
     [Export]
     public NodePath SendButtonPath = null!;
 
     private CustomRichTextLabel chatDisplay = null!;
-    private LineEdit textBox = null!;
+    private LineEdit lineEdit = null!;
     private Button sendButton = null!;
 
     private Deque<string> chatHistory = new();
 
+    private bool controlsHoveredOver;
+
+    [Export]
+    public bool ReleaseLineEditFocusAfterMessageSent { get; set; } = true;
+
     public override void _Ready()
     {
         chatDisplay = GetNode<CustomRichTextLabel>(MessagesPath);
-        textBox = GetNode<LineEdit>(TextBoxPath);
+        lineEdit = GetNode<LineEdit>(LineEditPath);
         sendButton = GetNode<Button>(SendButtonPath);
 
         NetworkManager.Instance.Connect(nameof(NetworkManager.ChatReceived), this, nameof(OnMessageReceived));
@@ -75,10 +80,12 @@ public class ChatBox : VBoxContainer
             return;
 
         ParseChat(message);
-        textBox.Text = string.Empty;
-        textBox.ReleaseFocus();
+        lineEdit.Text = string.Empty;
 
-        OnMessageChanged(textBox.Text);
+        if (ReleaseLineEditFocusAfterMessageSent)
+            lineEdit.ReleaseFocus();
+
+        OnMessageChanged(lineEdit.Text);
     }
 
     private void OnMessageChanged(string newText)
@@ -88,6 +95,27 @@ public class ChatBox : VBoxContainer
 
     private void OnSendPressed()
     {
-        OnMessageEntered(textBox.Text);
+        OnMessageEntered(lineEdit.Text);
+    }
+
+    public void OnClickedOffTextBox()
+    {
+        var focused = GetFocusOwner();
+
+        // Ignore if the species name line edit wasn't focused or if one of our controls is hovered
+        if (focused != lineEdit || controlsHoveredOver)
+            return;
+
+        lineEdit.ReleaseFocus();
+    }
+
+    private void OnControlMouseEntered()
+    {
+        controlsHoveredOver = true;
+    }
+
+    private void OnControlMouseExited()
+    {
+        controlsHoveredOver = false;
     }
 }

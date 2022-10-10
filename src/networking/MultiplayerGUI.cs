@@ -30,7 +30,7 @@ public class MultiplayerGUI : CenterContainer
     public NodePath ServerNamePath = null!;
 
     [Export]
-    public NodePath InProgressLabelPath = null!;
+    public NodePath ServerAttributesPath = null!;
 
     [Export]
     public NodePath PeerCountPath = null!;
@@ -40,9 +40,6 @@ public class MultiplayerGUI : CenterContainer
 
     [Export]
     public NodePath KickDialogPath = null!;
-
-    [Export]
-    public NodePath KickReasonLineEditPath = null!;
 
     [Export]
     public NodePath KickedDialogPath = null!;
@@ -66,21 +63,18 @@ public class MultiplayerGUI : CenterContainer
     private ServerSetup serverSetup = null!;
     private Label peerCount = null!;
     private Button startButton = null!;
-    private CustomConfirmationDialog kickDialog = null!;
-    private LineEdit kickReasonLineEdit = null!;
+    private KickPlayerDialog kickDialog = null!;
     private CustomConfirmationDialog kickedDialog = null!;
     private Label serverName = null!;
-    private Label inProgressLabel = null!;
+    private Label serverAttributes = null!;
     private ChatBox chatBox = null!;
 
     private Control? primaryMenu;
     private Control? lobbyMenu;
 
-    private Menus currentMenu = Menus.Main;
+    private Submenu currentMenu = Submenu.Main;
 
     private Dictionary<int, NetworkedPlayerLabel> playerLabels = new();
-
-    private int idToKick;
 
     private string loadingDialogTitle = string.Empty;
     private string loadingDialogText = string.Empty;
@@ -93,7 +87,7 @@ public class MultiplayerGUI : CenterContainer
     [Signal]
     public delegate void OnClosed();
 
-    public enum Menus
+    public enum Submenu
     {
         Main,
         Lobby,
@@ -107,7 +101,7 @@ public class MultiplayerGUI : CenterContainer
         PortForwarding,
     }
 
-    public Menus CurrentMenu
+    public Submenu CurrentMenu
     {
         get => currentMenu;
         set
@@ -129,11 +123,10 @@ public class MultiplayerGUI : CenterContainer
         list = GetNode<VBoxContainer>(LobbyPlayerListPath);
         peerCount = GetNode<Label>(PeerCountPath);
         startButton = GetNode<Button>(StartButtonPath);
-        kickReasonLineEdit = GetNode<LineEdit>(KickReasonLineEditPath);
-        kickDialog = GetNode<CustomConfirmationDialog>(KickDialogPath);
+        kickDialog = GetNode<KickPlayerDialog>(KickDialogPath);
         kickedDialog = GetNode<CustomConfirmationDialog>(KickedDialogPath);
         serverName = GetNode<Label>(ServerNamePath);
-        inProgressLabel = GetNode<Label>(InProgressLabelPath);
+        serverAttributes = GetNode<Label>(ServerAttributesPath);
         chatBox = GetNode<ChatBox>(ChatBoxPath);
 
         generalDialog = GetNode<CustomConfirmationDialog>("GeneralDialog");
@@ -181,6 +174,12 @@ public class MultiplayerGUI : CenterContainer
         }
     }
 
+    public void ShowKickedDialog(string reason)
+    {
+        kickedDialog.DialogText = "You have been kicked. Reason for kick: " + (string.IsNullOrEmpty(reason) ? "unspecified" : reason);
+        kickedDialog.PopupCenteredShrink();
+    }
+
     private void UpdateLobby()
     {
         var network = NetworkManager.Instance;
@@ -193,9 +192,10 @@ public class MultiplayerGUI : CenterContainer
         foreach (var peer in network.PlayerList)
             CreatePlayerLabel(peer.Key, peer.Value.Name);
 
-        peerCount.Text = network.PlayerList.Count + " / " + network.Settings?.MaxPlayers;
+        peerCount.Text = $"{network.PlayerList.Count} / {network.Settings?.MaxPlayers}";
         serverName.Text = network.Settings?.Name;
-        inProgressLabel.Visible = network.GameInSession;
+        serverAttributes.Text = $"- [{network.Settings?.GetGameModeReadable()}]"
+            + $"{(network.GameInSession ? " [In progress]" : string.Empty)}";
 
         UpdateStartButton();
     }
@@ -207,7 +207,7 @@ public class MultiplayerGUI : CenterContainer
         label.PlayerName = name;
         label.Highlight = NetworkManager.Instance.GetPlayerState(peerId)!.ReadyForSession;
 
-        label.Connect(nameof(NetworkedPlayerLabel.Kicked), this, nameof(OnLobbyMemberKicked));
+        label.Connect(nameof(NetworkedPlayerLabel.KickRequested), this, nameof(OnKickButtonPressed));
 
         list.AddChild(label);
         playerLabels.Add(peerId, label);
@@ -278,11 +278,11 @@ public class MultiplayerGUI : CenterContainer
 
         switch (currentMenu)
         {
-            case Menus.Main:
+            case Submenu.Main:
                 primaryMenu.Show();
                 lobbyMenu.Hide();
                 break;
-            case Menus.Lobby:
+            case Submenu.Lobby:
                 primaryMenu.Hide();
                 lobbyMenu.Show();
                 UpdateLobby();
@@ -301,7 +301,8 @@ public class MultiplayerGUI : CenterContainer
     {
         GUICommon.Instance.PlayButtonPressSound();
 
-        ShowLoadingDialog(TranslationServer.Translate("CONNECTING"), "Establishing connection to: " + addressBox.Text);
+        ShowLoadingDialog(
+            TranslationServer.Translate("CONNECTING"), "Establishing connection to " + addressBox.Text + ":" + portBox.Text);
 
         ReadNameAndPort(out string name, out int port);
 
@@ -309,7 +310,8 @@ public class MultiplayerGUI : CenterContainer
         if (error != Error.Ok)
         {
             loadingDialog.Hide();
-            ShowGeneralDialog(TranslationServer.Translate("CONNECTION_FAILED"), "Failed to establish connection: " + error);
+            ShowGeneralDialog(
+                TranslationServer.Translate("CONNECTION_FAILED"), "Failed to establish connection: " + error);
             return;
         }
 
@@ -350,12 +352,12 @@ public class MultiplayerGUI : CenterContainer
             return;
         }
 
-        CurrentMenu = Menus.Lobby;
+        CurrentMenu = Submenu.Lobby;
 
         if (parsedData.UseUPNP)
         {
             ShowLoadingDialog(
-                TranslationServer.Translate("UPNP_SETUP"), "[UPnP] discovering devices", false);
+                TranslationServer.Translate("UPNP_SETUP"), "[UPnP] Discovering devices", false);
 
             currentWorkStatus = WorkStatus.SettingUpUPNP;
         }
@@ -371,7 +373,7 @@ public class MultiplayerGUI : CenterContainer
     {
         GUICommon.Instance.PlayButtonPressSound();
         NetworkManager.Instance.Disconnect();
-        CurrentMenu = Menus.Main;
+        CurrentMenu = Submenu.Main;
 
         chatBox.ClearMessages();
     }
@@ -400,16 +402,18 @@ public class MultiplayerGUI : CenterContainer
 
         if (result == NetworkManager.RegistrationToServerResult.ServerFull)
         {
-            ShowGeneralDialog(TranslationServer.Translate("SERVER_FULL"), "Server is full");
+            ShowGeneralDialog(TranslationServer.Translate("SERVER_FULL"), $"Server is full " +
+                $"{NetworkManager.Instance.PlayerList.Count}/{NetworkManager.Instance.Settings?.MaxPlayers}");
             return;
         }
 
-        CurrentMenu = Menus.Lobby;
+        CurrentMenu = Submenu.Lobby;
 
         currentWorkStatus = WorkStatus.None;
 
         NetworkManager.Instance.PrintWithRole(
-            "Connection to ", addressBox.Text, " succeeded, with network ID (", GetTree().GetNetworkUniqueId(), ")");
+            "Connection to ", addressBox.Text, ":", portBox.Text, " succeeded," +
+            " with network ID (", GetTree().GetNetworkUniqueId(), ")");
     }
 
     private void OnConnectionFailed(string reason)
@@ -424,7 +428,8 @@ public class MultiplayerGUI : CenterContainer
 
         currentWorkStatus = WorkStatus.None;
 
-        NetworkManager.Instance.PrintErrorWithRole("Connection to ", addressBox.Text, " failed: ", reason);
+        NetworkManager.Instance.PrintErrorWithRole(
+            "Connection to ", addressBox.Text, ":", portBox.Text, " failed: ", reason);
     }
 
     private void OnServerDisconnected()
@@ -434,36 +439,18 @@ public class MultiplayerGUI : CenterContainer
         ShowGeneralDialog(
             TranslationServer.Translate("SERVER_DISCONNECTED"), "Connection was closed by the remote host");
 
-        CurrentMenu = Menus.Main;
+        CurrentMenu = Submenu.Main;
     }
 
-    private void OnLobbyMemberKicked(int id)
+    private void OnKickButtonPressed(int peerId)
     {
-        kickDialog.PopupCenteredShrink();
-        idToKick = id;
-    }
-
-    private void OnKickConfirmed()
-    {
-        if (idToKick <= 1)
-        {
-            GD.Print("[Client] Attempting to kick host/server, this is not allowed");
-            return;
-        }
-
-        NetworkManager.Instance.Kick(idToKick, kickReasonLineEdit.Text);
-    }
-
-    private void OnKickCancelled()
-    {
-        idToKick = 0;
+        kickDialog.RequestKick(peerId);
     }
 
     private void OnKicked(string reason)
     {
-        kickedDialog.DialogText = "You have been kicked. Reason for kick: " + (string.IsNullOrEmpty(reason) ? "unspecified" : reason);
-        kickedDialog.PopupCenteredShrink();
-        CurrentMenu = Menus.Main;
+        ShowKickedDialog(reason);
+        CurrentMenu = Submenu.Main;
     }
 
     private void OnStartPressed()

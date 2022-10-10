@@ -9,16 +9,16 @@ public class NetworkedPlayerLabel : PanelContainer
     [Export]
     public NodePath KickButtonPath = null!;
 
-    private Label? nameLabel;
+    private CustomRichTextLabel? nameLabel;
     private Button? kickButton;
 
     private string playerName = string.Empty;
     private bool highlight;
 
     [Signal]
-    public delegate void Kicked(int id);
+    public delegate void KickRequested(int id);
 
-    public int ID { get; set; }
+    public int ID { get; set; } = -1;
 
     public string PlayerName
     {
@@ -47,7 +47,7 @@ public class NetworkedPlayerLabel : PanelContainer
 
     public override void _Ready()
     {
-        nameLabel = GetNode<Label>(NamePath);
+        nameLabel = GetNode<CustomRichTextLabel>(NamePath);
         kickButton = GetNode<Button>(KickButtonPath);
 
         NetworkManager.Instance.Connect(
@@ -70,7 +70,7 @@ public class NetworkedPlayerLabel : PanelContainer
         if (ID == NetworkManager.DEFAULT_SERVER_ID)
         {
             builder.Append(' ');
-            builder.Append("[host]");
+            builder.Append("[color=#fe82ff][host][/color]");
         }
 
         var network = NetworkManager.Instance;
@@ -82,7 +82,7 @@ public class NetworkedPlayerLabel : PanelContainer
             builder.Append($"[{player.GetEnvironmentReadable()}]");
         }
 
-        nameLabel.Text = builder.ToString();
+        nameLabel.ExtendedBbcode = builder.ToString();
     }
 
     private void UpdateKickButton()
@@ -110,6 +110,6 @@ public class NetworkedPlayerLabel : PanelContainer
     private void OnKickPressed()
     {
         GUICommon.Instance.PlayButtonPressSound();
-        EmitSignal(nameof(Kicked), ID);
+        EmitSignal(nameof(KickRequested), ID);
     }
 }
