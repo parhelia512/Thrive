@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Godot;
 using Newtonsoft.Json;
@@ -556,7 +555,7 @@ public partial class MicrobeStage : StageBase<Microbe>
 
     protected override void SpawnPlayer()
     {
-        if (HasPlayer || NetworkManager.Instance.IsDedicated)
+        if (HasPlayer)
             return;
 
         Player = SpawnHelpers.SpawnMicrobe(GameWorld.PlayerSpecies, new Vector3(0, 0, 0),

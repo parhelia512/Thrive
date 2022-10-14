@@ -19,18 +19,6 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
     // I.e. its value is true when its respective panel is collapsed.
     private bool chatBoxActive = true;
 
-    public override void _EnterTree()
-    {
-        base._EnterTree();
-        InputManager.RegisterReceiver(this);
-    }
-
-    public override void _ExitTree()
-    {
-        base._ExitTree();
-        InputManager.UnregisterReceiver(this);
-    }
-
     public override void _Ready()
     {
         base._Ready();
@@ -49,14 +37,10 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
         chatBoxAnimationPlayer.Play(GetTree().HasNetworkPeer() ? "Open" : "Close");
     }
 
-    [RunOnKeyDown("g_show_scoreboard")]
     public void ToggleScoreBoard()
     {
         if (GetTree().HasNetworkPeer())
-        {
-            GetFocusOwner()?.ReleaseFocus();
             scoreBoard.Visible = !scoreBoard.Visible;
-        }
     }
 
     private void ChatButtonPressed(bool wantedState)

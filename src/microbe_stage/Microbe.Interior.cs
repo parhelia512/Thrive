@@ -718,6 +718,9 @@ public partial class Microbe
                 {
                     Hitpoints = MaxHitpoints;
                 }
+
+                if (IsNetworkMaster())
+                    RpcUnreliable(nameof(NetworkSyncHealth), Hitpoints);
             }
         }
     }
@@ -733,6 +736,9 @@ public partial class Microbe
             (CellTypeProperties.MembraneRigidity * Constants.MEMBRANE_RIGIDITY_HITPOINTS_MODIFIER);
 
         Hitpoints = MaxHitpoints * currentHealth;
+
+        if (IsNetworkMaster())
+            Rpc(nameof(NetworkSyncHealth), Hitpoints);
     }
 
     /// <summary>

@@ -455,7 +455,7 @@ public class MultiplayerGUI : CenterContainer
 
     private void OnStartPressed()
     {
-        NetworkManager.Instance.StartGameSession();
+        NetworkManager.Instance.StartGame();
     }
 
     private void OnReadyToggled(bool active)

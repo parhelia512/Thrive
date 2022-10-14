@@ -24,6 +24,8 @@ public partial class Microbe
 
     private bool destroyed;
 
+    private bool networkedDeathInvoked;
+
     [JsonProperty]
     private float escapeInterval;
 
@@ -373,6 +375,9 @@ public partial class Microbe
         }
 
         Hitpoints -= amount;
+
+        if (IsNetworkMaster())
+            Rpc(nameof(NetworkSyncHealth), Hitpoints);
 
         ModLoader.ModInterface.TriggerOnDamageReceived(this, amount, IsPlayerMicrobe);
 
@@ -1278,7 +1283,17 @@ public partial class Microbe
 
         if (Membrane.DissolveEffectValue >= 1)
         {
-            this.DestroyDetachAndQueueFree();
+            if (IsNetworkMaster() && !networkedDeathInvoked && OnNetworkedDeathCompletes != null)
+            {
+                OnNetworkedDeathCompletes.Invoke(Name.ToInt());
+
+                // TODO: RPCs doesn't work well for immediate loop breaks like this
+                networkedDeathInvoked = true;
+            }
+            else
+            {
+                this.DestroyDetachAndQueueFree();
+            }
         }
     }
 

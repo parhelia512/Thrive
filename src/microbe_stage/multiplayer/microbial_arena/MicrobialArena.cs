@@ -1,6 +1,10 @@
+using System;
 using System.Globalization;
 using Godot;
 
+/// <summary>
+///   Main class for managing an online competitive game mode set in the microbial stage.
+/// </summary>
 public class MicrobialArena : MultiplayerStageBase<Microbe>
 {
     private PatchManager patchManager = null!;
@@ -25,8 +29,13 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
     protected override IStageHUD BaseHUD => HUD;
 
+    private LocalizedString CurrentPatchName =>
+        GameWorld.Map.CurrentPatch?.Name ?? throw new InvalidOperationException("no current patch");
+
     public override void _Ready()
     {
+        base._Ready();
+
         ResolveNodeReferences();
 
         HUD.Init(this);
@@ -41,7 +50,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         if (NodeReferencesResolved)
             return;
 
-        CurrentGame ??= GameProperties.StartNewMicrobeGame(new WorldGenerationSettings());
+        CurrentGame = NetworkManager.Instance.CurrentGame;
 
         base.ResolveNodeReferences();
 
@@ -58,12 +67,10 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
             worldLight, CurrentGame);
     }
 
-    public override void _Process(float delta)
+    public override void OnFinishTransitioning()
     {
-        base._Process(delta);
-
-        TimedLifeSystem.Process(delta);
-        ProcessSystem.Process(delta);
+        base.OnFinishTransitioning();
+        HUD.ShowPatchName(CurrentPatchName.ToString());
     }
 
     public override void StartMusic()
@@ -80,14 +87,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
     public override void OnSuicide()
     {
-        Player?.Damage(9999.0f, "suicide");
-    }
-
-    public override void StartNewGame()
-    {
-        CurrentGame = GameProperties.StartNewMicrobeGame(new WorldGenerationSettings());
-
-        base.StartNewGame();
+        Rpc(nameof(SuicideReceived), GetTree().GetNetworkUniqueId());
     }
 
     protected override void SetupStage()
@@ -110,19 +110,14 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         SpawnPlayer();
     }
 
-    protected override void NetworkUpdateGameState()
+    protected override void NetworkUpdateGameState(float delta)
     {
-        foreach (var peer in Peers)
-        {
-            if (IsNetworkMaster())
-            {
-                peer.Value.Sync();
-            }
-            else
-            {
-                peer.Value.Send();
-            }
-        }
+        // TODO: replicate these systems
+        TimedLifeSystem.Process(delta);
+        ProcessSystem.Process(delta);
+
+        foreach (var peer in Players)
+            peer.Value.Value?.Sync(Players);
     }
 
     protected override void UpdatePatchSettings(bool promptPatchNameChange = true)
@@ -137,40 +132,44 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         HUD.UpdateEnvironmentalBars(GameWorld.Map.CurrentPatch!.Biome);
     }
 
-    protected override void SpawnPlayer()
-    {
-        if (HasPlayer || NetworkManager.Instance.IsDedicated)
-            return;
-
-        var id = GetTree().GetNetworkUniqueId();
-        SpawnPeer(id);
-        Player = Peers[id];
-
-        Player.AddToGroup(Constants.PLAYER_GROUP);
-
-        Camera.ObjectToFollow = Player;
-
-        if (spawnedPlayer)
-        {
-            // Random location on respawn
-            Player.Translation = new Vector3(
-                random.Next(Constants.MIN_SPAWN_DISTANCE, Constants.MAX_SPAWN_DISTANCE), 0,
-                random.Next(Constants.MIN_SPAWN_DISTANCE, Constants.MAX_SPAWN_DISTANCE));
-        }
-
-        playerRespawnTimer = Constants.PLAYER_RESPAWN_TIME;
-    }
-
-    protected override void OnPeerSpawn(int peerId, out Microbe spawned)
+    protected override void OnPlayerSpawn(int peerId, out Microbe spawned)
     {
         spawned = (Microbe)SpawnHelpers.SpawnMicrobe(GameWorld.PlayerSpecies, new Vector3(0, 0, 0),
             rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
         spawned.Name = peerId.ToString(CultureInfo.CurrentCulture);
-        spawned.SetupPlayerClient(peerId);
+        spawned.SetupNetworked(peerId);
+
+        if (peerId == GetTree().GetNetworkUniqueId())
+        {
+            spawned.AddToGroup(Constants.PLAYER_GROUP);
+            spawned.OnDeath = OnPlayerDied;
+            Camera.ObjectToFollow = spawned;
+            spawnedPlayer = true;
+        }
+
+        if (IsNetworkMaster())
+            spawned.OnNetworkedDeathCompletes = OnPlayerDestroyed;
     }
 
-    protected override void OnPeerDespawn(Microbe removed)
+    protected override void OnPlayerDeSpawn(Microbe removed)
     {
         removed.DestroyDetachAndQueueFree();
+    }
+
+    private void OnPlayerDied(Microbe player)
+    {
+        Player = null;
+        Camera.ObjectToFollow = null;
+    }
+
+    private void OnPlayerDestroyed(int peerId)
+    {
+        Rpc(nameof(DeSpawnPlayer), peerId);
+    }
+
+    [Master]
+    private void SuicideReceived(int peerId)
+    {
+        Players[peerId].Value?.Damage(9999.0f, "suicide");
     }
 }

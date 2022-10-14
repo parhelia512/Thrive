@@ -14,7 +14,7 @@ public class EntryPoint : Node
             GD.Print("Running as server");
 
             NetworkManager.Instance.CreateServer(new ServerSettings { Address = "*" });
-            NetworkManager.Instance.StartGameSession();
+            NetworkManager.Instance.StartGame();
         }
         else
         {

@@ -72,7 +72,7 @@
 
 [sub_resource type="Environment" id=2]
 background_mode = 1
-background_color = Color( 0.435294, 0.458824, 0.509804, 1 )
+background_color = Color( 0.4, 0.509804, 0.580392, 1 )
 ambient_light_color = Color( 0.847059, 0.847059, 0.847059, 1 )
 
 [sub_resource type="Theme" id=3]
@@ -558,6 +558,7 @@ HUDRootPath = NodePath("MicrobialArenaHUD")
 [node name="World" type="Node" parent="."]
 
 [node name="PrimaryCamera" parent="World" instance=ExtResource( 1 )]
+BackgroundVisible = false
 
 [node name="DynamicallySpawned" type="Node" parent="World"]
 
@@ -2350,6 +2351,7 @@ __meta__ = {
 
 [node name="PauseMenu" parent="." instance=ExtResource( 72 )]
 visible = true
+MultiplayerMode = true
 
 [connection signal="Clicked" from="MicrobialArenaHUD" to="MicrobialArenaHUD/BottomLeft/LeftPanels/ChatBox" method="OnClickedOffTextBox"]
 [connection signal="pressed" from="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer/EnvironmentExpandButton" to="MicrobialArenaHUD" method="OnEnvironmentPanelSizeButtonPressed" binds= [ "expand" ]]

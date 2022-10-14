@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Godot;
 
 /// <summary>
@@ -9,7 +11,9 @@ public partial class Microbe
 
     private Tween? movementTween;
 
-    public void SetupPlayerClient(int peerId)
+    public Action<int>? OnNetworkedDeathCompletes { get; set; }
+
+    public void SetupNetworked(int peerId)
     {
         if (!GetTree().HasNetworkPeer())
             return;
@@ -39,49 +43,56 @@ public partial class Microbe
         }
     }
 
-    public void Send()
+    public void Sync(IReadOnlyDictionary<int, EntityReference<Microbe>> peers)
     {
-        if (!GetTree().HasNetworkPeer() || IsNetworkMaster())
-            return;
-
-        RpcUnreliableId(1, nameof(NetworkStateReceived), MovementDirection, LookAtPoint, Dead);
-    }
-
-    public void Sync()
-    {
-        if (!GetTree().HasNetworkPeer() || !IsNetworkMaster())
-            return;
-
-        foreach (var player in NetworkManager.Instance.PlayerList)
+        foreach (var peer in peers)
         {
-            if (IsNetworkMaster() && player.Key == GetTree().GetNetworkUniqueId())
+            if (peer.Key == GetTree().GetNetworkUniqueId())
                 continue;
 
-            if (player.Value.CurrentEnvironment == PlayerState.Environment.InGame)
-                RpcUnreliableId(player.Key, nameof(NetworkSync), GlobalTransform.origin, Rotation, Dead);
+            RpcUnreliableId(peer.Key, nameof(NetworkSyncMovement), GlobalTransform.origin, Rotation);
         }
     }
 
-    [Puppet]
-    private void NetworkSync(Vector3 position, Vector3 rotation, bool dead)
+    public void SendMovementDirection(Vector3 direction)
     {
-        // TODO: maybe pass in a structured object
+        RpcUnreliable(nameof(NetworkMovementDirectionReceived), direction);
+    }
 
+    public void SendLookAtPoint(Vector3 lookAtPoint)
+    {
+        RpcUnreliable(nameof(NetworkLookAtPointReceived), lookAtPoint);
+    }
+
+    [Puppet]
+    private void NetworkSyncMovement(Vector3 position, Vector3 rotation)
+    {
         Rotation = rotation;
         movementTween?.InterpolateProperty(this, "global_transform", null, new Transform(GlobalTransform.basis, position), 0.1f);
         movementTween?.Start();
+    }
 
-        if (dead)
+    [Puppet]
+    private void NetworkSyncHealth(float health)
+    {
+        Hitpoints = health;
+
+        if (Hitpoints <= 0.0f)
+        {
+            Hitpoints = 0.0f;
             Kill();
+        }
     }
 
     [Master]
-    private void NetworkStateReceived(Vector3 movementDirection, Vector3 lookAtPoint, bool dead)
+    private void NetworkMovementDirectionReceived(Vector3 movementDirection)
     {
-        // TODO: maybe pass in a structured object
-
         MovementDirection = movementDirection;
+    }
+
+    [Master]
+    private void NetworkLookAtPointReceived(Vector3 lookAtPoint)
+    {
         LookAtPoint = lookAtPoint;
-        Dead = dead;
     }
 }

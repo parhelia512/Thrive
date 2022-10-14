@@ -3,6 +3,8 @@ using System;
 
 public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
 {
+    private bool wasMoving;
+
     // TODO: when using controller movement this should be screen relative movement by default
     [RunOnAxis(new[] { "g_move_forward", "g_move_backwards" }, new[] { -1.0f, 1.0f })]
     [RunOnAxis(new[] { "g_move_left", "g_move_right" }, new[] { -1.0f, 1.0f })]
@@ -34,6 +36,29 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
 
             stage.Player.MovementDirection = direction;
             stage.Player.LookAtPoint = stage.Camera.CursorWorldPos;
+
+            if (!IsNetworkMaster())
+            {
+                if (!direction.IsEqualApprox(Vector3.Zero))
+                {
+                    stage.Player.SendMovementDirection(direction);
+                    wasMoving = true;
+                }
+                else if (direction.IsEqualApprox(Vector3.Zero) && wasMoving)
+                {
+                    stage.Player.SendMovementDirection(direction);
+                    wasMoving = false;
+                }
+
+                // TODO: make this not be sent every frame
+                stage.Player.SendLookAtPoint(stage.Camera.CursorWorldPos);
+            }
         }
+    }
+
+    [RunOnKeyChange("g_toggle_scoreboard")]
+    public void ShowScoreBoard(bool heldDown)
+    {
+        stage?.HUD.ToggleScoreBoard();
     }
 }

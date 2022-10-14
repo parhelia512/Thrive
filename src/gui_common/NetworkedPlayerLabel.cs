@@ -51,7 +51,7 @@ public class NetworkedPlayerLabel : PanelContainer
         kickButton = GetNode<Button>(KickButtonPath);
 
         NetworkManager.Instance.Connect(
-            nameof(NetworkManager.PlayerEnvironmentChanged), this, nameof(OnPlayerEnvironmentChanged));
+            nameof(NetworkManager.PlayerStatusChanged), this, nameof(OnPlayerStatusChanged));
 
         UpdateName();
         UpdateKickButton();
@@ -76,7 +76,7 @@ public class NetworkedPlayerLabel : PanelContainer
         var network = NetworkManager.Instance;
 
         var player = network.GetPlayerState(ID);
-        if (player != null && player.CurrentEnvironment != network.Player?.CurrentEnvironment)
+        if (player != null && player.Status != network.Player?.Status)
         {
             builder.Append(' ');
             builder.Append($"[{player.GetEnvironmentReadable()}]");
@@ -100,10 +100,10 @@ public class NetworkedPlayerLabel : PanelContainer
         AddStyleboxOverride("panel", stylebox);
     }
 
-    private void OnPlayerEnvironmentChanged(int peerId, PlayerState.Environment environment)
+    private void OnPlayerStatusChanged(int peerId, NetPlayerStatus status)
     {
         _ = peerId;
-        _ = environment;
+        _ = status;
         UpdateName();
     }
 

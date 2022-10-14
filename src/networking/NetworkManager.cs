@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
 using Godot;
 using Newtonsoft.Json;
@@ -15,7 +13,7 @@ public class NetworkManager : Node
 
     private static NetworkManager? instance;
 
-    private readonly Dictionary<int, PlayerState> playerList = new();
+    private readonly Dictionary<int, NetPlayerInfo> playerList = new();
 
     private NetworkedMultiplayerENet? peer;
     private UPNP? upnp;
@@ -44,16 +42,16 @@ public class NetworkManager : Node
     public delegate void ChatReceived(string message);
 
     [Signal]
-    public delegate void SpawnRequested(int peerId);
+    public delegate void PlayerJoined(int peerId);
 
     [Signal]
-    public delegate void DespawnRequested(int peerId);
+    public delegate void PlayerLeft(int peerId);
 
     [Signal]
     public delegate void ReadyForSessionReceived(int peerId, bool ready);
 
     [Signal]
-    public delegate void PlayerEnvironmentChanged(int peerId, PlayerState.Environment environment);
+    public delegate void PlayerStatusChanged(int peerId, NetPlayerStatus status);
 
     public enum UPNPActionStep
     {
@@ -69,25 +67,27 @@ public class NetworkManager : Node
 
     public static NetworkManager Instance => instance ?? throw new InstanceNotLoadedYetException();
 
+    public ServerSettings? Settings { get; private set; }
+
+    public bool Connected => peer?.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connected;
+
+    public float TickRateDelay { get; private set; } = Constants.MULTIPLAYER_DEFAULT_TICK_RATE_DELAY_SECONDS;
+
+    public float TimePassedConnecting { get; private set; }
+
     /// <summary>
     ///   All peers connected in the network (INCLUDING SELF).
     /// </summary>
-    public IReadOnlyDictionary<int, PlayerState> PlayerList => playerList;
+    public IReadOnlyDictionary<int, NetPlayerInfo> PlayerList => playerList;
 
-    public PlayerState? Player => GetPlayerState(GetTree().GetNetworkUniqueId());
+    public NetPlayerInfo? Player => GetPlayerState(GetTree().GetNetworkUniqueId());
 
     public bool IsDedicated => GetTree().IsNetworkServer() && !HasPlayer(1);
-
-    public ServerSettings? Settings { get; private set; }
-
-    public float TickRateDelay { get; private set; } = Constants.MULTIPLAYER_DEFAULT_TICK_RATE_DELAY_SECONDS;
 
     [RemoteSync]
     public bool GameInSession { get; private set; }
 
-    public bool Connected => peer?.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connected;
-
-    public float TimePassedConnecting { get; private set; }
+    public GameProperties? CurrentGame { get; private set; }
 
     public override void _Ready()
     {
@@ -95,7 +95,6 @@ public class NetworkManager : Node
         GetTree().Connect("network_peer_disconnected", this, nameof(OnPeerDisconnected));
         GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
         GetTree().Connect("connection_failed", this, nameof(OnConnectionFailed));
-        GetTree().Multiplayer.Connect("network_peer_packet", this, nameof(OnReceivedPacket));
 
         Connect(nameof(UPNPCallResultReceived), this, nameof(OnUPNPCallResultReceived));
     }
@@ -131,6 +130,7 @@ public class NetworkManager : Node
         }
 
         Settings = settings;
+        CurrentGame = GameProperties.StartNewMicrobeGame(new WorldGenerationSettings());
 
         GetTree().NetworkPeer = peer;
 
@@ -157,7 +157,7 @@ public class NetworkManager : Node
         var id = GetTree().GetNetworkUniqueId();
         NotifyPlayerConnected(id, playerName);
 
-        PrintWithRole("Server is created with player as the host");
+        PrintWithRole("Server is player hosted");
 
         return result;
     }
@@ -203,42 +203,65 @@ public class NetworkManager : Node
         return playerList.ContainsKey(peerId);
     }
 
-    public PlayerState? GetPlayerState(int peerId)
+    public NetPlayerInfo? GetPlayerState(int peerId)
     {
-        playerList.TryGetValue(peerId, out PlayerState result);
+        playerList.TryGetValue(peerId, out NetPlayerInfo result);
         return result;
     }
 
-    public void StartGameSession()
+    public void StartGame()
     {
         if (!GetTree().IsNetworkServer() && !GameInSession)
             return;
 
-        if (!IsDedicated && Player!.CurrentEnvironment == PlayerState.Environment.InGame)
+        if (!IsDedicated && Player!.Status == NetPlayerStatus.InGame)
             return;
 
         if (GetTree().IsNetworkServer() && !GameInSession)
             Rset(nameof(GameInSession), true);
 
-        NotifySceneSwitchToGame();
+        RpcId(1, nameof(NotifyPlayerStatusChange), GetTree().GetNetworkUniqueId(),
+            NetPlayerStatus.JoiningGame);
 
-        RpcId(1, nameof(NotifyGameStart), GetTree().GetNetworkUniqueId());
+        NotifyLoadWorld();
+
+        if (GetTree().IsNetworkServer())
+        {
+            foreach (var player in playerList)
+            {
+                if (player.Key == DEFAULT_SERVER_ID)
+                    continue;
+
+                if (player.Value.Status == NetPlayerStatus.Lobby)
+                    RpcId(player.Key, nameof(NotifyLoadWorld));
+            }
+        }
     }
 
-    public void EndGameSession()
+    public void EndGame()
     {
-        if (!IsDedicated && Player!.CurrentEnvironment == PlayerState.Environment.Lobby)
+        if (!IsDedicated && Player!.Status == NetPlayerStatus.Lobby)
             return;
 
         if (GetTree().IsNetworkServer() && GameInSession)
             Rset(nameof(GameInSession), false);
 
-        RpcId(1, nameof(NotifyPeerEnvironmentChange), GetTree().GetNetworkUniqueId(),
-            PlayerState.Environment.LeavingGame);
+        RpcId(1, nameof(NotifyPlayerStatusChange), GetTree().GetNetworkUniqueId(),
+            NetPlayerStatus.LeavingGame);
 
-        NotifySceneSwitchToLobby();
+        NotifyExitWorld();
 
-        RpcId(1, nameof(NotifyGameEnd), GetTree().GetNetworkUniqueId());
+        if (GetTree().IsNetworkServer())
+        {
+            foreach (var player in playerList)
+            {
+                if (player.Key == DEFAULT_SERVER_ID)
+                    continue;
+
+                if (player.Value.Status == NetPlayerStatus.InGame)
+                    RpcId(player.Key, nameof(NotifyExitWorld));
+            }
+        }
     }
 
     public void SetReadyForSessionStatus(bool ready)
@@ -247,6 +270,14 @@ public class NetworkManager : Node
             return;
 
         RpcId(1, nameof(NotifyReadyForSessionStatusChange), GetTree().GetNetworkUniqueId(), ready);
+    }
+
+    public void RegisterGameSceneSwitch(int peerId, bool inGame)
+    {
+        if (IsDedicated)
+            return;
+
+        Rpc(inGame ? nameof(NotifyGameLoaded) : nameof(NotifyGameExited), peerId);
     }
 
     public void Kick(int id, string reason)
@@ -374,18 +405,6 @@ public class NetworkManager : Node
         TimePassedConnecting = 0;
     }
 
-    private void OnReceivedPacket(int senderId, byte[] packet)
-    {
-        ServerSettings? parsedSettings;
-        using (var stream = new MemoryStream(packet))
-        {
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
-                parsedSettings = JsonSerializer.Create().Deserialize(reader, typeof(ServerSettings)) as ServerSettings;
-        }
-
-        Settings = parsedSettings;
-    }
-
     private void OnUPNPCallResultReceived(UPNP.UPNPResult result, UPNPActionStep step)
     {
         switch (step)
@@ -418,7 +437,7 @@ public class NetworkManager : Node
             if (!IsDedicated)
             {
                 RpcId(id, nameof(NotifyPlayerConnected), GetTree().GetNetworkUniqueId(), Player!.Name);
-                RpcId(id, nameof(NotifyPeerEnvironmentChange), GetTree().GetNetworkUniqueId(), Player.CurrentEnvironment);
+                RpcId(id, nameof(NotifyPlayerStatusChange), GetTree().GetNetworkUniqueId(), Player.Status);
             }
 
             foreach (var player in playerList)
@@ -433,7 +452,9 @@ public class NetworkManager : Node
             if (id != DEFAULT_SERVER_ID)
             {
                 RpcId(id, nameof(NotifyPlayerConnected), id, playerName);
-                GetTree().Multiplayer.SendBytes(Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(Settings)), id);
+                RpcId(id, nameof(NotifyServerConfigs),
+                    JsonConvert.SerializeObject(Settings),
+                    ThriveJsonConverter.Instance.SerializeObject(CurrentGame!));
             }
 
             // TODO: might not be true...
@@ -444,7 +465,7 @@ public class NetworkManager : Node
         if (HasPlayer(id))
             return;
 
-        playerList.Add(id, new PlayerState { Name = playerName });
+        playerList.Add(id, new NetPlayerInfo { Name = playerName });
         EmitSignal(nameof(ServerStateUpdated));
 
         if (GetTree().IsNetworkServer())
@@ -465,6 +486,20 @@ public class NetworkManager : Node
         EmitSignal(nameof(ServerStateUpdated));
     }
 
+    [Remote]
+    private void NotifyServerConfigs(string settings, string currentGame)
+    {
+        try
+        {
+            Settings = JsonConvert.DeserializeObject<ServerSettings>(settings);
+            CurrentGame = ThriveJsonConverter.Instance.DeserializeObject<GameProperties>(currentGame);
+        }
+        catch (Exception e)
+        {
+            PrintErrorWithRole("Error occured while reading server configurations: ", e);
+        }
+    }
+
     [RemoteSync]
     private void NotifyRegistrationToServerResult(int peerId, RegistrationToServerResult result)
     {
@@ -481,7 +516,7 @@ public class NetworkManager : Node
     }
 
     [RemoteSync]
-    private void NotifyPeerEnvironmentChange(int id, PlayerState.Environment environment)
+    private void NotifyPlayerStatusChange(int id, NetPlayerStatus environment)
     {
         if (GetTree().IsNetworkServer())
         {
@@ -490,15 +525,15 @@ public class NetworkManager : Node
                 if (player.Key == DEFAULT_SERVER_ID)
                     continue;
 
-                RpcId(player.Key, nameof(NotifyPeerEnvironmentChange), id, environment);
+                RpcId(player.Key, nameof(NotifyPlayerStatusChange), id, environment);
             }
         }
 
         var state = GetPlayerState(id);
         if (state != null)
         {
-            state.CurrentEnvironment = environment;
-            EmitSignal(nameof(PlayerEnvironmentChanged), id, environment);
+            state.Status = environment;
+            EmitSignal(nameof(PlayerStatusChanged), id, environment);
         }
     }
 
@@ -536,97 +571,62 @@ public class NetworkManager : Node
     }
 
     [Remote]
-    private void NotifySceneSwitchToGame()
+    private void NotifyLoadWorld()
     {
+        PackedScene scene = null!;
+
         switch (Settings?.SelectedGameMode)
         {
             case MultiplayerGameMode.MicrobialArena:
-                var scene = SceneManager.Instance.LoadScene(MultiplayerGameMode.MicrobialArena);
-                var arena = (MicrobialArena)scene.Instance();
-                SceneManager.Instance.SwitchToScene(arena);
+                scene = SceneManager.Instance.LoadScene(MultiplayerGameMode.MicrobialArena);
                 break;
         }
+
+        TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.5f, () =>
+        {
+            SceneManager.Instance.SwitchToScene(scene.Instance());
+            RegisterGameSceneSwitch(GetTree().GetNetworkUniqueId(), true);
+        });
     }
 
     [Remote]
-    private void NotifySceneSwitchToLobby()
+    private void NotifyExitWorld()
     {
         var menu = SceneManager.Instance.ReturnToMenu();
         menu.OpenMultiplayerMenu(MultiplayerGUI.Submenu.Lobby);
+        NetworkManager.Instance.RegisterGameSceneSwitch(GetTree().GetNetworkUniqueId(), false);
     }
 
     [RemoteSync]
-    private void NotifyGameStart(int peerId)
+    private void NotifyGameLoaded(int peerId)
     {
-        var state = GetPlayerState(peerId);
+        var playerInfo = GetPlayerState(peerId);
 
-        if (state != null)
-        {
-            state.CurrentEnvironment = PlayerState.Environment.InGame;
-            EmitSignal(nameof(SpawnRequested), peerId);
-            EmitSignal(nameof(PlayerEnvironmentChanged), peerId, state.CurrentEnvironment);
-        }
+        if (playerInfo == null)
+            return;
 
-        if (GetTree().IsNetworkServer())
-        {
-            foreach (var player in playerList)
-            {
-                if (player.Key == DEFAULT_SERVER_ID)
-                    continue;
+        playerInfo.Status = NetPlayerStatus.InGame;
+        EmitSignal(nameof(PlayerJoined), peerId);
+        EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
 
-                RpcId(player.Key, nameof(NotifyGameStart), peerId);
-
-                if (player.Value.CurrentEnvironment == PlayerState.Environment.Lobby)
-                {
-                    RpcId(player.Key, nameof(NotifySceneSwitchToGame));
-                    NotifyGameStart(player.Key);
-                }
-            }
-
-            if (state != null)
-                SystemBroadcastChat($"[b]{state.Name}[/b] has joined.");
-        }
+        SystemBroadcastChat($"[b]{playerInfo.Name}[/b] has joined.");
     }
 
     [RemoteSync]
-    private void NotifyGameEnd(int peerId)
+    private void NotifyGameExited(int peerId)
     {
-        var state = GetPlayerState(peerId);
+        var playerInfo = GetPlayerState(peerId);
 
-        if (state != null)
-        {
-            state.CurrentEnvironment = PlayerState.Environment.Lobby;
-            EmitSignal(nameof(DespawnRequested), peerId);
-            EmitSignal(nameof(ReadyForSessionReceived), peerId, state.ReadyForSession);
-            EmitSignal(nameof(ServerStateUpdated));
-            EmitSignal(nameof(PlayerEnvironmentChanged), peerId, state.CurrentEnvironment);
-        }
+        if (playerInfo == null)
+            return;
 
-        if (GetTree().IsNetworkServer())
-        {
-            foreach (var player in playerList)
-            {
-                if (player.Key == DEFAULT_SERVER_ID)
-                    continue;
+        playerInfo.Status = NetPlayerStatus.Lobby;
+        EmitSignal(nameof(PlayerLeft), peerId);
+        EmitSignal(nameof(ReadyForSessionReceived), peerId, playerInfo.ReadyForSession);
+        EmitSignal(nameof(ServerStateUpdated));
+        EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
 
-                RpcId(player.Key, nameof(NotifyGameEnd), peerId);
-
-                if (player.Value.CurrentEnvironment == PlayerState.Environment.InGame)
-                {
-                    RpcId(player.Key, nameof(NotifySceneSwitchToLobby));
-                    NotifyGameEnd(player.Key);
-                }
-            }
-
-            if (state != null)
-                SystemBroadcastChat($"[b]{state.Name}[/b] has left.");
-        }
-        else
-        {
-            // If the host left the game and we're in the lobby, tell the host where we currently are
-            if (peerId == DEFAULT_SERVER_ID && Player!.CurrentEnvironment == PlayerState.Environment.Lobby)
-                RpcId(1, nameof(NotifyPeerEnvironmentChange), GetTree().GetNetworkUniqueId(), Player.CurrentEnvironment);
-        }
+        SystemBroadcastChat($"[b]{playerInfo.Name}[/b] has left.");
     }
 
     [RemoteSync]

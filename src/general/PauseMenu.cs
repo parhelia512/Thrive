@@ -469,7 +469,7 @@ public class PauseMenu : CustomDialog
 
         if (MultiplayerMode)
         {
-            NetworkManager.Instance.EndGameSession();
+            NetworkManager.Instance.EndGame();
         }
         else
         {
