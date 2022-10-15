@@ -36,6 +36,9 @@ public class CompoundBag : ICompoundStorage
     [JsonProperty]
     public Dictionary<Compound, float> Compounds { get; private set; } = new();
 
+    [JsonIgnore]
+    public IEnumerable<Compound> UsefulCompounds => usefulCompounds;
+
     /// <summary>
     ///   Gets the capacity for a given compound
     /// </summary>

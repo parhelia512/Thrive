@@ -205,6 +205,9 @@ public partial class Microbe
             if (Colony != null)
                 Colony.State = value;
 
+            if (IsNetworkMaster())
+                Rpc(nameof(NetworkSyncMicrobeState), state);
+
             if (value == MicrobeState.Unbinding && IsPlayerMicrobe)
                 OnUnbindEnabled?.Invoke(this);
         }
@@ -290,6 +293,10 @@ public partial class Microbe
         flashDuration = duration;
         flashColour = colour;
         flashPriority = priority;
+
+        if (IsNetworkMaster())
+            Rpc(nameof(NetworkSyncFlash), duration, priority, colour.r, colour.g, colour.b, colour.a);
+
         return true;
     }
 
@@ -299,6 +306,9 @@ public partial class Microbe
         flashColour = new Color(0, 0, 0, 0);
         flashPriority = 0;
         Membrane.Tint = CellTypeProperties.Colour;
+
+        if (IsNetworkMaster())
+            Rpc(nameof(NetworkSyncAbortFlash));
     }
 
     /// <summary>
@@ -306,7 +316,7 @@ public partial class Microbe
     /// </summary>
     public void Damage(float amount, string source)
     {
-        if (IsPlayerMicrobe && CheatManager.GodMode)
+        if (IsPlayerMicrobe && CheatManager.GodMode || !IsNetworkMaster())
             return;
 
         if (amount == 0 || Dead)

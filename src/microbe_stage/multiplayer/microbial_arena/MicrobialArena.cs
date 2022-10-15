@@ -9,6 +9,8 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 {
     private PatchManager patchManager = null!;
 
+    private SpawnSystem spawner = null!;
+
     public CompoundCloudSystem Clouds { get; private set; } = null!;
 
     public FluidSystem FluidSystem { get; private set; } = null!;
@@ -24,8 +26,6 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     public PlayerHoverInfo HoverInfo { get; private set; } = null!;
 
     public PlayerMicrobialArenaInput PlayerInput { get; private set; } = null!;
-
-    private SpawnSystem spawner = null!;
 
     protected override IStageHUD BaseHUD => HUD;
 
@@ -103,11 +103,11 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
     protected override void OnGameStarted()
     {
+        base.OnGameStarted();
+
         patchManager.CurrentGame = CurrentGame;
 
         UpdatePatchSettings(false);
-
-        SpawnPlayer();
     }
 
     protected override void NetworkUpdateGameState(float delta)
@@ -117,7 +117,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         ProcessSystem.Process(delta);
 
         foreach (var peer in Players)
-            peer.Value.Value?.Sync(Players);
+            peer.Value.Value?.Sync();
     }
 
     protected override void UpdatePatchSettings(bool promptPatchNameChange = true)
@@ -132,9 +132,9 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         HUD.UpdateEnvironmentalBars(GameWorld.Map.CurrentPatch!.Biome);
     }
 
-    protected override void OnPlayerSpawn(int peerId, out Microbe spawned)
+    protected override bool OnPlayerSpawn(int peerId, out Microbe? spawned)
     {
-        spawned = (Microbe)SpawnHelpers.SpawnMicrobe(GameWorld.PlayerSpecies, new Vector3(0, 0, 0),
+        spawned = (Microbe)SpawnHelpers.SpawnMicrobe(PlayerSpeciesList[peerId], new Vector3(0, 0, 0),
             rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
         spawned.Name = peerId.ToString(CultureInfo.CurrentCulture);
         spawned.SetupNetworked(peerId);
@@ -149,11 +149,21 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         if (IsNetworkMaster())
             spawned.OnNetworkedDeathCompletes = OnPlayerDestroyed;
+
+        return true;
     }
 
-    protected override void OnPlayerDeSpawn(Microbe removed)
+    protected override bool OnPlayerDeSpawn(Microbe removed)
     {
+        if (Player == removed)
+        {
+            Player = null;
+            Camera.ObjectToFollow = null;
+        }
+
         removed.DestroyDetachAndQueueFree();
+
+        return true;
     }
 
     private void OnPlayerDied(Microbe player)

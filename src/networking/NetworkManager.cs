@@ -223,7 +223,7 @@ public class NetworkManager : Node
         RpcId(1, nameof(NotifyPlayerStatusChange), GetTree().GetNetworkUniqueId(),
             NetPlayerStatus.JoiningGame);
 
-        NotifyLoadWorld();
+        NotifyWorldLoad();
 
         if (GetTree().IsNetworkServer())
         {
@@ -233,7 +233,7 @@ public class NetworkManager : Node
                     continue;
 
                 if (player.Value.Status == NetPlayerStatus.Lobby)
-                    RpcId(player.Key, nameof(NotifyLoadWorld));
+                    RpcId(player.Key, nameof(NotifyWorldLoad));
             }
         }
     }
@@ -249,7 +249,7 @@ public class NetworkManager : Node
         RpcId(1, nameof(NotifyPlayerStatusChange), GetTree().GetNetworkUniqueId(),
             NetPlayerStatus.LeavingGame);
 
-        NotifyExitWorld();
+        NotifyWorldExit();
 
         if (GetTree().IsNetworkServer())
         {
@@ -259,7 +259,7 @@ public class NetworkManager : Node
                     continue;
 
                 if (player.Value.Status == NetPlayerStatus.InGame)
-                    RpcId(player.Key, nameof(NotifyExitWorld));
+                    RpcId(player.Key, nameof(NotifyWorldExit));
             }
         }
     }
@@ -270,14 +270,6 @@ public class NetworkManager : Node
             return;
 
         RpcId(1, nameof(NotifyReadyForSessionStatusChange), GetTree().GetNetworkUniqueId(), ready);
-    }
-
-    public void RegisterGameSceneSwitch(int peerId, bool inGame)
-    {
-        if (IsDedicated)
-            return;
-
-        Rpc(inGame ? nameof(NotifyGameLoaded) : nameof(NotifyGameExited), peerId);
     }
 
     public void Kick(int id, string reason)
@@ -571,7 +563,7 @@ public class NetworkManager : Node
     }
 
     [Remote]
-    private void NotifyLoadWorld()
+    private void NotifyWorldLoad()
     {
         PackedScene scene = null!;
 
@@ -585,20 +577,25 @@ public class NetworkManager : Node
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.5f, () =>
         {
             SceneManager.Instance.SwitchToScene(scene.Instance());
-            RegisterGameSceneSwitch(GetTree().GetNetworkUniqueId(), true);
-        });
+            Rpc(nameof(NotifyWorldLoaded), GetTree().GetNetworkUniqueId());
+        }, false);
     }
 
     [Remote]
-    private void NotifyExitWorld()
+    private void NotifyWorldExit()
     {
-        var menu = SceneManager.Instance.ReturnToMenu();
-        menu.OpenMultiplayerMenu(MultiplayerGUI.Submenu.Lobby);
-        NetworkManager.Instance.RegisterGameSceneSwitch(GetTree().GetNetworkUniqueId(), false);
+        Rpc(nameof(NotifyWorldPreExit), GetTree().GetNetworkUniqueId());
+
+        TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.3f, () =>
+        {
+            var menu = SceneManager.Instance.ReturnToMenu();
+            menu.OpenMultiplayerMenu(MultiplayerGUI.Submenu.Lobby);
+            Rpc(nameof(NotifyWorldPostExit), GetTree().GetNetworkUniqueId());
+        });
     }
 
     [RemoteSync]
-    private void NotifyGameLoaded(int peerId)
+    private void NotifyWorldLoaded(int peerId)
     {
         var playerInfo = GetPlayerState(peerId);
 
@@ -606,14 +603,20 @@ public class NetworkManager : Node
             return;
 
         playerInfo.Status = NetPlayerStatus.InGame;
-        EmitSignal(nameof(PlayerJoined), peerId);
         EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
+        EmitSignal(nameof(PlayerJoined), peerId);
 
         SystemBroadcastChat($"[b]{playerInfo.Name}[/b] has joined.");
     }
 
     [RemoteSync]
-    private void NotifyGameExited(int peerId)
+    private void NotifyWorldPreExit(int peerId)
+    {
+        EmitSignal(nameof(PlayerLeft), peerId);
+    }
+
+    [RemoteSync]
+    private void NotifyWorldPostExit(int peerId)
     {
         var playerInfo = GetPlayerState(peerId);
 
@@ -621,10 +624,9 @@ public class NetworkManager : Node
             return;
 
         playerInfo.Status = NetPlayerStatus.Lobby;
-        EmitSignal(nameof(PlayerLeft), peerId);
+        EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
         EmitSignal(nameof(ReadyForSessionReceived), peerId, playerInfo.ReadyForSession);
         EmitSignal(nameof(ServerStateUpdated));
-        EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
 
         SystemBroadcastChat($"[b]{playerInfo.Name}[/b] has left.");
     }

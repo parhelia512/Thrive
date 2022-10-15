@@ -56,6 +56,28 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
         }
     }
 
+    [RunOnKeyDown("g_toggle_engulf")]
+    public void ToggleEngulf()
+    {
+        if (stage!.Player == null)
+            return;
+
+        if (stage.Player.State == Microbe.MicrobeState.Engulf)
+        {
+            stage.Player.State = Microbe.MicrobeState.Normal;
+
+            if (!IsNetworkMaster())
+                stage.Player.SendEngulfMode(false);
+        }
+        else if (!stage.Player.Membrane.Type.CellWall)
+        {
+            stage.Player.State = Microbe.MicrobeState.Engulf;
+
+            if (!IsNetworkMaster())
+                stage.Player.SendEngulfMode(true);
+        }
+    }
+
     [RunOnKeyChange("g_toggle_scoreboard")]
     public void ShowScoreBoard(bool heldDown)
     {

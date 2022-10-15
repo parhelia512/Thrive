@@ -96,7 +96,7 @@ public class NetworkedPlayerLabel : PanelContainer
     private void UpdateReadyState()
     {
         var stylebox = GetStylebox("panel").Duplicate(true) as StyleBoxFlat;
-        stylebox!.BgColor = Highlight ? new Color(0.07f, 0.51f, 0.84f, 0.39f) : Colors.Black;
+        stylebox!.BgColor = Highlight ? new Color(0.07f, 0.51f, 0.84f, 0.39f) : new Color(Colors.Black, 0.39f);
         AddStyleboxOverride("panel", stylebox);
     }
 

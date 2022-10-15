@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 public partial class Microbe
 {
     [JsonProperty]
-    private readonly CompoundBag compounds = new(0.0f);
+    private CompoundBag compounds = new(0.0f);
 
     [JsonProperty]
     private readonly Dictionary<Compound, float> requiredCompoundsForBaseReproduction = new();
@@ -1172,7 +1172,7 @@ public partial class Microbe
 
     private void HandleMovement(float delta)
     {
-        if (PhagocytosisStep != PhagocytosisPhase.None)
+        if (PhagocytosisStep != PhagocytosisPhase.None || Dead)
         {
             // Reset movement
             MovementDirection = Vector3.Zero;
@@ -1265,6 +1265,9 @@ public partial class Microbe
         // hook up computing this when the StorageBag needs this info.
         organellesCapacity += organelle.StorageCapacity;
         Compounds.Capacity = organellesCapacity;
+
+        if (IsNetworkMaster())
+            NetworkSyncCompoundsCapacity(organellesCapacity);
     }
 
     [DeserializedCallbackAllowed]
@@ -1292,6 +1295,9 @@ public partial class Microbe
         organelleMaxRenderPriorityDirty = true;
 
         Compounds.Capacity = organellesCapacity;
+
+        if (IsNetworkMaster())
+            NetworkSyncCompoundsCapacity(organellesCapacity);
     }
 
     /// <summary>
@@ -1301,6 +1307,9 @@ public partial class Microbe
     {
         organellesCapacity = organelles!.Sum(o => o.StorageCapacity);
         Compounds.Capacity = organellesCapacity;
+
+        if (IsNetworkMaster())
+            NetworkSyncCompoundsCapacity(organellesCapacity);
     }
 
     private bool CheckHasSignalingAgent()

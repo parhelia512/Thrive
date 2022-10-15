@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using Newtonsoft.Json;
+using Environment = System.Environment;
 
 /// <summary>
 ///   Main script on each cell in the game.
@@ -72,7 +73,8 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
     [JsonProperty]
     private int renderPriority = 18;
 
-    private Random random = new();
+    private int randomSeed = Environment.TickCount;
+    private Random random = null!;
 
     private HashSet<(Compound Compound, float Range, float MinAmount, Color Colour)> activeCompoundDetections = new();
 
@@ -323,6 +325,8 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
 
         if (!isPlayer)
             ai = new MicrobeAI(this);
+
+        random = new Random(randomSeed);
 
         // Needed for immediately applying the species
         _Ready();
@@ -848,7 +852,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
 
     public override void _IntegrateForces(PhysicsDirectBodyState physicsState)
     {
-        if (ColonyParent != null)
+        if (ColonyParent != null || Dead)
             return;
 
         // TODO: should movement also be applied here?

@@ -195,7 +195,7 @@ public class MultiplayerGUI : CenterContainer
         peerCount.Text = $"{network.PlayerList.Count} / {network.Settings?.MaxPlayers}";
         serverName.Text = network.Settings?.Name;
         serverAttributes.Text = $"- [{network.Settings?.GetGameModeReadable()}]"
-            + $"{(network.GameInSession ? " [In progress]" : string.Empty)}";
+            + $"{(network.GameInSession ? " [In progress]" : " [Preparing]")}";
 
         UpdateStartButton();
     }

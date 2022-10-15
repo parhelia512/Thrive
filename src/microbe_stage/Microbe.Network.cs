@@ -1,15 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 /// <summary>
-///   The networking part of Microbe class for multiplayer.
+///   The networking part of Microbe class for state synchronizations.
 /// </summary>
 public partial class Microbe
 {
     private MeshInstance tagBox = null!;
 
-    private Tween? movementTween;
+    private Tween? networkTweener;
 
     public Action<int>? OnNetworkedDeathCompletes { get; set; }
 
@@ -20,8 +21,8 @@ public partial class Microbe
 
         tagBox = GetNode<MeshInstance>("TagBox");
 
-        movementTween = new Tween();
-        AddChild(movementTween);
+        networkTweener = new Tween();
+        AddChild(networkTweener);
 
         var network = NetworkManager.Instance;
 
@@ -41,16 +42,25 @@ public partial class Microbe
 
             // TODO: offset tag above the membrane (Z-axis)
         }
+
+        if (!IsNetworkMaster())
+            Rpc(nameof(NetworkFetchRandom));
     }
 
-    public void Sync(IReadOnlyDictionary<int, EntityReference<Microbe>> peers)
+    public void Sync()
     {
-        foreach (var peer in peers)
+        foreach (var player in NetworkManager.Instance.PlayerList)
         {
-            if (peer.Key == GetTree().GetNetworkUniqueId())
+            if (player.Key == GetTree().GetNetworkUniqueId() || player.Value.Status != NetPlayerStatus.InGame)
                 continue;
 
-            RpcUnreliableId(peer.Key, nameof(NetworkSyncMovement), GlobalTransform.origin, Rotation);
+            RpcUnreliableId(player.Key, nameof(NetworkSyncMovement), GlobalTransform.origin, Rotation);
+
+            RpcUnreliableId(player.Key, nameof(NetworkSyncUsefulCompounds),
+                Compounds.UsefulCompounds.Select(c => c.InternalName).ToList());
+
+            RpcUnreliableId(player.Key, nameof(NetworkSyncCompounds),
+                Compounds.Compounds.ToDictionary(c => c.Key.InternalName, c => c.Value));
         }
     }
 
@@ -64,12 +74,17 @@ public partial class Microbe
         RpcUnreliable(nameof(NetworkLookAtPointReceived), lookAtPoint);
     }
 
+    public void SendEngulfMode(bool wantsToEngulf)
+    {
+        Rpc(nameof(NetworkEngulfModeReceived), wantsToEngulf);
+    }
+
     [Puppet]
     private void NetworkSyncMovement(Vector3 position, Vector3 rotation)
     {
         Rotation = rotation;
-        movementTween?.InterpolateProperty(this, "global_transform", null, new Transform(GlobalTransform.basis, position), 0.1f);
-        movementTween?.Start();
+        networkTweener?.InterpolateProperty(this, "global_transform", null, new Transform(GlobalTransform.basis, position), 0.1f);
+        networkTweener?.Start();
     }
 
     [Puppet]
@@ -84,6 +99,55 @@ public partial class Microbe
         }
     }
 
+    [Puppet]
+    private void NetworkSyncUsefulCompounds(List<string> usefulCompounds)
+    {
+        Compounds.ClearUseful();
+        foreach (var useful in usefulCompounds)
+            Compounds.SetUseful(SimulationParameters.Instance.GetCompound(useful));
+    }
+
+    [Puppet]
+    private void NetworkSyncCompoundsCapacity(float capacity)
+    {
+        Compounds.Capacity = capacity;
+    }
+
+    [Puppet]
+    private void NetworkSyncCompounds(Dictionary<string, float> compounds)
+    {
+        foreach (var entry in compounds)
+        {
+            var compound = SimulationParameters.Instance.GetCompound(entry.Key);
+            Compounds.Compounds[compound] = entry.Value;
+        }
+    }
+
+    [Puppet]
+    private void NetworkSyncMicrobeState(Microbe.MicrobeState state)
+    {
+        State = state;
+    }
+
+    [Puppet]
+    private void NetworkSyncFlash(float duration, int priority, float r, float g, float b, float a)
+    {
+        Flash(duration, new Color(r, g, b, a), priority);
+    }
+
+    [Puppet]
+    private void NetworkSyncAbortFlash()
+    {
+        AbortFlash();
+    }
+
+    [Puppet]
+    private void NetworkReturnRandom(int seed)
+    {
+        randomSeed = seed;
+        random = new Random(seed);
+    }
+
     [Master]
     private void NetworkMovementDirectionReceived(Vector3 movementDirection)
     {
@@ -94,5 +158,18 @@ public partial class Microbe
     private void NetworkLookAtPointReceived(Vector3 lookAtPoint)
     {
         LookAtPoint = lookAtPoint;
+    }
+
+    [Master]
+    private void NetworkEngulfModeReceived(bool wantsToEngulf)
+    {
+        State = wantsToEngulf ? MicrobeState.Engulf : MicrobeState.Normal;
+    }
+
+    [Master]
+    private void NetworkFetchRandom()
+    {
+        var sender = GetTree().GetRpcSenderId();
+        RpcId(sender, nameof(NetworkReturnRandom), randomSeed);
     }
 }

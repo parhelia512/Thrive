@@ -1,11 +1,16 @@
 using System.Collections.Generic;
 using Godot;
-using Newtonsoft.Json;
 
 /// <summary>
-///   Base stage for the stages where the player controls a single creature
+///   Base stage for the stages where the player controls a single creature, supports online gameplay.
 /// </summary>
 /// <typeparam name="TPlayer">The type of the player object</typeparam>
+/// <remarks>
+///   <para>
+///     TODO: perhaps this can be combined into the normal StageBase to remove redundancies and
+///     to make singleplayer to multiplayer seamless.
+///   </para>
+/// </remarks>
 public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     where TPlayer : class, IEntity
 {
@@ -13,8 +18,10 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
 
     private readonly Dictionary<int, EntityReference<TPlayer>> players = new();
     private readonly Dictionary<int, float> respawnTimers = new();
+    private Dictionary<int, Species> playerSpeciesList = new();
 
     public IReadOnlyDictionary<int, EntityReference<TPlayer>> Players => players;
+    public IReadOnlyDictionary<int, Species> PlayerSpeciesList => playerSpeciesList;
 
     public override void _Ready()
     {
@@ -23,8 +30,8 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         GetTree().Connect("network_peer_disconnected", this, nameof(OnPeerDisconnected));
         GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
 
-        NetworkManager.Instance.Connect(nameof(NetworkManager.PlayerJoined), this, nameof(SpawnPlayer));
-        NetworkManager.Instance.Connect(nameof(NetworkManager.PlayerLeft), this, nameof(DeSpawnPlayer));
+        NetworkManager.Instance.Connect(nameof(NetworkManager.PlayerJoined), this, nameof(RegisterPlayer));
+        NetworkManager.Instance.Connect(nameof(NetworkManager.PlayerLeft), this, nameof(UnRegisterPlayer));
         NetworkManager.Instance.Connect(nameof(NetworkManager.Kicked), this, nameof(OnKicked));
     }
 
@@ -35,10 +42,13 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         if (!GetTree().HasNetworkPeer() || !IsNetworkMaster())
             return;
 
+        if (!NetworkManager.Instance.IsDedicated && NetworkManager.Instance.Player!.Status != NetPlayerStatus.InGame)
+            return;
+
         if (NetworkManager.Instance.GameInSession && networkTick > NetworkManager.Instance.TickRateDelay)
         {
-            NetworkUpdateGameState(delta);
-            NetworkHandleRespawns(delta);
+            NetworkUpdateGameState(delta + networkTick);
+            NetworkHandleRespawns(delta + networkTick);
             networkTick = 0;
         }
     }
@@ -47,16 +57,10 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     {
     }
 
-    protected override void SetupStage()
+    protected override void OnGameStarted()
     {
-        base.SetupStage();
-
-        // Spawn already existing players in the game
-        foreach (var player in NetworkManager.Instance.PlayerList)
-        {
-            if (player.Value.Status == NetPlayerStatus.InGame)
-                SpawnPlayer(player.Key);
-        }
+        if (!NetworkManager.Instance.IsDedicated && GetTree().IsNetworkServer())
+            RegisterPlayer(GetTree().GetNetworkUniqueId());
     }
 
     protected abstract void NetworkUpdateGameState(float delta);
@@ -71,7 +75,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
             if (players.ContainsKey(player.Key) || !respawnTimers.ContainsKey(player.Key))
                 continue;
 
-            var diff = respawnTimers[player.Key] - (delta + NetworkManager.Instance.TickRateDelay);
+            var diff = respawnTimers[player.Key] - delta;
             respawnTimers[player.Key] = diff;
 
             // Respawn the player once the timer is up
@@ -88,8 +92,10 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     {
         if (!players.ContainsKey(peerId))
         {
-            OnPlayerSpawn(peerId, out TPlayer spawned);
-            players.Add(peerId, new EntityReference<TPlayer>(spawned));
+            if (!OnPlayerSpawn(peerId, out TPlayer? spawned))
+                return;
+
+            players.Add(peerId, new EntityReference<TPlayer>(spawned!));
             respawnTimers[peerId] = Constants.PLAYER_RESPAWN_TIME;
 
             if (peerId == GetTree().GetNetworkUniqueId())
@@ -103,14 +109,23 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         if (players.TryGetValue(peerId, out EntityReference<TPlayer> peer))
         {
             if (peer.Value != null)
-                OnPlayerDeSpawn(peer.Value);
+            {
+                if (!OnPlayerDeSpawn(peer.Value))
+                    return;
+            }
 
             players.Remove(peerId);
         }
     }
 
-    protected abstract void OnPlayerSpawn(int peerId, out TPlayer spawned);
-    protected abstract void OnPlayerDeSpawn(TPlayer removed);
+    /// <summary>
+    ///   Returns true if successfully spawned.
+    /// </summary>
+    protected abstract bool OnPlayerSpawn(int peerId, out TPlayer? spawned);
+
+    /// <summary>
+    ///   Returns true if successfully despawned.
+    protected abstract bool OnPlayerDeSpawn(TPlayer removed);
 
     [RemoteSync]
     protected override void SpawnPlayer()
@@ -126,9 +141,53 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     {
     }
 
+    private void RegisterPlayer(int peerId)
+    {
+        if (!GetTree().IsNetworkServer())
+            return;
+
+        if (!playerSpeciesList.TryGetValue(peerId, out Species species))
+        {
+            species = GameWorld.CreateMutatedSpecies(GameWorld.PlayerSpecies);
+            playerSpeciesList[peerId] = species;
+            Rpc(nameof(SyncPlayerSpeciesList), ThriveJsonConverter.Instance.SerializeObject(playerSpeciesList));
+        }
+
+        foreach (var player in NetworkManager.Instance.PlayerList)
+        {
+            if (player.Value.Status == NetPlayerStatus.InGame)
+            {
+                RpcId(player.Key, nameof(SpawnPlayer), peerId);
+                RpcId(peerId, nameof(SpawnPlayer), player.Key);
+            }
+        }
+    }
+
+    private void UnRegisterPlayer(int peerId)
+    {
+        if (!GetTree().IsNetworkServer())
+            return;
+
+        if (playerSpeciesList.Remove(peerId))
+            Rpc(nameof(SyncPlayerSpeciesList), ThriveJsonConverter.Instance.SerializeObject(playerSpeciesList));
+
+        foreach (var player in NetworkManager.Instance.PlayerList)
+        {
+            if (player.Value.Status == NetPlayerStatus.InGame)
+                RpcId(player.Key, nameof(DeSpawnPlayer), peerId);
+        }
+    }
+
+    [Puppet]
+    private void SyncPlayerSpeciesList(string data)
+    {
+        playerSpeciesList = ThriveJsonConverter.Instance.DeserializeObject<Dictionary<int, Species>>(data)!;
+    }
+
     private void OnPeerDisconnected(int peerId)
     {
-        DeSpawnPlayer(peerId);
+        if (GetTree().IsNetworkServer())
+            UnRegisterPlayer(peerId);
     }
 
     private void OnServerDisconnected()

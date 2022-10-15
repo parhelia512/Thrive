@@ -44,7 +44,6 @@ public class ScoreBoard : CenterContainer
         var label = (NetworkedPlayerLabel)NetworkedPlayerLabelScene.Instance();
         label.ID = id;
         label.PlayerName = name;
-        label.Highlight = true;
 
         label.Connect(nameof(NetworkedPlayerLabel.KickRequested), this, nameof(OnKickButtonPressed));
 
