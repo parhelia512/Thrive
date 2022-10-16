@@ -47,7 +47,7 @@ public partial class Microbe
             Rpc(nameof(NetworkFetchRandom));
     }
 
-    public void Sync()
+    public void NetworkSync()
     {
         foreach (var player in NetworkManager.Instance.PlayerList)
         {
@@ -61,6 +61,8 @@ public partial class Microbe
 
             RpcUnreliableId(player.Key, nameof(NetworkSyncCompounds),
                 Compounds.Compounds.ToDictionary(c => c.Key.InternalName, c => c.Value));
+
+            RpcUnreliableId(player.Key, nameof(NetworkSyncHealth), Hitpoints);
         }
     }
 
@@ -79,6 +81,30 @@ public partial class Microbe
         Rpc(nameof(NetworkEngulfModeReceived), wantsToEngulf);
     }
 
+    private void IngestEngulfable(string targetPath, float animationSpeed = 2.0f)
+    {
+        if (IsNetworkMaster())
+        {
+            Rpc(nameof(NetworkSyncEngulfment), true, targetPath);
+        }
+        else if (!GetTree().HasNetworkPeer())
+        {
+            IngestEngulfable(GetNode<IEngulfable>(targetPath), animationSpeed);
+        }
+    }
+
+    private void EjectEngulfable(string targetPath, float animationSpeed = 2.0f)
+    {
+        if (IsNetworkMaster())
+        {
+            Rpc(nameof(NetworkSyncEngulfment), false, targetPath);
+        }
+        else if (!GetTree().HasNetworkPeer())
+        {
+            EjectEngulfable(GetNode<IEngulfable>(targetPath), animationSpeed);
+        }
+    }
+
     [Puppet]
     private void NetworkSyncMovement(Vector3 position, Vector3 rotation)
     {
@@ -91,12 +117,12 @@ public partial class Microbe
     private void NetworkSyncHealth(float health)
     {
         Hitpoints = health;
+    }
 
-        if (Hitpoints <= 0.0f)
-        {
-            Hitpoints = 0.0f;
-            Kill();
-        }
+    [Puppet]
+    private void NetworkSyncKill()
+    {
+        Kill();
     }
 
     [Puppet]
@@ -130,6 +156,27 @@ public partial class Microbe
     }
 
     [Puppet]
+    private void NetworkSyncPhagocytosisPhase(PhagocytosisPhase phase)
+    {
+        PhagocytosisStep = phase;
+    }
+
+    [PuppetSync]
+    private void NetworkSyncEngulfment(bool engulf, string engulfablePath)
+    {
+        var engulfable = GetNode<IEngulfable>(engulfablePath);
+
+        if (engulf)
+        {
+            IngestEngulfable(engulfable);
+        }
+        else
+        {
+            EjectEngulfable(engulfable);
+        }
+    }
+
+    [Puppet]
     private void NetworkSyncFlash(float duration, int priority, float r, float g, float b, float a)
     {
         Flash(duration, new Color(r, g, b, a), priority);
@@ -139,6 +186,12 @@ public partial class Microbe
     private void NetworkSyncAbortFlash()
     {
         AbortFlash();
+    }
+
+    [Puppet]
+    private void NetworkSyncDigestedAmount(float amount)
+    {
+        DigestedAmount = amount;
     }
 
     [Puppet]

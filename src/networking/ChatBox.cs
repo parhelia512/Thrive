@@ -59,6 +59,17 @@ public class ChatBox : VBoxContainer
         {
             ClearMessages();
         }
+        else if (chat.BeginsWith("/updaterate_d "))
+        {
+            var args = chat.Split(" ");
+
+            if (float.TryParse(args[1], out float result))
+            {
+                var oldTickRate = NetworkManager.Instance.UpdateRateDelay;
+                NetworkManager.Instance.UpdateRateDelay = result;
+                NetworkManager.Instance.BroadcastChat($"Update rate delay has been changed to {result} by the host");
+            }
+        }
         else
         {
             NetworkManager.Instance.BroadcastChat(chat);

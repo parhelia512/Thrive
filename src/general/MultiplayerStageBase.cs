@@ -16,11 +16,19 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
 {
     private float networkTick;
 
+    /// <summary>
+    ///   Dictionary of players that has joined the game.
+    /// </summary>
     private readonly Dictionary<int, EntityReference<TPlayer>> players = new();
+
     private readonly Dictionary<int, float> respawnTimers = new();
     private Dictionary<int, Species> playerSpeciesList = new();
 
+    /// <summary>
+    ///   Dictionary of players that has joined the game.
+    /// </summary>
     public IReadOnlyDictionary<int, EntityReference<TPlayer>> Players => players;
+
     public IReadOnlyDictionary<int, Species> PlayerSpeciesList => playerSpeciesList;
 
     public override void _Ready()
@@ -39,13 +47,15 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     {
         networkTick += delta;
 
-        if (!GetTree().HasNetworkPeer() || !IsNetworkMaster())
+        if (!GetTree().HasNetworkPeer() || !GetTree().IsNetworkServer())
             return;
 
-        if (!NetworkManager.Instance.IsDedicated && NetworkManager.Instance.Player!.Status != NetPlayerStatus.InGame)
+        var network = NetworkManager.Instance;
+
+        if (!network.IsDedicated && network.Player!.Status != NetPlayerStatus.InGame)
             return;
 
-        if (NetworkManager.Instance.GameInSession && networkTick > NetworkManager.Instance.TickRateDelay)
+        if (network.GameInSession && networkTick > network.UpdateRateDelay)
         {
             NetworkUpdateGameState(delta + networkTick);
             NetworkHandleRespawns(delta + networkTick);

@@ -24,7 +24,7 @@ public class KickPlayerDialog : Control
         id = peerId;
     }
 
-    private void OnKickConfirmed()
+    private void OnKickConfirmed(string newText)
     {
         if (id == 1)
         {
@@ -32,7 +32,7 @@ public class KickPlayerDialog : Control
             return;
         }
 
-        NetworkManager.Instance.Kick(id, reasonEdit.Text);
+        NetworkManager.Instance.Kick(id, newText);
     }
 
     private void OnKickCancelled()

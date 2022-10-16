@@ -166,7 +166,14 @@ public partial class Microbe
         get => dissolveEffectValue;
         set
         {
+            if (dissolveEffectValue == value)
+                return;
+
             dissolveEffectValue = Mathf.Clamp(value, 0.0f, 1.0f);
+
+            if (IsNetworkMaster())
+                Rpc(nameof(NetworkSyncDigestedAmount), dissolveEffectValue);
+
             UpdateDissolveEffect();
         }
     }
@@ -718,9 +725,6 @@ public partial class Microbe
                 {
                     Hitpoints = MaxHitpoints;
                 }
-
-                if (IsNetworkMaster())
-                    RpcUnreliable(nameof(NetworkSyncHealth), Hitpoints);
             }
         }
     }
@@ -1421,7 +1425,7 @@ public partial class Microbe
     /// </summary>
     private void HandleDigestion(float delta)
     {
-        if (Dead)
+        if (Dead || !IsNetworkMaster())
             return;
 
         var compoundTypes = SimulationParameters.Instance.GetAllCompounds();
@@ -1442,7 +1446,7 @@ public partial class Microbe
             // is overloaded
             if (UsedIngestionCapacity > EngulfSize)
             {
-                EjectEngulfable(engulfable);
+                EjectEngulfable(engulfable.EntityNode.GetPath());
                 continue;
             }
 
@@ -1457,7 +1461,7 @@ public partial class Microbe
             {
                 if (!Enzymes.ContainsKey(engulfable.RequisiteEnzymeToDigest))
                 {
-                    EjectEngulfable(engulfable);
+                    EjectEngulfable(engulfable.EntityNode.GetPath());
                     continue;
                 }
 
@@ -1560,6 +1564,12 @@ public partial class Microbe
 
                 // Microbe is beyond repair, might as well consider it as dead
                 Kill();
+
+                if (IsNetworkMaster())
+                {
+                    Rpc(nameof(NetworkSyncKill));
+                    OnNetworkedDeathCompletes?.Invoke(Name.ToInt());
+                }
 
                 if (IsPlayerMicrobe)
                 {

@@ -8,23 +8,16 @@ using Godot;
 public class MicrobialArena : MultiplayerStageBase<Microbe>
 {
     private PatchManager patchManager = null!;
-
     private SpawnSystem spawner = null!;
+    private MicrobeSystem microbeSystem = null!;
 
     public CompoundCloudSystem Clouds { get; private set; } = null!;
-
     public FluidSystem FluidSystem { get; private set; } = null!;
-
     public TimedLifeSystem TimedLifeSystem { get; private set; } = null!;
-
     public ProcessSystem ProcessSystem { get; private set; } = null!;
-
     public MicrobeCamera Camera { get; private set; } = null!;
-
     public MicrobialArenaHUD HUD { get; private set; } = null!;
-
     public PlayerHoverInfo HoverInfo { get; private set; } = null!;
-
     public PlayerMicrobialArenaInput PlayerInput { get; private set; } = null!;
 
     protected override IStageHUD BaseHUD => HUD;
@@ -60,11 +53,20 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         Camera = world.GetNode<MicrobeCamera>("PrimaryCamera");
         Clouds = world.GetNode<CompoundCloudSystem>("CompoundClouds");
 
+        Clouds.SetProcess(false);
+
         TimedLifeSystem = new TimedLifeSystem(rootOfDynamicallySpawned);
         ProcessSystem = new ProcessSystem(rootOfDynamicallySpawned);
+        microbeSystem = new MicrobeSystem(rootOfDynamicallySpawned);
         spawner = new SpawnSystem(rootOfDynamicallySpawned);
         patchManager = new PatchManager(spawner, ProcessSystem, Clouds, TimedLifeSystem,
             worldLight, CurrentGame);
+    }
+
+    public override void _Process(float delta)
+    {
+        base._Process(delta);
+        microbeSystem.Process(delta);
     }
 
     public override void OnFinishTransitioning()
@@ -116,8 +118,11 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         TimedLifeSystem.Process(delta);
         ProcessSystem.Process(delta);
 
-        foreach (var peer in Players)
-            peer.Value.Value?.Sync();
+        foreach (var player in Players)
+        {
+            var microbe = player.Value.Value;
+            microbe?.NetworkSync();
+        }
     }
 
     protected override void UpdatePatchSettings(bool promptPatchNameChange = true)
@@ -148,7 +153,9 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         }
 
         if (IsNetworkMaster())
+        {
             spawned.OnNetworkedDeathCompletes = OnPlayerDestroyed;
+        }
 
         return true;
     }
@@ -161,7 +168,8 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
             Camera.ObjectToFollow = null;
         }
 
-        removed.DestroyDetachAndQueueFree();
+        if (removed.PhagocytosisStep == PhagocytosisPhase.None)
+            removed.DestroyDetachAndQueueFree();
 
         return true;
     }

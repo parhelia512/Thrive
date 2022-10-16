@@ -79,7 +79,7 @@ public class NetworkedPlayerLabel : PanelContainer
         if (player != null && player.Status != network.Player?.Status)
         {
             builder.Append(' ');
-            builder.Append($"[{player.GetEnvironmentReadable()}]");
+            builder.Append($"[{player.GetStatusReadable()}]");
         }
 
         nameLabel.ExtendedBbcode = builder.ToString();

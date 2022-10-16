@@ -91,6 +91,9 @@ public partial class Microbe
     [JsonProperty]
     private MicrobeState state;
 
+    [JsonIgnore]
+    private PhagocytosisPhase phagocytosisPhase;
+
     public enum MicrobeState
     {
         /// <summary>
@@ -145,7 +148,20 @@ public partial class Microbe
 
     // Properties for engulfing
     [JsonProperty]
-    public PhagocytosisPhase PhagocytosisStep { get; set; }
+    public PhagocytosisPhase PhagocytosisStep
+    {
+        get => phagocytosisPhase;
+        set
+        {
+            if (phagocytosisPhase == value)
+                return;
+
+            phagocytosisPhase = value;
+
+            if (IsNetworkMaster())
+                Rpc(nameof(NetworkSyncPhagocytosisPhase), value);
+        }
+    }
 
     /// <summary>
     ///   The amount of space all of the currently engulfed objects occupy in the cytoplasm. This is used to determine
@@ -206,7 +222,7 @@ public partial class Microbe
                 Colony.State = value;
 
             if (IsNetworkMaster())
-                Rpc(nameof(NetworkSyncMicrobeState), state);
+                Rpc(nameof(NetworkSyncMicrobeState), value);
 
             if (value == MicrobeState.Unbinding && IsPlayerMicrobe)
                 OnUnbindEnabled?.Invoke(this);
@@ -399,6 +415,9 @@ public partial class Microbe
         {
             Hitpoints = 0.0f;
             Kill();
+
+            if (IsNetworkMaster())
+                Rpc(nameof(NetworkSyncKill));
         }
     }
 
@@ -1280,7 +1299,7 @@ public partial class Microbe
             foreach (var engulfed in engulfedObjects.ToList())
             {
                 if (engulfed.Object.Value != null)
-                    EjectEngulfable(engulfed.Object.Value);
+                    EjectEngulfable(engulfed.Object.Value.EntityNode.GetPath());
             }
         }
 
@@ -1297,7 +1316,7 @@ public partial class Microbe
             {
                 OnNetworkedDeathCompletes.Invoke(Name.ToInt());
 
-                // TODO: RPCs doesn't work well for immediate loop breaks like this
+                // TODO: RPCs don't work well for immediate loop breaks like this
                 networkedDeathInvoked = true;
             }
             else
@@ -1727,7 +1746,7 @@ public partial class Microbe
 
         if (CanEngulf(engulfable))
         {
-            IngestEngulfable(engulfable);
+            IngestEngulfable(engulfable.EntityNode.GetPath());
         }
         else if (EngulfSize > engulfable.EngulfSize * Constants.ENGULF_SIZE_RATIO_REQ && full)
         {
@@ -1874,7 +1893,7 @@ public partial class Microbe
         body.ApplyCentralImpulse(impulse + LinearVelocity);
 
         // We have our own engulfer and it wants to claim this object we've just expelled
-        HostileEngulfer.Value?.IngestEngulfable(engulfable);
+        HostileEngulfer.Value?.IngestEngulfable(engulfable.EntityNode.GetPath());
 
         engulfable.OnExpelledFromEngulfment();
         engulfable.HostileEngulfer.Value = null;

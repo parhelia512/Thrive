@@ -71,7 +71,7 @@ public class NetworkManager : Node
 
     public bool Connected => peer?.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connected;
 
-    public float TickRateDelay { get; private set; } = Constants.MULTIPLAYER_DEFAULT_TICK_RATE_DELAY_SECONDS;
+    public float UpdateRateDelay { get; set; } = Constants.MULTIPLAYER_DEFAULT_UPDATE_RATE_DELAY_SECONDS;
 
     public float TimePassedConnecting { get; private set; }
 
@@ -220,9 +220,6 @@ public class NetworkManager : Node
         if (GetTree().IsNetworkServer() && !GameInSession)
             Rset(nameof(GameInSession), true);
 
-        RpcId(1, nameof(NotifyPlayerStatusChange), GetTree().GetNetworkUniqueId(),
-            NetPlayerStatus.JoiningGame);
-
         NotifyWorldLoad();
 
         if (GetTree().IsNetworkServer())
@@ -245,9 +242,6 @@ public class NetworkManager : Node
 
         if (GetTree().IsNetworkServer() && GameInSession)
             Rset(nameof(GameInSession), false);
-
-        RpcId(1, nameof(NotifyPlayerStatusChange), GetTree().GetNetworkUniqueId(),
-            NetPlayerStatus.LeavingGame);
 
         NotifyWorldExit();
 
@@ -565,20 +559,22 @@ public class NetworkManager : Node
     [Remote]
     private void NotifyWorldLoad()
     {
-        PackedScene scene = null!;
+        Rpc(nameof(NotifyWorldPreLoad), GetTree().GetNetworkUniqueId());
 
-        switch (Settings?.SelectedGameMode)
+        TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.4f, () =>
         {
-            case MultiplayerGameMode.MicrobialArena:
-                scene = SceneManager.Instance.LoadScene(MultiplayerGameMode.MicrobialArena);
-                break;
-        }
+            PackedScene scene = null!;
 
-        TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.5f, () =>
-        {
+            switch (Settings?.SelectedGameMode)
+            {
+                case MultiplayerGameMode.MicrobialArena:
+                    scene = SceneManager.Instance.LoadScene(MultiplayerGameMode.MicrobialArena);
+                    break;
+            }
+
             SceneManager.Instance.SwitchToScene(scene.Instance());
-            Rpc(nameof(NotifyWorldLoaded), GetTree().GetNetworkUniqueId());
-        }, false);
+            Rpc(nameof(NotifyWorldPostLoad), GetTree().GetNetworkUniqueId());
+        });
     }
 
     [Remote]
@@ -595,7 +591,19 @@ public class NetworkManager : Node
     }
 
     [RemoteSync]
-    private void NotifyWorldLoaded(int peerId)
+    private void NotifyWorldPreLoad(int peerId)
+    {
+        var playerInfo = GetPlayerState(peerId);
+
+        if (playerInfo == null)
+            return;
+
+        playerInfo.Status = NetPlayerStatus.JoiningGame;
+        EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
+    }
+
+    [RemoteSync]
+    private void NotifyWorldPostLoad(int peerId)
     {
         var playerInfo = GetPlayerState(peerId);
 
@@ -612,6 +620,13 @@ public class NetworkManager : Node
     [RemoteSync]
     private void NotifyWorldPreExit(int peerId)
     {
+        var playerInfo = GetPlayerState(peerId);
+
+        if (playerInfo == null)
+            return;
+
+        playerInfo.Status = NetPlayerStatus.LeavingGame;
+        EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
         EmitSignal(nameof(PlayerLeft), peerId);
     }
 
@@ -644,7 +659,7 @@ public class NetworkManager : Node
         }
         else
         {
-            formatted = $"[b]({senderState.GetEnvironmentReadableShort()}) [{senderState.Name}]:[/b] {message}";
+            formatted = $"[b]({senderState.GetStatusReadableShort()}) [{senderState.Name}]:[/b] {message}";
         }
 
         EmitSignal(nameof(ChatReceived), formatted);

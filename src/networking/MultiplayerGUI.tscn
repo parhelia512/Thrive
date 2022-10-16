@@ -142,10 +142,11 @@ custom_fonts/font = ExtResource( 8 )
 text = "CONNECT"
 
 [node name="Lobby" type="VBoxContainer" parent="."]
+visible = false
 margin_left = 223.0
-margin_top = 96.0
+margin_top = 114.0
 margin_right = 1057.0
-margin_bottom = 623.0
+margin_bottom = 606.0
 
 [node name="PanelContainer" type="PanelContainer" parent="Lobby"]
 margin_right = 834.0

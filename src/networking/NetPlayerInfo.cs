@@ -10,7 +10,7 @@ public class NetPlayerInfo
 
     // TODO: add more important properties...
 
-    public string GetEnvironmentReadable()
+    public string GetStatusReadable()
     {
         switch (Status)
         {
@@ -18,12 +18,16 @@ public class NetPlayerInfo
                 return TranslationServer.Translate("IN_GAME_LOWERCASE");
             case NetPlayerStatus.Lobby:
                 return TranslationServer.Translate("LOBBY_LOWERCASE");
+            case NetPlayerStatus.JoiningGame:
+                return TranslationServer.Translate("JOINING_LOWERCASE");
+            case NetPlayerStatus.LeavingGame:
+                return TranslationServer.Translate("LEAVING_LOWERCASE");
             default:
                 return TranslationServer.Translate("N_A");
         }
     }
 
-    public string GetEnvironmentReadableShort()
+    public string GetStatusReadableShort()
     {
         switch (Status)
         {
