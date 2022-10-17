@@ -24,6 +24,11 @@ public class KickPlayerDialog : Control
         id = peerId;
     }
 
+    private void OnKickConfirmed()
+    {
+        OnKickConfirmed(reasonEdit.Text);
+    }
+
     private void OnKickConfirmed(string newText)
     {
         if (id == 1)

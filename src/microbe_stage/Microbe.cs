@@ -14,7 +14,8 @@ using Environment = System.Environment;
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/Microbe.tscn", UsesEarlyResolve = false)]
 [DeserializedCallbackTarget]
-public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable
+public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable,
+    INetEntity
 {
     /// <summary>
     ///   The point towards which the microbe will move to point to

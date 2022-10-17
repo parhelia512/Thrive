@@ -130,7 +130,14 @@ public class NetworkManager : Node
         }
 
         Settings = settings;
-        CurrentGame = GameProperties.StartNewMicrobeGame(new WorldGenerationSettings());
+
+        // Setting up world
+        var worldSettings = new WorldGenerationSettings
+        {
+            Origin = WorldGenerationSettings.LifeOrigin.Pond,
+            AddDefaultSpecies = false,
+        };
+        CurrentGame = GameProperties.StartNewMicrobeGame(worldSettings);
 
         GetTree().NetworkPeer = peer;
 
@@ -482,7 +489,7 @@ public class NetworkManager : Node
         }
         catch (Exception e)
         {
-            PrintErrorWithRole("Error occured while reading server configurations: ", e);
+            PrintErrorWithRole("Error occured while trying to read server configurations: ", e);
         }
     }
 

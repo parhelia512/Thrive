@@ -1,4 +1,5 @@
-﻿using Godot;
+﻿using System.Collections.Generic;
+using Godot;
 
 public class NetPlayerInfo
 {
@@ -7,6 +8,8 @@ public class NetPlayerInfo
     public NetPlayerStatus Status { get; set; } = NetPlayerStatus.Lobby;
 
     public bool ReadyForSession { get; set; }
+
+    public Dictionary<string, object> Vars { get; set; } = new();
 
     // TODO: add more important properties...
 

@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=1]
 [ext_resource path="res://src/networking/MultiplayerGUI.cs" type="Script" id=2]
@@ -11,6 +11,19 @@
 [ext_resource path="res://src/gui_common/dialogs/CustomConfirmationDialog.tscn" type="PackedScene" id=9]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Smaller.tres" type="DynamicFont" id=10]
 [ext_resource path="res://src/networking/KickPlayerDialog.tscn" type="PackedScene" id=11]
+[ext_resource path="res://assets/textures/gui/bevel/bacteria.png" type="Texture" id=12]
+[ext_resource path="res://assets/textures/gui/bevel/NewIcon.png" type="Texture" id=13]
+[ext_resource path="res://assets/textures/gui/bevel/SuicideIcon.png" type="Texture" id=14]
+[ext_resource path="res://assets/textures/gui/bevel/IconGenerating.png" type="Texture" id=15]
+[ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Small.tres" type="DynamicFont" id=16]
+
+[sub_resource type="StyleBoxFlat" id=1]
+content_margin_right = 5.0
+bg_color = Color( 0, 0, 0, 0.588235 )
+expand_margin_left = 2.0
+expand_margin_right = 2.0
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
 
 [node name="MultiplayerGUI" type="CenterContainer"]
 anchor_right = 1.0
@@ -25,7 +38,7 @@ CreateServerButtonPath = NodePath("PrimaryMenu/HBoxContainer2/Host")
 LobbyPlayerListPath = NodePath("Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/PanelContainer/ScrollContainer/MarginContainer/PlayerList")
 ServerNamePath = NodePath("Lobby/PanelContainer/MarginContainer/HBoxContainer/ServerName")
 ServerAttributesPath = NodePath("Lobby/PanelContainer/MarginContainer/HBoxContainer/ServerAttributes")
-PeerCountPath = NodePath("Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer/PeerCount")
+PeerCountPath = NodePath("Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/PlayerCount")
 StartButtonPath = NodePath("Lobby/HBoxContainer/Start")
 KickDialogPath = NodePath("KickPlayerDialog")
 KickedDialogPath = NodePath("KickedDialog")
@@ -215,14 +228,15 @@ margin_bottom = 443.0
 
 [node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer"]
 margin_right = 538.0
-margin_bottom = 17.0
+margin_bottom = 18.0
 custom_constants/margin_right = 5
 custom_constants/margin_left = 5
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer"]
+visible = false
 margin_left = 5.0
 margin_right = 533.0
-margin_bottom = 17.0
+margin_bottom = 18.0
 
 [node name="Label" type="Label" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
 margin_right = 59.0
@@ -241,8 +255,79 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
+[node name="PanelContainer" type="PanelContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer"]
+margin_left = 5.0
+margin_right = 533.0
+margin_bottom = 18.0
+mouse_filter = 2
+custom_styles/panel = SubResource( 1 )
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer"]
+margin_right = 523.0
+margin_bottom = 18.0
+mouse_filter = 2
+
+[node name="Name" type="Label" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer"]
+margin_right = 270.0
+margin_bottom = 18.0
+size_flags_horizontal = 3
+custom_fonts/font = ExtResource( 16 )
+text = "SPECIES"
+align = 1
+
+[node name="Indicators" type="HBoxContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer"]
+margin_left = 274.0
+margin_right = 474.0
+margin_bottom = 18.0
+custom_constants/separation = 40
+
+[node name="Score" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
+margin_right = 20.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 20, 0 )
+size_flags_vertical = 3
+texture = ExtResource( 13 )
+expand = true
+
+[node name="Longevity" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
+margin_left = 60.0
+margin_right = 80.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 20, 0 )
+size_flags_vertical = 3
+texture = ExtResource( 15 )
+expand = true
+
+[node name="Kills" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
+margin_left = 120.0
+margin_right = 140.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 20, 0 )
+size_flags_vertical = 3
+texture = ExtResource( 12 )
+expand = true
+
+[node name="Death" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
+margin_left = 180.0
+margin_right = 200.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 20, 0 )
+size_flags_vertical = 3
+texture = ExtResource( 14 )
+expand = true
+
+[node name="PlayerCount" type="Label" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer"]
+margin_left = 478.0
+margin_right = 523.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 45, 0 )
+custom_fonts/font = ExtResource( 16 )
+text = "32/32"
+align = 2
+clip_text = true
+
 [node name="PanelContainer" type="PanelContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer"]
-margin_top = 21.0
+margin_top = 22.0
 margin_right = 538.0
 margin_bottom = 438.0
 size_flags_vertical = 3
@@ -251,11 +336,11 @@ size_flags_vertical = 3
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 537.0
-margin_bottom = 416.0
+margin_bottom = 415.0
 
 [node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/PanelContainer/ScrollContainer"]
 margin_right = 536.0
-margin_bottom = 415.0
+margin_bottom = 414.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_constants/margin_right = 5
@@ -267,7 +352,7 @@ custom_constants/margin_bottom = 3
 margin_left = 3.0
 margin_top = 3.0
 margin_right = 531.0
-margin_bottom = 412.0
+margin_bottom = 411.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
@@ -304,7 +389,8 @@ margin_left = 5.0
 margin_right = 263.0
 margin_bottom = 17.0
 custom_fonts/font = ExtResource( 4 )
-text = "CHAT"
+text = "CHAT_ROOM"
+align = 1
 
 [node name="ChatBox" parent="Lobby/HBoxContainer2/ChatPanel/MarginContainer/VBoxContainer" instance=ExtResource( 3 )]
 anchor_top = 0.0

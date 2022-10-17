@@ -39,6 +39,9 @@ public static class Spawners
 /// </summary>
 public static class SpawnHelpers
 {
+    public static Action<INetEntity>? OnNetEntitySpawned;
+    public static Action<uint>? OnNetEntityDespawned;
+
     public static Microbe SpawnMicrobe(Species species, Vector3 location,
         Node worldRoot, PackedScene microbeScene, bool aiControlled,
         CompoundCloudSystem cloudSystem, ISpawnSystem spawnSystem, GameProperties currentGame,
@@ -70,6 +73,9 @@ public static class SpawnHelpers
         }
 
         microbe.SetInitialCompounds();
+
+        OnNetEntitySpawned?.Invoke(microbe);
+
         return microbe;
     }
 
@@ -157,6 +163,9 @@ public static class SpawnHelpers
 
         chunk.AddToGroup(Constants.FLUID_EFFECT_GROUP);
         chunk.AddToGroup(Constants.AI_TAG_CHUNK);
+
+        OnNetEntitySpawned?.Invoke(chunk);
+
         return chunk;
     }
 

@@ -340,6 +340,7 @@
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\MicrobialArena.cs" />
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\MicrobialArenaHUD.cs" />
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\PlayerMicrobialArenaInput.cs" />
+    <Compile Include="src\microbe_stage\multiplayer\NetworkedSpawnSystem.cs" />
     <Compile Include="src\microbe_stage\organelle_components\CiliaComponent.cs" />
     <Compile Include="src\microbe_stage\organelle_components\SlimeJetComponent.cs" />
     <Compile Include="src\microbe_stage\organelle_components\EmptyOrganelleComponent.cs" />
@@ -473,6 +474,7 @@
     <Compile Include="src\modding\WorkshopData.cs" />
     <Compile Include="src\networking\ChatBox.cs" />
     <Compile Include="src\gui_common\ScoreBoard.cs" />
+    <Compile Include="src\networking\INetEntity.cs" />
     <Compile Include="src\networking\KickPlayerDialog.cs" />
     <Compile Include="src\networking\MultiplayerGameMode.cs" />
     <Compile Include="src\networking\NetPlayerStatus.cs" />

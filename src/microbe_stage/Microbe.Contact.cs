@@ -92,7 +92,7 @@ public partial class Microbe
     private MicrobeState state;
 
     [JsonIgnore]
-    private PhagocytosisPhase phagocytosisPhase;
+    private PhagocytosisPhase phagocytosisStep;
 
     public enum MicrobeState
     {
@@ -150,16 +150,16 @@ public partial class Microbe
     [JsonProperty]
     public PhagocytosisPhase PhagocytosisStep
     {
-        get => phagocytosisPhase;
+        get => phagocytosisStep;
         set
         {
-            if (phagocytosisPhase == value)
+            if (phagocytosisStep == value)
                 return;
 
-            phagocytosisPhase = value;
+            phagocytosisStep = value;
 
             if (IsNetworkMaster())
-                Rpc(nameof(NetworkSyncPhagocytosisPhase), value);
+                Rpc(nameof(NetworkSyncPhagocytosisStep), value);
         }
     }
 
@@ -770,6 +770,9 @@ public partial class Microbe
     /// </returns>
     private IEnumerable<FloatingChunk> OnKilled()
     {
+        if (!IsNetworkMaster())
+            return new List<FloatingChunk>();
+
         // Reset some stuff
         State = MicrobeState.Normal;
         MovementDirection = new Vector3(0, 0, 0);

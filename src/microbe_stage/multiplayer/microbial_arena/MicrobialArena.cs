@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using Godot;
 
 /// <summary>
@@ -7,8 +6,7 @@ using Godot;
 /// </summary>
 public class MicrobialArena : MultiplayerStageBase<Microbe>
 {
-    private PatchManager patchManager = null!;
-    private SpawnSystem spawner = null!;
+    private NetworkedSpawnSystem spawner = null!;
     private MicrobeSystem microbeSystem = null!;
 
     public CompoundCloudSystem Clouds { get; private set; } = null!;
@@ -58,9 +56,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         TimedLifeSystem = new TimedLifeSystem(rootOfDynamicallySpawned);
         ProcessSystem = new ProcessSystem(rootOfDynamicallySpawned);
         microbeSystem = new MicrobeSystem(rootOfDynamicallySpawned);
-        spawner = new SpawnSystem(rootOfDynamicallySpawned);
-        patchManager = new PatchManager(spawner, ProcessSystem, Clouds, TimedLifeSystem,
-            worldLight, CurrentGame);
+        spawner = new NetworkedSpawnSystem(rootOfDynamicallySpawned);
     }
 
     public override void _Process(float delta)
@@ -101,66 +97,45 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         spawner.Init();
 
         base.SetupStage();
-    }
 
-    protected override void OnGameStarted()
-    {
-        base.OnGameStarted();
+        Camera.SetBackground(SimulationParameters.Instance.GetBackground(
+            GameWorld.Map.CurrentPatch!.BiomeTemplate.Background));
 
-        patchManager.CurrentGame = CurrentGame;
-
-        UpdatePatchSettings(false);
+        // Update environment for process system
+        ProcessSystem.SetBiome(GameWorld.Map.CurrentPatch.Biome);
     }
 
     protected override void NetworkUpdateGameState(float delta)
     {
+        base.NetworkUpdateGameState(delta);
+
         // TODO: replicate these systems
         TimedLifeSystem.Process(delta);
         ProcessSystem.Process(delta);
 
-        foreach (var player in Players)
-        {
-            var microbe = player.Value.Value;
-            microbe?.NetworkSync();
-        }
+        // if (Player != null)
+        //     spawner.Process(delta, Player.GlobalTranslation);
     }
 
-    protected override void UpdatePatchSettings(bool promptPatchNameChange = true)
+    protected override void OnLocalPlayerSpawned(Microbe player)
     {
-        // TODO: would be nice to skip this if we are loading a save made in the editor as this gets called twice when
-        // going back to the stage
-        if (patchManager.ApplyChangedPatchSettingsIfNeeded(GameWorld.Map.CurrentPatch!))
-        {
-            Player?.ClearEngulfedObjects();
-        }
+        base.OnLocalPlayerSpawned(player);
 
-        HUD.UpdateEnvironmentalBars(GameWorld.Map.CurrentPatch!.Biome);
-    }
-
-    protected override bool OnPlayerSpawn(int peerId, out Microbe? spawned)
-    {
-        spawned = (Microbe)SpawnHelpers.SpawnMicrobe(PlayerSpeciesList[peerId], new Vector3(0, 0, 0),
-            rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
-        spawned.Name = peerId.ToString(CultureInfo.CurrentCulture);
-        spawned.SetupNetworked(peerId);
-
-        if (peerId == GetTree().GetNetworkUniqueId())
-        {
-            spawned.AddToGroup(Constants.PLAYER_GROUP);
-            spawned.OnDeath = OnPlayerDied;
-            Camera.ObjectToFollow = spawned;
-            spawnedPlayer = true;
-        }
+        player.AddToGroup(Constants.PLAYER_GROUP);
+        player.OnDeath = OnPlayerDied;
+        Camera.ObjectToFollow = player;
 
         if (IsNetworkMaster())
-        {
-            spawned.OnNetworkedDeathCompletes = OnPlayerDestroyed;
-        }
+            player.OnNetworkedDeathCompletes = OnPlayerDestroyed;
+    }
 
+    protected override bool CreatePlayer(int peerId, out Microbe? spawned)
+    {
+        spawned = CreatePlayer(peerId);
         return true;
     }
 
-    protected override bool OnPlayerDeSpawn(Microbe removed)
+    protected override bool DestroyPlayer(Microbe removed)
     {
         if (Player == removed)
         {
@@ -174,6 +149,18 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         return true;
     }
 
+    protected override void UpdatePatchSettings(bool promptPatchNameChange = true)
+    {
+    }
+
+    private Microbe CreatePlayer(int peerId)
+    {
+        var microbe = (Microbe)SpawnHelpers.SpawnMicrobe(PlayerSpeciesList[peerId], new Vector3(0, 0, 0),
+            rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
+        microbe.SetupNetworked(peerId);
+        return microbe;
+    }
+
     private void OnPlayerDied(Microbe player)
     {
         Player = null;
@@ -182,7 +169,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
     private void OnPlayerDestroyed(int peerId)
     {
-        Rpc(nameof(DeSpawnPlayer), peerId);
+        DespawnPlayer(peerId);
     }
 
     [Master]

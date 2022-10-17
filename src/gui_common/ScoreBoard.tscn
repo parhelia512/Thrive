@@ -1,10 +1,14 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=1]
 [ext_resource path="res://src/gui_common/ScoreBoard.cs" type="Script" id=2]
 [ext_resource path="res://src/gui_common/NetworkedPlayerLabel.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Small.tres" type="DynamicFont" id=4]
 [ext_resource path="res://src/networking/KickPlayerDialog.tscn" type="PackedScene" id=5]
+[ext_resource path="res://assets/textures/gui/bevel/bacteria.png" type="Texture" id=6]
+[ext_resource path="res://assets/textures/gui/bevel/SuicideIcon.png" type="Texture" id=7]
+[ext_resource path="res://assets/textures/gui/bevel/IconGenerating.png" type="Texture" id=8]
+[ext_resource path="res://assets/textures/gui/bevel/NewIcon.png" type="Texture" id=9]
 
 [sub_resource type="StyleBoxFlat" id=1]
 draw_center = false
@@ -19,7 +23,6 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id=2]
-content_margin_left = 5.0
 content_margin_right = 5.0
 bg_color = Color( 0, 0, 0, 0.588235 )
 expand_margin_left = 2.0
@@ -33,8 +36,8 @@ anchor_bottom = 1.0
 mouse_filter = 2
 theme = ExtResource( 1 )
 script = ExtResource( 2 )
-ListPath = NodePath("VBoxContainer/Body/MarginContainer/VBoxContainer/VBoxContainer2")
-PlayerCountPath = NodePath("VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/Label2")
+ListPath = NodePath("VBoxContainer/Body/MarginContainer/VBoxContainer/PlayerList")
+PlayerCountPath = NodePath("VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/PlayerCount")
 NetworkedPlayerLabelScene = ExtResource( 3 )
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
@@ -91,26 +94,70 @@ mouse_filter = 2
 custom_styles/panel = SubResource( 2 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer"]
-margin_left = 5.0
 margin_right = 485.0
 margin_bottom = 18.0
 mouse_filter = 2
 
-[node name="Label" type="Label" parent="VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_right = 373.0
+[node name="Name" type="Label" parent="VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
+margin_right = 232.0
 margin_bottom = 18.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 4 )
-text = "NAME"
+text = "SPECIES"
+align = 1
 
-[node name="Label2" type="Label" parent="VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
-margin_left = 377.0
-margin_right = 480.0
+[node name="Indicators" type="HBoxContainer" parent="VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 236.0
+margin_right = 436.0
 margin_bottom = 18.0
-custom_fonts/font = ExtResource( 4 )
-text = "PLAYER_COUNT"
+custom_constants/separation = 40
 
-[node name="VBoxContainer2" type="VBoxContainer" parent="VBoxContainer/Body/MarginContainer/VBoxContainer"]
+[node name="Score" type="TextureRect" parent="VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/Indicators"]
+margin_right = 20.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 20, 0 )
+size_flags_vertical = 3
+texture = ExtResource( 9 )
+expand = true
+
+[node name="Longevity" type="TextureRect" parent="VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/Indicators"]
+margin_left = 60.0
+margin_right = 80.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 20, 0 )
+size_flags_vertical = 3
+texture = ExtResource( 8 )
+expand = true
+
+[node name="Kills" type="TextureRect" parent="VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/Indicators"]
+margin_left = 120.0
+margin_right = 140.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 20, 0 )
+size_flags_vertical = 3
+texture = ExtResource( 6 )
+expand = true
+
+[node name="Death" type="TextureRect" parent="VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer/Indicators"]
+margin_left = 180.0
+margin_right = 200.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 20, 0 )
+size_flags_vertical = 3
+texture = ExtResource( 7 )
+expand = true
+
+[node name="PlayerCount" type="Label" parent="VBoxContainer/Body/MarginContainer/VBoxContainer/PanelContainer/HBoxContainer"]
+margin_left = 440.0
+margin_right = 485.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 45, 0 )
+custom_fonts/font = ExtResource( 4 )
+text = "32/32"
+align = 2
+clip_text = true
+
+[node name="PlayerList" type="VBoxContainer" parent="VBoxContainer/Body/MarginContainer/VBoxContainer"]
 margin_top = 22.0
 margin_right = 490.0
 margin_bottom = 490.0

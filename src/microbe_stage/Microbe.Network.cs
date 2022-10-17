@@ -12,6 +12,8 @@ public partial class Microbe
 
     private Tween? networkTweener;
 
+    public uint NetEntityId { get; set; }
+
     public Action<int>? OnNetworkedDeathCompletes { get; set; }
 
     public void SetupNetworked(int peerId)
@@ -47,23 +49,17 @@ public partial class Microbe
             Rpc(nameof(NetworkFetchRandom));
     }
 
-    public void NetworkSync()
+    public void NetworkSyncEveryFrame(int peerId)
     {
-        foreach (var player in NetworkManager.Instance.PlayerList)
-        {
-            if (player.Key == GetTree().GetNetworkUniqueId() || player.Value.Status != NetPlayerStatus.InGame)
-                continue;
+        RpcUnreliableId(peerId, nameof(NetworkSyncMovement), GlobalTransform.origin, Rotation);
 
-            RpcUnreliableId(player.Key, nameof(NetworkSyncMovement), GlobalTransform.origin, Rotation);
+        RpcUnreliableId(peerId, nameof(NetworkSyncUsefulCompounds),
+            Compounds.UsefulCompounds.Select(c => c.InternalName).ToList());
 
-            RpcUnreliableId(player.Key, nameof(NetworkSyncUsefulCompounds),
-                Compounds.UsefulCompounds.Select(c => c.InternalName).ToList());
+        RpcUnreliableId(peerId, nameof(NetworkSyncCompounds),
+            Compounds.Compounds.ToDictionary(c => c.Key.InternalName, c => c.Value));
 
-            RpcUnreliableId(player.Key, nameof(NetworkSyncCompounds),
-                Compounds.Compounds.ToDictionary(c => c.Key.InternalName, c => c.Value));
-
-            RpcUnreliableId(player.Key, nameof(NetworkSyncHealth), Hitpoints);
-        }
+        RpcUnreliableId(peerId, nameof(NetworkSyncHealth), Hitpoints);
     }
 
     public void SendMovementDirection(Vector3 direction)
@@ -156,7 +152,7 @@ public partial class Microbe
     }
 
     [Puppet]
-    private void NetworkSyncPhagocytosisPhase(PhagocytosisPhase phase)
+    private void NetworkSyncPhagocytosisStep(PhagocytosisPhase phase)
     {
         PhagocytosisStep = phase;
     }

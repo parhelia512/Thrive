@@ -64,9 +64,6 @@ public class SpawnSystem : ISpawnSystem
         spawnTypes = new ShuffleBag<Spawner>(random);
     }
 
-    // Just a temporary.
-    public bool Enabled { get; set; }
-
     /// <summary>
     ///   Adds a new spawner. Sets up the spawn radius, this radius squared,
     ///   and frequency fields based on the parameters of this
@@ -152,11 +149,8 @@ public class SpawnSystem : ISpawnSystem
         coordinatesSpawned.Clear();
     }
 
-    public void Process(float delta, Vector3 playerPosition)
+    public virtual void Process(float delta, Vector3 playerPosition)
     {
-        if (!Enabled)
-            return;
-
         elapsed += delta;
         despawnElapsed += delta;
 

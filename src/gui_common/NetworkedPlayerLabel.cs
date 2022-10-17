@@ -9,8 +9,16 @@ public class NetworkedPlayerLabel : PanelContainer
     [Export]
     public NodePath KickButtonPath = null!;
 
+    [Export]
+    public NodePath CrossPath = null!;
+
+    [Export]
+    public NodePath SpacerPath = null!;
+
     private CustomRichTextLabel? nameLabel;
-    private Button? kickButton;
+    private Button kickButton = null!;
+    private TextureRect cross = null!;
+    private Control spacer = null!;
 
     private string playerName = string.Empty;
     private bool highlight;
@@ -49,6 +57,8 @@ public class NetworkedPlayerLabel : PanelContainer
     {
         nameLabel = GetNode<CustomRichTextLabel>(NamePath);
         kickButton = GetNode<Button>(KickButtonPath);
+        cross = GetNode<TextureRect>(CrossPath);
+        spacer = GetNode<Control>(SpacerPath);
 
         NetworkManager.Instance.Connect(
             nameof(NetworkManager.PlayerStatusChanged), this, nameof(OnPlayerStatusChanged));
@@ -87,10 +97,8 @@ public class NetworkedPlayerLabel : PanelContainer
 
     private void UpdateKickButton()
     {
-        if (kickButton == null)
-            throw new SceneTreeAttachRequired();
-
         kickButton.Visible = GetTree().IsNetworkServer() && ID != GetTree().GetNetworkUniqueId();
+        spacer.Visible = !kickButton.Visible;
     }
 
     private void UpdateReadyState()

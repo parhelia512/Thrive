@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 /// </summary>
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/FloatingChunk.tscn", UsesEarlyResolve = false)]
-public class FloatingChunk : RigidBody, ISpawned, IEngulfable
+public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
 {
     [Export]
     [JsonProperty]
@@ -62,6 +62,9 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
     [JsonProperty]
     private float engulfSize;
 
+    [JsonIgnore]
+    private PhagocytosisPhase phagocytosisStep;
+
     public int DespawnRadiusSquared { get; set; }
 
     [JsonIgnore]
@@ -72,6 +75,8 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
 
     [JsonIgnore]
     public GeometryInstance EntityGraphics => chunkMesh ?? throw new InstanceNotLoadedYetException();
+
+    public uint NetEntityId { get; set; }
 
     [JsonIgnore]
     public int RenderPriority
@@ -153,7 +158,20 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
     public AliveMarker AliveMarker { get; } = new();
 
     [JsonProperty]
-    public PhagocytosisPhase PhagocytosisStep { get; set; }
+    public PhagocytosisPhase PhagocytosisStep
+    {
+        get => phagocytosisStep;
+        set
+        {
+            if (phagocytosisStep == value)
+                return;
+
+            phagocytosisStep = value;
+
+            if (IsNetworkMaster())
+                Rpc(nameof(NetworkSyncPhagocytosisStep), value);
+        }
+    }
 
     [JsonProperty]
     public EntityReference<Microbe> HostileEngulfer { get; private set; } = new();
@@ -340,6 +358,11 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
         }
 
         elapsedSinceProcess = 0;
+    }
+
+    public void NetworkSyncEveryFrame(int peerId)
+    {
+        RpcUnreliableId(peerId, nameof(NetworkSyncTransform), GlobalTranslation, Rotation);
     }
 
     public void PopImmediately(CompoundCloudSystem compoundClouds)
@@ -601,5 +624,18 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
         {
             this.DestroyDetachAndQueueFree();
         }
+    }
+
+    [Puppet]
+    private void NetworkSyncTransform(Vector3 position, Vector3 rotation)
+    {
+        GlobalTranslation = position;
+        Rotation = rotation;
+    }
+
+    [Puppet]
+    private void NetworkSyncPhagocytosisStep(PhagocytosisPhase phase)
+    {
+        PhagocytosisStep = phase;
     }
 }
