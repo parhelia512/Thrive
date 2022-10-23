@@ -74,6 +74,17 @@ public static class SpawnHelpers
 
         microbe.SetInitialCompounds();
 
+        return microbe;
+    }
+
+    public static Microbe SpawnNetworkedMicrobe(int peerId, Species species, Vector3 location,
+        Node worldRoot, CompoundCloudSystem cloudSystem, ISpawnSystem spawnSystem, GameProperties currentGame)
+    {
+        var microbe = SpawnMicrobe(
+            species, location, worldRoot, LoadMicrobeScene(), false, cloudSystem, spawnSystem, currentGame);
+
+        microbe.SetupNetworked(peerId);
+
         OnNetEntitySpawned?.Invoke(microbe);
 
         return microbe;

@@ -56,6 +56,8 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
 
     private bool transitionFinished;
 
+    public event EventHandler? GameReady;
+
     /// <summary>
     ///   The main current game object holding various details
     /// </summary>
@@ -509,6 +511,12 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
         playerExtinctInCurrentPatch = true;
 
         BaseHUD.ShowPatchExtinctionBox();
+    }
+
+    [Puppet]
+    protected void NotifyGameReady()
+    {
+        GameReady?.Invoke(this, EventArgs.Empty);
     }
 
     private void PatchExtinctionResolved()

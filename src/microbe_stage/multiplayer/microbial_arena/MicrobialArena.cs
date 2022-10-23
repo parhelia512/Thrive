@@ -1,13 +1,19 @@
 using System;
 using Godot;
+using Newtonsoft.Json;
 
 /// <summary>
 ///   Main class for managing an online competitive game mode set in the microbial stage.
 /// </summary>
+[JsonObject(IsReference = true)]
+[SceneLoadedClass("res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn")]
+[DeserializedCallbackTarget]
+[UseThriveSerializer]
 public class MicrobialArena : MultiplayerStageBase<Microbe>
 {
-    private NetworkedSpawnSystem spawner = null!;
+    private MicrobialArenaSpawnSystem spawner = null!;
     private MicrobeSystem microbeSystem = null!;
+    private FloatingChunkSystem floatingChunkSystem = null!;
 
     public CompoundCloudSystem Clouds { get; private set; } = null!;
     public FluidSystem FluidSystem { get; private set; } = null!;
@@ -17,6 +23,10 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     public MicrobialArenaHUD HUD { get; private set; } = null!;
     public PlayerHoverInfo HoverInfo { get; private set; } = null!;
     public PlayerMicrobialArenaInput PlayerInput { get; private set; } = null!;
+
+    public float ArenaRadius { get; private set; } = 1000;
+
+    public int MaxEntities { get; private set; } = Constants.MULTIPLAYER_MICROBIAL_ARENA_DEFAULT_ENTITY_LIMIT;
 
     protected override IStageHUD BaseHUD => HUD;
 
@@ -56,13 +66,16 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         TimedLifeSystem = new TimedLifeSystem(rootOfDynamicallySpawned);
         ProcessSystem = new ProcessSystem(rootOfDynamicallySpawned);
         microbeSystem = new MicrobeSystem(rootOfDynamicallySpawned);
-        spawner = new NetworkedSpawnSystem(rootOfDynamicallySpawned);
+        floatingChunkSystem = new FloatingChunkSystem(rootOfDynamicallySpawned, Clouds);
+        spawner = new MicrobialArenaSpawnSystem(
+            rootOfDynamicallySpawned, GameWorld.Map.CurrentPatch!.Biome, ArenaRadius, MaxEntities, random);
     }
 
     public override void _Process(float delta)
     {
         base._Process(delta);
         microbeSystem.Process(delta);
+        floatingChunkSystem.Process(delta, Player?.Translation);
     }
 
     public override void OnFinishTransitioning()
@@ -93,16 +106,16 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         // Initialise the cloud system first so we can apply patch-specific brightness in OnGameStarted
         Clouds.Init(FluidSystem);
 
-        // Initialise spawners next, since this removes existing spawners if present
-        spawner.Init();
-
-        base.SetupStage();
+        if (IsNetworkMaster())
+            spawner.Init();
 
         Camera.SetBackground(SimulationParameters.Instance.GetBackground(
             GameWorld.Map.CurrentPatch!.BiomeTemplate.Background));
 
         // Update environment for process system
         ProcessSystem.SetBiome(GameWorld.Map.CurrentPatch.Biome);
+
+        base.SetupStage();
     }
 
     protected override void NetworkUpdateGameState(float delta)
@@ -124,25 +137,24 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         player.AddToGroup(Constants.PLAYER_GROUP);
         player.OnDeath = OnPlayerDied;
         Camera.ObjectToFollow = player;
-
-        if (IsNetworkMaster())
-            player.OnNetworkedDeathCompletes = OnPlayerDestroyed;
     }
 
-    protected override bool CreatePlayer(int peerId, out Microbe? spawned)
+    protected override void OnLocalPlayerDespawn()
     {
-        spawned = CreatePlayer(peerId);
+        base.OnLocalPlayerDespawn();
+
+        Camera.ObjectToFollow = null;
+    }
+
+    protected override bool HandlePlayerSpawn(int peerId, out Microbe? spawned)
+    {
+        spawned = HandlePlayerSpawn(peerId);
+        spawned.OnNetworkedDeathCompletes = OnPlayerDestroyed;
         return true;
     }
 
-    protected override bool DestroyPlayer(Microbe removed)
+    protected override bool HandlePlayerDespawn(Microbe removed)
     {
-        if (Player == removed)
-        {
-            Player = null;
-            Camera.ObjectToFollow = null;
-        }
-
         if (removed.PhagocytosisStep == PhagocytosisPhase.None)
             removed.DestroyDetachAndQueueFree();
 
@@ -153,20 +165,21 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     {
     }
 
-    private Microbe CreatePlayer(int peerId)
+    private Microbe HandlePlayerSpawn(int peerId)
     {
-        var microbe = (Microbe)SpawnHelpers.SpawnMicrobe(PlayerSpeciesList[peerId], new Vector3(0, 0, 0),
-            rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!);
-        microbe.SetupNetworked(peerId);
+        var microbe = (Microbe)SpawnHelpers.SpawnNetworkedMicrobe(peerId, PlayerSpeciesList[peerId], new Vector3(0, 0, 0),
+            rootOfDynamicallySpawned, Clouds, spawner, CurrentGame!);
         return microbe;
     }
 
+    [DeserializedCallbackAllowed]
     private void OnPlayerDied(Microbe player)
     {
         Player = null;
         Camera.ObjectToFollow = null;
     }
 
+    [DeserializedCallbackAllowed]
     private void OnPlayerDestroyed(int peerId)
     {
         DespawnPlayer(peerId);

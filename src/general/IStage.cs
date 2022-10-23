@@ -1,10 +1,13 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 
 /// <summary>
 ///   See the documentation on <see cref="IStageHUD"/>
 /// </summary>
 public interface IStage : IReturnableGameState
 {
+    public event EventHandler? GameReady;
+
     [JsonIgnore]
     public bool HasPlayer { get; }
 

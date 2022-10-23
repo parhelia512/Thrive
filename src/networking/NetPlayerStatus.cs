@@ -1,7 +1,7 @@
 ﻿public enum NetPlayerStatus
 {
     Lobby,
-    JoiningGame,
-    InGame,
-    LeavingGame,
+    Joining,
+    Active,
+    Leaving,
 }

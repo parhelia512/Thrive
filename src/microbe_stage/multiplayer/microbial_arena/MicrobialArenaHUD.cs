@@ -18,12 +18,17 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     [Export]
     public NodePath UnbindAllHotkeyPath = null!;
 
+    [Export]
+    public NodePath ArenaMinimapPath = null!;
+
     private ActionButton bindingModeHotkey = null!;
     private ActionButton unbindAllHotkey = null!;
 
     private ProgressBar ingestedMatterBar = null!;
 
     private CustomDialog? winBox;
+
+    private ArenaMinimap minimap = null!;
 
     /// <summary>
     ///   If not null the signaling agent radial menu is open for the given microbe, which should be the player
@@ -50,6 +55,15 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
 
         bindingModeHotkey = GetNode<ActionButton>(BindingModeHotkeyPath);
         unbindAllHotkey = GetNode<ActionButton>(UnbindAllHotkeyPath);
+
+        minimap = GetNode<ArenaMinimap>(ArenaMinimapPath);
+    }
+
+    public override void Init(MicrobialArena containedInStage)
+    {
+        base.Init(containedInStage);
+
+        minimap.Init(containedInStage);
     }
 
     public void ShowSignalingCommandsMenu(Microbe player)

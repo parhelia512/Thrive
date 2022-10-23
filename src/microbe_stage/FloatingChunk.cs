@@ -39,6 +39,9 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
     private MeshInstance? chunkMesh;
 
     [JsonProperty]
+    private Tween? networkTweener;
+
+    [JsonProperty]
     private bool isDissolving;
 
     [JsonProperty]
@@ -291,6 +294,12 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
             throw new InvalidOperationException("Can't make a chunk without graphics scene");
 
         InitPhysics();
+
+        if (GetTree().HasNetworkPeer())
+        {
+            networkTweener = new Tween();
+            AddChild(networkTweener);
+        }
     }
 
     public void ProcessChunk(float delta, CompoundCloudSystem compoundClouds)
@@ -360,9 +369,32 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
         elapsedSinceProcess = 0;
     }
 
-    public void NetworkSyncEveryFrame(int peerId)
+    public void NetSyncEveryFrame(Dictionary<string, string> data)
     {
-        RpcUnreliableId(peerId, nameof(NetworkSyncTransform), GlobalTranslation, Rotation);
+        var rotation = (Vector3)GD.Str2Var(data["rot"]);
+        var position = (Vector3)GD.Str2Var(data["pos"]);
+
+        Rotation = rotation;
+        networkTweener?.InterpolateProperty(this, "global_translation", null, position, 0.1f);
+        networkTweener?.Start();
+    }
+
+    public Dictionary<string, string> PackState()
+    {
+        var vars = new Dictionary<string, string>
+        {
+            { "pos", GD.Var2Str(GlobalTranslation) },
+            { "rot", GD.Var2Str(GlobalRotation) },
+        };
+
+        return vars;
+    }
+
+    public void OnReplicated()
+    {
+        networkTweener?.DetachAndQueueFree();
+        networkTweener = new Tween();
+        AddChild(networkTweener);
     }
 
     public void PopImmediately(CompoundCloudSystem compoundClouds)
@@ -624,13 +656,6 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
         {
             this.DestroyDetachAndQueueFree();
         }
-    }
-
-    [Puppet]
-    private void NetworkSyncTransform(Vector3 position, Vector3 rotation)
-    {
-        GlobalTranslation = position;
-        Rotation = rotation;
     }
 
     [Puppet]

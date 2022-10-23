@@ -41,6 +41,11 @@ public class ChatBox : VBoxContainer
         DisplayChat();
     }
 
+    public void Focus()
+    {
+        lineEdit.GrabFocus();
+    }
+
     private void DisplayChat()
     {
         var builder = new StringBuilder(100);
@@ -59,15 +64,15 @@ public class ChatBox : VBoxContainer
         {
             ClearMessages();
         }
-        else if (chat.BeginsWith("/updaterate_d "))
+        else if (chat.BeginsWith("/updateintv "))
         {
             var args = chat.Split(" ");
 
             if (float.TryParse(args[1], out float result))
             {
-                var oldTickRate = NetworkManager.Instance.UpdateRateDelay;
-                NetworkManager.Instance.UpdateRateDelay = result;
-                NetworkManager.Instance.BroadcastChat($"Update rate delay has been changed to {result} by the host");
+                var oldTickRate = NetworkManager.Instance.UpdateInterval;
+                NetworkManager.Instance.UpdateInterval = result;
+                NetworkManager.Instance.BroadcastChat($"Update interval has been changed to {result} by the host");
             }
         }
         else

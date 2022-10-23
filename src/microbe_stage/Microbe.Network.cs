@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Godot;
+using Newtonsoft.Json;
 
 /// <summary>
 ///   The networking part of Microbe class for state synchronizations.
@@ -10,6 +12,7 @@ public partial class Microbe
 {
     private MeshInstance tagBox = null!;
 
+    [JsonProperty]
     private Tween? networkTweener;
 
     public uint NetEntityId { get; set; }
@@ -23,6 +26,9 @@ public partial class Microbe
 
         tagBox = GetNode<MeshInstance>("TagBox");
 
+        Name = peerId.ToString(CultureInfo.CurrentCulture);
+
+        networkTweener?.DetachAndQueueFree();
         networkTweener = new Tween();
         AddChild(networkTweener);
 
@@ -49,17 +55,46 @@ public partial class Microbe
             Rpc(nameof(NetworkFetchRandom));
     }
 
-    public void NetworkSyncEveryFrame(int peerId)
+    public void NetSyncEveryFrame(Dictionary<string, string> data)
     {
-        RpcUnreliableId(peerId, nameof(NetworkSyncMovement), GlobalTransform.origin, Rotation);
+        var rotation = (Vector3)GD.Str2Var(data["rot"]);
+        var position = (Vector3)GD.Str2Var(data["pos"]);
 
-        RpcUnreliableId(peerId, nameof(NetworkSyncUsefulCompounds),
-            Compounds.UsefulCompounds.Select(c => c.InternalName).ToList());
+        Rotation = rotation;
+        networkTweener?.InterpolateProperty(this, "global_translation", null, position, 0.1f);
+        networkTweener?.Start();
 
-        RpcUnreliableId(peerId, nameof(NetworkSyncCompounds),
-            Compounds.Compounds.ToDictionary(c => c.Key.InternalName, c => c.Value));
+        Compounds.ClearUseful();
+        foreach (var useful in JsonConvert.DeserializeObject<List<string>>(data["usefulCompounds"])!)
+            Compounds.SetUseful(SimulationParameters.Instance.GetCompound(useful));
 
-        RpcUnreliableId(peerId, nameof(NetworkSyncHealth), Hitpoints);
+        foreach (var entry in JsonConvert.DeserializeObject<Dictionary<string, float>>(data["compounds"])!)
+        {
+            var compound = SimulationParameters.Instance.GetCompound(entry.Key);
+            Compounds.Compounds[compound] = entry.Value;
+        }
+
+        Hitpoints = (float)GD.Str2Var(data["health"]);
+    }
+
+    public Dictionary<string, string> PackState()
+    {
+        var vars = new Dictionary<string, string>
+        {
+            { "pos", GD.Var2Str(GlobalTranslation) },
+            { "rot", GD.Var2Str(GlobalRotation) },
+            { "usefulCompounds", JsonConvert.SerializeObject(Compounds.UsefulCompounds.Select(c => c.InternalName).ToList()) },
+            { "compounds", JsonConvert.SerializeObject(Compounds.Compounds.ToDictionary(c => c.Key.InternalName, c => c.Value)) },
+            { "health", GD.Var2Str(Hitpoints) }
+        };
+
+        return vars;
+    }
+
+    public void OnReplicated()
+    {
+        if (int.TryParse(Name, out int parsedId))
+            SetupNetworked(parsedId);
     }
 
     public void SendMovementDirection(Vector3 direction)
@@ -102,47 +137,15 @@ public partial class Microbe
     }
 
     [Puppet]
-    private void NetworkSyncMovement(Vector3 position, Vector3 rotation)
-    {
-        Rotation = rotation;
-        networkTweener?.InterpolateProperty(this, "global_transform", null, new Transform(GlobalTransform.basis, position), 0.1f);
-        networkTweener?.Start();
-    }
-
-    [Puppet]
-    private void NetworkSyncHealth(float health)
-    {
-        Hitpoints = health;
-    }
-
-    [Puppet]
     private void NetworkSyncKill()
     {
         Kill();
     }
 
     [Puppet]
-    private void NetworkSyncUsefulCompounds(List<string> usefulCompounds)
-    {
-        Compounds.ClearUseful();
-        foreach (var useful in usefulCompounds)
-            Compounds.SetUseful(SimulationParameters.Instance.GetCompound(useful));
-    }
-
-    [Puppet]
     private void NetworkSyncCompoundsCapacity(float capacity)
     {
         Compounds.Capacity = capacity;
-    }
-
-    [Puppet]
-    private void NetworkSyncCompounds(Dictionary<string, float> compounds)
-    {
-        foreach (var entry in compounds)
-        {
-            var compound = SimulationParameters.Instance.GetCompound(entry.Key);
-            Compounds.Compounds[compound] = entry.Value;
-        }
     }
 
     [Puppet]

@@ -740,9 +740,6 @@ public partial class Microbe
             (CellTypeProperties.MembraneRigidity * Constants.MEMBRANE_RIGIDITY_HITPOINTS_MODIFIER);
 
         Hitpoints = MaxHitpoints * currentHealth;
-
-        if (IsNetworkMaster())
-            Rpc(nameof(NetworkSyncHealth), Hitpoints);
     }
 
     /// <summary>
@@ -1271,7 +1268,7 @@ public partial class Microbe
         Compounds.Capacity = organellesCapacity;
 
         if (IsNetworkMaster())
-            NetworkSyncCompoundsCapacity(organellesCapacity);
+            Rpc(nameof(NetworkSyncCompoundsCapacity), organellesCapacity);
     }
 
     [DeserializedCallbackAllowed]
@@ -1301,7 +1298,7 @@ public partial class Microbe
         Compounds.Capacity = organellesCapacity;
 
         if (IsNetworkMaster())
-            NetworkSyncCompoundsCapacity(organellesCapacity);
+            Rpc(nameof(NetworkSyncCompoundsCapacity), organellesCapacity);
     }
 
     /// <summary>
@@ -1313,7 +1310,7 @@ public partial class Microbe
         Compounds.Capacity = organellesCapacity;
 
         if (IsNetworkMaster())
-            NetworkSyncCompoundsCapacity(organellesCapacity);
+            Rpc(nameof(NetworkSyncCompoundsCapacity), organellesCapacity);
     }
 
     private bool CheckHasSignalingAgent()

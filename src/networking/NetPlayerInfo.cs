@@ -17,13 +17,13 @@ public class NetPlayerInfo
     {
         switch (Status)
         {
-            case NetPlayerStatus.InGame:
+            case NetPlayerStatus.Active:
                 return TranslationServer.Translate("IN_GAME_LOWERCASE");
             case NetPlayerStatus.Lobby:
                 return TranslationServer.Translate("LOBBY_LOWERCASE");
-            case NetPlayerStatus.JoiningGame:
+            case NetPlayerStatus.Joining:
                 return TranslationServer.Translate("JOINING_LOWERCASE");
-            case NetPlayerStatus.LeavingGame:
+            case NetPlayerStatus.Leaving:
                 return TranslationServer.Translate("LEAVING_LOWERCASE");
             default:
                 return TranslationServer.Translate("N_A");
@@ -34,7 +34,7 @@ public class NetPlayerInfo
     {
         switch (Status)
         {
-            case NetPlayerStatus.InGame:
+            case NetPlayerStatus.Active:
                 return TranslationServer.Translate("G_LETTER");
             case NetPlayerStatus.Lobby:
                 return TranslationServer.Translate("L_LETTER");

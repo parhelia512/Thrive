@@ -402,9 +402,6 @@ public partial class Microbe
 
         Hitpoints -= amount;
 
-        if (IsNetworkMaster())
-            Rpc(nameof(NetworkSyncHealth), Hitpoints);
-
         ModLoader.ModInterface.TriggerOnDamageReceived(this, amount, IsPlayerMicrobe);
 
         // Flash the microbe red

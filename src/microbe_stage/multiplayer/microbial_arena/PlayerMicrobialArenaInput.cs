@@ -83,4 +83,10 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
     {
         stage?.HUD.ToggleScoreBoard();
     }
+
+    [RunOnKeyDown("g_focus_chat")]
+    public void FocusChat()
+    {
+        stage?.HUD.FocusChat();
+    }
 }

@@ -39,8 +39,14 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
 
     public void ToggleScoreBoard()
     {
-        if (GetTree().HasNetworkPeer())
-            scoreBoard.Visible = !scoreBoard.Visible;
+        scoreBoard.Visible = !scoreBoard.Visible;
+    }
+
+    public void FocusChat()
+    {
+        bottomLeftBar.ChatPressed = true;
+        ChatButtonPressed(true);
+        chatBox.Focus();
     }
 
     private void ChatButtonPressed(bool wantedState)

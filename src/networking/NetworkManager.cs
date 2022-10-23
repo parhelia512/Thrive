@@ -71,7 +71,7 @@ public class NetworkManager : Node
 
     public bool Connected => peer?.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connected;
 
-    public float UpdateRateDelay { get; set; } = Constants.MULTIPLAYER_DEFAULT_UPDATE_RATE_DELAY_SECONDS;
+    public float UpdateInterval { get; set; } = Constants.MULTIPLAYER_DEFAULT_UPDATE_INTERVAL_SECONDS;
 
     public float TimePassedConnecting { get; private set; }
 
@@ -221,7 +221,7 @@ public class NetworkManager : Node
         if (!GetTree().IsNetworkServer() && !GameInSession)
             return;
 
-        if (!IsDedicated && Player!.Status == NetPlayerStatus.InGame)
+        if (!IsDedicated && Player!.Status == NetPlayerStatus.Active)
             return;
 
         if (GetTree().IsNetworkServer() && !GameInSession)
@@ -259,7 +259,7 @@ public class NetworkManager : Node
                 if (player.Key == DEFAULT_SERVER_ID)
                     continue;
 
-                if (player.Value.Status == NetPlayerStatus.InGame)
+                if (player.Value.Status == NetPlayerStatus.Active)
                     RpcId(player.Key, nameof(NotifyWorldExit));
             }
         }
@@ -410,6 +410,11 @@ public class NetworkManager : Node
                 break;
             }
         }
+    }
+
+    private void OnGameReady(object sender, EventArgs args)
+    {
+        Rpc(nameof(NotifyWorldReady), GetTree().GetNetworkUniqueId());
     }
 
     [RemoteSync]
@@ -570,16 +575,18 @@ public class NetworkManager : Node
 
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.4f, () =>
         {
-            PackedScene scene = null!;
+            IStage stage = null!;
 
             switch (Settings?.SelectedGameMode)
             {
                 case MultiplayerGameMode.MicrobialArena:
-                    scene = SceneManager.Instance.LoadScene(MultiplayerGameMode.MicrobialArena);
+                    var scene = SceneManager.Instance.LoadScene(MultiplayerGameMode.MicrobialArena);
+                    stage = (MicrobialArena)scene.Instance();
                     break;
             }
 
-            SceneManager.Instance.SwitchToScene(scene.Instance());
+            stage.GameReady += OnGameReady;
+            SceneManager.Instance.SwitchToScene(stage.GameStateRoot);
             Rpc(nameof(NotifyWorldPostLoad), GetTree().GetNetworkUniqueId());
         });
     }
@@ -605,7 +612,7 @@ public class NetworkManager : Node
         if (playerInfo == null)
             return;
 
-        playerInfo.Status = NetPlayerStatus.JoiningGame;
+        playerInfo.Status = NetPlayerStatus.Joining;
         EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
     }
 
@@ -617,10 +624,7 @@ public class NetworkManager : Node
         if (playerInfo == null)
             return;
 
-        playerInfo.Status = NetPlayerStatus.InGame;
-        EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
         EmitSignal(nameof(PlayerJoined), peerId);
-
         SystemBroadcastChat($"[b]{playerInfo.Name}[/b] has joined.");
     }
 
@@ -632,7 +636,7 @@ public class NetworkManager : Node
         if (playerInfo == null)
             return;
 
-        playerInfo.Status = NetPlayerStatus.LeavingGame;
+        playerInfo.Status = NetPlayerStatus.Leaving;
         EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
         EmitSignal(nameof(PlayerLeft), peerId);
     }
@@ -651,6 +655,18 @@ public class NetworkManager : Node
         EmitSignal(nameof(ServerStateUpdated));
 
         SystemBroadcastChat($"[b]{playerInfo.Name}[/b] has left.");
+    }
+
+    [RemoteSync]
+    private void NotifyWorldReady(int peerId)
+    {
+        var playerInfo = GetPlayerState(peerId);
+
+        if (playerInfo == null)
+            return;
+
+        playerInfo.Status = NetPlayerStatus.Active;
+        EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
     }
 
     [RemoteSync]
