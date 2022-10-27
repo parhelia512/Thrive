@@ -85,8 +85,8 @@ public class NetworkedPlayerLabel : PanelContainer
 
         var network = NetworkManager.Instance;
 
-        var player = network.GetPlayerState(ID);
-        if (player != null && player.Status != network.Player?.Status)
+        var player = network.GetPlayerInfo(ID);
+        if (player != null && player.Status != network.PlayerInfo?.Status)
         {
             builder.Append(' ');
             builder.Append($"[{player.GetStatusReadable()}]");
@@ -97,7 +97,7 @@ public class NetworkedPlayerLabel : PanelContainer
 
     private void UpdateKickButton()
     {
-        kickButton.Visible = GetTree().IsNetworkServer() && ID != GetTree().GetNetworkUniqueId();
+        kickButton.Visible = NetworkManager.Instance.IsAuthoritative && ID != GetTree().GetNetworkUniqueId();
         spacer.Visible = !kickButton.Visible;
     }
 

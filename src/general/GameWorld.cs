@@ -18,6 +18,9 @@ using Newtonsoft.Json;
 public class GameWorld : ISaveLoadable
 {
     [JsonProperty]
+    protected Dictionary<uint, Species> worldSpecies = new();
+
+    [JsonProperty]
     public WorldGenerationSettings WorldSettings = new();
 
     [JsonProperty]
@@ -25,9 +28,6 @@ public class GameWorld : ISaveLoadable
 
     [JsonProperty]
     private Mutations mutator = new();
-
-    [JsonProperty]
-    private Dictionary<uint, Species> worldSpecies = new();
 
     [JsonProperty]
     private Dictionary<double, List<GameEventDescription>> eventsLog = new();
@@ -147,6 +147,12 @@ public class GameWorld : ISaveLoadable
 
         species.Organelles.Add(new OrganelleTemplate(
             SimulationParameters.Instance.GetOrganelleType("cytoplasm"), new Hex(0, 0), 0));
+
+        species.Organelles.Add(new OrganelleTemplate(
+            SimulationParameters.Instance.GetOrganelleType("metabolosome"), new Hex(0, -1), 0));
+
+        species.Organelles.Add(new OrganelleTemplate(
+            SimulationParameters.Instance.GetOrganelleType("pilus"), new Hex(0, -2), 0));
 
         species.OnEdited();
     }

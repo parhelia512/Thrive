@@ -548,14 +548,14 @@ corner_radius_bottom_left = 1
 
 [node name="MicrobialArena" type="Node"]
 script = ExtResource( 7 )
-PauseMenuPath = NodePath("PauseMenu")
-HUDRootPath = NodePath("MicrobialArenaHUD")
+PauseMenuPath = NodePath("GUI/PauseMenu")
+HUDRootPath = NodePath("GUI/MicrobialArenaHUD")
 
-[node name="World" type="Node" parent="."]
+[node name="World" type="Spatial" parent="."]
 
 [node name="PrimaryCamera" parent="World" instance=ExtResource( 1 )]
 
-[node name="DynamicallySpawned" type="Node" parent="World"]
+[node name="DynamicallySpawned" type="Spatial" parent="World"]
 
 [node name="CompoundClouds" type="Node" parent="World"]
 script = ExtResource( 74 )
@@ -571,7 +571,12 @@ script = ExtResource( 56 )
 [node name="PlayerMicrobialArenaInput" type="Node" parent="."]
 script = ExtResource( 50 )
 
-[node name="MicrobialArenaHUD" type="Control" parent="."]
+[node name="GUI" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="MicrobialArenaHUD" type="Control" parent="GUI"]
 pause_mode = 2
 process_priority = 4
 anchor_right = 1.0
@@ -654,7 +659,7 @@ BindingModeHotkeyPath = NodePath("ScrollContainer/HotBar/BindingMode")
 UnbindAllHotkeyPath = NodePath("ScrollContainer/HotBar/UnbindAll")
 ArenaMinimapPath = NodePath("BottomRight/VBoxContainer/ArenaMinimap")
 
-[node name="MouseHoverPanel" type="MarginContainer" parent="MicrobialArenaHUD"]
+[node name="MouseHoverPanel" type="MarginContainer" parent="GUI/MicrobialArenaHUD"]
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -665,7 +670,7 @@ theme = ExtResource( 10 )
 custom_constants/margin_right = 10
 custom_constants/margin_top = 10
 
-[node name="PanelContainer" type="PanelContainer" parent="MicrobialArenaHUD/MouseHoverPanel"]
+[node name="PanelContainer" type="PanelContainer" parent="GUI/MicrobialArenaHUD/MouseHoverPanel"]
 margin_top = 10.0
 margin_right = 250.0
 margin_bottom = 79.0
@@ -677,7 +682,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="MarginContainer" type="MarginContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer"]
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 249.0
@@ -688,14 +693,14 @@ custom_constants/margin_top = 5
 custom_constants/margin_left = 10
 custom_constants/margin_bottom = 10
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer"]
 margin_left = 10.0
 margin_top = 5.0
 margin_right = 238.0
 margin_bottom = 57.0
 mouse_filter = 2
 
-[node name="MousePos" type="Label" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="MousePos" type="Label" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 margin_right = 228.0
 margin_bottom = 19.0
 custom_fonts/font = ExtResource( 15 )
@@ -705,21 +710,21 @@ __meta__ = {
 "_editor_description_": ""
 }
 
-[node name="TitleSeparator" type="HSeparator" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="TitleSeparator" type="HSeparator" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 margin_top = 23.0
 margin_right = 228.0
 margin_bottom = 28.0
 rect_min_size = Vector2( 0, 5 )
 mouse_filter = 2
 
-[node name="NothingHere" type="MarginContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="NothingHere" type="MarginContainer" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 margin_top = 32.0
 margin_right = 228.0
 margin_bottom = 52.0
 mouse_filter = 2
 custom_constants/margin_left = 10
 
-[node name="NothingHereLabel" type="Label" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/NothingHere"]
+[node name="NothingHereLabel" type="Label" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/NothingHere"]
 margin_left = 10.0
 margin_right = 228.0
 margin_bottom = 20.0
@@ -731,20 +736,20 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HoveredCompounds" type="VBoxContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HoveredCompounds" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 visible = false
 margin_top = 56.0
 margin_right = 218.0
 margin_bottom = 80.0
 mouse_filter = 2
 
-[node name="MarginContainer" type="MarginContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds"]
+[node name="MarginContainer" type="MarginContainer" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds"]
 margin_right = 218.0
 margin_bottom = 20.0
 mouse_filter = 2
 custom_constants/margin_left = 10
 
-[node name="CompoundsLabel" type="Label" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds/MarginContainer"]
+[node name="CompoundsLabel" type="Label" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds/MarginContainer"]
 margin_left = 10.0
 margin_right = 218.0
 margin_bottom = 20.0
@@ -756,14 +761,14 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="List" type="VBoxContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds"]
+[node name="List" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCompounds"]
 margin_top = 24.0
 margin_right = 218.0
 margin_bottom = 24.0
 mouse_filter = 2
 theme = SubResource( 3 )
 
-[node name="SpeciesSeparator" type="HSeparator" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="SpeciesSeparator" type="HSeparator" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 visible = false
 margin_top = 56.0
 margin_right = 218.0
@@ -771,20 +776,20 @@ margin_bottom = 61.0
 rect_min_size = Vector2( 0, 5 )
 mouse_filter = 2
 
-[node name="HoveredCells" type="VBoxContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="HoveredCells" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer"]
 visible = false
 margin_top = 56.0
 margin_right = 208.0
 margin_bottom = 97.0
 mouse_filter = 2
 
-[node name="MarginContainer2" type="MarginContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells"]
+[node name="MarginContainer2" type="MarginContainer" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells"]
 margin_right = 208.0
 margin_bottom = 20.0
 mouse_filter = 2
 custom_constants/margin_left = 10
 
-[node name="SpeciesLabel" type="Label" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells/MarginContainer2"]
+[node name="SpeciesLabel" type="Label" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells/MarginContainer2"]
 margin_left = 10.0
 margin_right = 208.0
 margin_bottom = 20.0
@@ -796,21 +801,21 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="List" type="VBoxContainer" parent="MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells"]
+[node name="List" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/MouseHoverPanel/PanelContainer/MarginContainer/VBoxContainer/HoveredCells"]
 margin_top = 24.0
 margin_right = 208.0
 margin_bottom = 41.0
 mouse_filter = 2
 theme = SubResource( 3 )
 
-[node name="BottomLeft" type="Control" parent="MicrobialArenaHUD"]
+[node name="BottomLeft" type="Control" parent="GUI/MicrobialArenaHUD"]
 anchor_top = 1.0
 anchor_bottom = 1.0
 margin_top = -632.0
 margin_right = 455.0
 mouse_filter = 2
 
-[node name="LeftPanels" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft"]
+[node name="LeftPanels" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/BottomLeft"]
 anchor_top = 1.0
 anchor_bottom = 1.0
 margin_left = 10.0
@@ -824,11 +829,11 @@ size_flags_vertical = 0
 custom_constants/separation = 10
 alignment = 2
 
-[node name="EnvironmentGroup" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels"]
+[node name="EnvironmentGroup" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels"]
 margin_right = 313.0
 margin_bottom = 234.0
 
-[node name="EnvironmentPanel" type="Panel" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup"]
+[node name="EnvironmentPanel" type="Panel" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup"]
 margin_right = 197.0
 margin_bottom = 234.0
 rect_min_size = Vector2( 197, 234 )
@@ -837,7 +842,7 @@ size_flags_horizontal = 0
 size_flags_vertical = 0
 custom_styles/panel = SubResource( 4 )
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel"]
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 196.0
@@ -847,7 +852,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Header" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
+[node name="Header" type="MarginContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
 margin_right = 197.0
 margin_bottom = 52.0
 rect_min_size = Vector2( 195, 35 )
@@ -856,7 +861,7 @@ custom_constants/margin_right = 10
 custom_constants/margin_top = 5
 custom_constants/margin_left = 10
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header"]
+[node name="HBoxContainer" type="HBoxContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header"]
 margin_left = 10.0
 margin_top = 5.0
 margin_right = 184.0
@@ -865,7 +870,7 @@ rect_min_size = Vector2( 174, 0 )
 size_flags_horizontal = 0
 custom_constants/separation = 6
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
 margin_right = 126.0
 margin_bottom = 47.0
 size_flags_horizontal = 3
@@ -873,7 +878,7 @@ custom_fonts/font = ExtResource( 12 )
 text = "ENVIRONMENT"
 autowrap = true
 
-[node name="EnvironmentExpandButton" type="Button" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="EnvironmentExpandButton" type="Button" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 132.0
 margin_top = 14.0
 margin_right = 150.0
@@ -890,7 +895,7 @@ pressed = true
 action_mode = 0
 group = SubResource( 8 )
 
-[node name="EnvironmentCompressButton" type="Button" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="EnvironmentCompressButton" type="Button" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 156.0
 margin_top = 14.0
 margin_right = 174.0
@@ -906,7 +911,7 @@ toggle_mode = true
 action_mode = 0
 group = SubResource( 8 )
 
-[node name="HSeparator" type="HSeparator" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
 margin_top = 56.0
 margin_right = 197.0
 margin_bottom = 60.0
@@ -914,7 +919,7 @@ rect_min_size = Vector2( 197, 0 )
 size_flags_horizontal = 0
 custom_styles/separator = SubResource( 12 )
 
-[node name="Body" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
+[node name="Body" type="MarginContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
 margin_top = 64.0
 margin_right = 197.0
 margin_bottom = 249.0
@@ -925,13 +930,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="BarContainer" type="GridContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body"]
+[node name="BarContainer" type="GridContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body"]
 margin_left = 22.0
 margin_top = 5.0
 margin_right = 197.0
 margin_bottom = 175.0
 
-[node name="Oxygen" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="Oxygen" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 show_behind_parent = true
 margin_right = 162.0
 margin_bottom = 25.0
@@ -941,7 +946,7 @@ custom_styles/bg = SubResource( 14 )
 step = 0.1
 percent_visible = false
 
-[node name="OxygenIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
+[node name="OxygenIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
@@ -954,7 +959,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -969,7 +974,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Oxygen"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -988,7 +993,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="CarbonDioxide" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="CarbonDioxide" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 show_behind_parent = true
 margin_top = 29.0
 margin_right = 162.0
@@ -999,7 +1004,7 @@ custom_styles/bg = SubResource( 14 )
 step = 0.1
 percent_visible = false
 
-[node name="CO2Icon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
+[node name="CO2Icon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
@@ -1012,7 +1017,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -1028,7 +1033,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/CarbonDioxide"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -1047,7 +1052,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Nitrogen" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="Nitrogen" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 show_behind_parent = true
 margin_top = 58.0
 margin_right = 162.0
@@ -1058,7 +1063,7 @@ custom_styles/bg = SubResource( 14 )
 step = 0.1
 percent_visible = false
 
-[node name="NitrogenIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
+[node name="NitrogenIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
@@ -1071,7 +1076,7 @@ __meta__ = {
 "_edit_use_anchors_": true
 }
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -1087,7 +1092,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Nitrogen"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -1106,7 +1111,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Temperature" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="Temperature" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 self_modulate = Color( 1, 1, 1, 0 )
 show_behind_parent = true
 margin_top = 87.0
@@ -1114,7 +1119,7 @@ margin_right = 162.0
 margin_bottom = 112.0
 rect_min_size = Vector2( 162, 25 )
 
-[node name="TemperatureIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
+[node name="TemperatureIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
@@ -1127,7 +1132,7 @@ __meta__ = {
 "_edit_use_anchors_": true
 }
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -1142,7 +1147,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Temperature"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -1162,7 +1167,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="Sunlight" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="Sunlight" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 self_modulate = Color( 1, 1, 1, 0 )
 show_behind_parent = true
 margin_top = 116.0
@@ -1170,7 +1175,7 @@ margin_right = 162.0
 margin_bottom = 141.0
 rect_min_size = Vector2( 162, 25 )
 
-[node name="LightIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
+[node name="LightIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
@@ -1183,7 +1188,7 @@ __meta__ = {
 "_edit_use_anchors_": true
 }
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -1198,7 +1203,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Sunlight"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -1217,7 +1222,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Pressure" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
+[node name="Pressure" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer"]
 self_modulate = Color( 1, 1, 1, 0 )
 show_behind_parent = true
 margin_top = 145.0
@@ -1225,7 +1230,7 @@ margin_right = 162.0
 margin_bottom = 170.0
 rect_min_size = Vector2( 162, 25 )
 
-[node name="PressureIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
+[node name="PressureIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
 margin_left = -15.0
 margin_right = 10.0
 margin_bottom = 20.0
@@ -1238,7 +1243,7 @@ __meta__ = {
 "_edit_use_anchors_": true
 }
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
 anchor_top = 0.5
 anchor_bottom = 0.5
 margin_left = 20.0
@@ -1253,7 +1258,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Body/BarContainer/Pressure"]
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -1273,12 +1278,12 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="CompoundsGroup" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels"]
+[node name="CompoundsGroup" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels"]
 margin_top = 244.0
 margin_right = 313.0
 margin_bottom = 587.0
 
-[node name="CompoundsPanel" type="Panel" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup"]
+[node name="CompoundsPanel" type="Panel" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup"]
 margin_right = 254.0
 margin_bottom = 219.0
 rect_min_size = Vector2( 254, 219 )
@@ -1286,7 +1291,7 @@ rect_clip_content = true
 size_flags_horizontal = 0
 custom_styles/panel = SubResource( 4 )
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel"]
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 253.0
@@ -1295,7 +1300,7 @@ rect_min_size = Vector2( 252, 0 )
 size_flags_horizontal = 0
 size_flags_vertical = 0
 
-[node name="Header" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
+[node name="Header" type="MarginContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
 margin_right = 254.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 0, 40 )
@@ -1303,7 +1308,7 @@ custom_constants/margin_right = 10
 custom_constants/margin_top = 5
 custom_constants/margin_left = 5
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header"]
+[node name="HBoxContainer" type="HBoxContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header"]
 margin_left = 5.0
 margin_top = 5.0
 margin_right = 239.0
@@ -1315,7 +1320,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Icon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="Icon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_right = 35.0
 margin_bottom = 35.0
 rect_min_size = Vector2( 35, 35 )
@@ -1323,7 +1328,7 @@ size_flags_vertical = 4
 texture = ExtResource( 16 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 41.0
 margin_top = 6.0
 margin_right = 186.0
@@ -1334,7 +1339,7 @@ custom_fonts/font = ExtResource( 12 )
 text = "COMPOUNDS"
 autowrap = true
 
-[node name="CompoundExpandButton" type="Button" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="CompoundExpandButton" type="Button" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 192.0
 margin_top = 8.0
 margin_right = 210.0
@@ -1351,7 +1356,7 @@ pressed = true
 action_mode = 0
 group = SubResource( 17 )
 
-[node name="CompoundCompressButton" type="Button" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="CompoundCompressButton" type="Button" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 216.0
 margin_top = 8.0
 margin_right = 234.0
@@ -1367,7 +1372,7 @@ toggle_mode = true
 action_mode = 0
 group = SubResource( 17 )
 
-[node name="HSeparator" type="HSeparator" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
 margin_top = 44.0
 margin_right = 254.0
 margin_bottom = 48.0
@@ -1375,7 +1380,7 @@ rect_min_size = Vector2( 254, 0 )
 size_flags_horizontal = 0
 custom_styles/separator = SubResource( 12 )
 
-[node name="Body" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
+[node name="Body" type="MarginContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer"]
 margin_top = 52.0
 margin_right = 254.0
 margin_bottom = 247.0
@@ -1387,7 +1392,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="BarContainer" type="GridContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body"]
+[node name="BarContainer" type="GridContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body"]
 margin_left = 22.0
 margin_top = 5.0
 margin_right = 242.0
@@ -1398,7 +1403,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="glucose" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="glucose" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_right = 220.0
 margin_bottom = 25.0
@@ -1409,7 +1414,7 @@ custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="GlucoseIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
+[node name="GlucoseIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
@@ -1421,7 +1426,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
 margin_left = 20.0
 margin_right = 83.0
 margin_bottom = 25.0
@@ -1430,7 +1435,7 @@ custom_fonts/font = ExtResource( 9 )
 text = "GLUCOSE"
 valign = 1
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/glucose"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1443,7 +1448,7 @@ text = "0.0 / 4"
 align = 2
 valign = 1
 
-[node name="ammonia" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="ammonia" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_top = 30.0
 margin_right = 220.0
@@ -1455,7 +1460,7 @@ custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="AmmoniaIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
+[node name="AmmoniaIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
@@ -1467,7 +1472,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
 margin_left = 20.0
 margin_right = 81.0
 margin_bottom = 25.0
@@ -1479,7 +1484,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ammonia"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1495,7 +1500,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="phosphates" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="phosphates" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_top = 60.0
 margin_right = 220.0
@@ -1507,7 +1512,7 @@ custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="PhospateIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
+[node name="PhospateIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
@@ -1516,7 +1521,7 @@ size_flags_horizontal = 0
 texture = ExtResource( 20 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
 margin_left = 20.0
 margin_right = 95.0
 margin_bottom = 25.0
@@ -1528,7 +1533,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/phosphates"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1544,7 +1549,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="hydrogensulfide" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="hydrogensulfide" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_top = 90.0
 margin_right = 220.0
@@ -1556,7 +1561,7 @@ custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="HydrogenSulfideIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
+[node name="HydrogenSulfideIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
@@ -1568,7 +1573,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
 margin_left = 20.0
 margin_right = 141.0
 margin_bottom = 25.0
@@ -1577,7 +1582,7 @@ custom_fonts/font = ExtResource( 9 )
 text = "HYDROGEN_SULFIDE"
 valign = 1
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/hydrogensulfide"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1593,7 +1598,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="iron" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="iron" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_top = 120.0
 margin_right = 220.0
@@ -1605,7 +1610,7 @@ custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="IronIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
+[node name="IronIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
 margin_left = -12.0
 margin_right = 13.0
 margin_bottom = 20.0
@@ -1614,7 +1619,7 @@ size_flags_horizontal = 0
 texture = ExtResource( 27 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
 margin_left = 20.0
 margin_right = 47.0
 margin_bottom = 25.0
@@ -1626,7 +1631,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/iron"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1642,7 +1647,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ingested" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="ingested" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 show_behind_parent = true
 margin_top = 150.0
 margin_right = 220.0
@@ -1654,7 +1659,7 @@ custom_styles/bg = SubResource( 22 )
 step = 0.1
 percent_visible = false
 
-[node name="IngestedMatterIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
+[node name="IngestedMatterIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
 modulate = Color( 0.882353, 0.882353, 0.882353, 1 )
 margin_left = -12.0
 margin_right = 13.0
@@ -1664,7 +1669,7 @@ size_flags_horizontal = 0
 texture = ExtResource( 66 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
 margin_left = 20.0
 margin_right = 47.0
 margin_bottom = 25.0
@@ -1673,7 +1678,7 @@ custom_fonts/font = ExtResource( 9 )
 text = "INGESTED_MATTER"
 valign = 1
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -44.0
@@ -1686,7 +1691,7 @@ text = "0.0 / 4"
 align = 2
 valign = 1
 
-[node name="AgentsPanel" type="Panel" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup"]
+[node name="AgentsPanel" type="Panel" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup"]
 margin_top = 223.0
 margin_right = 254.0
 margin_bottom = 343.0
@@ -1696,13 +1701,13 @@ size_flags_horizontal = 0
 size_flags_vertical = 0
 custom_styles/panel = SubResource( 4 )
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel"]
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 255.0
 margin_bottom = 122.0
 
-[node name="Header" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
+[node name="Header" type="MarginContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
 margin_right = 254.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 230, 35 )
@@ -1710,13 +1715,13 @@ custom_constants/margin_right = 10
 custom_constants/margin_top = 5
 custom_constants/margin_left = 5
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header"]
+[node name="HBoxContainer" type="HBoxContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header"]
 margin_left = 5.0
 margin_top = 5.0
 margin_right = 244.0
 margin_bottom = 40.0
 
-[node name="Icon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="Icon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_right = 35.0
 margin_bottom = 35.0
 rect_min_size = Vector2( 35, 35 )
@@ -1724,7 +1729,7 @@ size_flags_vertical = 4
 texture = ExtResource( 61 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header/HBoxContainer"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Header/HBoxContainer"]
 margin_left = 39.0
 margin_top = 6.0
 margin_right = 239.0
@@ -1734,7 +1739,7 @@ custom_fonts/font = ExtResource( 12 )
 text = "AGENTS"
 autowrap = true
 
-[node name="HSeparator" type="HSeparator" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
+[node name="HSeparator" type="HSeparator" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
 margin_top = 44.0
 margin_right = 254.0
 margin_bottom = 48.0
@@ -1742,7 +1747,7 @@ rect_min_size = Vector2( 254, 0 )
 size_flags_horizontal = 0
 custom_styles/separator = SubResource( 12 )
 
-[node name="Body" type="MarginContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
+[node name="Body" type="MarginContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer"]
 margin_top = 52.0
 margin_right = 254.0
 margin_bottom = 121.0
@@ -1754,13 +1759,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="BarContainer" type="GridContainer" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body"]
+[node name="BarContainer" type="GridContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body"]
 margin_left = 22.0
 margin_top = 5.0
 margin_right = 244.0
 margin_bottom = 59.0
 
-[node name="oxytoxy" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="oxytoxy" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 margin_right = 220.0
 margin_bottom = 25.0
 rect_min_size = Vector2( 220, 25 )
@@ -1770,7 +1775,7 @@ custom_styles/bg = SubResource( 29 )
 step = 0.1
 percent_visible = false
 
-[node name="OxyToxyIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
+[node name="OxyToxyIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
 anchor_left = -0.00454545
 anchor_right = -0.00454545
 margin_left = -12.0
@@ -1782,7 +1787,7 @@ size_flags_vertical = 0
 texture = ExtResource( 24 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
 margin_left = 18.0
 margin_right = 97.0
 margin_bottom = 25.0
@@ -1791,7 +1796,7 @@ custom_fonts/font = ExtResource( 9 )
 text = "OXYTOXY_NT"
 valign = 1
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/oxytoxy"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -45.0
@@ -1807,7 +1812,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="mucilage" type="ProgressBar" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
+[node name="mucilage" type="ProgressBar" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer" groups=["CompoundBar"]]
 margin_top = 29.0
 margin_right = 220.0
 margin_bottom = 54.0
@@ -1818,7 +1823,7 @@ custom_styles/bg = SubResource( 29 )
 step = 0.1
 percent_visible = false
 
-[node name="MucilageIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
+[node name="MucilageIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
 anchor_left = -0.00454545
 anchor_right = -0.00454545
 margin_left = -12.0
@@ -1830,7 +1835,7 @@ size_flags_vertical = 0
 texture = ExtResource( 68 )
 expand = true
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
 margin_left = 18.0
 margin_right = 97.0
 margin_bottom = 25.0
@@ -1839,7 +1844,7 @@ custom_fonts/font = ExtResource( 9 )
 text = "MUCILAGE"
 valign = 1
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/AgentsPanel/VBoxContainer/Body/BarContainer/mucilage"]
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -45.0
@@ -1855,7 +1860,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ChatBox" parent="MicrobialArenaHUD/BottomLeft/LeftPanels" instance=ExtResource( 53 )]
+[node name="ChatBox" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels" instance=ExtResource( 53 )]
 anchor_top = 0.0
 anchor_bottom = 0.0
 margin_top = 417.0
@@ -1865,27 +1870,27 @@ rect_min_size = Vector2( 313, 150 )
 rect_pivot_offset = Vector2( 0, 170 )
 size_flags_horizontal = 0
 
-[node name="PanelsTween" type="Tween" parent="MicrobialArenaHUD/BottomLeft/LeftPanels"]
+[node name="PanelsTween" type="Tween" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels"]
 
-[node name="HUDBottomBar" parent="MicrobialArenaHUD/BottomLeft" instance=ExtResource( 54 )]
+[node name="HUDBottomBar" parent="GUI/MicrobialArenaHUD/BottomLeft" instance=ExtResource( 54 )]
 margin_top = -43.0
 margin_bottom = -8.0
 
-[node name="CompoundsPanelAnimationPlayer" type="AnimationPlayer" parent="MicrobialArenaHUD"]
+[node name="CompoundsPanelAnimationPlayer" type="AnimationPlayer" parent="GUI/MicrobialArenaHUD"]
 anims/HideCompoundsPanels = SubResource( 31 )
 anims/ShowCompoundsPanels = SubResource( 32 )
 
-[node name="EnvironmentPanelAnimationPlayer" type="AnimationPlayer" parent="MicrobialArenaHUD"]
+[node name="EnvironmentPanelAnimationPlayer" type="AnimationPlayer" parent="GUI/MicrobialArenaHUD"]
 anims/HideEnvironmentPanel = SubResource( 33 )
 anims/ShowEnvironmentPanel = SubResource( 34 )
 
-[node name="ChatBoxAnimationPlayer" type="AnimationPlayer" parent="MicrobialArenaHUD"]
+[node name="ChatBoxAnimationPlayer" type="AnimationPlayer" parent="GUI/MicrobialArenaHUD"]
 autoplay = "Close"
 anims/Close = SubResource( 35 )
 anims/Open = SubResource( 36 )
 anims/RESET = SubResource( 37 )
 
-[node name="BottomRight" type="Control" parent="MicrobialArenaHUD"]
+[node name="BottomRight" type="Control" parent="GUI/MicrobialArenaHUD"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -1896,7 +1901,7 @@ margin_right = 1.0
 margin_bottom = -1.0
 mouse_filter = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MicrobialArenaHUD/BottomRight"]
+[node name="VBoxContainer" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -1910,13 +1915,13 @@ grow_vertical = 0
 custom_constants/separation = 8
 alignment = 2
 
-[node name="ArenaMinimap" parent="MicrobialArenaHUD/BottomRight/VBoxContainer" instance=ExtResource( 2 )]
+[node name="ArenaMinimap" parent="GUI/MicrobialArenaHUD/BottomRight/VBoxContainer" instance=ExtResource( 2 )]
 margin_top = 0.0
 margin_right = 140.0
 margin_bottom = 110.0
 rect_min_size = Vector2( 140, 0 )
 
-[node name="PopulationData" type="HBoxContainer" parent="MicrobialArenaHUD/BottomRight/VBoxContainer"]
+[node name="PopulationData" type="HBoxContainer" parent="GUI/MicrobialArenaHUD/BottomRight/VBoxContainer"]
 visible = false
 margin_left = 88.0
 margin_top = 38.0
@@ -1928,7 +1933,7 @@ rect_min_size = Vector2( 0, 17 )
 size_flags_horizontal = 8
 size_flags_vertical = 0
 
-[node name="Label" type="Label" parent="MicrobialArenaHUD/BottomRight/VBoxContainer/PopulationData"]
+[node name="Label" type="Label" parent="GUI/MicrobialArenaHUD/BottomRight/VBoxContainer/PopulationData"]
 margin_right = 87.0
 margin_bottom = 37.0
 rect_min_size = Vector2( 87, 0 )
@@ -1942,7 +1947,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Value" type="Label" parent="MicrobialArenaHUD/BottomRight/VBoxContainer/PopulationData"]
+[node name="Value" type="Label" parent="GUI/MicrobialArenaHUD/BottomRight/VBoxContainer/PopulationData"]
 margin_left = 91.0
 margin_top = 9.0
 margin_right = 131.0
@@ -1957,7 +1962,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="DataValue" type="PanelContainer" parent="MicrobialArenaHUD/BottomRight"]
+[node name="DataValue" type="PanelContainer" parent="GUI/MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -1971,7 +1976,7 @@ size_flags_horizontal = 0
 size_flags_vertical = 0
 custom_styles/panel = SubResource( 39 )
 
-[node name="Margin" type="MarginContainer" parent="MicrobialArenaHUD/BottomRight/DataValue"]
+[node name="Margin" type="MarginContainer" parent="GUI/MicrobialArenaHUD/BottomRight/DataValue"]
 margin_right = 80.0
 margin_bottom = 52.0
 mouse_filter = 2
@@ -1980,7 +1985,7 @@ custom_constants/margin_top = 5
 custom_constants/margin_left = 5
 custom_constants/margin_bottom = 5
 
-[node name="VBox" type="VBoxContainer" parent="MicrobialArenaHUD/BottomRight/DataValue/Margin"]
+[node name="VBox" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/BottomRight/DataValue/Margin"]
 margin_left = 5.0
 margin_top = 5.0
 margin_right = 75.0
@@ -1988,7 +1993,7 @@ margin_bottom = 47.0
 custom_constants/separation = 8
 alignment = 1
 
-[node name="HPValue" type="Label" parent="MicrobialArenaHUD/BottomRight/DataValue/Margin/VBox"]
+[node name="HPValue" type="Label" parent="GUI/MicrobialArenaHUD/BottomRight/DataValue/Margin/VBox"]
 margin_right = 70.0
 margin_bottom = 17.0
 mouse_filter = 0
@@ -1999,7 +2004,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="ATPValue" type="Label" parent="MicrobialArenaHUD/BottomRight/DataValue/Margin/VBox"]
+[node name="ATPValue" type="Label" parent="GUI/MicrobialArenaHUD/BottomRight/DataValue/Margin/VBox"]
 margin_top = 25.0
 margin_right = 70.0
 margin_bottom = 42.0
@@ -2011,7 +2016,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="HealthBar" type="TextureProgress" parent="MicrobialArenaHUD/BottomRight"]
+[node name="HealthBar" type="TextureProgress" parent="GUI/MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -2031,7 +2036,7 @@ tint_progress = Color( 0.960784, 0.270588, 0.478431, 1 )
 radial_initial_angle = 237.0
 radial_fill_degrees = 126.0
 
-[node name="HitpointIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/HealthBar"]
+[node name="HitpointIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomRight/HealthBar"]
 margin_left = 21.46
 margin_top = 197.749
 margin_right = 41.46
@@ -2042,7 +2047,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="ATPBar" type="TextureProgress" parent="MicrobialArenaHUD/BottomRight"]
+[node name="ATPBar" type="TextureProgress" parent="GUI/MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -2062,7 +2067,7 @@ tint_progress = Color( 0.439216, 0.956863, 0.137255, 1 )
 radial_initial_angle = 237.0
 radial_fill_degrees = 129.0
 
-[node name="ATPIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/ATPBar"]
+[node name="ATPIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomRight/ATPBar"]
 margin_left = 18.5
 margin_top = 156.5
 margin_right = 38.5
@@ -2073,7 +2078,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="EditorButton" type="TextureButton" parent="MicrobialArenaHUD/BottomRight"]
+[node name="EditorButton" type="TextureButton" parent="GUI/MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
@@ -2092,7 +2097,7 @@ texture_hover = ExtResource( 32 )
 texture_disabled = ExtResource( 26 )
 expand = true
 
-[node name="Highlight" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/EditorButton"]
+[node name="Highlight" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomRight/EditorButton"]
 visible = false
 modulate = Color( 1, 1, 1, 0 )
 anchor_right = 1.0
@@ -2104,13 +2109,13 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Light2D" type="Light2D" parent="MicrobialArenaHUD/BottomRight/EditorButton/Highlight"]
+[node name="Light2D" type="Light2D" parent="GUI/MicrobialArenaHUD/BottomRight/EditorButton/Highlight"]
 position = Vector2( 79.2703, 78.2703 )
 scale = Vector2( 0.845357, 0.845357 )
 texture = ExtResource( 43 )
 energy = 0.0
 
-[node name="ReproductionBar" type="Control" parent="MicrobialArenaHUD/BottomRight/EditorButton"]
+[node name="ReproductionBar" type="Control" parent="GUI/MicrobialArenaHUD/BottomRight/EditorButton"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
@@ -2118,7 +2123,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="BarBackground" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
+[node name="BarBackground" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
 modulate = Color( 0, 0, 0, 1 )
 anchor_left = 0.5
 anchor_top = 0.5
@@ -2135,7 +2140,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="AmmoniaReproductionBar" type="TextureProgress" parent="MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
+[node name="AmmoniaReproductionBar" type="TextureProgress" parent="GUI/MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -2154,7 +2159,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PhosphateReproductionBar" type="TextureProgress" parent="MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
+[node name="PhosphateReproductionBar" type="TextureProgress" parent="GUI/MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -2171,7 +2176,7 @@ radial_initial_angle = 180.0
 radial_fill_degrees = 180.0
 nine_patch_stretch = true
 
-[node name="AmmoniaIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
+[node name="AmmoniaIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
 margin_left = 70.0
 margin_top = 5.5
 margin_right = 90.0
@@ -2182,7 +2187,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PhosphateIcon" type="TextureRect" parent="MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
+[node name="PhosphateIcon" type="TextureRect" parent="GUI/MicrobialArenaHUD/BottomRight/EditorButton/ReproductionBar"]
 margin_left = 70.0
 margin_top = 134.5
 margin_right = 90.0
@@ -2193,24 +2198,24 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="AnimationPlayer" type="AnimationPlayer" parent="MicrobialArenaHUD/BottomRight/EditorButton"]
+[node name="AnimationPlayer" type="AnimationPlayer" parent="GUI/MicrobialArenaHUD/BottomRight/EditorButton"]
 anims/EditorButtonFlash = SubResource( 40 )
 
-[node name="ProcessPanel" parent="MicrobialArenaHUD" instance=ExtResource( 55 )]
+[node name="ProcessPanel" parent="GUI/MicrobialArenaHUD" instance=ExtResource( 55 )]
 margin_left = 8.0
 margin_top = 72.0
 margin_right = -872.0
 margin_bottom = -48.0
 
-[node name="MicrobeCheatMenu" parent="MicrobialArenaHUD" instance=ExtResource( 58 )]
+[node name="MicrobeCheatMenu" parent="GUI/MicrobialArenaHUD" instance=ExtResource( 58 )]
 margin_left = 10.0
 margin_top = 30.0
 margin_right = 207.0
 
-[node name="PausePrompt" parent="MicrobialArenaHUD" instance=ExtResource( 59 )]
+[node name="PausePrompt" parent="GUI/MicrobialArenaHUD" instance=ExtResource( 59 )]
 visible = false
 
-[node name="VScrollBar2" type="VScrollBar" parent="MicrobialArenaHUD/PausePrompt/PauseInfo" index="0"]
+[node name="VScrollBar2" type="VScrollBar" parent="GUI/MicrobialArenaHUD/PausePrompt/PauseInfo" index="0"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -2218,13 +2223,13 @@ max_value = 22.0
 step = 1.0
 page = 40.0
 
-[node name="VScrollBar3" type="VScrollBar" parent="MicrobialArenaHUD/PausePrompt/PauseInfo" index="1"]
+[node name="VScrollBar3" type="VScrollBar" parent="GUI/MicrobialArenaHUD/PausePrompt/PauseInfo" index="1"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 step = 1.0
 
-[node name="ScrollContainer" type="ScrollContainer" parent="MicrobialArenaHUD"]
+[node name="ScrollContainer" type="ScrollContainer" parent="GUI/MicrobialArenaHUD"]
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -2235,7 +2240,7 @@ rect_min_size = Vector2( 550, 69 )
 theme = ExtResource( 10 )
 scroll_vertical_enabled = false
 
-[node name="HotBar" type="HBoxContainer" parent="MicrobialArenaHUD/ScrollContainer"]
+[node name="HotBar" type="HBoxContainer" parent="GUI/MicrobialArenaHUD/ScrollContainer"]
 margin_right = 550.0
 size_flags_horizontal = 3
 custom_constants/separation = 6
@@ -2244,7 +2249,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Engulfment" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
+[node name="Engulfment" parent="GUI/MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2258,7 +2263,7 @@ toggle_mode = true
 ActionIcon = ExtResource( 36 )
 ActionName = "g_toggle_engulf"
 
-[node name="FireToxin" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
+[node name="FireToxin" parent="GUI/MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2270,7 +2275,7 @@ focus_mode = 2
 ActionIcon = ExtResource( 61 )
 ActionName = "g_fire_toxin"
 
-[node name="BindingMode" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
+[node name="BindingMode" parent="GUI/MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2283,7 +2288,7 @@ toggle_mode = true
 ActionIcon = ExtResource( 35 )
 ActionName = "g_toggle_binding"
 
-[node name="UnbindAll" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
+[node name="UnbindAll" parent="GUI/MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2295,7 +2300,7 @@ focus_mode = 2
 ActionIcon = ExtResource( 46 )
 ActionName = "g_unbind_all"
 
-[node name="SignalingAgents" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
+[node name="SignalingAgents" parent="GUI/MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2307,7 +2312,7 @@ toggle_mode = true
 ActionIcon = ExtResource( 47 )
 ActionName = "g_pack_commands"
 
-[node name="SecreteSlime" parent="MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
+[node name="SecreteSlime" parent="GUI/MicrobialArenaHUD/ScrollContainer/HotBar" instance=ExtResource( 51 )]
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
@@ -2319,7 +2324,7 @@ focus_mode = 2
 ActionIcon = ExtResource( 67 )
 ActionName = "g_secrete_slime"
 
-[node name="HintText" type="Label" parent="MicrobialArenaHUD"]
+[node name="HintText" type="Label" parent="GUI/MicrobialArenaHUD"]
 anchor_right = 1.0
 margin_top = 35.0
 margin_bottom = 59.0
@@ -2330,15 +2335,15 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="ScoreBoard" parent="MicrobialArenaHUD" instance=ExtResource( 52 )]
+[node name="ScoreBoard" parent="GUI/MicrobialArenaHUD" instance=ExtResource( 52 )]
 visible = false
 
-[node name="PatchNameOverlay" parent="." instance=ExtResource( 73 )]
+[node name="PatchNameOverlay" parent="GUI" instance=ExtResource( 73 )]
 visible = false
 
-[node name="RadialPopup" parent="." instance=ExtResource( 71 )]
+[node name="RadialPopup" parent="GUI" instance=ExtResource( 71 )]
 
-[node name="WinExtinctBoxHolder" type="Control" parent="."]
+[node name="WinExtinctBoxHolder" type="Control" parent="GUI"]
 visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -2349,28 +2354,28 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="PauseMenu" parent="." instance=ExtResource( 72 )]
+[node name="PauseMenu" parent="GUI" instance=ExtResource( 72 )]
 visible = true
 MultiplayerMode = true
 
-[connection signal="Clicked" from="MicrobialArenaHUD" to="MicrobialArenaHUD/BottomLeft/LeftPanels/ChatBox" method="OnClickedOffTextBox"]
-[connection signal="OnOpenMenu" from="MicrobialArenaHUD" to="PauseMenu" method="Open"]
-[connection signal="OnOpenMenuToHelp" from="MicrobialArenaHUD" to="PauseMenu" method="OpenToHelp"]
-[connection signal="pressed" from="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer/EnvironmentExpandButton" to="MicrobialArenaHUD" method="OnEnvironmentPanelSizeButtonPressed" binds= [ "expand" ]]
-[connection signal="pressed" from="MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer/EnvironmentCompressButton" to="MicrobialArenaHUD" method="OnEnvironmentPanelSizeButtonPressed" binds= [ "compress" ]]
-[connection signal="pressed" from="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer/CompoundExpandButton" to="MicrobialArenaHUD" method="OnCompoundsPanelSizeButtonPressed" binds= [ "expand" ]]
-[connection signal="pressed" from="MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer/CompoundCompressButton" to="MicrobialArenaHUD" method="OnCompoundsPanelSizeButtonPressed" binds= [ "compress" ]]
-[connection signal="OnChatPressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="ChatButtonPressed"]
-[connection signal="OnCompoundsToggled" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="CompoundButtonPressed"]
-[connection signal="OnEnvironmentToggled" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="EnvironmentButtonPressed"]
-[connection signal="OnHelpPressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="OpenHelp"]
-[connection signal="OnMenuPressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="OpenMenu"]
-[connection signal="OnPausePressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="PauseButtonPressed"]
-[connection signal="OnProcessesPressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="ProcessPanelButtonPressed"]
-[connection signal="OnSuicidePressed" from="MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="MicrobialArenaHUD" method="OnSuicide"]
-[connection signal="mouse_entered" from="MicrobialArenaHUD/BottomRight/EditorButton" to="MicrobialArenaHUD" method="OnEditorButtonMouseEnter"]
-[connection signal="mouse_exited" from="MicrobialArenaHUD/BottomRight/EditorButton" to="MicrobialArenaHUD" method="OnEditorButtonMouseExit"]
-[connection signal="pressed" from="MicrobialArenaHUD/BottomRight/EditorButton" to="MicrobialArenaHUD" method="EditorButtonPressed"]
-[connection signal="OnClosed" from="MicrobialArenaHUD/ProcessPanel" to="MicrobialArenaHUD" method="OnProcessPanelClosed"]
+[connection signal="Clicked" from="GUI/MicrobialArenaHUD" to="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/ChatBox" method="OnClickedOffTextBox"]
+[connection signal="OnOpenMenu" from="GUI/MicrobialArenaHUD" to="GUI/PauseMenu" method="Open"]
+[connection signal="OnOpenMenuToHelp" from="GUI/MicrobialArenaHUD" to="GUI/PauseMenu" method="OpenToHelp"]
+[connection signal="pressed" from="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer/EnvironmentExpandButton" to="GUI/MicrobialArenaHUD" method="OnEnvironmentPanelSizeButtonPressed" binds= [ "expand" ]]
+[connection signal="pressed" from="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer/Header/HBoxContainer/EnvironmentCompressButton" to="GUI/MicrobialArenaHUD" method="OnEnvironmentPanelSizeButtonPressed" binds= [ "compress" ]]
+[connection signal="pressed" from="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer/CompoundExpandButton" to="GUI/MicrobialArenaHUD" method="OnCompoundsPanelSizeButtonPressed" binds= [ "expand" ]]
+[connection signal="pressed" from="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Header/HBoxContainer/CompoundCompressButton" to="GUI/MicrobialArenaHUD" method="OnCompoundsPanelSizeButtonPressed" binds= [ "compress" ]]
+[connection signal="OnChatPressed" from="GUI/MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="GUI/MicrobialArenaHUD" method="ChatButtonPressed"]
+[connection signal="OnCompoundsToggled" from="GUI/MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="GUI/MicrobialArenaHUD" method="CompoundButtonPressed"]
+[connection signal="OnEnvironmentToggled" from="GUI/MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="GUI/MicrobialArenaHUD" method="EnvironmentButtonPressed"]
+[connection signal="OnHelpPressed" from="GUI/MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="GUI/MicrobialArenaHUD" method="OpenHelp"]
+[connection signal="OnMenuPressed" from="GUI/MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="GUI/MicrobialArenaHUD" method="OpenMenu"]
+[connection signal="OnPausePressed" from="GUI/MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="GUI/MicrobialArenaHUD" method="PauseButtonPressed"]
+[connection signal="OnProcessesPressed" from="GUI/MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="GUI/MicrobialArenaHUD" method="ProcessPanelButtonPressed"]
+[connection signal="OnSuicidePressed" from="GUI/MicrobialArenaHUD/BottomLeft/HUDBottomBar" to="GUI/MicrobialArenaHUD" method="OnSuicide"]
+[connection signal="mouse_entered" from="GUI/MicrobialArenaHUD/BottomRight/EditorButton" to="GUI/MicrobialArenaHUD" method="OnEditorButtonMouseEnter"]
+[connection signal="mouse_exited" from="GUI/MicrobialArenaHUD/BottomRight/EditorButton" to="GUI/MicrobialArenaHUD" method="OnEditorButtonMouseExit"]
+[connection signal="pressed" from="GUI/MicrobialArenaHUD/BottomRight/EditorButton" to="GUI/MicrobialArenaHUD" method="EditorButtonPressed"]
+[connection signal="OnClosed" from="GUI/MicrobialArenaHUD/ProcessPanel" to="GUI/MicrobialArenaHUD" method="OnProcessPanelClosed"]
 
-[editable path="MicrobialArenaHUD/PausePrompt"]
+[editable path="GUI/MicrobialArenaHUD/PausePrompt"]

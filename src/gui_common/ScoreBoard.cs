@@ -66,7 +66,7 @@ public class ScoreBoard : CenterContainer
     private void OnPlayerRegistered(int peerId, NetworkManager.RegistrationToServerResult result)
     {
         if (result == NetworkManager.RegistrationToServerResult.Success)
-            RegisterPlayer(peerId, NetworkManager.Instance.GetPlayerState(peerId)!.Name);
+            RegisterPlayer(peerId, NetworkManager.Instance.GetPlayerInfo(peerId)!.Name);
     }
 
     private void OnPlayerDisconnected(int peerId)

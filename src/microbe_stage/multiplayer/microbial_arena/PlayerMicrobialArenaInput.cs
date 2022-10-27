@@ -36,23 +36,6 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
 
             stage.Player.MovementDirection = direction;
             stage.Player.LookAtPoint = stage.Camera.CursorWorldPos;
-
-            if (!IsNetworkMaster())
-            {
-                if (!direction.IsEqualApprox(Vector3.Zero))
-                {
-                    stage.Player.SendMovementDirection(direction);
-                    wasMoving = true;
-                }
-                else if (direction.IsEqualApprox(Vector3.Zero) && wasMoving)
-                {
-                    stage.Player.SendMovementDirection(direction);
-                    wasMoving = false;
-                }
-
-                // TODO: make this not be sent every frame
-                stage.Player.SendLookAtPoint(stage.Camera.CursorWorldPos);
-            }
         }
     }
 
@@ -65,16 +48,10 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
         if (stage.Player.State == Microbe.MicrobeState.Engulf)
         {
             stage.Player.State = Microbe.MicrobeState.Normal;
-
-            if (!IsNetworkMaster())
-                stage.Player.SendEngulfMode(false);
         }
         else if (!stage.Player.Membrane.Type.CellWall)
         {
             stage.Player.State = Microbe.MicrobeState.Engulf;
-
-            if (!IsNetworkMaster())
-                stage.Player.SendEngulfMode(true);
         }
     }
 
@@ -88,5 +65,14 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
     public void FocusChat()
     {
         stage?.HUD.FocusChat();
+    }
+
+    [RunOnKeyDown("g_cheat_editor")]
+    public void CheatEditor()
+    {
+        if (Settings.Instance.CheatsEnabled)
+        {
+            stage!.HUD.ShowReproductionDialog();
+        }
     }
 }

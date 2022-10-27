@@ -15,7 +15,7 @@ using Environment = System.Environment;
 [SceneLoadedClass("res://src/microbe_stage/Microbe.tscn", UsesEarlyResolve = false)]
 [DeserializedCallbackTarget]
 public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable,
-    INetEntity
+    INetPlayer
 {
     /// <summary>
     ///   The point towards which the microbe will move to point to
@@ -317,7 +317,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
     ///   Must be called when spawned to provide access to the needed systems
     /// </summary>
     public void Init(CompoundCloudSystem cloudSystem, ISpawnSystem spawnSystem, GameProperties currentGame,
-        bool isPlayer)
+        bool isPlayer, int? peerId = null)
     {
         this.cloudSystem = cloudSystem;
         this.spawnSystem = spawnSystem;
@@ -326,6 +326,8 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
 
         if (!isPlayer)
             ai = new MicrobeAI(this);
+
+        PeerId = peerId;
 
         random = new Random(randomSeed);
 
@@ -383,6 +385,8 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
 
             GD.Print("Player Microbe spawned");
         }
+
+        SetupNetworking();
 
         // pseudopodTarget = GetNode<MeshInstance>("PseudopodTarget");
         // var pseudopodRange = GetNode<Area>("PseudopodRange");

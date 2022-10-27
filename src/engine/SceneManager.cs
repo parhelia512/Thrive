@@ -130,12 +130,14 @@ public class SceneManager : Node
         }
     }
 
-    public PackedScene LoadScene(MultiplayerGameMode gameMode)
+    public PackedScene LoadScene(MultiplayerGameState state)
     {
-        switch (gameMode)
+        switch (state)
         {
-            case MultiplayerGameMode.MicrobialArena:
+            case MultiplayerGameState.MicrobialArena:
                 return LoadScene("res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn");
+            case MultiplayerGameState.MicrobialArenaEditor:
+                return LoadScene("res://src/microbe_stage/multiplayer/microbial_arena/editor/MicrobialArenaEditor.tscn");
             default:
                 throw new ArgumentException("unknown scene path for given multiplayer game mode");
         }

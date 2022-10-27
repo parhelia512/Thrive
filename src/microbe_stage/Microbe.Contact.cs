@@ -157,9 +157,6 @@ public partial class Microbe
                 return;
 
             phagocytosisStep = value;
-
-            if (IsNetworkMaster())
-                Rpc(nameof(NetworkSyncPhagocytosisStep), value);
         }
     }
 
@@ -220,9 +217,6 @@ public partial class Microbe
             state = value;
             if (Colony != null)
                 Colony.State = value;
-
-            if (IsNetworkMaster())
-                Rpc(nameof(NetworkSyncMicrobeState), value);
 
             if (value == MicrobeState.Unbinding && IsPlayerMicrobe)
                 OnUnbindEnabled?.Invoke(this);
@@ -310,9 +304,6 @@ public partial class Microbe
         flashColour = colour;
         flashPriority = priority;
 
-        if (IsNetworkMaster())
-            Rpc(nameof(NetworkSyncFlash), duration, priority, colour.r, colour.g, colour.b, colour.a);
-
         return true;
     }
 
@@ -322,9 +313,6 @@ public partial class Microbe
         flashColour = new Color(0, 0, 0, 0);
         flashPriority = 0;
         Membrane.Tint = CellTypeProperties.Colour;
-
-        if (IsNetworkMaster())
-            Rpc(nameof(NetworkSyncAbortFlash));
     }
 
     /// <summary>
@@ -332,7 +320,7 @@ public partial class Microbe
     /// </summary>
     public void Damage(float amount, string source)
     {
-        if (IsPlayerMicrobe && CheatManager.GodMode || !IsNetworkMaster())
+        if (IsPlayerMicrobe && CheatManager.GodMode || NetworkManager.Instance.IsPuppet)
             return;
 
         if (amount == 0 || Dead)
@@ -412,9 +400,6 @@ public partial class Microbe
         {
             Hitpoints = 0.0f;
             Kill();
-
-            if (IsNetworkMaster())
-                Rpc(nameof(NetworkSyncKill));
         }
     }
 
@@ -767,7 +752,7 @@ public partial class Microbe
     /// </returns>
     private IEnumerable<FloatingChunk> OnKilled()
     {
-        if (!IsNetworkMaster())
+        if (NetworkManager.Instance.IsPuppet)
             return new List<FloatingChunk>();
 
         // Reset some stuff
@@ -1299,7 +1284,7 @@ public partial class Microbe
             foreach (var engulfed in engulfedObjects.ToList())
             {
                 if (engulfed.Object.Value != null)
-                    EjectEngulfable(engulfed.Object.Value.EntityNode.GetPath());
+                    EjectEngulfable(engulfed.Object.Value);
             }
         }
 
@@ -1312,9 +1297,10 @@ public partial class Microbe
 
         if (Membrane.DissolveEffectValue >= 1)
         {
-            if (IsNetworkMaster() && !networkedDeathInvoked && OnNetworkedDeathCompletes != null)
+            if (PeerId.HasValue && NetworkManager.Instance.IsAuthoritative && !networkedDeathInvoked &&
+                OnNetworkedDeathCompletes != null)
             {
-                OnNetworkedDeathCompletes.Invoke(Name.ToInt());
+                OnNetworkedDeathCompletes.Invoke(PeerId.Value);
 
                 // TODO: RPCs don't work well for immediate loop breaks like this
                 networkedDeathInvoked = true;
@@ -1746,7 +1732,7 @@ public partial class Microbe
 
         if (CanEngulf(engulfable))
         {
-            IngestEngulfable(engulfable.EntityNode.GetPath());
+            IngestEngulfable(engulfable);
         }
         else if (EngulfSize > engulfable.EngulfSize * Constants.ENGULF_SIZE_RATIO_REQ && full)
         {
@@ -1893,7 +1879,7 @@ public partial class Microbe
         body.ApplyCentralImpulse(impulse + LinearVelocity);
 
         // We have our own engulfer and it wants to claim this object we've just expelled
-        HostileEngulfer.Value?.IngestEngulfable(engulfable.EntityNode.GetPath());
+        HostileEngulfer.Value?.IngestEngulfable(engulfable);
 
         engulfable.OnExpelledFromEngulfment();
         engulfable.HostileEngulfer.Value = null;

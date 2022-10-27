@@ -1082,8 +1082,12 @@ public static class Constants
     public const int MULTIPLAYER_DEFAULT_PORT = 4242;
     public const int MULTIPLAYER_DEFAULT_MAX_PLAYERS = 32;
     public const int MULTIPLAYER_DEFAULT_MAX_CLIENTS = 100;
-    public const float MULTIPLAYER_DEFAULT_UPDATE_INTERVAL_SECONDS = 0.05f;
+    public const float MULTIPLAYER_DEFAULT_UPDATE_INTERVAL_SECONDS = 0.03f;
     public const int MULTIPLAYER_DEFAULT_TIMEOUT_LIMIT_SECONDS = 32;
+
+    /// <summary>
+    ///   Networked entities discounting players.
+    /// </summary>
     public const int MULTIPLAYER_MICROBIAL_ARENA_DEFAULT_ENTITY_LIMIT = 100;
 
     public const int CHAT_HISTORY_RANGE = 50;

@@ -10,53 +10,32 @@ using Newtonsoft.Json;
 /// </summary>
 public partial class Microbe
 {
-    private MeshInstance tagBox = null!;
-
     [JsonProperty]
     private Tween? networkTweener;
 
+    /// <summary>
+    ///   If set, will assume <see cref="SceneTree.HasNetworkPeer"/> is true and subsequently do network
+    ///   operations with the given value.
+    /// </summary>
+    [JsonProperty]
+    public int? PeerId { get; private set; }
+
     public uint NetEntityId { get; set; }
+
+    public bool Synchronize { get; set; } = true;
 
     public Action<int>? OnNetworkedDeathCompletes { get; set; }
 
-    public void SetupNetworked(int peerId)
+    public void OnNetworkSync(Dictionary<string, string> data)
     {
-        if (!GetTree().HasNetworkPeer())
-            return;
+        // TODO: these badly needs optimizing
 
-        tagBox = GetNode<MeshInstance>("TagBox");
-
-        Name = peerId.ToString(CultureInfo.CurrentCulture);
-
-        networkTweener?.DetachAndQueueFree();
-        networkTweener = new Tween();
-        AddChild(networkTweener);
-
-        var network = NetworkManager.Instance;
-
-        if (peerId != GetTree().GetNetworkUniqueId())
+        if (int.TryParse(data["randomSeed"], out int parsedRandomSeed) && parsedRandomSeed != randomSeed)
         {
-            var tagBoxMesh = (QuadMesh)tagBox.Mesh;
-            var tagBoxMaterial = (SpatialMaterial)tagBox.MaterialOverride;
-
-            var tag = tagBox.GetChild<Label3D>(0);
-
-            tagBox.Visible = true;
-            tag.Text = network.PlayerList[peerId].Name;
-
-            tagBoxMesh.Size = tag.Font.GetStringSize(tag.Text) * tag.PixelSize * 1.2f;
-            tagBoxMaterial.RenderPriority = RenderPriority + 1;
-            tag.RenderPriority = tagBoxMaterial.RenderPriority + 1;
-
-            // TODO: offset tag above the membrane (Z-axis)
+            randomSeed = parsedRandomSeed;
+            random = new Random(parsedRandomSeed);
         }
 
-        if (!IsNetworkMaster())
-            Rpc(nameof(NetworkFetchRandom));
-    }
-
-    public void NetSyncEveryFrame(Dictionary<string, string> data)
-    {
         var rotation = (Vector3)GD.Str2Var(data["rot"]);
         var position = (Vector3)GD.Str2Var(data["pos"]);
 
@@ -66,7 +45,12 @@ public partial class Microbe
 
         Compounds.ClearUseful();
         foreach (var useful in JsonConvert.DeserializeObject<List<string>>(data["usefulCompounds"])!)
+        {
             Compounds.SetUseful(SimulationParameters.Instance.GetCompound(useful));
+        }
+
+        if (float.TryParse(data["compoundsCap"], out float parsedCompoundsCap))
+            Compounds.Capacity = parsedCompoundsCap;
 
         foreach (var entry in JsonConvert.DeserializeObject<Dictionary<string, float>>(data["compounds"])!)
         {
@@ -74,18 +58,73 @@ public partial class Microbe
             Compounds.Compounds[compound] = entry.Value;
         }
 
-        Hitpoints = (float)GD.Str2Var(data["health"]);
+        if (float.TryParse(data["health"], out float parsedHealth))
+            Hitpoints = parsedHealth;
+
+        if (Enum.TryParse<MicrobeState>(data["microbeState"], out MicrobeState parsedMicrobeState))
+            State = parsedMicrobeState;
+
+        if (Enum.TryParse<PhagocytosisPhase>(data["engulfStep"], out PhagocytosisPhase parsedEngulfStep))
+            phagocytosisStep = parsedEngulfStep;
+
+        if (!string.IsNullOrEmpty(data["engulfer"]))
+        {
+            var engulfer = GetNode<Microbe>(data["engulfer"]);
+
+            if (PhagocytosisStep == PhagocytosisPhase.None)
+                engulfer.IngestEngulfable(this);
+        }
+        else
+        {
+            if (HostileEngulfer.Value != null)
+                HostileEngulfer.Value.EjectEngulfable(this);
+        }
+
+        Membrane.Tint = (Color)GD.Str2Var(data["membraneTint"]);
+
+        if (float.TryParse(data["digestedAmount"], out float parsedDigestedAmount))
+            DigestedAmount = parsedDigestedAmount;
     }
 
-    public Dictionary<string, string> PackState()
+    public void OnNetworkInput(Dictionary<string, string> data)
+    {
+        MovementDirection = (Vector3)GD.Str2Var(data["moveDirection"]);
+        LookAtPoint = (Vector3)GD.Str2Var(data["lookAtPoint"]);
+
+        if (Enum.TryParse<MicrobeState>(data["microbeState"], out MicrobeState parsedMicrobeState))
+            State = parsedMicrobeState;
+    }
+
+    public Dictionary<string, string>? PackStates()
     {
         var vars = new Dictionary<string, string>
         {
+            { "randomSeed", randomSeed.ToString(CultureInfo.CurrentCulture) },
             { "pos", GD.Var2Str(GlobalTranslation) },
             { "rot", GD.Var2Str(GlobalRotation) },
             { "usefulCompounds", JsonConvert.SerializeObject(Compounds.UsefulCompounds.Select(c => c.InternalName).ToList()) },
+            { "compoundsCap", Compounds.Capacity.ToString() },
             { "compounds", JsonConvert.SerializeObject(Compounds.Compounds.ToDictionary(c => c.Key.InternalName, c => c.Value)) },
-            { "health", GD.Var2Str(Hitpoints) }
+            { "health", Hitpoints.ToString(CultureInfo.CurrentCulture) },
+            { "microbeState", State.ToString() },
+            { "engulfStep", PhagocytosisStep.ToString() },
+            { "engulfer", HostileEngulfer.Value != null ? HostileEngulfer.Value.GetPath() : string.Empty },
+            { "membraneTint", GD.Var2Str(Membrane.Tint) },
+            { "digestedAmount", DigestedAmount.ToString(CultureInfo.CurrentCulture) }
+        };
+
+        // TODO: Death sync broken, so does engulfing
+
+        return vars;
+    }
+
+    public Dictionary<string, string>? PackInputs()
+    {
+        var vars = new Dictionary<string, string>
+        {
+            { "moveDirection", GD.Var2Str(MovementDirection) },
+            { "lookAtPoint", GD.Var2Str(LookAtPoint) },
+            { "microbeState", State.ToString() },
         };
 
         return vars;
@@ -93,135 +132,43 @@ public partial class Microbe
 
     public void OnReplicated()
     {
-        if (int.TryParse(Name, out int parsedId))
-            SetupNetworked(parsedId);
+        SetupNetworking();
     }
 
-    public void SendMovementDirection(Vector3 direction)
+    private void SetupNetworking()
     {
-        RpcUnreliable(nameof(NetworkMovementDirectionReceived), direction);
+        if (!PeerId.HasValue)
+            return;
+
+        Name = PeerId.Value.ToString(CultureInfo.CurrentCulture);
+
+        networkTweener?.DetachAndQueueFree();
+        networkTweener = new Tween();
+        AddChild(networkTweener);
+
+        if (PeerId.Value != NetworkManager.Instance.PeerId!.Value)
+            UpdateNameTag();
     }
 
-    public void SendLookAtPoint(Vector3 lookAtPoint)
+    private void UpdateNameTag()
     {
-        RpcUnreliable(nameof(NetworkLookAtPointReceived), lookAtPoint);
-    }
+        if (!PeerId.HasValue)
+            return;
 
-    public void SendEngulfMode(bool wantsToEngulf)
-    {
-        Rpc(nameof(NetworkEngulfModeReceived), wantsToEngulf);
-    }
+        var tagBox = GetNode<MeshInstance>("TagBox");
 
-    private void IngestEngulfable(string targetPath, float animationSpeed = 2.0f)
-    {
-        if (IsNetworkMaster())
-        {
-            Rpc(nameof(NetworkSyncEngulfment), true, targetPath);
-        }
-        else if (!GetTree().HasNetworkPeer())
-        {
-            IngestEngulfable(GetNode<IEngulfable>(targetPath), animationSpeed);
-        }
-    }
+        var tagBoxMesh = (QuadMesh)tagBox.Mesh;
+        var tagBoxMaterial = (SpatialMaterial)tagBox.MaterialOverride;
 
-    private void EjectEngulfable(string targetPath, float animationSpeed = 2.0f)
-    {
-        if (IsNetworkMaster())
-        {
-            Rpc(nameof(NetworkSyncEngulfment), false, targetPath);
-        }
-        else if (!GetTree().HasNetworkPeer())
-        {
-            EjectEngulfable(GetNode<IEngulfable>(targetPath), animationSpeed);
-        }
-    }
+        var tag = tagBox.GetChild<Label3D>(0);
 
-    [Puppet]
-    private void NetworkSyncKill()
-    {
-        Kill();
-    }
+        tagBox.Visible = true;
+        tag.Text = NetworkManager.Instance.PlayerList[PeerId.Value].Name + ", Dead: " + Dead;
 
-    [Puppet]
-    private void NetworkSyncCompoundsCapacity(float capacity)
-    {
-        Compounds.Capacity = capacity;
-    }
+        tagBoxMesh.Size = tag.Font.GetStringSize(tag.Text) * tag.PixelSize * 1.2f;
+        tagBoxMaterial.RenderPriority = RenderPriority + 1;
+        tag.RenderPriority = tagBoxMaterial.RenderPriority + 1;
 
-    [Puppet]
-    private void NetworkSyncMicrobeState(Microbe.MicrobeState state)
-    {
-        State = state;
-    }
-
-    [Puppet]
-    private void NetworkSyncPhagocytosisStep(PhagocytosisPhase phase)
-    {
-        PhagocytosisStep = phase;
-    }
-
-    [PuppetSync]
-    private void NetworkSyncEngulfment(bool engulf, string engulfablePath)
-    {
-        var engulfable = GetNode<IEngulfable>(engulfablePath);
-
-        if (engulf)
-        {
-            IngestEngulfable(engulfable);
-        }
-        else
-        {
-            EjectEngulfable(engulfable);
-        }
-    }
-
-    [Puppet]
-    private void NetworkSyncFlash(float duration, int priority, float r, float g, float b, float a)
-    {
-        Flash(duration, new Color(r, g, b, a), priority);
-    }
-
-    [Puppet]
-    private void NetworkSyncAbortFlash()
-    {
-        AbortFlash();
-    }
-
-    [Puppet]
-    private void NetworkSyncDigestedAmount(float amount)
-    {
-        DigestedAmount = amount;
-    }
-
-    [Puppet]
-    private void NetworkReturnRandom(int seed)
-    {
-        randomSeed = seed;
-        random = new Random(seed);
-    }
-
-    [Master]
-    private void NetworkMovementDirectionReceived(Vector3 movementDirection)
-    {
-        MovementDirection = movementDirection;
-    }
-
-    [Master]
-    private void NetworkLookAtPointReceived(Vector3 lookAtPoint)
-    {
-        LookAtPoint = lookAtPoint;
-    }
-
-    [Master]
-    private void NetworkEngulfModeReceived(bool wantsToEngulf)
-    {
-        State = wantsToEngulf ? MicrobeState.Engulf : MicrobeState.Normal;
-    }
-
-    [Master]
-    private void NetworkFetchRandom()
-    {
-        var sender = GetTree().GetRpcSenderId();
-        RpcId(sender, nameof(NetworkReturnRandom), randomSeed);
+        // TODO: offset tag above the membrane (Z-axis)
     }
 }

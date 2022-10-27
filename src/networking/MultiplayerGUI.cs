@@ -205,7 +205,7 @@ public class MultiplayerGUI : CenterContainer
         var label = NetworkedPlayerLabelScene.Instance<NetworkedPlayerLabel>();
         label.ID = peerId;
         label.PlayerName = name;
-        label.Highlight = NetworkManager.Instance.GetPlayerState(peerId)!.ReadyForSession;
+        label.Highlight = NetworkManager.Instance.GetPlayerInfo(peerId)!.ReadyForSession;
 
         label.Connect(nameof(NetworkedPlayerLabel.KickRequested), this, nameof(OnKickButtonPressed));
 
@@ -228,14 +228,14 @@ public class MultiplayerGUI : CenterContainer
     {
         var network = NetworkManager.Instance;
 
-        if (GetTree().IsNetworkServer())
+        if (NetworkManager.Instance.IsAuthoritative)
         {
             startButton.Text = TranslationServer.Translate("START");
             startButton.Disabled = network.PlayerList.Any(
                 p => p.Key != NetworkManager.DEFAULT_SERVER_ID && !p.Value.ReadyForSession);
             startButton.ToggleMode = false;
         }
-        else
+        else if (NetworkManager.Instance.IsPuppet)
         {
             startButton.Text = network.GameInSession ? TranslationServer.Translate("JOIN")
                 :
@@ -243,8 +243,8 @@ public class MultiplayerGUI : CenterContainer
             startButton.Disabled = false;
             startButton.ToggleMode = !network.GameInSession;
 
-            if (network.Player != null)
-                startButton.SetPressedNoSignal(network.Player.ReadyForSession);
+            if (network.PlayerInfo != null)
+                startButton.SetPressedNoSignal(network.PlayerInfo.ReadyForSession);
         }
     }
 
@@ -383,7 +383,7 @@ public class MultiplayerGUI : CenterContainer
         switch (currentWorkStatus)
         {
             case WorkStatus.Connecting:
-                NetworkManager.Instance.PrintWithRole("Cancelling connection");
+                NetworkManager.Instance.Print("Cancelling connection");
                 NetworkManager.Instance.Disconnect();
                 break;
 
@@ -411,7 +411,7 @@ public class MultiplayerGUI : CenterContainer
 
         currentWorkStatus = WorkStatus.None;
 
-        NetworkManager.Instance.PrintWithRole(
+        NetworkManager.Instance.Print(
             "Connection to ", addressBox.Text, ":", portBox.Text, " succeeded," +
             " with network ID (", GetTree().GetNetworkUniqueId(), ")");
     }
@@ -428,7 +428,7 @@ public class MultiplayerGUI : CenterContainer
 
         currentWorkStatus = WorkStatus.None;
 
-        NetworkManager.Instance.PrintErrorWithRole(
+        NetworkManager.Instance.PrintError(
             "Connection to ", addressBox.Text, ":", portBox.Text, " failed: ", reason);
     }
 

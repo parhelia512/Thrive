@@ -5,7 +5,7 @@ using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
-///   Includes both the server and client code.
+///   Manages networking related operations
 /// </summary>
 public class NetworkManager : Node
 {
@@ -17,6 +17,8 @@ public class NetworkManager : Node
 
     private NetworkedMultiplayerENet? peer;
     private UPNP? upnp;
+
+    private float networkTickTimer;
 
     private NetworkManager()
     {
@@ -53,6 +55,11 @@ public class NetworkManager : Node
     [Signal]
     public delegate void PlayerStatusChanged(int peerId, NetPlayerStatus status);
 
+    public event EventHandler<float>? NetworkTick;
+
+    public event EventHandler<EntityReplicatedEventArgs>? EntityReplicated;
+    public event EventHandler<uint>? EntityDestroy;
+
     public enum UPNPActionStep
     {
         Setup,
@@ -75,19 +82,32 @@ public class NetworkManager : Node
 
     public float TimePassedConnecting { get; private set; }
 
+    public int? PeerId { get; private set; }
+
     /// <summary>
     ///   All peers connected in the network (INCLUDING SELF).
     /// </summary>
     public IReadOnlyDictionary<int, NetPlayerInfo> PlayerList => playerList;
 
-    public NetPlayerInfo? Player => GetPlayerState(GetTree().GetNetworkUniqueId());
+    public NetPlayerInfo? PlayerInfo => PeerId.HasValue ? GetPlayerInfo(PeerId.Value) : null;
 
-    public bool IsDedicated => GetTree().IsNetworkServer() && !HasPlayer(1);
+    public NetPlayerState? PlayerState => PeerId.HasValue ? GetPlayerState(PeerId.Value) : null;
+
+    public bool IsServer { get; private set; }
+
+    public bool IsDedicated => IsServer && !HasPlayer(1);
+
+    public bool IsAuthoritative => PeerId.HasValue && IsServer && IsNetworkMaster();
+
+    public bool IsPuppet => PeerId.HasValue && !IsServer && !IsNetworkMaster();
 
     [RemoteSync]
     public bool GameInSession { get; private set; }
 
     public GameProperties? CurrentGame { get; private set; }
+
+    public MultiplayerGameWorld World => (MultiplayerGameWorld?)CurrentGame?.GameWorld ??
+        throw new NullReferenceException("Multiplayer game instance doesn't exist");
 
     public override void _Ready()
     {
@@ -108,6 +128,17 @@ public class NetworkManager : Node
         {
             TimePassedConnecting += delta;
         }
+
+        if (GameInSession)
+        {
+            networkTickTimer += delta;
+
+            if (networkTickTimer > UpdateInterval)
+            {
+                NetworkTick?.Invoke(this, delta + networkTickTimer);
+                networkTickTimer = 0;
+            }
+        }
     }
 
     /// <summary>
@@ -125,7 +156,7 @@ public class NetworkManager : Node
         var error = peer.CreateServer(settings.Port, Constants.MULTIPLAYER_DEFAULT_MAX_CLIENTS);
         if (error != Error.Ok)
         {
-            PrintErrorWithRole("An error occurred while trying to create server: ", error);
+            PrintError("An error occurred while trying to create server: ", error);
             return error;
         }
 
@@ -137,11 +168,16 @@ public class NetworkManager : Node
             Origin = WorldGenerationSettings.LifeOrigin.Pond,
             AddDefaultSpecies = false,
         };
-        CurrentGame = GameProperties.StartNewMicrobeGame(worldSettings);
+        CurrentGame = GameProperties.StartNewMultiplayerGame(worldSettings);
+
+        SpawnHelpers.OnNetEntitySpawned = OnNetEntitySpawned;
+        SpawnHelpers.OnNetEntityDespawned = OnNetEntityDespawned;
 
         GetTree().NetworkPeer = peer;
 
-        PrintWithRole("Created server with the following settings ", settings);
+        IsServer = true;
+
+        Print("Created server with the following settings ", settings);
 
         return error;
     }
@@ -161,10 +197,9 @@ public class NetworkManager : Node
             TaskExecutor.Instance.AddTask(new Task(() => SetupUPNP()));
         }
 
-        var id = GetTree().GetNetworkUniqueId();
-        NotifyPlayerConnected(id, playerName);
+        OnConnectedToServer(playerName);
 
-        PrintWithRole("Server is player hosted");
+        Print("Server is player hosted");
 
         return result;
     }
@@ -184,18 +219,20 @@ public class NetworkManager : Node
         var result = peer.CreateClient(address, port);
         if (result != Error.Ok)
         {
-            PrintErrorWithRole("An error occurred while trying to create client: ", result);
+            PrintError("An error occurred while trying to create client: ", result);
             return result;
         }
 
         GetTree().NetworkPeer = peer;
+
+        IsServer = false;
 
         return result;
     }
 
     public void Disconnect()
     {
-        PrintWithRole("Disconnecting...");
+        Print("Disconnecting...");
         peer?.CloseConnection();
 
         if (upnp?.GetDeviceCount() > 0)
@@ -203,6 +240,7 @@ public class NetworkManager : Node
 
         playerList.Clear();
         GameInSession = false;
+        PeerId = null;
     }
 
     public bool HasPlayer(int peerId)
@@ -210,9 +248,15 @@ public class NetworkManager : Node
         return playerList.ContainsKey(peerId);
     }
 
-    public NetPlayerInfo? GetPlayerState(int peerId)
+    public NetPlayerInfo? GetPlayerInfo(int peerId)
     {
         playerList.TryGetValue(peerId, out NetPlayerInfo result);
+        return result;
+    }
+
+    public NetPlayerState? GetPlayerState(int peerId)
+    {
+        World.Players.TryGetValue(peerId, out NetPlayerState result);
         return result;
     }
 
@@ -221,13 +265,13 @@ public class NetworkManager : Node
         if (!GetTree().IsNetworkServer() && !GameInSession)
             return;
 
-        if (!IsDedicated && Player!.Status == NetPlayerStatus.Active)
+        if (!IsDedicated && PlayerInfo!.Status == NetPlayerStatus.Active)
             return;
 
         if (GetTree().IsNetworkServer() && !GameInSession)
             Rset(nameof(GameInSession), true);
 
-        NotifyWorldLoad();
+        NotifyGameLoad();
 
         if (GetTree().IsNetworkServer())
         {
@@ -237,20 +281,20 @@ public class NetworkManager : Node
                     continue;
 
                 if (player.Value.Status == NetPlayerStatus.Lobby)
-                    RpcId(player.Key, nameof(NotifyWorldLoad));
+                    RpcId(player.Key, nameof(NotifyGameLoad));
             }
         }
     }
 
     public void EndGame()
     {
-        if (!IsDedicated && Player!.Status == NetPlayerStatus.Lobby)
+        if (!IsDedicated && PlayerInfo!.Status == NetPlayerStatus.Lobby)
             return;
 
         if (GetTree().IsNetworkServer() && GameInSession)
             Rset(nameof(GameInSession), false);
 
-        NotifyWorldExit();
+        NotifyGameExit();
 
         if (GetTree().IsNetworkServer())
         {
@@ -260,7 +304,7 @@ public class NetworkManager : Node
                     continue;
 
                 if (player.Value.Status == NetPlayerStatus.Active)
-                    RpcId(player.Key, nameof(NotifyWorldExit));
+                    RpcId(player.Key, nameof(NotifyGameExit));
             }
         }
     }
@@ -271,6 +315,15 @@ public class NetworkManager : Node
             return;
 
         RpcId(1, nameof(NotifyReadyForSessionStatusChange), GetTree().GetNetworkUniqueId(), ready);
+    }
+
+    public void SyncPlayerStateToAllPlayers(int peerId, NetPlayerState? state)
+    {
+        if (!GetTree().IsNetworkServer())
+            return;
+
+        var serialized = state == null ? string.Empty : JsonConvert.SerializeObject(state);
+        Rpc(nameof(SyncPlayerState), peerId, serialized);
     }
 
     public void Kick(int id, string reason)
@@ -302,14 +355,14 @@ public class NetworkManager : Node
     ///   Differentiates between print call from server or client. We do this so that they will stand out more
     ///   on the output log.
     /// </summary>
-    public void PrintWithRole(params object[] what)
+    public void Print(params object[] what)
     {
         var str = string.Concat(Array.ConvertAll(what, x => x?.ToString() ?? "null"));
         var serverOrHost = IsDedicated ? "[Server] " : "[Host] ";
         GD.Print(GetTree().IsNetworkServer() ? serverOrHost : "[Client] ", str);
     }
 
-    public void PrintErrorWithRole(params object[] what)
+    public void PrintError(params object[] what)
     {
         var str = string.Concat(Array.ConvertAll(what, x => x?.ToString() ?? "null"));
         var serverOrHost = IsDedicated ? "[Server] " : "[Host] ";
@@ -323,7 +376,7 @@ public class NetworkManager : Node
         var result = (UPNP.UPNPResult)upnp.Discover();
 
         if (result != UPNP.UPNPResult.Success)
-            PrintErrorWithRole("UPnP devices discovery failed: ", result);
+            PrintError("UPnP devices discovery failed: ", result);
 
         EmitSignal(nameof(UPNPCallResultReceived), result, UPNPActionStep.Setup);
     }
@@ -360,29 +413,30 @@ public class NetworkManager : Node
         if (!HasPlayer(id))
             return;
 
-        PrintWithRole("User ", GetPlayerState(id)!.Name, " (", id, ") has disconnected");
+        Print("User ", GetPlayerInfo(id)!.Name, " (", id, ") has disconnected");
 
-        SystemBroadcastChat($"[b]{GetPlayerState(id)!.Name}[/b] has disconnected.");
+        SystemBroadcastChat($"[b]{GetPlayerInfo(id)!.Name}[/b] has disconnected.");
 
         NotifyPlayerDisconnected(id);
     }
 
     private void OnConnectedToServer(string playerName)
     {
-        var id = GetTree().GetNetworkUniqueId();
+        PeerId = GetTree().GetNetworkUniqueId();
 
         // TODO: some kind of authentication
-        RpcId(1, nameof(NotifyPlayerConnected), id, playerName);
+        RpcId(1, nameof(NotifyPlayerConnected), PeerId.Value, playerName);
 
         TimePassedConnecting = 0;
     }
 
     private void OnServerDisconnected()
     {
-        PrintWithRole("Disconnected from server");
+        Print("Disconnected from server");
 
         playerList.Clear();
         GameInSession = false;
+        PeerId = null;
         EmitSignal(nameof(ServerStateUpdated));
     }
 
@@ -417,6 +471,33 @@ public class NetworkManager : Node
         Rpc(nameof(NotifyWorldReady), GetTree().GetNetworkUniqueId());
     }
 
+    private void OnNetEntitySpawned(INetEntity spawned)
+    {
+        var id = World.RegisterEntity(spawned);
+
+        foreach (var player in NetworkManager.Instance.PlayerList)
+        {
+            if (player.Key == GetTree().GetNetworkUniqueId() || player.Value.Status != NetPlayerStatus.Active)
+                continue;
+
+            // TODO: replace this with something far more efficient!!
+            RpcId(player.Key, nameof(ReplicateSpawnedEntity), id, ThriveJsonConverter.Instance.SerializeObject(spawned), -1);
+        }
+    }
+
+    private void OnNetEntityDespawned(uint id)
+    {
+        World.UnregisterEntity(id);
+
+        foreach (var player in NetworkManager.Instance.PlayerList)
+        {
+            if (player.Key == GetTree().GetNetworkUniqueId() || player.Value.Status != NetPlayerStatus.Active)
+                continue;
+
+            RpcId(player.Key, nameof(DestroySpawnedEntity), id);
+        }
+    }
+
     [RemoteSync]
     private void NotifyPlayerConnected(int id, string playerName)
     {
@@ -434,8 +515,8 @@ public class NetworkManager : Node
 
             if (!IsDedicated)
             {
-                RpcId(id, nameof(NotifyPlayerConnected), GetTree().GetNetworkUniqueId(), Player!.Name);
-                RpcId(id, nameof(NotifyPlayerStatusChange), GetTree().GetNetworkUniqueId(), Player.Status);
+                RpcId(id, nameof(NotifyPlayerConnected), GetTree().GetNetworkUniqueId(), PlayerInfo!.Name);
+                RpcId(id, nameof(NotifyPlayerStatusChange), GetTree().GetNetworkUniqueId(), PlayerInfo.Status);
             }
 
             foreach (var player in playerList)
@@ -456,7 +537,7 @@ public class NetworkManager : Node
             }
 
             // TODO: might not be true...
-            PrintWithRole("User ", playerName, " (", id, ") has connected");
+            Print("User ", playerName, " (", id, ") has connected");
             SystemBroadcastChat($"[b]{playerName}[/b] has connected.");
         }
 
@@ -485,16 +566,16 @@ public class NetworkManager : Node
     }
 
     [Remote]
-    private void NotifyServerConfigs(string settings, string currentGame)
+    private void NotifyServerConfigs(string settings, string game)
     {
         try
         {
             Settings = JsonConvert.DeserializeObject<ServerSettings>(settings);
-            CurrentGame = ThriveJsonConverter.Instance.DeserializeObject<GameProperties>(currentGame);
+            CurrentGame = ThriveJsonConverter.Instance.DeserializeObject<GameProperties>(game);
         }
         catch (Exception e)
         {
-            PrintErrorWithRole("Error occured while trying to read server configurations: ", e);
+            PrintError("Error occured while trying to read server configurations: ", e);
         }
     }
 
@@ -527,10 +608,10 @@ public class NetworkManager : Node
             }
         }
 
-        var state = GetPlayerState(id);
-        if (state != null)
+        var info = GetPlayerInfo(id);
+        if (info != null)
         {
-            state.Status = environment;
+            info.Status = environment;
             EmitSignal(nameof(PlayerStatusChanged), id, environment);
         }
     }
@@ -540,7 +621,7 @@ public class NetworkManager : Node
     {
         if (GetTree().GetRpcSenderId() != DEFAULT_SERVER_ID)
         {
-            PrintErrorWithRole("Kicking is only permissible from host/server");
+            PrintError("Kicking is only permissible from host/server");
             return;
         }
 
@@ -562,14 +643,14 @@ public class NetworkManager : Node
             }
         }
 
-        var state = GetPlayerState(peerId)!;
-        state.ReadyForSession = ready;
+        var info = GetPlayerInfo(peerId)!;
+        info.ReadyForSession = ready;
 
         EmitSignal(nameof(ReadyForSessionReceived), peerId, ready);
     }
 
     [Remote]
-    private void NotifyWorldLoad()
+    private void NotifyGameLoad()
     {
         Rpc(nameof(NotifyWorldPreLoad), GetTree().GetNetworkUniqueId());
 
@@ -579,8 +660,8 @@ public class NetworkManager : Node
 
             switch (Settings?.SelectedGameMode)
             {
-                case MultiplayerGameMode.MicrobialArena:
-                    var scene = SceneManager.Instance.LoadScene(MultiplayerGameMode.MicrobialArena);
+                case MultiplayerGameState.MicrobialArena:
+                    var scene = SceneManager.Instance.LoadScene(MultiplayerGameState.MicrobialArena);
                     stage = (MicrobialArena)scene.Instance();
                     break;
             }
@@ -592,7 +673,7 @@ public class NetworkManager : Node
     }
 
     [Remote]
-    private void NotifyWorldExit()
+    private void NotifyGameExit()
     {
         Rpc(nameof(NotifyWorldPreExit), GetTree().GetNetworkUniqueId());
 
@@ -607,7 +688,7 @@ public class NetworkManager : Node
     [RemoteSync]
     private void NotifyWorldPreLoad(int peerId)
     {
-        var playerInfo = GetPlayerState(peerId);
+        var playerInfo = GetPlayerInfo(peerId);
 
         if (playerInfo == null)
             return;
@@ -619,19 +700,43 @@ public class NetworkManager : Node
     [RemoteSync]
     private void NotifyWorldPostLoad(int peerId)
     {
-        var playerInfo = GetPlayerState(peerId);
+        var playerInfo = GetPlayerInfo(peerId);
 
         if (playerInfo == null)
             return;
 
         EmitSignal(nameof(PlayerJoined), peerId);
         SystemBroadcastChat($"[b]{playerInfo.Name}[/b] has joined.");
+
+        if (GetTree().IsNetworkServer() && peerId != GetTree().GetNetworkUniqueId())
+        {
+            foreach (var entry in World.Entities)
+            {
+                var entity = entry.Value.Value;
+                if (entity == null)
+                    continue;
+
+                var oldName = entity.EntityNode.Name;
+                var entityParent = entity.EntityNode.GetParent();
+
+                // Obvious hack. Why does the json serializer keeps the entity's parent anyway,
+                // now this need to be like this as I don't bother finding out
+                entityParent?.RemoveChild(entity.EntityNode);
+
+                // TODO: replace this with something far more efficient!!
+                RpcId(peerId, nameof(ReplicateSpawnedEntity), entry.Key,
+                    ThriveJsonConverter.Instance.SerializeObject(entity), World.EntityCount);
+
+                entityParent?.AddChild(entity.EntityNode);
+                entity.EntityNode.Name = oldName;
+            }
+        }
     }
 
     [RemoteSync]
     private void NotifyWorldPreExit(int peerId)
     {
-        var playerInfo = GetPlayerState(peerId);
+        var playerInfo = GetPlayerInfo(peerId);
 
         if (playerInfo == null)
             return;
@@ -639,12 +744,14 @@ public class NetworkManager : Node
         playerInfo.Status = NetPlayerStatus.Leaving;
         EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
         EmitSignal(nameof(PlayerLeft), peerId);
+
+        World.Clear();
     }
 
     [RemoteSync]
     private void NotifyWorldPostExit(int peerId)
     {
-        var playerInfo = GetPlayerState(peerId);
+        var playerInfo = GetPlayerInfo(peerId);
 
         if (playerInfo == null)
             return;
@@ -660,7 +767,7 @@ public class NetworkManager : Node
     [RemoteSync]
     private void NotifyWorldReady(int peerId)
     {
-        var playerInfo = GetPlayerState(peerId);
+        var playerInfo = GetPlayerInfo(peerId);
 
         if (playerInfo == null)
             return;
@@ -673,7 +780,7 @@ public class NetworkManager : Node
     private void NotifyChatSend(string message, bool asSystem)
     {
         var senderId = GetTree().GetRpcSenderId();
-        var senderState = GetPlayerState(senderId);
+        var senderState = GetPlayerInfo(senderId);
 
         var formatted = string.Empty;
         if (senderState == null || (senderId == DEFAULT_SERVER_ID && asSystem))
@@ -686,5 +793,35 @@ public class NetworkManager : Node
         }
 
         EmitSignal(nameof(ChatReceived), formatted);
+    }
+
+    [Puppet]
+    private void SyncPlayerState(int peerId, string data)
+    {
+        if (string.IsNullOrEmpty(data))
+        {
+            World.Players.Remove(peerId);
+            return;
+        }
+
+        World.Players[peerId] = JsonConvert.DeserializeObject<NetPlayerState>(data);
+    }
+
+    [Puppet]
+    private void ReplicateSpawnedEntity(uint id, string data, int serverEntityCount = -1)
+    {
+        var deserialized = ThriveJsonConverter.Instance.DeserializeObject<INetEntity>(data);
+        if (deserialized == null)
+            return;
+
+        World.RegisterEntity(id, deserialized);
+        EntityReplicated?.Invoke(this, new EntityReplicatedEventArgs(id, deserialized, serverEntityCount));
+    }
+
+    [Puppet]
+    private void DestroySpawnedEntity(uint entityId)
+    {
+        EntityDestroy?.Invoke(this, entityId);
+        World.UnregisterEntity(entityId);
     }
 }

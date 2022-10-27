@@ -15,7 +15,7 @@ public class ServerSettings
 
     public bool UseUPNP { get; set; }
 
-    public MultiplayerGameMode SelectedGameMode { get; set; } = MultiplayerGameMode.MicrobialArena;
+    public MultiplayerGameState SelectedGameMode { get; set; } = MultiplayerGameState.MicrobialArena;
 
     public override string ToString()
     {
@@ -26,7 +26,7 @@ public class ServerSettings
     {
         switch (SelectedGameMode)
         {
-            case MultiplayerGameMode.MicrobialArena:
+            case MultiplayerGameState.MicrobialArena:
                 return TranslationServer.Translate("MICROBIAL_ARENA");
             default:
                 return TranslationServer.Translate("N_A");

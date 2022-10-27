@@ -81,6 +81,8 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
 
     public uint NetEntityId { get; set; }
 
+    public bool Synchronize { get; set; } = true;
+
     [JsonIgnore]
     public int RenderPriority
     {
@@ -170,9 +172,6 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
                 return;
 
             phagocytosisStep = value;
-
-            if (IsNetworkMaster())
-                Rpc(nameof(NetworkSyncPhagocytosisStep), value);
         }
     }
 
@@ -369,7 +368,7 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
         elapsedSinceProcess = 0;
     }
 
-    public void NetSyncEveryFrame(Dictionary<string, string> data)
+    public void OnNetworkSync(Dictionary<string, string> data)
     {
         var rotation = (Vector3)GD.Str2Var(data["rot"]);
         var position = (Vector3)GD.Str2Var(data["pos"]);
@@ -377,17 +376,30 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
         Rotation = rotation;
         networkTweener?.InterpolateProperty(this, "global_translation", null, position, 0.1f);
         networkTweener?.Start();
+
+        if (Enum.TryParse<PhagocytosisPhase>(data["engulfStep"], out PhagocytosisPhase parsedPhagocytosisStep))
+            PhagocytosisStep = parsedPhagocytosisStep;
     }
 
-    public Dictionary<string, string> PackState()
+    public void OnNetworkInput(Dictionary<string, string> data)
+    {
+    }
+
+    public Dictionary<string, string>? PackStates()
     {
         var vars = new Dictionary<string, string>
         {
             { "pos", GD.Var2Str(GlobalTranslation) },
             { "rot", GD.Var2Str(GlobalRotation) },
+            { "engulfStep", PhagocytosisStep.ToString() },
         };
 
         return vars;
+    }
+
+    public Dictionary<string, string>? PackInputs()
+    {
+        return null;
     }
 
     public void OnReplicated()
@@ -656,11 +668,5 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
         {
             this.DestroyDetachAndQueueFree();
         }
-    }
-
-    [Puppet]
-    private void NetworkSyncPhagocytosisStep(PhagocytosisPhase phase)
-    {
-        PhagocytosisStep = phase;
     }
 }

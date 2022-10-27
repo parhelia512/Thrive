@@ -170,10 +170,6 @@ public partial class Microbe
                 return;
 
             dissolveEffectValue = Mathf.Clamp(value, 0.0f, 1.0f);
-
-            if (IsNetworkMaster())
-                Rpc(nameof(NetworkSyncDigestedAmount), dissolveEffectValue);
-
             UpdateDissolveEffect();
         }
     }
@@ -655,6 +651,9 @@ public partial class Microbe
 
     private void HandleCompoundAbsorbing(float delta)
     {
+        if (NetworkManager.Instance.IsPuppet)
+            return;
+
         if (PhagocytosisStep != PhagocytosisPhase.None)
             return;
 
@@ -758,6 +757,9 @@ public partial class Microbe
     /// </remarks>
     private void HandleReproduction(float delta)
     {
+        if (NetworkManager.Instance.IsPuppet)
+            return;
+
         // Dead or engulfed cells can't reproduce
         if (Dead || PhagocytosisStep != PhagocytosisPhase.None)
             return;
@@ -1266,9 +1268,6 @@ public partial class Microbe
         // hook up computing this when the StorageBag needs this info.
         organellesCapacity += organelle.StorageCapacity;
         Compounds.Capacity = organellesCapacity;
-
-        if (IsNetworkMaster())
-            Rpc(nameof(NetworkSyncCompoundsCapacity), organellesCapacity);
     }
 
     [DeserializedCallbackAllowed]
@@ -1296,9 +1295,6 @@ public partial class Microbe
         organelleMaxRenderPriorityDirty = true;
 
         Compounds.Capacity = organellesCapacity;
-
-        if (IsNetworkMaster())
-            Rpc(nameof(NetworkSyncCompoundsCapacity), organellesCapacity);
     }
 
     /// <summary>
@@ -1308,9 +1304,6 @@ public partial class Microbe
     {
         organellesCapacity = organelles!.Sum(o => o.StorageCapacity);
         Compounds.Capacity = organellesCapacity;
-
-        if (IsNetworkMaster())
-            Rpc(nameof(NetworkSyncCompoundsCapacity), organellesCapacity);
     }
 
     private bool CheckHasSignalingAgent()
@@ -1422,7 +1415,7 @@ public partial class Microbe
     /// </summary>
     private void HandleDigestion(float delta)
     {
-        if (Dead || !IsNetworkMaster())
+        if (Dead || NetworkManager.Instance.IsPuppet)
             return;
 
         var compoundTypes = SimulationParameters.Instance.GetAllCompounds();
@@ -1443,7 +1436,7 @@ public partial class Microbe
             // is overloaded
             if (UsedIngestionCapacity > EngulfSize)
             {
-                EjectEngulfable(engulfable.EntityNode.GetPath());
+                EjectEngulfable(engulfable);
                 continue;
             }
 
@@ -1458,7 +1451,7 @@ public partial class Microbe
             {
                 if (!Enzymes.ContainsKey(engulfable.RequisiteEnzymeToDigest))
                 {
-                    EjectEngulfable(engulfable.EntityNode.GetPath());
+                    EjectEngulfable(engulfable);
                     continue;
                 }
 
@@ -1562,11 +1555,8 @@ public partial class Microbe
                 // Microbe is beyond repair, might as well consider it as dead
                 Kill();
 
-                if (IsNetworkMaster())
-                {
-                    Rpc(nameof(NetworkSyncKill));
-                    OnNetworkedDeathCompletes?.Invoke(Name.ToInt());
-                }
+                if (PeerId.HasValue && NetworkManager.Instance.IsAuthoritative)
+                    OnNetworkedDeathCompletes?.Invoke(PeerId.Value);
 
                 if (IsPlayerMicrobe)
                 {
@@ -1596,6 +1586,9 @@ public partial class Microbe
 
     private void HandleSlimeSecretion(float delta)
     {
+        if (NetworkManager.Instance.IsPuppet)
+            return;
+
         // Ignore if we have no slime jets
         if (SlimeJets.Count < 1)
             return;

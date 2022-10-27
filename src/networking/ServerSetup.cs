@@ -100,7 +100,7 @@ public class ServerSetup : CustomDialog
     {
         settings!.Name = name.Text;
         settings.MaxPlayers = (int)maxPlayers.Value;
-        settings.SelectedGameMode = (MultiplayerGameMode)gameMode.Selected;
+        settings.SelectedGameMode = (MultiplayerGameState)gameMode.Selected;
         settings.UseUPNP = useUPNP.Pressed;
     }
 }

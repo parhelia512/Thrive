@@ -209,7 +209,7 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
             return;
         }
 
-        if (!HasPlayer && !NetworkManager.Instance.IsDedicated)
+        if (!HasPlayer)
         {
             if (!spawnedPlayer)
             {
@@ -513,7 +513,6 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
         BaseHUD.ShowPatchExtinctionBox();
     }
 
-    [Puppet]
     protected void NotifyGameReady()
     {
         GameReady?.Invoke(this, EventArgs.Empty);

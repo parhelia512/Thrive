@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
 using Godot;
 
+/// <summary>
+///   Describes player information in relation to the connected server.
+/// </summary>
 public class NetPlayerInfo
 {
     public string Name { get; set; } = string.Empty;

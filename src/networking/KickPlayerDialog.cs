@@ -33,7 +33,7 @@ public class KickPlayerDialog : Control
     {
         if (id == 1)
         {
-            NetworkManager.Instance.PrintWithRole("Attempting to kick host/server, this is not allowed");
+            NetworkManager.Instance.Print("Attempting to kick host/server, this is not allowed");
             return;
         }
 

@@ -23,6 +23,12 @@ public class GameProperties
         TutorialState = new TutorialState();
     }
 
+    private GameProperties(MultiplayerGameWorld multiplayerGame)
+    {
+        GameWorld = multiplayerGame;
+        TutorialState = null!;
+    }
+
     [JsonConstructor]
     private GameProperties(GameWorld gameWorld, TutorialState tutorialState)
     {
@@ -70,6 +76,11 @@ public class GameProperties
         }
 
         return game;
+    }
+
+    public static GameProperties StartNewMultiplayerGame(WorldGenerationSettings settings)
+    {
+        return new GameProperties(new MultiplayerGameWorld(settings));
     }
 
     /// <summary>
