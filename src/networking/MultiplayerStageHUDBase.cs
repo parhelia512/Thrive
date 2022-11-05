@@ -8,11 +8,15 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
     public NodePath ChatBoxPath = null!;
 
     [Export]
+    public NodePath InfoScreenPath = null!;
+
+    [Export]
     public NodePath ScoreBoardPath = null!;
 
     protected AnimationPlayer chatBoxAnimationPlayer = null!;
 
     protected ChatBox chatBox = null!;
+    protected CenterContainer infoScreen = null!;
     protected ScoreBoard scoreBoard = null!;
 
     // The values of the following variable is the opposite of the expected value.
@@ -25,6 +29,7 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
 
         chatBoxAnimationPlayer = GetNode<AnimationPlayer>(ChatBoxAnimationPlayerPath);
         chatBox = GetNode<ChatBox>(ChatBoxPath);
+        infoScreen = GetNode<CenterContainer>(InfoScreenPath);
         scoreBoard = GetNode<ScoreBoard>(ScoreBoardPath);
     }
 
@@ -37,9 +42,14 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
         chatBoxAnimationPlayer.Play(GetTree().HasNetworkPeer() ? "Open" : "Close");
     }
 
-    public void ToggleScoreBoard()
+    public void ToggleInfoScreen()
     {
-        scoreBoard.Visible = !scoreBoard.Visible;
+        infoScreen.Visible = !infoScreen.Visible;
+    }
+
+    public void SortScoreBoard()
+    {
+        scoreBoard.SortHighestScoreFirst();
     }
 
     public void FocusChat()

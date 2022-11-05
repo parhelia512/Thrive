@@ -80,13 +80,13 @@ public class GameWorld : ISaveLoadable
     }
 
     [JsonProperty]
-    public Species PlayerSpecies { get; private set; } = null!;
+    public Species PlayerSpecies { get; protected set; } = null!;
 
     [JsonIgnore]
     public IReadOnlyDictionary<uint, Species> Species => worldSpecies;
 
     [JsonProperty]
-    public PatchMap Map { get; private set; } = null!;
+    public PatchMap Map { get; protected set; } = null!;
 
     /// <summary>
     ///   This probably needs to be changed to a huge precision number
@@ -147,12 +147,6 @@ public class GameWorld : ISaveLoadable
 
         species.Organelles.Add(new OrganelleTemplate(
             SimulationParameters.Instance.GetOrganelleType("cytoplasm"), new Hex(0, 0), 0));
-
-        species.Organelles.Add(new OrganelleTemplate(
-            SimulationParameters.Instance.GetOrganelleType("metabolosome"), new Hex(0, -1), 0));
-
-        species.Organelles.Add(new OrganelleTemplate(
-            SimulationParameters.Instance.GetOrganelleType("pilus"), new Hex(0, -2), 0));
 
         species.OnEdited();
     }

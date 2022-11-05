@@ -1,7 +1,7 @@
 using System.Text;
 using Godot;
 
-public class NetworkedPlayerLabel : PanelContainer
+public class NetPlayerLog : PanelContainer
 {
     [Export]
     public NodePath NamePath = null!;
@@ -16,6 +16,8 @@ public class NetworkedPlayerLabel : PanelContainer
     public NodePath SpacerPath = null!;
 
     private CustomRichTextLabel? nameLabel;
+    private Label killsLabel = null!;
+    private Label deathsLabel = null!;
     private Button kickButton = null!;
     private TextureRect cross = null!;
     private Control spacer = null!;
@@ -60,12 +62,28 @@ public class NetworkedPlayerLabel : PanelContainer
         cross = GetNode<TextureRect>(CrossPath);
         spacer = GetNode<Control>(SpacerPath);
 
+        killsLabel = GetNode<Label>("HBoxContainer/Kills");
+        deathsLabel = GetNode<Label>("HBoxContainer/Deaths");
+
         NetworkManager.Instance.Connect(
             nameof(NetworkManager.PlayerStatusChanged), this, nameof(OnPlayerStatusChanged));
 
         UpdateName();
         UpdateKickButton();
         UpdateReadyState();
+    }
+
+    public override void _Process(float delta)
+    {
+        var info = NetworkManager.Instance.GetPlayerInfo(ID);
+        if (info == null)
+            return;
+
+        info.Ints.TryGetValue("kills", out int kills);
+        info.Ints.TryGetValue("deaths", out int deaths);
+
+        killsLabel.Text = kills.ToString();
+        deathsLabel.Text = deaths.ToString();
     }
 
     private void UpdateName()
@@ -97,7 +115,7 @@ public class NetworkedPlayerLabel : PanelContainer
 
     private void UpdateKickButton()
     {
-        kickButton.Visible = NetworkManager.Instance.IsAuthoritative && ID != GetTree().GetNetworkUniqueId();
+        kickButton.Visible = NetworkManager.Instance.IsAuthoritative && ID != NetworkManager.Instance.PeerId;
         spacer.Visible = !kickButton.Visible;
     }
 

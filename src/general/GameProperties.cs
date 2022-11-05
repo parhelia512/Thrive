@@ -78,9 +78,20 @@ public class GameProperties
         return game;
     }
 
-    public static GameProperties StartNewMultiplayerGame(WorldGenerationSettings settings)
+    public static GameProperties StartNewMicrobialArenaGame()
     {
-        return new GameProperties(new MultiplayerGameWorld(settings));
+        var map = new PatchMap();
+        var region = new PatchRegion(0, string.Empty, PatchRegion.RegionType.Predefined, Vector2.Zero);
+
+        var tidepool = SimulationParameters.Instance.GetBiome("aavolcanic_vent");
+        var patch = new Patch(new LocalizedString("MICROBIAL_ARENA"), 0, tidepool, BiomeType.Tidepool, region);
+
+        map.AddRegion(region);
+        map.AddPatch(patch);
+
+        map.CurrentPatch = patch;
+
+        return new GameProperties(new MultiplayerGameWorld(map));
     }
 
     /// <summary>

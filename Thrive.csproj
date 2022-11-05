@@ -479,14 +479,13 @@
     <Compile Include="src\modding\WorkshopData.cs" />
     <Compile Include="src\networking\ChatBox.cs" />
     <Compile Include="src\gui_common\ScoreBoard.cs" />
-    <Compile Include="src\networking\EntityReplicatedEventArgs.cs" />
     <Compile Include="src\networking\INetEntity.cs" />
     <Compile Include="src\networking\KickPlayerDialog.cs" />
     <Compile Include="src\networking\MultiplayerGameState.cs" />
     <Compile Include="src\networking\NetPlayerStatus.cs" />
     <Compile Include="src\networking\NetPlayerState.cs" />
     <Compile Include="src\networking\ServerSettings.cs" />
-    <Compile Include="src\gui_common\NetworkedPlayerLabel.cs" />
+    <Compile Include="src\gui_common\NetPlayerLog.cs" />
     <Compile Include="src\networking\MultiplayerGUI.cs" />
     <Compile Include="src\networking\NetworkManager.cs" />
     <Compile Include="src\networking\NetPlayerInfo.cs" />

@@ -12,7 +12,7 @@ public class NetPlayerInfo
 
     public bool ReadyForSession { get; set; }
 
-    public Dictionary<string, object> Vars { get; set; } = new();
+    public Dictionary<string, int> Ints { get; set; } = new();
 
     // TODO: add more important properties...
 

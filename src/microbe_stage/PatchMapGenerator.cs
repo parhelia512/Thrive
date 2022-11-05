@@ -847,8 +847,7 @@ public static class PatchMapGenerator
                 break;
         }
 
-        if (settings.AddDefaultSpecies)
-            map.CurrentPatch.AddSpecies(defaultSpecies, Constants.INITIAL_SPECIES_POPULATION);
+        map.CurrentPatch.AddSpecies(defaultSpecies, Constants.INITIAL_SPECIES_POPULATION);
     }
 
     private static LocalizedString GetPatchLocalizedName(string regionName, string biomeType)

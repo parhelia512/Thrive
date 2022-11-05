@@ -652,12 +652,15 @@ PatchExtinctionBoxScene = ExtResource( 57 )
 FireToxinHotkeyPath = NodePath("ScrollContainer/HotBar/FireToxin")
 BottomLeftBarPath = NodePath("BottomLeft/HUDBottomBar")
 ChatBoxPath = NodePath("BottomLeft/LeftPanels/ChatBox")
-ScoreBoardPath = NodePath("ScoreBoard")
+InfoScreenPath = NodePath("InfoScreen")
+ScoreBoardPath = NodePath("InfoScreen/VBoxContainer/ScoreBoard")
 IngestedMatterBarPath = NodePath("BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested")
 WinBoxScene = ExtResource( 69 )
 BindingModeHotkeyPath = NodePath("ScrollContainer/HotBar/BindingMode")
 UnbindAllHotkeyPath = NodePath("ScrollContainer/HotBar/UnbindAll")
 ArenaMinimapPath = NodePath("BottomRight/VBoxContainer/ArenaMinimap")
+KillFeedPath = NodePath("KillFeed")
+GameTimePath = NodePath("InfoScreen/VBoxContainer/HBoxContainer/ElapsedTime")
 
 [node name="MouseHoverPanel" type="MarginContainer" parent="GUI/MicrobialArenaHUD"]
 anchor_left = 1.0
@@ -832,6 +835,7 @@ alignment = 2
 [node name="EnvironmentGroup" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels"]
 margin_right = 313.0
 margin_bottom = 234.0
+mouse_filter = 2
 
 [node name="EnvironmentPanel" type="Panel" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup"]
 margin_right = 197.0
@@ -1282,6 +1286,7 @@ __meta__ = {
 margin_top = 244.0
 margin_right = 313.0
 margin_bottom = 587.0
+mouse_filter = 2
 
 [node name="CompoundsPanel" type="Panel" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/CompoundsGroup"]
 margin_right = 254.0
@@ -2253,8 +2258,8 @@ __meta__ = {
 visible = false
 anchor_right = 0.0
 anchor_bottom = 0.0
-margin_left = 277.0
-margin_right = 323.0
+margin_left = 252.0
+margin_right = 298.0
 margin_bottom = 51.0
 hint_tooltip = "TOGGLE_ENGULF"
 focus_mode = 2
@@ -2335,8 +2340,61 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="ScoreBoard" parent="GUI/MicrobialArenaHUD" instance=ExtResource( 52 )]
+[node name="InfoScreen" type="CenterContainer" parent="GUI/MicrobialArenaHUD"]
 visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/InfoScreen"]
+margin_left = 390.0
+margin_top = 90.0
+margin_right = 890.0
+margin_bottom = 629.0
+mouse_filter = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="GUI/MicrobialArenaHUD/InfoScreen/VBoxContainer"]
+margin_right = 500.0
+margin_bottom = 25.0
+mouse_filter = 2
+
+[node name="GameMode" type="Label" parent="GUI/MicrobialArenaHUD/InfoScreen/VBoxContainer/HBoxContainer"]
+margin_right = 354.0
+margin_bottom = 25.0
+size_flags_horizontal = 3
+custom_colors/font_color_shadow = Color( 0, 0, 0, 0.588235 )
+text = "MICROBIAL_ARENA"
+
+[node name="ElapsedTime" type="Label" parent="GUI/MicrobialArenaHUD/InfoScreen/VBoxContainer/HBoxContainer"]
+margin_left = 358.0
+margin_right = 500.0
+margin_bottom = 25.0
+custom_colors/font_color_shadow = Color( 0, 0, 0, 0.588235 )
+text = "150 Myr (10:15)"
+__meta__ = {
+"_editor_description_": "PLACEHOLDER"
+}
+
+[node name="ScoreBoard" parent="GUI/MicrobialArenaHUD/InfoScreen/VBoxContainer" instance=ExtResource( 52 )]
+margin_top = 29.0
+margin_bottom = 564.0
+
+[node name="KillFeed" type="VBoxContainer" parent="GUI/MicrobialArenaHUD"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -100.0
+margin_top = -120.0
+margin_right = 100.0
+margin_bottom = -98.0
+grow_vertical = 0
+rect_clip_content = true
+mouse_filter = 2
+theme = ExtResource( 10 )
+__meta__ = {
+"_editor_description_": ""
+}
 
 [node name="PatchNameOverlay" parent="GUI" instance=ExtResource( 73 )]
 visible = false

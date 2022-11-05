@@ -21,6 +21,12 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     [Export]
     public NodePath ArenaMinimapPath = null!;
 
+    [Export]
+    public NodePath KillFeedPath = null!;
+
+    [Export]
+    public NodePath GameTimePath = null!;
+
     private ActionButton bindingModeHotkey = null!;
     private ActionButton unbindAllHotkey = null!;
 
@@ -29,6 +35,8 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     private CustomDialog? winBox;
 
     private ArenaMinimap minimap = null!;
+    private VBoxContainer killFeed = null!;
+    private Label gameTime = null!;
 
     /// <summary>
     ///   If not null the signaling agent radial menu is open for the given microbe, which should be the player
@@ -38,6 +46,8 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     private int? playerColonySize;
 
     private bool playerWasDigested;
+
+    private List<KillFeedLog> killFeedLogs = new();
 
     // These signals need to be copied to inheriting classes for Godot editor to pick them up
     [Signal]
@@ -57,13 +67,25 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         unbindAllHotkey = GetNode<ActionButton>(UnbindAllHotkeyPath);
 
         minimap = GetNode<ArenaMinimap>(ArenaMinimapPath);
+        killFeed = GetNode<VBoxContainer>(KillFeedPath);
+        gameTime = GetNode<Label>(GameTimePath);
+    }
+
+    public override void _Process(float delta)
+    {
+        if (stage == null)
+            return;
+
+        base._Process(delta);
+
+        UpdateMinimap();
+        UpdateKillFeed(delta);
+        UpdateGameTime();
     }
 
     public override void Init(MicrobialArena containedInStage)
     {
         base.Init(containedInStage);
-
-        minimap.Init(containedInStage);
     }
 
     public void ShowSignalingCommandsMenu(Microbe player)
@@ -134,6 +156,18 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         winBox.GetNode<Timer>("Timer").Connect("timeout", this, nameof(ToggleWinBox));
     }
 
+    public void AddKillFeedLog(string content)
+    {
+        var log = new KillFeedLog
+        {
+            ExtendedBbcode = $"[center]{content}[/center]",
+            FitContentHeight = true,
+        };
+
+        killFeedLogs.Add(log);
+        killFeed.AddChild(log);
+    }
+
     protected override void ReadPlayerHitpoints(out float hp, out float maxHP)
     {
         hp = stage!.Player!.Hitpoints;
@@ -164,7 +198,7 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
             // Show the digestion progress to the player
             hp = 1 - (stage.Player!.DigestedAmount / Constants.PARTIALLY_DIGESTED_THRESHOLD);
             maxHP = Constants.FULLY_DIGESTED_LIMIT;
-            hpText = percentageValue.FormatSafe(Mathf.Round((1 - hp) * 100));
+            hpText = percentageValue.FormatSafe(Mathf.Clamp(Mathf.Round((1 - hp) * 100), 0.0f, 100.0f));
             playerWasDigested = true;
             FlashHealthBar(new Color(0.96f, 0.5f, 0.27f), delta);
         }
@@ -285,6 +319,43 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         unbindAllHotkey.Pressed = Input.IsActionPressed(unbindAllHotkey.ActionName);
     }
 
+    private void UpdateKillFeed(float delta)
+    {
+        for (int i = killFeedLogs.Count - 1; i >= 0; --i)
+        {
+            var log = killFeedLogs[i];
+
+            if (log.Modulate.a <= 0)
+            {
+                log.DetachAndQueueFree();
+                killFeedLogs.Remove(log);
+                continue;
+            }
+
+            if (log.OpaqueLifetime > 0)
+                log.OpaqueLifetime -= delta;
+
+            if (log.OpaqueLifetime <= 0 && log.Modulate.a > 0)
+                log.Alpha -= delta * 0.5f;
+
+            log.Modulate = new Color(log.Modulate, log.Alpha);
+        }
+    }
+
+    private void UpdateGameTime()
+    {
+        gameTime.Text = NetworkManager.Instance.FormattedGameTime;
+    }
+
+    private void UpdateMinimap()
+    {
+        minimap.MapRadius = stage!.ArenaRadius;
+        minimap.SpawnCoordinates = stage.SpawnCoordinates;
+
+        if (stage.Player?.IsInsideTree() == true)
+            minimap.PlayerPosition = stage.Player.GlobalTranslation;
+    }
+
     private void OnRadialItemSelected(int itemId)
     {
         if (signalingAgentMenuOpenForMicrobe != null)
@@ -299,5 +370,11 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     private float GetPlayerUsedIngestionCapacity()
     {
         return stage!.Player!.Colony?.UsedIngestionCapacity ?? stage.Player.UsedIngestionCapacity;
+    }
+
+    public class KillFeedLog : CustomRichTextLabel
+    {
+        public float OpaqueLifetime = 5.0f;
+        public float Alpha = 1.0f;
     }
 }

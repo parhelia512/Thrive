@@ -621,10 +621,10 @@ size_flags_horizontal = 3
 custom_styles/separator = SubResource( 16 )
 
 [node name="TweakedColourPicker" parent="LeftPanel/MainPanel/VBoxContainer/MarginContainer/EditingPanel/Membrane/ScrollContainer/MarginContainer/VBoxContainer/VBoxContainer2" instance=ExtResource( 43 )]
-margin_left = 260.0
-margin_top = 285.0
-margin_right = 576.0
-margin_bottom = 875.0
+margin_left = 264.0
+margin_top = 289.0
+margin_right = 580.0
+margin_bottom = 879.0
 RawButtonEnabled = false
 
 [node name="Behaviour" parent="LeftPanel/MainPanel/VBoxContainer/MarginContainer/EditingPanel" instance=ExtResource( 14 )]
@@ -651,8 +651,8 @@ __meta__ = {
 [node name="Statistics" type="PanelContainer" parent="RightPanel/VBoxContainer"]
 margin_right = 275.0
 margin_bottom = 389.0
+rect_min_size = Vector2( 0, 389 )
 mouse_filter = 1
-size_flags_vertical = 3
 __meta__ = {
 "_edit_use_anchors_": false
 }

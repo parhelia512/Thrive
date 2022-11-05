@@ -71,13 +71,9 @@ public static class Constants
     public const int CLOUD_SQUARES_PER_SIDE = 3;
     public const int CLOUD_EDGE_WIDTH = 2;
 
-    // NOTE: these 4 constants need to match what is setup in CompoundCloudPlane.tscn
+    // These 2 constants are the default size for compound clouds
     public const int CLOUD_WIDTH = 300;
-    public const int CLOUD_X_EXTENT = CLOUD_WIDTH * 2;
     public const int CLOUD_HEIGHT = 300;
-
-    // This is cloud local Y not world Y
-    public const int CLOUD_Y_EXTENT = CLOUD_HEIGHT * 2;
 
     public const float CLOUD_Y_COORDINATE = 0;
 
@@ -1085,11 +1081,7 @@ public static class Constants
     public const float MULTIPLAYER_DEFAULT_UPDATE_INTERVAL_SECONDS = 0.03f;
     public const int MULTIPLAYER_DEFAULT_TIMEOUT_LIMIT_SECONDS = 32;
 
-    /// <summary>
-    ///   Networked entities discounting players.
-    /// </summary>
-    public const int MULTIPLAYER_MICROBIAL_ARENA_DEFAULT_ENTITY_LIMIT = 100;
-
+    public const float MICROBIAL_ARENA_CLOUD_SPAWN_AMOUNT_SCALE_FACTOR = 0.003f;
     public const int CHAT_HISTORY_RANGE = 50;
 
     /// <summary>

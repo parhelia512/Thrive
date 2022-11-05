@@ -39,9 +39,6 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
     private MeshInstance? chunkMesh;
 
     [JsonProperty]
-    private Tween? networkTweener;
-
-    [JsonProperty]
     private bool isDissolving;
 
     [JsonProperty]
@@ -78,6 +75,8 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
 
     [JsonIgnore]
     public GeometryInstance EntityGraphics => chunkMesh ?? throw new InstanceNotLoadedYetException();
+
+    public string ResourcePath => "res://src/microbe_stage/FloatingChunk.tscn";
 
     public uint NetEntityId { get; set; }
 
@@ -293,12 +292,6 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
             throw new InvalidOperationException("Can't make a chunk without graphics scene");
 
         InitPhysics();
-
-        if (GetTree().HasNetworkPeer())
-        {
-            networkTweener = new Tween();
-            AddChild(networkTweener);
-        }
     }
 
     public void ProcessChunk(float delta, CompoundCloudSystem compoundClouds)
@@ -368,45 +361,95 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
         elapsedSinceProcess = 0;
     }
 
-    public void OnNetworkSync(Dictionary<string, string> data)
+    public void NetworkTick(float delta)
     {
-        var rotation = (Vector3)GD.Str2Var(data["rot"]);
-        var position = (Vector3)GD.Str2Var(data["pos"]);
-
-        Rotation = rotation;
-        networkTweener?.InterpolateProperty(this, "global_translation", null, position, 0.1f);
-        networkTweener?.Start();
-
-        if (Enum.TryParse<PhagocytosisPhase>(data["engulfStep"], out PhagocytosisPhase parsedPhagocytosisStep))
-            PhagocytosisStep = parsedPhagocytosisStep;
     }
 
-    public void OnNetworkInput(Dictionary<string, string> data)
+    public void OnNetworkSync(Dictionary<string, string> data)
     {
+        var rotation = (Vector3)GD.Str2Var(data[nameof(GlobalRotation)]);
+        var position = (Vector3)GD.Str2Var(data[nameof(GlobalTranslation)]);
+
+        GlobalRotation = rotation;
+        GlobalTranslation = position;
+
+        if (Enum.TryParse(data[nameof(PhagocytosisStep)], out PhagocytosisPhase parsedEngulfStep))
+        {
+            if (data.TryGetValue(nameof(HostileEngulfer), out string engulferPath))
+            {
+                var engulfer = GetNode<Microbe>(engulferPath);
+
+                switch (parsedEngulfStep)
+                {
+                    case PhagocytosisPhase.Ingestion:
+                        engulfer.IngestEngulfable(this);
+                        break;
+                    case PhagocytosisPhase.Exocytosis:
+                        engulfer.EjectEngulfable(this);
+                        break;
+                }
+            }
+            else
+            {
+                HostileEngulfer.Value?.EjectEngulfable(this);
+            }
+        }
     }
 
     public Dictionary<string, string>? PackStates()
     {
+        var states = new Dictionary<string, string>
+        {
+            { nameof(GlobalTranslation), GD.Var2Str(GlobalTranslation) },
+            { nameof(GlobalRotation), GD.Var2Str(GlobalRotation) },
+            { nameof(PhagocytosisStep), PhagocytosisStep.ToString() },
+        };
+
+        if (HostileEngulfer.Value != null)
+            states.Add(nameof(HostileEngulfer), HostileEngulfer.Value.GetPath());
+
+        return states;
+    }
+
+    public Dictionary<string, string>? PackReplicableVars()
+    {
         var vars = new Dictionary<string, string>
         {
-            { "pos", GD.Var2Str(GlobalTranslation) },
-            { "rot", GD.Var2Str(GlobalRotation) },
-            { "engulfStep", PhagocytosisStep.ToString() },
+            { nameof(ChunkConfiguration), ThriveJsonConverter.Instance.SerializeObject(CreateChunkConfigurationFromThis()) },
+            { nameof(GraphicsScene), GraphicsScene.ResourcePath },
         };
+
+        if (ConvexPhysicsMesh != null)
+            vars.Add(nameof(ConvexPhysicsMesh), ConvexPhysicsMesh.ResourcePath);
+
+        if (!string.IsNullOrEmpty(ModelNodePath))
+            vars.Add(nameof(ModelNodePath), ModelNodePath!);
+
+        if (!string.IsNullOrEmpty(AnimationPath))
+            vars.Add(nameof(AnimationPath), AnimationPath!);
 
         return vars;
     }
 
-    public Dictionary<string, string>? PackInputs()
+    public void OnReplicated(Dictionary<string, string>? data)
     {
-        return null;
-    }
+        if (data == null)
+            return;
 
-    public void OnReplicated()
-    {
-        networkTweener?.DetachAndQueueFree();
-        networkTweener = new Tween();
-        AddChild(networkTweener);
+        data.TryGetValue(nameof(ChunkConfiguration), out string config);
+        data.TryGetValue(nameof(GraphicsScene), out string graphicsScene);
+        data.TryGetValue(nameof(ConvexPhysicsMesh), out string convexPhysicsMesh);
+        data.TryGetValue(nameof(ModelNodePath), out string modelPath);
+        data.TryGetValue(nameof(AnimationPath), out string animationPath);
+
+        var deserializedConfig = ThriveJsonConverter.Instance.DeserializeObject<ChunkConfiguration>(config);
+        Init(deserializedConfig, modelPath, animationPath);
+
+        GraphicsScene = GD.Load<PackedScene>(graphicsScene);
+        ConvexPhysicsMesh = ResourceLoader.Exists(convexPhysicsMesh) ?
+            GD.Load<ConvexPolygonShape>(convexPhysicsMesh) : null;
+        ModelNodePath = modelPath;
+        AnimationPath = animationPath;
     }
 
     public void PopImmediately(CompoundCloudSystem compoundClouds)

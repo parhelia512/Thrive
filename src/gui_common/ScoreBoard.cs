@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 /// <summary>
 ///   Lists players and their gameplay attributes. Code is pretty much self-contained.
 /// </summary>
-public class ScoreBoard : CenterContainer
+public class ScoreBoard : VBoxContainer
 {
     [Export]
     public NodePath ListPath = null!;
@@ -15,7 +16,7 @@ public class ScoreBoard : CenterContainer
     [Export]
     public PackedScene NetworkedPlayerLabelScene = null!;
 
-    private Dictionary<int, NetworkedPlayerLabel> playerLabels = new();
+    private Dictionary<int, NetPlayerLog> playerLogs = new();
 
     private VBoxContainer list = null!;
     private Label playerCount = null!;
@@ -39,16 +40,35 @@ public class ScoreBoard : CenterContainer
         }
     }
 
+    public void SortHighestScoreFirst()
+    {
+        // TODO: use actual score instead of kill count
+        var ordered = NetworkManager.Instance.PlayerList
+            .OrderByDescending(p =>
+            {
+                p.Value.Ints.TryGetValue("kills", out int killCount);
+                return killCount;
+            })
+            .Select(p => p.Key)
+            .ToList();
+
+        for (int i = 0; i < ordered.Count; i++)
+        {
+            var log = playerLogs[ordered[i]];
+            list.MoveChild(log, i);
+        }
+    }
+
     private void RegisterPlayer(int id, string name)
     {
-        var label = (NetworkedPlayerLabel)NetworkedPlayerLabelScene.Instance();
+        var label = (NetPlayerLog)NetworkedPlayerLabelScene.Instance();
         label.ID = id;
         label.PlayerName = name;
 
-        label.Connect(nameof(NetworkedPlayerLabel.KickRequested), this, nameof(OnKickButtonPressed));
+        label.Connect(nameof(NetPlayerLog.KickRequested), this, nameof(OnKickButtonPressed));
 
         list.AddChild(label);
-        playerLabels.Add(id, label);
+        playerLogs.Add(id, label);
 
         playerCount.Text = $"{NetworkManager.Instance.PlayerList.Count}/" +
             $"{NetworkManager.Instance.Settings?.MaxPlayers}";
@@ -56,10 +76,10 @@ public class ScoreBoard : CenterContainer
 
     private void UnRegisterPlayer(int id)
     {
-        if (playerLabels.TryGetValue(id, out NetworkedPlayerLabel label))
+        if (playerLogs.TryGetValue(id, out NetPlayerLog label))
         {
             label.QueueFree();
-            playerLabels.Remove(id);
+            playerLogs.Remove(id);
         }
     }
 

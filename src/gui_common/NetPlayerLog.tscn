@@ -1,17 +1,14 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=12 format=2]
 
-[ext_resource path="res://src/gui_common/NetworkedPlayerLabel.cs" type="Script" id=1]
+[ext_resource path="res://src/gui_common/NetPlayerLog.cs" type="Script" id=1]
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=2]
 [ext_resource path="res://assets/textures/gui/bevel/graphMarkerCross.png" type="Texture" id=3]
 [ext_resource path="res://src/gui_common/CustomRichTextLabel.tscn" type="PackedScene" id=4]
 [ext_resource path="res://src/gui_common/fonts/EmptyFont.tres" type="DynamicFont" id=5]
-[ext_resource path="res://src/gui_common/fonts/Lato-Regular-Tiny.tres" type="DynamicFont" id=6]
+[ext_resource path="res://src/gui_common/fonts/Lato-Regular-AlmostTiny.tres" type="DynamicFont" id=6]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.392157 )
-
-[sub_resource type="StyleBoxFlat" id=6]
-bg_color = Color( 0, 0.435294, 0.52549, 0.392157 )
 
 [sub_resource type="StyleBoxFlat" id=2]
 content_margin_left = 7.0
@@ -35,7 +32,7 @@ content_margin_right = 5.0
 content_margin_top = 5.0
 content_margin_bottom = 5.0
 
-[node name="NetworkedPlayerLabel" type="PanelContainer"]
+[node name="NetPlayerLog" type="PanelContainer"]
 margin_right = 417.0
 margin_bottom = 29.0
 rect_min_size = Vector2( 0, 29 )
@@ -54,7 +51,7 @@ margin_bottom = 29.0
 mouse_filter = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer"]
-margin_right = 144.0
+margin_right = 262.0
 margin_bottom = 29.0
 mouse_filter = 2
 size_flags_horizontal = 3
@@ -64,8 +61,9 @@ custom_constants/margin_bottom = -5
 [node name="Name" parent="HBoxContainer/MarginContainer" instance=ExtResource( 4 )]
 margin_left = 10.0
 margin_top = 6.0
-margin_right = 144.0
+margin_right = 262.0
 margin_bottom = 28.0
+mouse_filter = 2
 size_flags_horizontal = 3
 size_flags_vertical = 4
 text = "PLAYER_NAME"
@@ -73,38 +71,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="Label3" type="Label" parent="HBoxContainer"]
-margin_left = 148.0
-margin_right = 203.0
-margin_bottom = 29.0
-rect_min_size = Vector2( 55, 0 )
-size_flags_vertical = 3
-custom_fonts/font = ExtResource( 6 )
-custom_styles/normal = SubResource( 6 )
-text = "100"
-align = 1
-valign = 1
-clip_text = true
-__meta__ = {
-"_editor_description_": "PLACEHOLDER"
-}
-
-[node name="Label4" type="Label" parent="HBoxContainer"]
-margin_left = 207.0
-margin_right = 262.0
-margin_bottom = 29.0
-rect_min_size = Vector2( 55, 0 )
-size_flags_vertical = 3
-custom_fonts/font = ExtResource( 6 )
-text = "100myr"
-align = 1
-valign = 1
-clip_text = true
-__meta__ = {
-"_editor_description_": "PLACEHOLDER"
-}
-
-[node name="Label" type="Label" parent="HBoxContainer"]
+[node name="Kills" type="Label" parent="HBoxContainer"]
 margin_left = 266.0
 margin_right = 321.0
 margin_bottom = 29.0
@@ -119,7 +86,7 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
-[node name="Label2" type="Label" parent="HBoxContainer"]
+[node name="Deaths" type="Label" parent="HBoxContainer"]
 margin_left = 325.0
 margin_right = 380.0
 margin_bottom = 29.0

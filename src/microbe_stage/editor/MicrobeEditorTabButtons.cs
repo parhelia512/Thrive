@@ -7,6 +7,9 @@ public class MicrobeEditorTabButtons : MarginContainer
     public bool IsForMulticellular;
 
     [Export]
+    public bool CellEditorOnly;
+
+    [Export]
     public NodePath ReportTabButtonPath = null!;
 
     [Export]
@@ -37,6 +40,8 @@ public class MicrobeEditorTabButtons : MarginContainer
         cellTypeTab = GetNode<Button>(CellTypeTabPath);
 
         cellTypeTab.Visible = IsForMulticellular;
+        reportTabButton.Disabled = CellEditorOnly;
+        patchMapButton.Disabled = CellEditorOnly;
     }
 
     public void SetCurrentTab(EditorTab tab)

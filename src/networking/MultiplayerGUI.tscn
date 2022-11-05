@@ -1,23 +1,22 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=1]
 [ext_resource path="res://src/networking/MultiplayerGUI.cs" type="Script" id=2]
 [ext_resource path="res://src/networking/ChatBox.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/gui_common/fonts/Lato-Bold-Small.tres" type="DynamicFont" id=4]
 [ext_resource path="res://src/gui_common/fonts/Lato-Regular-Small.tres" type="DynamicFont" id=5]
-[ext_resource path="res://src/gui_common/NetworkedPlayerLabel.tscn" type="PackedScene" id=6]
+[ext_resource path="res://src/gui_common/NetPlayerLog.tscn" type="PackedScene" id=6]
 [ext_resource path="res://src/networking/ServerSetup.tscn" type="PackedScene" id=7]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-AlmostSmaller.tres" type="DynamicFont" id=8]
 [ext_resource path="res://src/gui_common/dialogs/CustomConfirmationDialog.tscn" type="PackedScene" id=9]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Smaller.tres" type="DynamicFont" id=10]
 [ext_resource path="res://src/networking/KickPlayerDialog.tscn" type="PackedScene" id=11]
-[ext_resource path="res://assets/textures/gui/bevel/bacteria.png" type="Texture" id=12]
-[ext_resource path="res://assets/textures/gui/bevel/NewIcon.png" type="Texture" id=13]
+[ext_resource path="res://assets/textures/gui/bevel/extinctionLocal.png" type="Texture" id=12]
 [ext_resource path="res://assets/textures/gui/bevel/SuicideIcon.png" type="Texture" id=14]
-[ext_resource path="res://assets/textures/gui/bevel/IconGenerating.png" type="Texture" id=15]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Small.tres" type="DynamicFont" id=16]
 
 [sub_resource type="StyleBoxFlat" id=1]
+content_margin_left = 10.0
 content_margin_right = 5.0
 bg_color = Color( 0, 0, 0, 0.588235 )
 expand_margin_left = 2.0
@@ -263,44 +262,26 @@ mouse_filter = 2
 custom_styles/panel = SubResource( 1 )
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer"]
+margin_left = 10.0
 margin_right = 523.0
 margin_bottom = 18.0
 mouse_filter = 2
 
 [node name="Name" type="Label" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer"]
-margin_right = 270.0
+margin_right = 380.0
 margin_bottom = 18.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 16 )
-text = "SPECIES"
-align = 1
+text = "NAME"
 
 [node name="Indicators" type="HBoxContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer"]
-margin_left = 274.0
-margin_right = 474.0
+margin_left = 384.0
+margin_right = 464.0
 margin_bottom = 18.0
 custom_constants/separation = 40
 
-[node name="Score" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
-margin_right = 20.0
-margin_bottom = 18.0
-rect_min_size = Vector2( 20, 0 )
-size_flags_vertical = 3
-texture = ExtResource( 13 )
-expand = true
-
-[node name="Longevity" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
-margin_left = 60.0
-margin_right = 80.0
-margin_bottom = 18.0
-rect_min_size = Vector2( 20, 0 )
-size_flags_vertical = 3
-texture = ExtResource( 15 )
-expand = true
-
 [node name="Kills" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
-margin_left = 120.0
-margin_right = 140.0
+margin_right = 20.0
 margin_bottom = 18.0
 rect_min_size = Vector2( 20, 0 )
 size_flags_vertical = 3
@@ -308,8 +289,8 @@ texture = ExtResource( 12 )
 expand = true
 
 [node name="Death" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
-margin_left = 180.0
-margin_right = 200.0
+margin_left = 60.0
+margin_right = 80.0
 margin_bottom = 18.0
 rect_min_size = Vector2( 20, 0 )
 size_flags_vertical = 3
@@ -317,8 +298,8 @@ texture = ExtResource( 14 )
 expand = true
 
 [node name="PlayerCount" type="Label" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer"]
-margin_left = 478.0
-margin_right = 523.0
+margin_left = 468.0
+margin_right = 513.0
 margin_bottom = 18.0
 rect_min_size = Vector2( 45, 0 )
 custom_fonts/font = ExtResource( 16 )

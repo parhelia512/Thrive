@@ -130,7 +130,7 @@ public class MultiplayerEditorBase<TAction, TStage> : EditorBase<TAction, TStage
 
     protected override GameProperties StartNewGameForEditor()
     {
-        return GameProperties.StartNewMultiplayerGame(new WorldGenerationSettings());
+        return GameProperties.StartNewMicrobialArenaGame();
     }
 
     protected override void UpdateHistoryCallbackTargets(ActionHistory<TAction> actionHistory)

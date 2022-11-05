@@ -18,6 +18,9 @@ public partial class CellEditorComponent :
     public bool IsMulticellularEditor;
 
     [Export]
+    public bool IsMicrobialArenaEditor;
+
+    [Export]
     public NodePath StructureTabButtonPath = null!;
 
     [Export]
@@ -527,6 +530,12 @@ public partial class CellEditorComponent :
             // In multicellular the body plan editor handles this
             behaviourTabButton.Visible = false;
             behaviourEditor.Visible = false;
+        }
+
+        if (IsMicrobialArenaEditor)
+        {
+            behaviourTabButton.Visible = false;
+            autoEvoPredictionPanel.Visible = false;
         }
 
         UpdateMicrobePartSelections();

@@ -1,71 +1,192 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
-[JSONAlwaysDynamicType]
-public class MicrobialArenaSpawnSystem : ISpawnSystem
+public class MicrobialArenaSpawnSystem : SpawnSystem
 {
+    public const int MAX_SPAWN_SPOTS = 23;
+    public const int MAX_SPAWNS_IN_ONE_SPAWN_SPOT = 20;
+    public const float SPAWN_SPOT_MIN_LIFETIME = 15.0f;
+    public const float SPAWN_SPOT_MAX_LIFETIME = 35.0f;
+    public const float DEFAULT_SPAWN_SPOT_SIZE = 150.0f;
+    public const float SPAWN_RADIUS_MARGIN_MULTIPLIER = 0.8f;
+
+    private MultiplayerGameWorld gameWorld;
+    private CompoundCloudSystem clouds;
+
+    private List<SpawnSpot> spawnSpots = new();
+    private List<Vector2> spawnCoordinates = new();
+
+    private bool spawnCoordinatesDirty = true;
+
+    private float spawnAreaRadius;
+
     /// <summary>
-    ///   Root node to parent all spawned things to
+    ///   Estimate count of existing spawned entities, cached to make delayed spawns cheaper
     /// </summary>
-    private Node worldRoot;
+    private float estimateEntityCount;
 
-    private BiomeConditions conditions;
-    private float radius;
-    private int maxEntities;
-
-    private Random random = null!;
-
-    public MicrobialArenaSpawnSystem(Node root, BiomeConditions conditions, float radius, int maxEntities,
-        Random random)
+    public IReadOnlyList<Vector2> SpawnCoordinates
     {
-        this.conditions = conditions;
-        this.radius = radius;
-        this.maxEntities = maxEntities;
-        this.random = random;
-        worldRoot = root;
-    }
-
-    public void AddEntityToTrack(ISpawned entity)
-    {
-    }
-
-    public void Clear()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void DespawnAll()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Init()
-    {
-        PopulateWorld();
-    }
-
-    public bool IsUnderEntityLimitForReproducing()
-    {
-        throw new NotImplementedException();
-    }
-
-    public void Process(float delta, Vector3 playerPosition)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void PopulateWorld()
-    {
-        for (int i = 0; i < maxEntities; i++)
+        get
         {
-            var r = radius * Mathf.Sqrt(random.NextFloat());
+            if (spawnCoordinatesDirty)
+            {
+                spawnCoordinates = spawnSpots.Select(c => c.Coordinate).ToList();
+                spawnCoordinatesDirty = false;
+            }
+
+            return spawnCoordinates;
+        }
+    }
+
+    public MicrobialArenaSpawnSystem(Node root, MultiplayerGameWorld gameWorld, CompoundCloudSystem clouds,
+        float radius) : base(root)
+    {
+        this.gameWorld = gameWorld;
+        this.clouds = clouds;
+        this.spawnAreaRadius = radius;
+    }
+
+    public override void Init()
+    {
+        base.Init();
+
+        GenerateSpawnSpots();
+
+        if (gameWorld.Map.CurrentPatch == null)
+            throw new InvalidOperationException("Current patch not set");
+
+        var biome = gameWorld.Map.CurrentPatch.Biome;
+
+        // Register chunk spawners
+        foreach (var entry in biome.Chunks)
+        {
+            // Don't spawn Easter eggs if the player has chosen not to
+            if (entry.Value.EasterEgg && !gameWorld.WorldSettings.EasterEggs)
+                continue;
+
+            // Difficulty only scales the spawn rate for chunks containing compounds
+            var density = entry.Value.Density * Constants.CLOUD_SPAWN_DENSITY_SCALE_FACTOR;
+
+            AddSpawnType(Spawners.MakeChunkSpawner(entry.Value), density, 0);
+        }
+
+        // Register cloud spawners
+        foreach (var entry in biome.Compounds)
+        {
+            // Density value in difficulty settings scales overall compound amount quadratically
+            var density = entry.Value.Density * Constants.CLOUD_SPAWN_DENSITY_SCALE_FACTOR;
+            var amount = entry.Value.Amount * Constants.MICROBIAL_ARENA_CLOUD_SPAWN_AMOUNT_SCALE_FACTOR;
+
+            AddSpawnType(Spawners.MakeCompoundBlobSpawner(entry.Key, clouds, amount, 20), density, 0);
+        }
+    }
+
+    public override void Process(float delta, Vector3 playerPosition)
+    {
+        elapsed += delta;
+
+        // Remove the y-position from player position
+        playerPosition.y = 0;
+
+        float spawnsLeftThisFrame = Constants.MAX_SPAWNS_PER_FRAME;
+
+        // If we have queued spawns to do spawn those
+        HandleQueuedSpawns(ref spawnsLeftThisFrame, playerPosition);
+
+        if (spawnsLeftThisFrame <= 0)
+            return;
+
+        // This is now an if to make sure that the spawn system is
+        // only ran once per frame to avoid spawning a bunch of stuff
+        // all at once after a lag spike
+        // NOTE: that as QueueFree is used it's not safe to just switch this to a loop
+        if (elapsed >= interval)
+        {
+            elapsed -= interval;
+
+            GenerateSpawnSpots();
+            UpdateSpawnSpots(delta, ref spawnsLeftThisFrame);
+        }
+    }
+
+    private void UpdateSpawnSpots(float delta, ref float spawnsLeftThisFrame)
+    {
+        foreach (var spot in spawnSpots)
+        {
+            spot.TimeUntilRemoval -= delta;
+            SpawnInSpot(spot, ref spawnsLeftThisFrame);
+        }
+
+        spawnSpots.RemoveAll(s => s.TimeUntilRemoval <= 0);
+    }
+
+    private void SpawnInSpot(SpawnSpot spot, ref float spawnsLeftThisFrame)
+    {
+        float spawns = 0.0f;
+
+        foreach (var spawnType in spawnTypes)
+        {
+            if (SpawnsBlocked(spawnType, spot))
+                continue;
+
+            var center = new Vector3(spot.Coordinate.x, 0, spot.Coordinate.y);
+
+            // Distance from the spawn point center.
+            var displacement = new Vector3(
+                random.NextFloat() * DEFAULT_SPAWN_SPOT_SIZE - (DEFAULT_SPAWN_SPOT_SIZE * 0.5f),
+                0,
+                random.NextFloat() * DEFAULT_SPAWN_SPOT_SIZE - (DEFAULT_SPAWN_SPOT_SIZE * 0.5f));
+
+            spawns += SpawnWithSpawner(spawnType, center + displacement, ref spawnsLeftThisFrame);
+
+            if (spawns <= 0)
+                spawns = 1.0f;
+
+            spot.Spawns += spawns;
+        }
+
+        var debugOverlay = DebugOverlays.Instance;
+
+        if (debugOverlay.PerformanceMetricsVisible)
+            debugOverlay.ReportSpawns(spawns);
+    }
+
+    private bool SpawnsBlocked(Spawner spawnType, SpawnSpot point)
+    {
+        return point.Spawns >= MAX_SPAWNS_IN_ONE_SPAWN_SPOT || SpawnsBlocked(spawnType);
+    }
+
+    private void GenerateSpawnSpots()
+    {
+        for (int i = 0; i < MAX_SPAWN_SPOTS; ++i)
+        {
+            if (spawnSpots.Count >= MAX_SPAWN_SPOTS)
+                break;
+
+            var r = spawnAreaRadius * SPAWN_RADIUS_MARGIN_MULTIPLIER * Mathf.Sqrt(random.NextFloat());
             var angle = random.NextFloat() * 2 * Mathf.Pi;
 
-            var x = r * Mathf.Cos(angle);
-            var y = r * Mathf.Sin(angle);
+            var point = new SpawnSpot
+            {
+                Coordinate = new Vector2(r * Mathf.Cos(angle), r * Mathf.Sin(angle)),
+                TimeUntilRemoval = random.Next(SPAWN_SPOT_MIN_LIFETIME, SPAWN_SPOT_MAX_LIFETIME),
+            };
 
-            SpawnHelpers.SpawnChunk(
-                conditions.Chunks.Random(random), new Vector3(x, 0, y), worldRoot, SpawnHelpers.LoadChunkScene(), random);
+            spawnSpots.Add(point);
+
+            spawnCoordinatesDirty = true;
         }
+    }
+
+    private class SpawnSpot
+    {
+        public Vector2 Coordinate { get; set; }
+
+        public float Spawns { get; set; }
+
+        public float TimeUntilRemoval { get; set; }
     }
 }

@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using Godot;
 using Newtonsoft.Json;
 
 [JsonObject(IsReference = true)]
@@ -10,10 +10,25 @@ public class MultiplayerGameWorld : GameWorld
     [JsonIgnore]
     private readonly Dictionary<uint, EntityReference<INetEntity>> entities = new();
 
+    private readonly List<uint> entityIds = new();
+
     private uint entityIdCounter;
 
     public MultiplayerGameWorld(WorldGenerationSettings settings) : base(settings)
     {
+    }
+
+    public MultiplayerGameWorld(PatchMap map) : base()
+    {
+        PlayerSpecies = CreatePlayerSpecies();
+
+        if (!PlayerSpecies.PlayerSpecies)
+            throw new Exception("PlayerSpecies flag for being player species is not set");
+
+        Map = map;
+
+        // Apply initial populations
+        Map.UpdateGlobalPopulations();
     }
 
     [JsonConstructor]
@@ -29,6 +44,8 @@ public class MultiplayerGameWorld : GameWorld
 
     public IReadOnlyDictionary<uint, EntityReference<INetEntity>> Entities => entities;
 
+    public IReadOnlyList<uint> EntityIDs => entityIds;
+
     public int EntityCount => entities.Count;
 
     public void Clear()
@@ -41,6 +58,9 @@ public class MultiplayerGameWorld : GameWorld
     {
         entity.NetEntityId = id;
         entities[id] = new EntityReference<INetEntity>(entity);
+
+        if (!entityIds.Contains(id))
+            entityIds.Add(id);
     }
 
     public uint RegisterEntity(INetEntity entity)
@@ -49,9 +69,10 @@ public class MultiplayerGameWorld : GameWorld
         return entityIdCounter;
     }
 
-    public void UnregisterEntity(uint entityId)
+    public void UnregisterEntity(uint id)
     {
-        entities.Remove(entityId);
+        entities.Remove(id);
+        entityIds.Remove(id);
     }
 
     public INetEntity? GetEntity(uint id)

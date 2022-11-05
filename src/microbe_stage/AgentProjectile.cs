@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using Godot;
 using Newtonsoft.Json;
 
@@ -7,7 +9,7 @@ using Newtonsoft.Json;
 /// </summary>
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/AgentProjectile.tscn", UsesEarlyResolve = false)]
-public class AgentProjectile : RigidBody, ITimedLife, IEntity
+public class AgentProjectile : RigidBody, ITimedLife, INetEntity
 {
     private Particles particles = null!;
 
@@ -17,6 +19,12 @@ public class AgentProjectile : RigidBody, ITimedLife, IEntity
     public EntityReference<IEntity> Emitter { get; set; } = new();
 
     public Spatial EntityNode => this;
+
+    public string ResourcePath => "res://src/microbe_stage/AgentProjectile.tscn";
+
+    public uint NetEntityId { get; set; }
+
+    public bool Synchronize { get; set; } = true;
 
     public AliveMarker AliveMarker { get; } = new();
 
@@ -54,6 +62,63 @@ public class AgentProjectile : RigidBody, ITimedLife, IEntity
             this.DestroyDetachAndQueueFree();
     }
 
+    public void NetworkTick(float delta)
+    {
+    }
+
+    public void OnNetworkSync(Dictionary<string, string> data)
+    {
+        var rotation = (Vector3)GD.Str2Var(data[nameof(GlobalRotation)]);
+        var position = (Vector3)GD.Str2Var(data[nameof(GlobalTranslation)]);
+
+        GlobalRotation = rotation;
+        GlobalTranslation = position;
+    }
+
+    public Dictionary<string, string>? PackStates()
+    {
+        var states = new Dictionary<string, string>
+        {
+            { nameof(GlobalTranslation), GD.Var2Str(GlobalTranslation) },
+            { nameof(GlobalRotation), GD.Var2Str(GlobalRotation) },
+        };
+
+        return states;
+    }
+
+    public Dictionary<string, string>? PackReplicableVars()
+    {
+        var vars = new Dictionary<string, string>
+        {
+            { nameof(TimeToLiveRemaining), TimeToLiveRemaining.ToString(CultureInfo.CurrentCulture) },
+            { nameof(Amount), Amount.ToString(CultureInfo.CurrentCulture) },
+        };
+
+        if (Properties != null)
+            vars.Add(nameof(Properties), ThriveJsonConverter.Instance.SerializeObject(Properties));
+
+        return vars;
+    }
+
+    public void OnReplicated(Dictionary<string, string>? data)
+    {
+        if (data == null)
+            return;
+
+        data.TryGetValue(nameof(TimeToLiveRemaining), out string timeToLive);
+        data.TryGetValue(nameof(Amount), out string amount);
+        data.TryGetValue(nameof(Properties), out string props);
+
+        if (float.TryParse(timeToLive, out float parsedTimeToLive))
+            TimeToLiveRemaining = parsedTimeToLive;
+
+        if (float.TryParse(amount, out float parsedAmount))
+            Amount = parsedAmount;
+
+        if (!string.IsNullOrEmpty(props))
+            Properties = ThriveJsonConverter.Instance.DeserializeObject<AgentProperties>(props);
+    }
+
     public void OnDestroyed()
     {
         AliveMarker.Alive = false;
@@ -76,8 +141,12 @@ public class AgentProjectile : RigidBody, ITimedLife, IEntity
         if (target == null)
             return;
 
+        int? peerId = null;
+        if (Emitter.Value is INetPlayer netPlayer)
+            peerId = netPlayer.PeerId;
+
         Invoke.Instance.Perform(
-            () => target.Damage(Constants.OXYTOXY_DAMAGE * Amount, Properties.AgentType));
+            () => target.Damage(Constants.OXYTOXY_DAMAGE * Amount, Properties.AgentType, peerId));
 
         if (FadeTimeRemaining == null)
         {

@@ -6,6 +6,14 @@ using System.Collections.Generic;
 [UseThriveSerializer]
 public interface INetEntity : IEntity
 {
+    /// <summary>
+    ///   The scene path to this entity for replication.
+    /// </summary>
+    public string ResourcePath { get; }
+
+    /// <summary>
+    ///   The unique incremental ID assigned to this entity by the server.
+    /// </summary>
     public uint NetEntityId { get; set; }
 
     /// <summary>
@@ -13,18 +21,15 @@ public interface INetEntity : IEntity
     /// </summary>
     public bool Synchronize { get; set; }
 
+    public void NetworkTick(float delta);
+
     /// <summary>
     ///   Called client-side for every network tick.
     /// </summary>
     public void OnNetworkSync(Dictionary<string, string> data);
 
     /// <summary>
-    ///   Called server-side for every network tick.
-    /// </summary>
-    public void OnNetworkInput(Dictionary<string, string> data);
-
-    /// <summary>
-    ///   A naive implementation for marshaling entity vars to be sent across network.
+    ///   A naive implementation for marshaling entity states to be sent across network.
     /// </summary>
     /// <remarks>
     ///   TODO: can this possibly be optimized to be far more efficient?
@@ -32,12 +37,12 @@ public interface INetEntity : IEntity
     public Dictionary<string, string>? PackStates();
 
     /// <summary>
-    ///   A naive implementation for marshaling entity inputs to be sent to the server.
+    ///   A naive implementation for marshaling replicable vars to be sent across network.
     /// </summary>
     /// <remarks>
     ///   TODO: can this possibly be optimized to be far more efficient?
     /// </remarks>
-    public Dictionary<string, string>? PackInputs();
+    public Dictionary<string, string>? PackReplicableVars();
 
-    public void OnReplicated();
+    public void OnReplicated(Dictionary<string, string>? data);
 }

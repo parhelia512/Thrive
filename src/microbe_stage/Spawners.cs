@@ -32,6 +32,12 @@ public static class Spawners
     {
         return new CompoundCloudSpawner(compound, clouds, amount);
     }
+
+    public static CompoundCloudBlobSpawner MakeCompoundBlobSpawner(Compound compound,
+        CompoundCloudSystem clouds, float amount, float radius)
+    {
+        return new CompoundCloudBlobSpawner(compound, clouds, amount, radius);
+    }
 }
 
 /// <summary>
@@ -81,8 +87,8 @@ public static class SpawnHelpers
         Node worldRoot, CompoundCloudSystem cloudSystem, ISpawnSystem spawnSystem, GameProperties currentGame)
     {
         var microbe = SpawnMicrobe(
-            species, location, worldRoot, LoadMicrobeScene(), peerId != worldRoot.GetTree().GetNetworkUniqueId(),
-            cloudSystem, spawnSystem, currentGame, null, peerId);
+            species, location, worldRoot, LoadMicrobeScene(), false, cloudSystem, spawnSystem, currentGame,
+            null, peerId);
 
         OnNetEntitySpawned?.Invoke(microbe);
 
@@ -200,6 +206,40 @@ public static class SpawnHelpers
         clouds.AddCloud(compound, amount, location + new Vector3(0, 0, 0));
     }
 
+    public static void SpawnCloudBlob(CompoundCloudSystem clouds, Vector3 location,
+        float radius, Compound compound, float amount, Random random)
+    {
+        int resolution = Settings.Instance.CloudResolution;
+
+        // Randomise the cloud radius a bit
+        radius *= random.Next(0.5f, 1);
+
+        // Randomise amount of compound in the cloud a bit
+        amount *= random.Next(0.5f, 1);
+
+        // Circle drawing algorithm taken from https://www.redblobgames.com/grids/circle-drawing/
+
+        var center = new Int2((int)location.x, (int)location.z);
+
+        var top = Mathf.CeilToInt(center.y - radius);
+        var bottom = Mathf.FloorToInt(center.y + radius);
+        var left = Mathf.CeilToInt(center.x - radius);
+        var right = Mathf.FloorToInt(center.x + radius);
+
+        for (int y = top; y <= bottom; ++y)
+        {
+            for (int x = left; x <= right; ++x)
+            {
+                var dx = center.x - x;
+                var dy = center.y - y;
+                var distanceSqr = dx * dx + dy * dy;
+
+                if (distanceSqr <= radius * radius)
+                    clouds.AddCloud(compound, amount, new Vector3(x + resolution, 0, y + resolution));
+            }
+        }
+    }
+
     /// <summary>
     ///   Spawns an agent projectile
     /// </summary>
@@ -224,6 +264,9 @@ public static class SpawnHelpers
             Constants.AGENT_EMISSION_IMPULSE_STRENGTH);
 
         agent.AddToGroup(Constants.TIMED_GROUP);
+
+        OnNetEntitySpawned?.Invoke(agent);
+
         return agent;
     }
 
@@ -331,10 +374,10 @@ public class MicrobeSpawner : Spawner
 /// </summary>
 public class CompoundCloudSpawner : Spawner
 {
-    private readonly Compound compound;
-    private readonly CompoundCloudSystem clouds;
-    private readonly float amount;
-    private readonly Random random = new();
+    protected readonly Compound compound;
+    protected readonly CompoundCloudSystem clouds;
+    protected readonly float amount;
+    protected readonly Random random = new();
 
     public CompoundCloudSpawner(Compound compound, CompoundCloudSystem clouds, float amount)
     {
@@ -356,6 +399,32 @@ public class CompoundCloudSpawner : Spawner
     public override string ToString()
     {
         return $"CloudSpawner for {compound}";
+    }
+}
+
+public class CompoundCloudBlobSpawner : CompoundCloudSpawner
+{
+    private readonly float radius;
+
+    public CompoundCloudBlobSpawner(Compound compound, CompoundCloudSystem clouds, float amount, float radius) :
+        base(compound, clouds, amount)
+    {
+        this.radius = radius;
+    }
+
+    public override bool SpawnsEntities => true;
+
+    public override IEnumerable<ISpawned>? Spawn(Node worldNode, Vector3 location, ISpawnSystem spawnSystem)
+    {
+        SpawnHelpers.SpawnCloudBlob(clouds, location, radius, compound, amount, random);
+
+        // We don't spawn entities
+        return null;
+    }
+
+    public override string ToString()
+    {
+        return $"CloudBlobSpawner for {compound}";
     }
 }
 

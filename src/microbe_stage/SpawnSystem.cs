@@ -15,23 +15,23 @@ public class SpawnSystem : ISpawnSystem
     ///   Sets how often the spawn system runs and checks things
     /// </summary>
     [JsonProperty]
-    private float interval = 1.0f;
+    protected float interval = 1.0f;
 
     [JsonProperty]
-    private float elapsed;
+    protected float elapsed;
 
     [JsonProperty]
-    private float despawnElapsed;
+    protected float despawnElapsed;
 
     /// <summary>
     ///   Root node to parent all spawned things to
     /// </summary>
-    private Node worldRoot;
+    protected Node worldRoot;
 
-    private ShuffleBag<Spawner> spawnTypes;
+    protected ShuffleBag<Spawner> spawnTypes;
 
     [JsonProperty]
-    private Random random = new();
+    protected Random random = new();
 
     /// <summary>
     ///   This is used to spawn only a few entities per frame with minimal changes needed to code that wants to
@@ -89,7 +89,7 @@ public class SpawnSystem : ISpawnSystem
         spawnTypes.Remove(spawner);
     }
 
-    public void Init()
+    public virtual void Init()
     {
         Clear();
     }
@@ -107,7 +107,7 @@ public class SpawnSystem : ISpawnSystem
         despawnElapsed = 0;
     }
 
-    public void DespawnAll()
+    public virtual void DespawnAll()
     {
         ClearSpawnQueue();
         float despawned = 0.0f;
@@ -203,7 +203,53 @@ public class SpawnSystem : ISpawnSystem
             Constants.REPRODUCTION_ALLOW_EXCEED_ENTITY_LIMIT_MULTIPLIER;
     }
 
-    private void HandleQueuedSpawns(ref float spawnsLeftThisFrame, Vector3 playerPosition)
+    /// <summary>
+    ///   Checks whether we're currently blocked from spawning this type
+    /// </summary>
+    protected bool SpawnsBlocked(Spawner spawnType)
+    {
+        return spawnType.SpawnsEntities && estimateEntityCount >= Settings.Instance.MaxSpawnedEntities.Value;
+    }
+
+    protected virtual void SpawnAllTypes(Vector3 playerPosition, ref float spawnsLeftThisFrame)
+    {
+        var playerCoordinatePoint = new Tuple<int, int>(Mathf.RoundToInt(playerPosition.x /
+            Constants.SPAWN_SECTOR_SIZE), Mathf.RoundToInt(playerPosition.z / Constants.SPAWN_SECTOR_SIZE));
+
+        // Spawn for all sectors immediately outside a 3x3 box around the player
+        var sectorsToSpawn = new List<Int2>(12);
+        for (int y = -1; y <= 1; y++)
+        {
+            sectorsToSpawn.Add(new Int2(playerCoordinatePoint.Item1 - 2, playerCoordinatePoint.Item2 + y));
+        }
+
+        for (int x = -1; x <= 1; x++)
+        {
+            sectorsToSpawn.Add(new Int2(playerCoordinatePoint.Item1 + 2, playerCoordinatePoint.Item2 + x));
+        }
+
+        for (int y = -1; y <= 1; y++)
+        {
+            sectorsToSpawn.Add(new Int2(playerCoordinatePoint.Item1 + y, playerCoordinatePoint.Item2 - 2));
+        }
+
+        for (int x = -1; x <= 1; x++)
+        {
+            sectorsToSpawn.Add(new Int2(playerCoordinatePoint.Item1 + x, playerCoordinatePoint.Item2 + 2));
+        }
+
+        foreach (var newSector in sectorsToSpawn)
+        {
+            if (coordinatesSpawned.Add(newSector))
+            {
+                SpawnInSector(newSector, ref spawnsLeftThisFrame);
+            }
+        }
+
+        SpawnMicrobesAroundPlayer(playerPosition, ref spawnsLeftThisFrame);
+    }
+
+    protected void HandleQueuedSpawns(ref float spawnsLeftThisFrame, Vector3 playerPosition)
     {
         float spawned = 0.0f;
 
@@ -267,42 +313,56 @@ public class SpawnSystem : ISpawnSystem
         }
     }
 
-    private void SpawnAllTypes(Vector3 playerPosition, ref float spawnsLeftThisFrame)
+    /// <summary>
+    ///   Does a single spawn with a spawner. Does NOT check we're under the entity limit.
+    /// </summary>
+    protected float SpawnWithSpawner(Spawner spawnType, Vector3 location, ref float spawnsLeftThisFrame)
     {
-        var playerCoordinatePoint = new Tuple<int, int>(Mathf.RoundToInt(playerPosition.x /
-            Constants.SPAWN_SECTOR_SIZE), Mathf.RoundToInt(playerPosition.z / Constants.SPAWN_SECTOR_SIZE));
+        float spawns = 0.0f;
 
-        // Spawn for all sectors immediately outside a 3x3 box around the player
-        var sectorsToSpawn = new List<Int2>(12);
-        for (int y = -1; y <= 1; y++)
+        if (random.NextFloat() > spawnType.Density)
         {
-            sectorsToSpawn.Add(new Int2(playerCoordinatePoint.Item1 - 2, playerCoordinatePoint.Item2 + y));
+            return spawns;
         }
 
-        for (int x = -1; x <= 1; x++)
-        {
-            sectorsToSpawn.Add(new Int2(playerCoordinatePoint.Item1 + 2, playerCoordinatePoint.Item2 + x));
-        }
+        var enumerable = spawnType.Spawn(worldRoot, location, this);
 
-        for (int y = -1; y <= 1; y++)
-        {
-            sectorsToSpawn.Add(new Int2(playerCoordinatePoint.Item1 + y, playerCoordinatePoint.Item2 - 2));
-        }
+        if (enumerable == null)
+            return spawns;
 
-        for (int x = -1; x <= 1; x++)
-        {
-            sectorsToSpawn.Add(new Int2(playerCoordinatePoint.Item1 + x, playerCoordinatePoint.Item2 + 2));
-        }
+        bool finished = false;
 
-        foreach (var newSector in sectorsToSpawn)
+        var spawner = enumerable.GetEnumerator();
+
+        while (spawnsLeftThisFrame > 0)
         {
-            if (coordinatesSpawned.Add(newSector))
+            if (!spawner.MoveNext())
             {
-                SpawnInSector(newSector, ref spawnsLeftThisFrame);
+                finished = true;
+                break;
             }
+
+            if (spawner.Current == null)
+                throw new NullReferenceException("spawn enumerator is not allowed to return null");
+
+            ProcessSpawnedEntity(spawner.Current, spawnType);
+            var weight = spawner.Current.EntityWeight;
+            spawns += weight;
+            estimateEntityCount += weight;
+            spawnsLeftThisFrame -= weight;
         }
 
-        SpawnMicrobesAroundPlayer(playerPosition, ref spawnsLeftThisFrame);
+        if (!finished)
+        {
+            // Store the remaining items in the enumerator for later
+            queuedSpawns.AddToBack(new QueuedSpawn(spawnType, spawner));
+        }
+        else
+        {
+            spawner.Dispose();
+        }
+
+        return spawns;
     }
 
     /// <summary>
@@ -358,66 +418,6 @@ public class SpawnSystem : ISpawnSystem
 
         if (debugOverlay.PerformanceMetricsVisible)
             debugOverlay.ReportSpawns(spawns);
-    }
-
-    /// <summary>
-    ///   Checks whether we're currently blocked from spawning this type
-    /// </summary>
-    private bool SpawnsBlocked(Spawner spawnType)
-    {
-        return spawnType.SpawnsEntities && estimateEntityCount >= Settings.Instance.MaxSpawnedEntities.Value;
-    }
-
-    /// <summary>
-    ///   Does a single spawn with a spawner. Does NOT check we're under the entity limit.
-    /// </summary>
-    private float SpawnWithSpawner(Spawner spawnType, Vector3 location, ref float spawnsLeftThisFrame)
-    {
-        float spawns = 0.0f;
-
-        if (random.NextFloat() > spawnType.Density)
-        {
-            return spawns;
-        }
-
-        var enumerable = spawnType.Spawn(worldRoot, location, this);
-
-        if (enumerable == null)
-            return spawns;
-
-        bool finished = false;
-
-        var spawner = enumerable.GetEnumerator();
-
-        while (spawnsLeftThisFrame > 0)
-        {
-            if (!spawner.MoveNext())
-            {
-                finished = true;
-                break;
-            }
-
-            if (spawner.Current == null)
-                throw new NullReferenceException("spawn enumerator is not allowed to return null");
-
-            ProcessSpawnedEntity(spawner.Current, spawnType);
-            var weight = spawner.Current.EntityWeight;
-            spawns += weight;
-            estimateEntityCount += weight;
-            spawnsLeftThisFrame -= weight;
-        }
-
-        if (!finished)
-        {
-            // Store the remaining items in the enumerator for later
-            queuedSpawns.AddToBack(new QueuedSpawn(spawnType, spawner));
-        }
-        else
-        {
-            spawner.Dispose();
-        }
-
-        return spawns;
     }
 
     /// <summary>
@@ -514,7 +514,7 @@ public class SpawnSystem : ISpawnSystem
         return distance <= Math.PI ? distance : (float)(2 * Math.PI) - distance;
     }
 
-    private class QueuedSpawn : IDisposable
+    protected class QueuedSpawn : IDisposable
     {
         public QueuedSpawn(Spawner spawnType, IEnumerator<ISpawned> spawns)
         {

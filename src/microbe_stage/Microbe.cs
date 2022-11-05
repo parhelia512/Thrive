@@ -337,7 +337,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
 
     public override void _Ready()
     {
-        if (cloudSystem == null && !IsForPreviewOnly)
+        if (cloudSystem == null && !IsForPreviewOnly && !NetworkManager.Instance.Connected)
             throw new InvalidOperationException("Microbe not initialized");
 
         if (onReadyCalled)
@@ -372,7 +372,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         // to the audio player while the latter is more convenient for dynamic and various short one-time sound effects
         // in expense of lesser audio player control.
 
-        if (IsPlayerMicrobe)
+        if (IsPlayerMicrobe && (PeerId == NetworkManager.Instance.PeerId || !PeerId.HasValue))
         {
             // Creates and activates the audio listener for the player microbe. Positional sound will be
             // received by it instead of the main camera.
@@ -713,7 +713,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         CheckEngulfShape();
 
         // Fire queued agents
-        if (queuedToxinToEmit != null)
+        if (queuedToxinToEmit != null && !NetworkManager.Instance.IsClient)
         {
             EmitToxin(queuedToxinToEmit);
             queuedToxinToEmit = null;

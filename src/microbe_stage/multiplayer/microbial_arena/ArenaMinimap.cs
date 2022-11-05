@@ -1,24 +1,21 @@
+using System.Collections.Generic;
 using Godot;
 
 public class ArenaMinimap : HBoxContainer
 {
     private Panel map = null!;
 
-    private MicrobialArena? arena;
-
     private float updateTimer;
-    private Vector2 mapHalfSize;
 
-    public void Init(MicrobialArena arena)
-    {
-        this.arena = arena;
-    }
+    public float MapRadius { get; set; }
+
+    public IReadOnlyList<Vector2>? SpawnCoordinates { get; set; }
+
+    public Vector3? PlayerPosition { get; set; }
 
     public override void _Ready()
     {
         map = GetNode<Panel>("Map");
-
-        mapHalfSize = map.RectSize / 2;
     }
 
     public override void _Process(float delta)
@@ -34,25 +31,20 @@ public class ArenaMinimap : HBoxContainer
 
     private void OnMapDraw()
     {
-        if (arena == null)
-            return;
+        map.DrawSetTransform(map.RectSize * 0.5f, 0, Vector2.One);
 
-        map.DrawSetTransform(mapHalfSize, 0, Vector2.One);
+        if (PlayerPosition.HasValue)
+            DrawPoint(new Vector2(PlayerPosition.Value.x, PlayerPosition.Value.z), 1.5f, Colors.Yellow);
 
-/*
-        foreach (var entity in arena.DynamicEntities)
+        if (SpawnCoordinates != null)
         {
-            if (entity is INetEntity netEntity)
-            {
-                var translation = netEntity.EntityNode.GlobalTranslation;
-                var player = int.TryParse(netEntity.EntityNode.Name, out int parsed) && parsed == GetTree().GetNetworkUniqueId();
-                var size = player ? 1.5f : 1.0f;
-                var color = player ? Colors.White : Colors.Gray;
-
-                map.DrawCircle(
-                    (new Vector2(translation.x, translation.z) / mapHalfSize) * 3, size, color);
-            }
+            foreach (var point in SpawnCoordinates)
+                DrawPoint(point, 1.0f, Colors.DarkGray);
         }
-*/
+    }
+
+    private void DrawPoint(Vector2 position, float size, Color colour)
+    {
+        map.DrawCircle((position / MapRadius) * (map.RectSize / 2), size, colour);
     }
 }

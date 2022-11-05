@@ -3,7 +3,7 @@ using System;
 
 public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
 {
-    private bool wasMoving;
+    private Random random = new();
 
     // TODO: when using controller movement this should be screen relative movement by default
     [RunOnAxis(new[] { "g_move_forward", "g_move_backwards" }, new[] { -1.0f, 1.0f })]
@@ -39,32 +39,64 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
         }
     }
 
+    [RunOnKeyDown("g_fire_toxin")]
+    public void EmitToxin()
+    {
+        stage!.Player?.QueueEmitToxin(SimulationParameters.Instance.GetCompound("oxytoxy"));
+    }
+
+    [RunOnKey("g_secrete_slime")]
+    public void SecreteSlime(float delta)
+    {
+        stage!.Player?.QueueSecreteSlime(delta);
+    }
+
     [RunOnKeyDown("g_toggle_engulf")]
     public void ToggleEngulf()
     {
         if (stage!.Player == null)
             return;
 
-        if (stage.Player.State == Microbe.MicrobeState.Engulf)
-        {
-            stage.Player.State = Microbe.MicrobeState.Normal;
-        }
-        else if (!stage.Player.Membrane.Type.CellWall)
-        {
-            stage.Player.State = Microbe.MicrobeState.Engulf;
-        }
+        stage.Player.WantsToEngulf = !stage.Player.WantsToEngulf;
     }
 
     [RunOnKeyChange("g_toggle_scoreboard")]
-    public void ShowScoreBoard(bool heldDown)
+    public void ShowInfoScreen(bool heldDown)
     {
-        stage?.HUD.ToggleScoreBoard();
+        stage?.HUD.ToggleInfoScreen();
     }
 
     [RunOnKeyDown("g_focus_chat")]
     public void FocusChat()
     {
         stage?.HUD.FocusChat();
+    }
+
+    [RunOnKey("g_cheat_glucose")]
+    public void CheatGlucose(float delta)
+    {
+        if (Settings.Instance.CheatsEnabled)
+        {
+            SpawnCheatCloud("glucose", delta);
+        }
+    }
+
+    [RunOnKey("g_cheat_ammonia")]
+    public void CheatAmmonia(float delta)
+    {
+        if (Settings.Instance.CheatsEnabled)
+        {
+            SpawnCheatCloud("ammonia", delta);
+        }
+    }
+
+    [RunOnKey("g_cheat_phosphates")]
+    public void CheatPhosphates(float delta)
+    {
+        if (Settings.Instance.CheatsEnabled)
+        {
+            SpawnCheatCloud("phosphates", delta);
+        }
     }
 
     [RunOnKeyDown("g_cheat_editor")]
@@ -74,5 +106,11 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
         {
             stage!.HUD.ShowReproductionDialog();
         }
+    }
+
+    private void SpawnCheatCloud(string name, float delta)
+    {
+        SpawnHelpers.SpawnCloud(stage!.Clouds, stage.Camera.CursorWorldPos,
+            SimulationParameters.Instance.GetCompound(name), Constants.CLOUD_CHEAT_DENSITY * delta, random);
     }
 }

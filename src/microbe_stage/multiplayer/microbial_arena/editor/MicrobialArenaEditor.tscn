@@ -1,0 +1,40 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://src/microbe_stage/multiplayer/microbial_arena/editor/MicrobialArenaEditor.cs" type="Script" id=1]
+[ext_resource path="res://src/general/PauseMenu.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/microbe_stage/editor/MicrobeEditorWorld.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/microbe_stage/editor/CellEditorComponent.tscn" type="PackedScene" id=4]
+[ext_resource path="res://src/microbe_stage/editor/MicrobeEditorTabButtons.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/microbe_stage/editor/EditorCommonBottomLeftButtons.tscn" type="PackedScene" id=6]
+
+[node name="MicrobialArenaEditor" type="Node"]
+script = ExtResource( 1 )
+PauseMenuPath = NodePath("PauseMenu")
+EditorGUIBaseNodePath = NodePath("MicrobialArenaEditorGUI")
+EditorTabSelectorPath = NodePath("MicrobialArenaEditorGUI/MicrobeEditorTabButtons")
+CellEditorTabPath = NodePath("MicrobialArenaEditorGUI/CellEditorComponent")
+
+[node name="EditorWorld" parent="." instance=ExtResource( 3 )]
+
+[node name="MicrobialArenaEditorGUI" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="CellEditorComponent" parent="MicrobialArenaEditorGUI" instance=ExtResource( 4 )]
+CameraPath = NodePath("../../EditorWorld/PrimaryCamera")
+EditorArrowPath = NodePath("../../EditorWorld/EditorArrow")
+EditorGridPath = NodePath("../../EditorWorld/Grid")
+CameraFollowPath = NodePath("../../EditorWorld/CameraLookAt")
+IsMicrobialArenaEditor = true
+
+[node name="MicrobeEditorTabButtons" parent="MicrobialArenaEditorGUI" instance=ExtResource( 5 )]
+CellEditorOnly = true
+
+[node name="EditorCommonBottomLeftButtons" parent="MicrobialArenaEditorGUI" instance=ExtResource( 6 )]
+
+[node name="PauseMenu" parent="." instance=ExtResource( 2 )]
+visible = true
+MultiplayerMode = true
+HelpCategory = "MicrobeEditor"
+
+[editable path="EditorWorld"]

@@ -38,6 +38,8 @@ public class KickPlayerDialog : Control
         }
 
         NetworkManager.Instance.Kick(id, newText);
+
+        dialog.Hide();
     }
 
     private void OnKickCancelled()

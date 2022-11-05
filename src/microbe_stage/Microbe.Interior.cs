@@ -259,7 +259,7 @@ public partial class Microbe
     /// </summary>
     public void EmitToxin(Compound? agentType = null)
     {
-        if (PhagocytosisStep != PhagocytosisPhase.None)
+        if (PhagocytosisStep != PhagocytosisPhase.None || NetworkManager.Instance.IsClient)
             return;
 
         agentType ??= SimulationParameters.Instance.GetCompound("oxytoxy");
@@ -651,7 +651,7 @@ public partial class Microbe
 
     private void HandleCompoundAbsorbing(float delta)
     {
-        if (NetworkManager.Instance.IsPuppet)
+        if (NetworkManager.Instance.IsClient)
             return;
 
         if (PhagocytosisStep != PhagocytosisPhase.None)
@@ -757,7 +757,7 @@ public partial class Microbe
     /// </remarks>
     private void HandleReproduction(float delta)
     {
-        if (NetworkManager.Instance.IsPuppet)
+        if (NetworkManager.Instance.IsClient)
             return;
 
         // Dead or engulfed cells can't reproduce
@@ -1098,6 +1098,9 @@ public partial class Microbe
     /// </summary>
     private void ReadyToReproduce()
     {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
         if (IsPlayerMicrobe)
         {
             // The player doesn't split automatically
@@ -1147,6 +1150,9 @@ public partial class Microbe
     /// </summary>
     private void UnreadyToReproduce()
     {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
         // Sets this flag to false to make full recomputation on next reproduction readiness check
         // This notably allows to reactivate editor button upon colony unbinding.
         allOrganellesDivided = false;
@@ -1155,7 +1161,7 @@ public partial class Microbe
 
     private void HandleOsmoregulation(float delta)
     {
-        if (PhagocytosisStep != PhagocytosisPhase.None)
+        if (PhagocytosisStep != PhagocytosisPhase.None || NetworkManager.Instance.IsClient)
             return;
 
         var osmoregulationCost = (HexCount * CellTypeProperties.MembraneType.OsmoregulationFactor *
@@ -1327,6 +1333,9 @@ public partial class Microbe
     /// </remarks>
     private void SpawnEjectedCompound(Compound compound, float amount, Vector3 direction, float displacement = 0)
     {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
         var amountToEject = amount * Constants.MICROBE_VENT_COMPOUND_MULTIPLIER;
 
         if (amountToEject <= MathUtils.EPSILON)
@@ -1415,7 +1424,7 @@ public partial class Microbe
     /// </summary>
     private void HandleDigestion(float delta)
     {
-        if (Dead || NetworkManager.Instance.IsPuppet)
+        if (Dead || NetworkManager.Instance.IsClient)
             return;
 
         var compoundTypes = SimulationParameters.Instance.GetAllCompounds();
@@ -1555,7 +1564,7 @@ public partial class Microbe
                 // Microbe is beyond repair, might as well consider it as dead
                 Kill();
 
-                if (PeerId.HasValue && NetworkManager.Instance.IsAuthoritative)
+                if (PeerId.HasValue)
                     OnNetworkedDeathCompletes?.Invoke(PeerId.Value);
 
                 if (IsPlayerMicrobe)
@@ -1568,6 +1577,9 @@ public partial class Microbe
                 var hostile = HostileEngulfer.Value;
                 if (hostile == null)
                     return;
+
+                if (PeerId.HasValue && hostile.PeerId.HasValue)
+                    OnKilledByPeer?.Invoke(hostile.PeerId.Value, PeerId.Value, "engulf");
 
                 // Transfer ownership of all the objects we engulfed to our engulfer
                 foreach (var other in engulfedObjects.ToList())
@@ -1586,9 +1598,6 @@ public partial class Microbe
 
     private void HandleSlimeSecretion(float delta)
     {
-        if (NetworkManager.Instance.IsPuppet)
-            return;
-
         // Ignore if we have no slime jets
         if (SlimeJets.Count < 1)
             return;

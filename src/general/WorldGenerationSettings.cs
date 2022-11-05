@@ -58,8 +58,6 @@ public class WorldGenerationSettings
     /// </summary>
     public LifeOrigin Origin { get; set; } = LifeOrigin.Vent;
 
-    public bool AddDefaultSpecies { get; set; } = true;
-
     /// <summary>
     ///   Random seed for generating this game's planet
     /// </summary>
@@ -120,7 +118,6 @@ public class WorldGenerationSettings
             $"LAWK: {LAWK}" +
             $", Difficulty: {Difficulty.GetDescriptionString()}" +
             $", Life origin: {Origin}" +
-            $", Add default species: {AddDefaultSpecies}" +
             $", Seed: {Seed}" +
             $", Map type: {MapType}" +
             $", Include Multicellular: {IncludeMulticellular}" +

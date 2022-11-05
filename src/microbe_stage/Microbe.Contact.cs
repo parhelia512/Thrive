@@ -12,6 +12,8 @@ using Array = Godot.Collections.Array;
 /// </summary>
 public partial class Microbe
 {
+    public bool WantsToEngulf;
+
     // private SphereShape pseudopodRangeSphereShape = null!;
 
     /// <summary>
@@ -318,9 +320,9 @@ public partial class Microbe
     /// <summary>
     ///   Applies damage to this cell. killing it if its hitpoints drop low enough
     /// </summary>
-    public void Damage(float amount, string source)
+    public void Damage(float amount, string source, int? attackerPeerId = null)
     {
-        if (IsPlayerMicrobe && CheatManager.GodMode || NetworkManager.Instance.IsPuppet)
+        if (IsPlayerMicrobe && CheatManager.GodMode || NetworkManager.Instance.IsClient)
             return;
 
         if (amount == 0 || Dead)
@@ -400,6 +402,9 @@ public partial class Microbe
         {
             Hitpoints = 0.0f;
             Kill();
+
+            if (Dead && attackerPeerId.HasValue && PeerId.HasValue)
+                OnKilledByPeer?.Invoke(attackerPeerId.Value, PeerId.Value, source);
         }
     }
 
@@ -469,6 +474,150 @@ public partial class Microbe
 
         // Needs to be big enough to engulf
         return EngulfSize > target.EngulfSize * Constants.ENGULF_SIZE_RATIO_REQ;
+    }
+
+    /// <summary>
+    ///   Attempts to engulf the given target into the cytoplasm. Does not check whether the target
+    ///   can be engulfed or not.
+    /// </summary>
+    public void IngestEngulfable(IEngulfable target, float animationSpeed = 2.0f)
+    {
+        if (target.PhagocytosisStep != PhagocytosisPhase.None)
+            return;
+
+        var body = target as RigidBody;
+        if (body == null)
+        {
+            // Engulfable must be of rigidbody type to be ingested
+            return;
+        }
+
+        attemptingToEngulf.Add(target);
+
+        target.HostileEngulfer.Value = this;
+        target.PhagocytosisStep = PhagocytosisPhase.Ingestion;
+
+        // Disable collisions
+        body.CollisionLayer = 0;
+        body.CollisionMask = 0;
+
+        body.ReParentWithTransform(this);
+
+        var originalRenderPriority = target.RenderPriority;
+
+        // We want the ingested material to be always visible over the organelles
+        target.RenderPriority += OrganelleMaxRenderPriority + 1;
+
+        // Below is for figuring out where to place the object attempted to be engulfed inside the cytoplasm,
+        // calculated accordingly to hopefully minimize any part of the object sticking out the membrane.
+        // Note: extremely long and thin objects might still stick out
+
+        var targetRadiusNormalized = Mathf.Clamp(target.Radius / Radius, 0.0f, 1.0f);
+
+        var nearestPointOfMembraneToTarget = Membrane.GetVectorTowardsNearestPointOfMembrane(
+            body.Translation.x, body.Translation.z);
+
+        // The point nearest to the membrane calculation doesn't take being bacteria into account
+        if (CellTypeProperties.IsBacteria)
+            nearestPointOfMembraneToTarget *= 0.5f;
+
+        // From the calculated nearest point of membrane above we then linearly interpolate it by the engulfed's
+        // normalized radius to this cell's center in order to "shrink" the point relative to this cell's origin.
+        // This will then act as a "maximum extent/edge" that qualifies as the interior of the engulfer's membrane
+        var viableStoringAreaEdge = nearestPointOfMembraneToTarget.LinearInterpolate(
+            Vector3.Zero, targetRadiusNormalized);
+
+        // Get the final storing position by taking a value between this cell's center and the storing area edge.
+        // This would lessen the possibility of engulfed things getting bunched up in the same position.
+        var ingestionPoint = new Vector3(
+            random.Next(0.0f, viableStoringAreaEdge.x),
+            body.Translation.y,
+            random.Next(0.0f, viableStoringAreaEdge.z));
+
+        var boundingBoxSize = target.EntityGraphics.GetAabb().Size;
+
+        // In the case of flat mesh (like membrane) we don't want the endosome to end up completely flat
+        // as it can cause unwanted visual glitch
+        if (boundingBoxSize.y < Mathf.Epsilon)
+            boundingBoxSize = new Vector3(boundingBoxSize.x, 0.1f, boundingBoxSize.z);
+
+        // Form phagosome
+        var phagosome = endosomeScene.Instance<Endosome>();
+        phagosome.Transform = target.EntityGraphics.Transform.Scaled(Vector3.Zero);
+        phagosome.Tint = CellTypeProperties.Colour;
+        phagosome.RenderPriority = target.RenderPriority + engulfedObjects.Count + 1;
+        target.EntityGraphics.AddChild(phagosome);
+
+        var engulfedObject = new EngulfedObject(target, phagosome)
+        {
+            TargetValuesToLerp = (ingestionPoint, body.Scale / 2, boundingBoxSize),
+            OriginalScale = body.Scale,
+            OriginalRenderPriority = originalRenderPriority,
+        };
+
+        engulfedObjects.Add(engulfedObject);
+
+        foreach (string group in engulfedObject.OriginalGroups)
+        {
+            if (group != Constants.RUNNABLE_MICROBE_GROUP)
+                target.EntityNode.RemoveFromGroup(group);
+        }
+
+        StartBulkTransport(engulfedObject, animationSpeed);
+
+        target.OnAttemptedToBeEngulfed();
+    }
+
+    /// <summary>
+    ///   Expels an ingested object from this microbe out into the environment.
+    /// </summary>
+    public void EjectEngulfable(IEngulfable target, float animationSpeed = 2.0f)
+    {
+        if (PhagocytosisStep != PhagocytosisPhase.None || target.PhagocytosisStep is PhagocytosisPhase.Exocytosis or
+                PhagocytosisPhase.None)
+        {
+            return;
+        }
+
+        attemptingToEngulf.Remove(target);
+
+        var body = target as RigidBody;
+        if (body == null)
+        {
+            // Engulfable must be of rigidbody type to be ejected
+            return;
+        }
+
+        var engulfedObject = engulfedObjects.Find(e => e.Object == target);
+        if (engulfedObject == null)
+            return;
+
+        target.PhagocytosisStep = PhagocytosisPhase.Exocytosis;
+
+        // The back of the microbe
+        var exit = Hex.AxialToCartesian(new Hex(0, 1));
+        var nearestPointOfMembraneToTarget = Membrane.GetVectorTowardsNearestPointOfMembrane(exit.x, exit.z);
+
+        // The point nearest to the membrane calculation doesn't take being bacteria into account
+        if (CellTypeProperties.IsBacteria)
+            nearestPointOfMembraneToTarget *= 0.5f;
+
+        // If engulfer cell is dead (us) or the engulfed is positioned outside any of our closest membrane, immediately
+        // eject it without animation
+        // TODO: Asses performance cost in massive cells?
+        if (Dead || !Membrane.Contains(body.Translation.x, body.Translation.z))
+        {
+            CompleteEjection(engulfedObject);
+            body.Scale = engulfedObject.OriginalScale;
+            engulfedObjects.Remove(engulfedObject);
+            return;
+        }
+
+        // Animate object move to the nearest point of the membrane
+        engulfedObject.TargetValuesToLerp = (nearestPointOfMembraneToTarget, null, Vector3.One * Mathf.Epsilon);
+        StartBulkTransport(engulfedObject, animationSpeed);
+
+        // The rest of the operation is done in CompleteEjection
     }
 
     public void OnAttemptedToBeEngulfed()
@@ -568,6 +717,11 @@ public partial class Microbe
         return attemptingToEngulf.Any();
     }
 
+    public bool HasEngulfed(IEngulfable engulfable)
+    {
+        return engulfedObjects.Any(o => o.Object == engulfable);
+    }
+
     /// <summary>
     ///   Offset relative to the colony lead cell. Throws if this cell is not part of a colony
     /// </summary>
@@ -621,7 +775,9 @@ public partial class Microbe
         if (PhagocytosisStep != PhagocytosisPhase.None)
             return null;
 
-        OnDestroyed();
+        // Still need to be a valid entity to be able to sync death to clients
+        if (!NetworkManager.Instance.IsAuthoritative)
+            OnDestroyed();
 
         // Post-death handling is done in HandleDeath
 
@@ -752,14 +908,18 @@ public partial class Microbe
     /// </returns>
     private IEnumerable<FloatingChunk> OnKilled()
     {
-        if (NetworkManager.Instance.IsPuppet)
-            return new List<FloatingChunk>();
-
         // Reset some stuff
         State = MicrobeState.Normal;
         MovementDirection = new Vector3(0, 0, 0);
         LinearVelocity = new Vector3(0, 0, 0);
         allOrganellesDivided = false;
+
+        // Disable collisions
+        CollisionLayer = 0;
+        CollisionMask = 0;
+
+        if (NetworkManager.Instance.IsClient)
+            return new List<FloatingChunk>();
 
         // Releasing all the agents.
         // To not completely deadlock in this there is a maximum limit
@@ -942,10 +1102,6 @@ public partial class Microbe
             PlaySoundEffect("res://assets/sounds/soundeffects/microbe-death-2.ogg");
         }
 
-        // Disable collisions
-        CollisionLayer = 0;
-        CollisionMask = 0;
-
         return droppedCorpseChunks;
     }
 
@@ -1112,6 +1268,21 @@ public partial class Microbe
     /// </summary>
     private void HandleEngulfing(float delta)
     {
+        if (NetworkManager.Instance.IsClient)
+        {
+            ProcessEngulfedObjects(delta);
+            return;
+        }
+
+        if (Membrane.Type.CellWall || !WantsToEngulf)
+        {
+            State = MicrobeState.Normal;
+        }
+        else if (WantsToEngulf)
+        {
+            state = MicrobeState.Engulf;
+        }
+
         if (State == MicrobeState.Engulf)
         {
             // Drain atp
@@ -1179,63 +1350,7 @@ public partial class Microbe
             }
         }
 
-        for (int i = engulfedObjects.Count - 1; i >= 0; --i)
-        {
-            var engulfedObject = engulfedObjects[i];
-
-            var engulfable = engulfedObject.Object.Value;
-
-            // ReSharper disable once UseNullPropagation
-            if (engulfable == null)
-                continue;
-
-            var body = engulfable as RigidBody;
-            if (body == null)
-            {
-                attemptingToEngulf.Remove(engulfable);
-                engulfedObjects.Remove(engulfedObject);
-                continue;
-            }
-
-            body.Mode = ModeEnum.Static;
-
-            if (engulfable.PhagocytosisStep == PhagocytosisPhase.Digested)
-            {
-                engulfedObject.TargetValuesToLerp = (null, null, Vector3.One * Mathf.Epsilon);
-                StartBulkTransport(engulfedObject, 1.5f, false);
-            }
-
-            if (!engulfedObject.Interpolate)
-                continue;
-
-            if (AnimateBulkTransport(delta, engulfedObject))
-            {
-                switch (engulfable.PhagocytosisStep)
-                {
-                    case PhagocytosisPhase.Ingestion:
-                        CompleteIngestion(engulfedObject);
-                        break;
-                    case PhagocytosisPhase.Digested:
-                        engulfable.DestroyAndQueueFree();
-                        engulfedObjects.Remove(engulfedObject);
-                        break;
-                    case PhagocytosisPhase.Exocytosis:
-                        engulfedObject.Phagosome.Value?.Hide();
-                        engulfedObject.TargetValuesToLerp = (null, engulfedObject.OriginalScale, null);
-                        StartBulkTransport(engulfedObject, 1.0f);
-                        engulfable.PhagocytosisStep = PhagocytosisPhase.Ejection;
-                        continue;
-                    case PhagocytosisPhase.Ejection:
-                        CompleteEjection(engulfedObject);
-                        break;
-                }
-            }
-        }
-
-        foreach (var expelled in expelledObjects)
-            expelled.TimeElapsedSinceEjection += delta;
-
-        expelledObjects.RemoveAll(e => e.TimeElapsedSinceEjection >= Constants.ENGULF_EJECTED_COOLDOWN);
+        ProcessEngulfedObjects(delta);
 
         /* Membrane engulf stretch debug code
         if (state == MicrobeState.Engulf)
@@ -1297,8 +1412,7 @@ public partial class Microbe
 
         if (Membrane.DissolveEffectValue >= 1)
         {
-            if (PeerId.HasValue && NetworkManager.Instance.IsAuthoritative && !networkedDeathInvoked &&
-                OnNetworkedDeathCompletes != null)
+            if (PeerId.HasValue && !networkedDeathInvoked && OnNetworkedDeathCompletes != null)
             {
                 OnNetworkedDeathCompletes.Invoke(PeerId.Value);
 
@@ -1398,8 +1512,9 @@ public partial class Microbe
                     return;
 
                 var target = otherIsPilus ? thisMicrobe : touchedMicrobe;
+                var inflicter = otherIsPilus ? touchedMicrobe : thisMicrobe;
 
-                Invoke.Instance.Perform(() => target.Damage(Constants.PILUS_BASE_DAMAGE, "pilus"));
+                Invoke.Instance.Perform(() => target.Damage(Constants.PILUS_BASE_DAMAGE, "pilus", inflicter.PeerId));
                 return;
             }
 
@@ -1469,151 +1584,6 @@ public partial class Microbe
         }
     }
     */
-
-    /// <summary>
-    ///   Attempts to engulf the given target into the cytoplasm. Does not check whether the target
-    ///   can be engulfed or not.
-    /// </summary>
-    private void IngestEngulfable(IEngulfable target, float animationSpeed = 2.0f)
-    {
-        if (target.PhagocytosisStep != PhagocytosisPhase.None)
-            return;
-
-        var body = target as RigidBody;
-        if (body == null)
-        {
-            // Engulfable must be of rigidbody type to be ingested
-            return;
-        }
-
-        attemptingToEngulf.Add(target);
-        touchedEntities.Remove(target);
-
-        target.HostileEngulfer.Value = this;
-        target.PhagocytosisStep = PhagocytosisPhase.Ingestion;
-
-        // Disable collisions
-        body.CollisionLayer = 0;
-        body.CollisionMask = 0;
-
-        body.ReParentWithTransform(this);
-
-        var originalRenderPriority = target.RenderPriority;
-
-        // We want the ingested material to be always visible over the organelles
-        target.RenderPriority += OrganelleMaxRenderPriority + 1;
-
-        // Below is for figuring out where to place the object attempted to be engulfed inside the cytoplasm,
-        // calculated accordingly to hopefully minimize any part of the object sticking out the membrane.
-        // Note: extremely long and thin objects might still stick out
-
-        var targetRadiusNormalized = Mathf.Clamp(target.Radius / Radius, 0.0f, 1.0f);
-
-        var nearestPointOfMembraneToTarget = Membrane.GetVectorTowardsNearestPointOfMembrane(
-            body.Translation.x, body.Translation.z);
-
-        // The point nearest to the membrane calculation doesn't take being bacteria into account
-        if (CellTypeProperties.IsBacteria)
-            nearestPointOfMembraneToTarget *= 0.5f;
-
-        // From the calculated nearest point of membrane above we then linearly interpolate it by the engulfed's
-        // normalized radius to this cell's center in order to "shrink" the point relative to this cell's origin.
-        // This will then act as a "maximum extent/edge" that qualifies as the interior of the engulfer's membrane
-        var viableStoringAreaEdge = nearestPointOfMembraneToTarget.LinearInterpolate(
-            Vector3.Zero, targetRadiusNormalized);
-
-        // Get the final storing position by taking a value between this cell's center and the storing area edge.
-        // This would lessen the possibility of engulfed things getting bunched up in the same position.
-        var ingestionPoint = new Vector3(
-            random.Next(0.0f, viableStoringAreaEdge.x),
-            body.Translation.y,
-            random.Next(0.0f, viableStoringAreaEdge.z));
-
-        var boundingBoxSize = target.EntityGraphics.GetAabb().Size;
-
-        // In the case of flat mesh (like membrane) we don't want the endosome to end up completely flat
-        // as it can cause unwanted visual glitch
-        if (boundingBoxSize.y < Mathf.Epsilon)
-            boundingBoxSize = new Vector3(boundingBoxSize.x, 0.1f, boundingBoxSize.z);
-
-        // Form phagosome
-        var phagosome = endosomeScene.Instance<Endosome>();
-        phagosome.Transform = target.EntityGraphics.Transform.Scaled(Vector3.Zero);
-        phagosome.Tint = CellTypeProperties.Colour;
-        phagosome.RenderPriority = target.RenderPriority + engulfedObjects.Count + 1;
-        target.EntityGraphics.AddChild(phagosome);
-
-        var engulfedObject = new EngulfedObject(target, phagosome)
-        {
-            TargetValuesToLerp = (ingestionPoint, body.Scale / 2, boundingBoxSize),
-            OriginalScale = body.Scale,
-            OriginalRenderPriority = originalRenderPriority,
-        };
-
-        engulfedObjects.Add(engulfedObject);
-
-        foreach (string group in engulfedObject.OriginalGroups)
-        {
-            if (group != Constants.RUNNABLE_MICROBE_GROUP)
-                target.EntityNode.RemoveFromGroup(group);
-        }
-
-        StartBulkTransport(engulfedObject, animationSpeed);
-
-        target.OnAttemptedToBeEngulfed();
-    }
-
-    /// <summary>
-    ///   Expels an ingested object from this microbe out into the environment.
-    /// </summary>
-    private void EjectEngulfable(IEngulfable target, float animationSpeed = 2.0f)
-    {
-        if (PhagocytosisStep != PhagocytosisPhase.None || target.PhagocytosisStep is PhagocytosisPhase.Exocytosis or
-                PhagocytosisPhase.None)
-        {
-            return;
-        }
-
-        attemptingToEngulf.Remove(target);
-
-        var body = target as RigidBody;
-        if (body == null)
-        {
-            // Engulfable must be of rigidbody type to be ejected
-            return;
-        }
-
-        var engulfedObject = engulfedObjects.Find(e => e.Object == target);
-        if (engulfedObject == null)
-            return;
-
-        target.PhagocytosisStep = PhagocytosisPhase.Exocytosis;
-
-        // The back of the microbe
-        var exit = Hex.AxialToCartesian(new Hex(0, 1));
-        var nearestPointOfMembraneToTarget = Membrane.GetVectorTowardsNearestPointOfMembrane(exit.x, exit.z);
-
-        // The point nearest to the membrane calculation doesn't take being bacteria into account
-        if (CellTypeProperties.IsBacteria)
-            nearestPointOfMembraneToTarget *= 0.5f;
-
-        // If engulfer cell is dead (us) or the engulfed is positioned outside any of our closest membrane, immediately
-        // eject it without animation
-        // TODO: Asses performance cost in massive cells?
-        if (Dead || !Membrane.Contains(body.Translation.x, body.Translation.z))
-        {
-            CompleteEjection(engulfedObject);
-            body.Scale = engulfedObject.OriginalScale;
-            engulfedObjects.Remove(engulfedObject);
-            return;
-        }
-
-        // Animate object move to the nearest point of the membrane
-        engulfedObject.TargetValuesToLerp = (nearestPointOfMembraneToTarget, null, Vector3.One * Mathf.Epsilon);
-        StartBulkTransport(engulfedObject, animationSpeed);
-
-        // The rest of the operation is done in CompleteEjection
-    }
 
     private bool CanBindToMicrobe(IEntity other)
     {
@@ -1820,6 +1790,69 @@ public partial class Microbe
     {
         engulfedObject.AnimationTimeElapsed = 0;
         engulfedObject.Interpolate = false;
+    }
+
+    private void ProcessEngulfedObjects(float delta)
+    {
+        for (int i = engulfedObjects.Count - 1; i >= 0; --i)
+        {
+            var engulfedObject = engulfedObjects[i];
+
+            var engulfable = engulfedObject.Object.Value;
+
+            // ReSharper disable once UseNullPropagation
+            if (engulfable == null)
+                continue;
+
+            var body = engulfable as RigidBody;
+            if (body == null)
+            {
+                attemptingToEngulf.Remove(engulfable);
+                engulfedObjects.Remove(engulfedObject);
+                continue;
+            }
+
+            body.Mode = ModeEnum.Static;
+
+            if (engulfable.PhagocytosisStep == PhagocytosisPhase.Digested)
+            {
+                engulfedObject.TargetValuesToLerp = (null, null, Vector3.One * Mathf.Epsilon);
+                StartBulkTransport(engulfedObject, 1.5f, false);
+            }
+
+            if (!engulfedObject.Interpolate)
+                continue;
+
+            if (AnimateBulkTransport(delta, engulfedObject))
+            {
+                switch (engulfable.PhagocytosisStep)
+                {
+                    case PhagocytosisPhase.Ingestion:
+                        CompleteIngestion(engulfedObject);
+                        break;
+                    case PhagocytosisPhase.Digested:
+                        if (NetworkManager.Instance.IsAuthoritative)
+                            engulfable.DestroyAndQueueFree();
+
+                        engulfedObjects.Remove(engulfedObject);
+                        break;
+                    case PhagocytosisPhase.Exocytosis:
+                        engulfedObject.Phagosome.Value?.Hide();
+                        engulfedObject.TargetValuesToLerp = (null, engulfedObject.OriginalScale, null);
+                        StartBulkTransport(engulfedObject, 1.0f);
+                        engulfable.PhagocytosisStep = PhagocytosisPhase.Ejection;
+                        continue;
+                    case PhagocytosisPhase.Ejection:
+                        CompleteEjection(engulfedObject);
+                        break;
+                }
+            }
+        }
+
+        foreach (var expelled in expelledObjects)
+            expelled.TimeElapsedSinceEjection += delta;
+
+        expelledObjects.RemoveAll(e => e.TimeElapsedSinceEjection >= Constants.ENGULF_EJECTED_COOLDOWN);
     }
 
     private void CompleteIngestion(EngulfedObject engulfed)

@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
+using Newtonsoft.Json;
 
 /// <summary>
 ///   Base stage for the stages where the player controls a single creature, supports online gameplay.
@@ -16,11 +19,12 @@ using Godot;
 ///   </para>
 /// </remarks>
 public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
-    where TPlayer : class, INetEntity
+    where TPlayer : class, INetPlayer
 {
-    private Dictionary<uint, Node> entityParents = new();
+    public NetPlayerState PlayerState => GetPlayerState(NetworkManager.Instance.PeerId!.Value) ??
+        throw new NullReferenceException("Player has not been set");
 
-    protected MultiplayerGameWorld MpGameWorld => (MultiplayerGameWorld)GameWorld;
+    public MultiplayerGameWorld MpGameWorld => (MultiplayerGameWorld)GameWorld;
 
     protected abstract string StageLoadingMessage { get; }
 
@@ -29,8 +33,6 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         base._EnterTree();
 
         NetworkManager.Instance.NetworkTick += OnNetworkTick;
-        NetworkManager.Instance.EntityReplicated += OnNetEntityReplicated;
-        NetworkManager.Instance.EntityDestroy += OnNetEntityDestroy;
     }
 
     public override void _ExitTree()
@@ -38,8 +40,6 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         base._ExitTree();
 
         NetworkManager.Instance.NetworkTick -= OnNetworkTick;
-        NetworkManager.Instance.EntityReplicated -= OnNetEntityReplicated;
-        NetworkManager.Instance.EntityDestroy -= OnNetEntityDestroy;
     }
 
     public override void _Ready()
@@ -49,9 +49,16 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         GetTree().Connect("network_peer_disconnected", this, nameof(OnPeerDisconnected));
         GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
 
-        NetworkManager.Instance.Connect(nameof(NetworkManager.PlayerJoined), this, nameof(RegisterPlayer));
-        NetworkManager.Instance.Connect(nameof(NetworkManager.PlayerLeft), this, nameof(UnregisterPlayer));
         NetworkManager.Instance.Connect(nameof(NetworkManager.Kicked), this, nameof(OnKicked));
+
+        if (NetworkManager.Instance.IsAuthoritative)
+        {
+            NetworkManager.Instance.Connect(nameof(NetworkManager.PlayerJoined), this, nameof(RegisterPlayer));
+            NetworkManager.Instance.Connect(nameof(NetworkManager.PlayerLeft), this, nameof(UnregisterPlayer));
+
+            SpawnHelpers.OnNetEntitySpawned = OnNetEntitySpawned;
+            SpawnHelpers.OnNetEntityDespawned = OnNetEntityDespawned;
+        }
     }
 
     public override void _Process(float delta)
@@ -62,10 +69,27 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     {
     }
 
+    public NetPlayerState? GetPlayerState(int peerId)
+    {
+        MpGameWorld.Players.TryGetValue(peerId, out NetPlayerState result);
+        return result;
+    }
+
+    public void SyncPlayerStateToAllPlayers(int peerId, NetPlayerState? state)
+    {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
+        var serialized = state == null ? string.Empty : JsonConvert.SerializeObject(state);
+        Rpc(nameof(SyncPlayerState), peerId, serialized);
+    }
+
     protected override void SetupStage()
     {
         LoadingScreen.Instance.Show(StageLoadingMessage, MainGameState.Invalid, "Preparing...");
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeIn, 0.5f, null, false, false);
+
+        pauseMenu.GameProperties = CurrentGame ?? throw new InvalidOperationException("current game is not set");
     }
 
     protected override void OnGameStarted()
@@ -79,68 +103,111 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     /// </summary>
     protected abstract void NetworkTick(float delta);
 
-    protected virtual void UpdateEntityState(int peerId, INetEntity entity)
+    protected virtual void UpdateEntityState(float delta, int targetPeerId, INetEntity entity)
     {
-        if (!entity.EntityNode.IsInsideTree())
+        if (!entity.EntityNode.IsInsideTree() || NetworkManager.Instance.IsClient)
             return;
 
-        if (NetworkManager.Instance.IsAuthoritative)
+        entity.NetworkTick(delta);
+
+        var states = entity.PackStates();
+
+        if (states != null)
+            RpcUnreliableId(targetPeerId, nameof(NotifyEntityStateUpdate), delta, entity.NetEntityId, states);
+    }
+
+    protected virtual void SendPlayerInputs()
+    {
+        if (Player?.EntityNode.IsInsideTree() == false || NetworkManager.Instance.IsAuthoritative)
+            return;
+
+        var inputs = Player?.PackInputs();
+
+        if (inputs != null)
+            RpcUnreliable(nameof(PlayerInputsReceived), NetworkManager.Instance.PeerId, inputs);
+    }
+
+    protected virtual void RegisterPlayer(int peerId)
+    {
+        if (MpGameWorld.Players.ContainsKey(peerId) || NetworkManager.Instance.IsClient)
+            return;
+
+        // Pretend that each separate Species instance across players are LUCA
+        var species = new MicrobeSpecies((uint)peerId, "Primum", "thrivium");
+        GameWorld.SetInitialSpeciesProperties(species);
+        MpGameWorld.UpdateSpecies(species.ID, species);
+
+        MpGameWorld.Players.Add(peerId, default);
+        SyncPlayerStateToAllPlayers(peerId, MpGameWorld.Players[peerId]);
+
+        SpawnPlayer(peerId);
+
+        if (peerId != NetworkManager.Instance.PeerId)
         {
-            if (peerId == NetworkManager.Instance.PeerId)
-                return;
+            foreach (var entry in MpGameWorld.Entities)
+            {
+                var entity = entry.Value.Value;
+                if (entity == null)
+                    continue;
 
-            var states = entity.PackStates();
-
-            if (states != null)
-                RpcUnreliableId(peerId, nameof(NotifyEntityStateUpdate), entity.NetEntityId, states);
-        }
-        else if (NetworkManager.Instance.IsPuppet)
-        {
-            var inputs = entity.PackInputs();
-
-            if (inputs != null)
-                RpcUnreliable(nameof(ReceivedEntityInput), entity.NetEntityId, inputs);
+                ReplicateEntity(peerId, entity, MpGameWorld.EntityCount);
+            }
         }
     }
 
-    protected virtual void OnNetEntityReplicated(object sender, EntityReplicatedEventArgs args)
+    protected virtual void UnregisterPlayer(int peerId)
     {
-        rootOfDynamicallySpawned.AddChild(args.Entity.EntityNode);
+        if (NetworkManager.Instance.IsClient)
+            return;
 
-        if (args.Entity is INetPlayer player && player.PeerId == NetworkManager.Instance.PeerId)
-            OnOwnPlayerSpawned((TPlayer)args.Entity);
+        DespawnPlayer(peerId);
 
-        args.Entity.OnReplicated();
+        MpGameWorld.Players.Remove(peerId);
+        SyncPlayerStateToAllPlayers(peerId, null);
+    }
+
+    /// <summary>
+    ///   Called client-side when entity with the given id has been replicated.
+    /// </summary>
+    protected virtual void OnNetEntityReplicated(uint id, INetEntity entity, int serverEntityCount)
+    {
+        rootOfDynamicallySpawned.AddChild(entity.EntityNode);
+
+        if (entity is INetPlayer player && player.PeerId == NetworkManager.Instance.PeerId)
+            OnOwnPlayerSpawned((TPlayer)entity);
 
         if (NetworkManager.Instance.PlayerInfo?.Status == NetPlayerStatus.Joining)
         {
             LoadingScreen.Instance.Show(StageLoadingMessage,
                 MainGameState.Invalid, "Loading entities... " + MpGameWorld?.EntityCount + "/" +
-                args.ServerEntityCount);
+                serverEntityCount);
 
-            if (args.ServerEntityCount > -1 && MpGameWorld?.EntityCount == args.ServerEntityCount)
+            if (serverEntityCount > -1 && MpGameWorld?.EntityCount == serverEntityCount)
+            {
+                Rpc(nameof(RequestExcessEntitiesRemoval));
+                Rpc(nameof(RequestServerSidePlayerStates));
                 OnReady();
+            }
         }
     }
 
     /// <summary>
-    ///   Called when entity with the given id needs to be destroyed.
+    ///   Called client-side when entity with the given id needs to be destroyed.
     /// </summary>
-    protected virtual void OnNetEntityDestroy(object sender, uint entityId)
+    protected virtual void OnNetEntityDestroy(uint entityId)
     {
         var entity = MpGameWorld.GetEntity(entityId);
         if (entity == null)
             return;
 
-        if (entityId == NetworkManager.Instance.PlayerState!.Value.EntityID)
+        if (entityId == PlayerState.EntityID)
             OnOwnPlayerDespawn();
 
         entity.DestroyDetachAndQueueFree();
-        entityParents.Remove(entityId);
     }
 
     /// <summary>
-    ///   If the entity we're controlling is spawned.
+    ///   If the the local entity we're controlling has been spawned.
     /// </summary>
     protected virtual void OnOwnPlayerSpawned(TPlayer player)
     {
@@ -149,7 +216,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     }
 
     /// <summary>
-    ///   If the entity we're controlling is despawned.
+    ///   If the local entity we're controlling has been despawned.
     /// </summary>
     protected virtual void OnOwnPlayerDespawn()
     {
@@ -158,7 +225,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
 
     protected void SpawnPlayer(int peerId)
     {
-        if (NetworkManager.Instance.IsPuppet)
+        if (NetworkManager.Instance.IsClient)
             return;
 
         if (!HandlePlayerSpawn(peerId, out TPlayer? spawned))
@@ -170,7 +237,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
 
     protected void DespawnPlayer(int peerId)
     {
-        if (NetworkManager.Instance.IsPuppet)
+        if (NetworkManager.Instance.IsClient)
             return;
 
         if (!MpGameWorld.Players.TryGetValue(peerId, out NetPlayerState state))
@@ -188,12 +255,13 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     }
 
     /// <summary>
-    ///   Returns true if successfully spawned.
+    ///   Server-side implementation. Returns true if successfully spawned.
     /// </summary>
     protected abstract bool HandlePlayerSpawn(int peerId, out TPlayer? spawned);
 
     /// <summary>
-    ///   Returns true if successfully despawned.
+    ///   Server-side implementation. Returns true if successfully despawned.
+    /// </summary>
     protected abstract bool HandlePlayerDespawn(TPlayer removed);
 
     [RemoteSync]
@@ -202,7 +270,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         if (HasPlayer)
             return;
 
-        SpawnPlayer(GetTree().GetNetworkUniqueId());
+        SpawnPlayer(NetworkManager.Instance.PeerId!.Value);
     }
 
     protected override void AutoSave()
@@ -213,83 +281,105 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     {
     }
 
-    [PuppetSync]
-    protected virtual void SetEntityAsAttached(uint id, bool attached)
+    protected virtual void SetEntityAsAttached(INetEntity entity, bool attached)
     {
-        if (!entityParents.ContainsKey(id))
-            return;
-
-        var entity = MpGameWorld.GetEntity(id);
-        if (entity == null)
-            return;
-
-        var parent = entityParents[id];
-
         if (attached && !entity.EntityNode.IsInsideTree())
         {
-            parent.AddChild(entity.EntityNode);
+            rootOfDynamicallySpawned.AddChild(entity.EntityNode);
         }
         else if (!attached && entity.EntityNode.IsInsideTree())
         {
-            parent.RemoveChild(entity.EntityNode);
+            rootOfDynamicallySpawned.RemoveChild(entity.EntityNode);
         }
+    }
+
+    private void ReplicateEntity(int targetPeerId, INetEntity entity, int serverEntityCount = -1)
+    {
+        var replicableVars = entity.PackReplicableVars();
+        var states = entity.PackStates();
+
+        var data = new Dictionary<string, string>
+        {
+            { nameof(INetEntity.ResourcePath), entity.ResourcePath },
+            { nameof(IEntity.EntityNode.Name), entity.EntityNode.Name },
+        };
+
+        if (replicableVars != null)
+            data.Add("Vars", JsonConvert.SerializeObject(replicableVars));
+
+        if (states != null)
+            data.Add("States", JsonConvert.SerializeObject(states));
+
+        RpcId(targetPeerId, nameof(NotifyEntityReplication), entity.NetEntityId, data, serverEntityCount);
     }
 
     private void OnNetworkTick(object sender, float delta)
     {
-        NetworkUpdateGameState(delta);
+        if (NetworkManager.Instance.IsAuthoritative)
+        {
+            NetworkUpdateGameState(delta);
+        }
+        else if (NetworkManager.Instance.IsClient)
+        {
+            SendPlayerInputs();
+        }
+
         NetworkTick(delta);
     }
 
     private void NetworkUpdateGameState(float delta)
     {
-        foreach (var entry in MpGameWorld.Entities)
+        for (int i = MpGameWorld.EntityIDs.Count - 1; i >= 0; --i)
         {
-            var entity = entry.Value.Value;
+            var id = MpGameWorld.EntityIDs[i];
+
+            var entity = MpGameWorld.Entities[id].Value;
             if (entity == null)
                 continue;
 
             if (!entity.Synchronize || !entity.EntityNode.IsInsideTree())
                 continue;
 
-            if (NetworkManager.Instance.IsAuthoritative)
-                entityParents[entry.Key] = entity.EntityNode.GetParent();
-
             foreach (var player in NetworkManager.Instance.PlayerList)
             {
-                if (player.Value.Status != NetPlayerStatus.Active)
+                if (player.Value.Status != NetPlayerStatus.Active || player.Key == NetworkManager.DEFAULT_SERVER_ID)
                     continue;
 
-                UpdateEntityState(player.Key, entity);
+                UpdateEntityState(delta, player.Key, entity);
             }
         }
     }
 
-    private void RegisterPlayer(int peerId)
+    private void OnNetEntitySpawned(INetEntity spawned)
     {
-        if (MpGameWorld.Players.ContainsKey(peerId) || NetworkManager.Instance.IsPuppet)
+        if (NetworkManager.Instance.IsClient)
             return;
 
-        // Pretend that each separate Species instance across players are LUCA
-        var species = new MicrobeSpecies((uint)peerId, "Primum", "thrivium");
-        GameWorld.SetInitialSpeciesProperties(species);
-        MpGameWorld.UpdateSpecies(species.ID, species);
+        var id = MpGameWorld.RegisterEntity(spawned);
 
-        MpGameWorld.Players.Add(peerId, new NetPlayerState());
-        NetworkManager.Instance.SyncPlayerStateToAllPlayers(peerId, MpGameWorld.Players[peerId]);
+        foreach (var player in NetworkManager.Instance.PlayerList)
+        {
+            if (player.Key == GetTree().GetNetworkUniqueId() || player.Value.Status != NetPlayerStatus.Active)
+                continue;
 
-        SpawnPlayer(peerId);
+            ReplicateEntity(player.Key, spawned);
+        }
     }
 
-    private void UnregisterPlayer(int peerId)
+    private void OnNetEntityDespawned(uint id)
     {
-        if (NetworkManager.Instance.IsPuppet)
+        if (NetworkManager.Instance.IsClient)
             return;
 
-        DespawnPlayer(peerId);
+        MpGameWorld.UnregisterEntity(id);
 
-        MpGameWorld.Players.Remove(peerId);
-        NetworkManager.Instance.SyncPlayerStateToAllPlayers(peerId, null);
+        foreach (var player in NetworkManager.Instance.PlayerList)
+        {
+            if (player.Key == NetworkManager.DEFAULT_SERVER_ID || player.Value.Status != NetPlayerStatus.Active)
+                continue;
+
+            RpcId(player.Key, nameof(DestroySpawnedEntity), id);
+        }
     }
 
     private void OnPeerDisconnected(int peerId)
@@ -300,6 +390,8 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
 
     private void OnServerDisconnected()
     {
+        LoadingScreen.Instance.Hide();
+
         var menu = SceneManager.Instance.ReturnToMenu();
         menu.OpenMultiplayerMenu(MultiplayerGUI.Submenu.Main);
     }
@@ -315,8 +407,8 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     {
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.5f, () =>
         {
-            if (!NetworkManager.Instance.IsDedicated)
-                RegisterPlayer(GetTree().GetNetworkUniqueId());
+            if (NetworkManager.Instance.IsAuthoritative)
+                RegisterPlayer(NetworkManager.Instance.PeerId!.Value);
 
             NotifyGameReady();
             LoadingScreen.Instance.Hide();
@@ -325,7 +417,57 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     }
 
     [Puppet]
-    private void NotifyEntityStateUpdate(uint id, Dictionary<string, string> data)
+    private void SyncPlayerState(int peerId, string data)
+    {
+        if (string.IsNullOrEmpty(data))
+        {
+            MpGameWorld.Players.Remove(peerId);
+            return;
+        }
+
+        MpGameWorld.Players[peerId] = JsonConvert.DeserializeObject<NetPlayerState>(data);
+    }
+
+    [Puppet]
+    private void NotifyEntityReplication(uint id, Dictionary<string, string> data, int serverEntityCount = -1)
+    {
+        data.TryGetValue(nameof(INetEntity.ResourcePath), out string resourcePath);
+        data.TryGetValue(nameof(IEntity.EntityNode.Name), out string name);
+
+        data.TryGetValue("Vars", out string vars);
+        data.TryGetValue("States", out string states);
+
+        Dictionary<string, string>? parsedVars = null;
+        Dictionary<string, string>? parsedStates = null;
+
+        if (!string.IsNullOrEmpty(vars))
+            parsedVars = JsonConvert.DeserializeObject<Dictionary<string, string>>(vars);
+
+        if (!string.IsNullOrEmpty(states))
+            parsedStates = JsonConvert.DeserializeObject<Dictionary<string, string>>(states);
+
+        var scene = GD.Load<PackedScene>(resourcePath);
+        var replicated = scene.Instance<INetEntity>();
+
+        replicated.EntityNode.Name = name;
+
+        replicated.OnReplicated(parsedVars);
+        MpGameWorld.RegisterEntity(id, replicated);
+        OnNetEntityReplicated(id, replicated, serverEntityCount);
+
+        if (parsedStates != null)
+            replicated.OnNetworkSync(parsedStates);
+    }
+
+    [Puppet]
+    private void DestroySpawnedEntity(uint entityId)
+    {
+        OnNetEntityDestroy(entityId);
+        MpGameWorld.UnregisterEntity(entityId);
+    }
+
+    [Puppet]
+    private void NotifyEntityStateUpdate(float delta, uint id, Dictionary<string, string> data)
     {
         var entity = MpGameWorld.GetEntity(id);
         if (entity == null)
@@ -334,18 +476,57 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
             return;
         }
 
-        entityParents[id] = entity.EntityNode.GetParent();
+        if (!entity.EntityNode.IsInsideTree())
+            return;
 
+        entity.NetworkTick(delta);
         entity.OnNetworkSync(data);
     }
 
-    [Master]
-    private void ReceivedEntityInput(uint id, Dictionary<string, string> data)
+    [Puppet]
+    private void ReceivedExcessEntitiesRemoval(string ids)
     {
-        var entity = MpGameWorld.GetEntity(id);
-        if (entity == null)
+        var deserialized = JsonConvert.DeserializeObject<List<uint>>(ids);
+        if (deserialized == null)
             return;
 
-        entity.OnNetworkInput(data);
+        var excess = MpGameWorld.Entities.Select(e => e.Key).Except(deserialized).ToList();
+
+        foreach (var id in excess)
+            DestroySpawnedEntity(id);
+    }
+
+    [Master]
+    private void PlayerInputsReceived(int peerId, Dictionary<string, string> data)
+    {
+        if (peerId == NetworkManager.DEFAULT_SERVER_ID)
+            return;
+
+        var state = GetPlayerState(peerId);
+        if (!state.HasValue)
+            return;
+
+        var entity = MpGameWorld.GetEntity(state.Value.EntityID);
+        if (entity == null || entity is not INetPlayer player)
+            return;
+
+        player.OnNetworkInput(data);
+    }
+
+    [Master]
+    private void RequestServerSidePlayerStates()
+    {
+        var sender = GetTree().GetRpcSenderId();
+
+        foreach (var state in MpGameWorld.Players)
+            RpcId(sender, nameof(SyncPlayerState), state.Key, JsonConvert.SerializeObject(state.Value));
+    }
+
+    [Master]
+    private void RequestExcessEntitiesRemoval()
+    {
+        var sender = GetTree().GetRpcSenderId();
+
+        RpcId(sender, nameof(ReceivedExcessEntitiesRemoval), JsonConvert.SerializeObject(MpGameWorld.EntityIDs));
     }
 }

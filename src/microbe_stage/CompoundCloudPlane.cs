@@ -49,35 +49,17 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
     [JsonProperty]
     public int Resolution { get; private set; }
 
+    /// <summary>
+    ///   Don't know why this is only one-dimension but we may need SizeX and SizeY if
+    ///   we want the cloud extent to not be symmetrical.
+    /// </summary>
     [JsonProperty]
     public int Size { get; private set; }
 
+    public Action<Compound, float, Vector3>? OnCloudAdded { get; set; }
+    public Action<Compound, Vector3, float>? OnCompoundTaken { get; set; }
+
     public bool IsLoadedFromSave { get; set; }
-
-    // Called when the node enters the scene tree for the first time.
-    public override void _Ready()
-    {
-        if (!IsLoadedFromSave)
-        {
-            Size = Settings.Instance.CloudSimulationWidth;
-            Resolution = Settings.Instance.CloudResolution;
-            CreateDensityTexture();
-
-            Density = new Vector4[Size, Size];
-            OldDensity = new Vector4[Size, Size];
-            ClearContents();
-        }
-        else
-        {
-            // Recreate the texture if the size changes
-            // TODO: could resample the density data here to allow changing the cloud resolution or size
-            // without starting a new save
-            CreateDensityTexture();
-
-            OldDensity = new Vector4[Size, Size];
-            SetMaterialUVForPosition();
-        }
-    }
 
     public void UpdatePosition(Int2 newPosition)
     {
@@ -121,9 +103,34 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
     /// <summary>
     ///   Initializes this cloud. cloud2 onwards can be null
     /// </summary>
-    public void Init(FluidSystem fluidSystem, int renderPriority, Compound cloud1, Compound? cloud2,
-        Compound? cloud3, Compound? cloud4)
+    public void Init(FluidSystem fluidSystem, int renderPriority, int simulationSize, int planeSize,
+        Compound cloud1, Compound? cloud2, Compound? cloud3, Compound? cloud4)
     {
+        Size = simulationSize;
+
+        var mesh = (QuadMesh)Mesh;
+        mesh.Size = new Vector2(planeSize, planeSize);
+
+        if (!IsLoadedFromSave)
+        {
+            Resolution = Settings.Instance.CloudResolution;
+            CreateDensityTexture();
+
+            Density = new Vector4[Size, Size];
+            OldDensity = new Vector4[Size, Size];
+            ClearContents();
+        }
+        else
+        {
+            // Recreate the texture if the size changes
+            // TODO: could resample the density data here to allow changing the cloud resolution or size
+            // without starting a new save
+            CreateDensityTexture();
+
+            OldDensity = new Vector4[Size, Size];
+            SetMaterialUVForPosition();
+        }
+
         this.fluidSystem = fluidSystem;
         Compounds = new Compound?[Constants.CLOUDS_IN_ONE] { cloud1, cloud2, cloud3, cloud4 };
 
@@ -392,6 +399,8 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
         {
             Density[x, y] += cloudToAdd;
         }
+
+        OnCloudAdded?.Invoke(compound, density, ConvertToWorld(x, y));
     }
 
     /// <summary>
@@ -411,6 +420,8 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
         {
             Density[x, y] += CalculateCloudToAdd(compound, -amountToGive);
         }
+
+        OnCompoundTaken?.Invoke(compound, ConvertToWorld(x, y), fraction);
 
         return amountToGive;
     }
@@ -452,7 +463,7 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
     public bool ContainsPosition(Vector3 worldPosition, out int x, out int y)
     {
         ConvertToCloudLocal(worldPosition, out x, out y);
-        return x >= 0 && y >= 0 && x < Constants.CLOUD_WIDTH && y < Constants.CLOUD_HEIGHT;
+        return x >= 0 && y >= 0 && x < Size && y < Size;
     }
 
     /// <summary>
@@ -462,10 +473,10 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
     public bool ContainsPositionWithRadius(Vector3 worldPosition,
         float radius)
     {
-        if (worldPosition.x + radius < Translation.x - Constants.CLOUD_WIDTH ||
-            worldPosition.x - radius >= Translation.x + Constants.CLOUD_WIDTH ||
-            worldPosition.z + radius < Translation.z - Constants.CLOUD_HEIGHT ||
-            worldPosition.z - radius >= Translation.z + Constants.CLOUD_HEIGHT)
+        if (worldPosition.x + radius < Translation.x - Size ||
+            worldPosition.x - radius >= Translation.x + Size ||
+            worldPosition.z + radius < Translation.z - Size ||
+            worldPosition.z - radius >= Translation.z + Size)
             return false;
 
         return true;
@@ -479,9 +490,9 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
         var topLeftRelative = worldPosition - Translation;
 
         // Floor is used here because otherwise the last coordinate is wrong
-        x = ((int)Math.Floor((topLeftRelative.x + Constants.CLOUD_WIDTH) / Resolution)
+        x = ((int)Math.Floor((topLeftRelative.x + Size) / Resolution)
             + position.x * Size / Constants.CLOUD_SQUARES_PER_SIDE) % Size;
-        y = ((int)Math.Floor((topLeftRelative.z + Constants.CLOUD_HEIGHT) / Resolution)
+        y = ((int)Math.Floor((topLeftRelative.z + Size) / Resolution)
             + position.y * Size / Constants.CLOUD_SQUARES_PER_SIDE) % Size;
     }
 
@@ -492,10 +503,10 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
     {
         return new Vector3(
             cloudX * Resolution + ((4 - position.x) % 3 - 1) * Resolution * Size / Constants.CLOUD_SQUARES_PER_SIDE -
-            Constants.CLOUD_WIDTH,
+            Size,
             0,
             cloudY * Resolution + ((4 - position.y) % 3 - 1) * Resolution * Size / Constants.CLOUD_SQUARES_PER_SIDE -
-            Constants.CLOUD_HEIGHT) + Translation;
+            Size) + Translation;
     }
 
     /// <summary>
