@@ -35,7 +35,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
     public float MaxGameDuration => 60;
 
-    public IReadOnlyList<Vector2> SpawnCoordinates => spawner.SpawnCoordinates;
+    public List<Vector2> SpawnCoordinates { get; set; } = new();
 
     public bool Visible
     {
@@ -221,7 +221,10 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         Clouds.RunSimulation = false;
 
         if (NetworkManager.Instance.IsAuthoritative)
+        {
+            spawner.OnSpawnCoordinatesChanged = OnSpawnCoordinatesChanged;
             spawner.Init();
+        }
 
         OnGameStarted();
     }
@@ -235,6 +238,14 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
     protected override void NetworkTick(float delta)
     {
+    }
+
+    protected override void RegisterPlayer(int peerId)
+    {
+        base.RegisterPlayer(peerId);
+
+        if (peerId != NetworkManager.DEFAULT_SERVER_ID)
+            RpcId(peerId, nameof(SyncSpawnCoordinates), SpawnCoordinates);
     }
 
     protected override void OnOwnPlayerSpawned(Microbe player)
@@ -391,6 +402,21 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     private void OnPlayerDestroyed(int peerId)
     {
         DespawnPlayer(peerId);
+    }
+
+    private void OnSpawnCoordinatesChanged(List<Vector2> coordinates)
+    {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
+        SpawnCoordinates = coordinates;
+        Rpc(nameof(SyncSpawnCoordinates), coordinates);
+    }
+
+    [Puppet]
+    private void SyncSpawnCoordinates(List<Vector2> coordinates)
+    {
+        SpawnCoordinates = coordinates;
     }
 
     [PuppetSync]

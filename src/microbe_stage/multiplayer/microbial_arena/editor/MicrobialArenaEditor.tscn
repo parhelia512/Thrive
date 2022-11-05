@@ -37,4 +37,7 @@ visible = true
 MultiplayerMode = true
 HelpCategory = "MicrobeEditor"
 
+[connection signal="OnOpenHelp" from="MicrobialArenaEditorGUI/EditorCommonBottomLeftButtons" to="PauseMenu" method="OpenToHelp"]
+[connection signal="OnOpenMenu" from="MicrobialArenaEditorGUI/EditorCommonBottomLeftButtons" to="PauseMenu" method="Open"]
+
 [editable path="EditorWorld"]

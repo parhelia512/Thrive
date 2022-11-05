@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -16,9 +16,6 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
     private CompoundCloudSystem clouds;
 
     private List<SpawnSpot> spawnSpots = new();
-    private List<Vector2> spawnCoordinates = new();
-
-    private bool spawnCoordinatesDirty = true;
 
     private float spawnAreaRadius;
 
@@ -27,20 +24,6 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
     /// </summary>
     private float estimateEntityCount;
 
-    public IReadOnlyList<Vector2> SpawnCoordinates
-    {
-        get
-        {
-            if (spawnCoordinatesDirty)
-            {
-                spawnCoordinates = spawnSpots.Select(c => c.Coordinate).ToList();
-                spawnCoordinatesDirty = false;
-            }
-
-            return spawnCoordinates;
-        }
-    }
-
     public MicrobialArenaSpawnSystem(Node root, MultiplayerGameWorld gameWorld, CompoundCloudSystem clouds,
         float radius) : base(root)
     {
@@ -48,6 +31,8 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
         this.clouds = clouds;
         this.spawnAreaRadius = radius;
     }
+
+    public Action<List<Vector2>>? OnSpawnCoordinatesChanged;
 
     public override void Init()
     {
@@ -161,6 +146,8 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
 
     private void GenerateSpawnSpots()
     {
+        var generated = false;
+
         for (int i = 0; i < MAX_SPAWN_SPOTS; ++i)
         {
             if (spawnSpots.Count >= MAX_SPAWN_SPOTS)
@@ -177,7 +164,12 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
 
             spawnSpots.Add(point);
 
-            spawnCoordinatesDirty = true;
+            generated = true;
+        }
+
+        if (generated)
+        {
+            OnSpawnCoordinatesChanged?.Invoke(spawnSpots.Select(s => s.Coordinate).ToList());
         }
     }
 

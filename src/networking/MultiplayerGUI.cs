@@ -46,6 +46,12 @@ public class MultiplayerGUI : CenterContainer
     public NodePath KickedDialogPath = null!;
 
     [Export]
+    public NodePath GameModeTitlePath = null!;
+
+    [Export]
+    public NodePath GameModeDescriptionPath = null!;
+
+    [Export]
     public NodePath ChatBoxPath = null!;
 
     [Export]
@@ -68,6 +74,8 @@ public class MultiplayerGUI : CenterContainer
     private CustomConfirmationDialog kickedDialog = null!;
     private Label serverName = null!;
     private Label serverAttributes = null!;
+    private Label gameModeTitle = null!;
+    private CustomRichTextLabel gameModeDescription = null!;
     private ChatBox chatBox = null!;
 
     private Control? primaryMenu;
@@ -128,6 +136,8 @@ public class MultiplayerGUI : CenterContainer
         kickedDialog = GetNode<CustomConfirmationDialog>(KickedDialogPath);
         serverName = GetNode<Label>(ServerNamePath);
         serverAttributes = GetNode<Label>(ServerAttributesPath);
+        gameModeTitle = GetNode<Label>(GameModeTitlePath);
+        gameModeDescription = GetNode<CustomRichTextLabel>(GameModeDescriptionPath);
         chatBox = GetNode<ChatBox>(ChatBoxPath);
 
         generalDialog = GetNode<CustomConfirmationDialog>("GeneralDialog");
@@ -162,9 +172,8 @@ public class MultiplayerGUI : CenterContainer
 
         var builder = new StringBuilder(100);
         builder.Append(" - ");
-        builder.Append(network.Settings?.GetGameModeReadable());
         builder.Append(network.GameInSession ?
-            $" [In progress] [{network.FormattedGameTimeHumanized}]" : " [Preparing]");
+            $" [in progress] [{network.FormattedGameTimeHumanized}]" : " [preparing]");
 
         serverAttributes.Text = builder.ToString();
     }
@@ -189,6 +198,9 @@ public class MultiplayerGUI : CenterContainer
 
         peerCount.Text = $"{network.PlayerList.Count} / {network.Settings?.MaxPlayers}";
         serverName.Text = network.Settings?.Name;
+
+        gameModeTitle.Text = network.Settings?.GetGameModeReadable();
+        gameModeDescription.ExtendedBbcode = network.Settings?.GetGameModeDescription();
 
         UpdateStartButton();
     }

@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=1]
 [ext_resource path="res://src/networking/MultiplayerGUI.cs" type="Script" id=2]
@@ -12,6 +12,7 @@
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Smaller.tres" type="DynamicFont" id=10]
 [ext_resource path="res://src/networking/KickPlayerDialog.tscn" type="PackedScene" id=11]
 [ext_resource path="res://assets/textures/gui/bevel/extinctionLocal.png" type="Texture" id=12]
+[ext_resource path="res://src/gui_common/CustomRichTextLabel.tscn" type="PackedScene" id=13]
 [ext_resource path="res://assets/textures/gui/bevel/SuicideIcon.png" type="Texture" id=14]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Small.tres" type="DynamicFont" id=16]
 
@@ -41,7 +42,9 @@ PeerCountPath = NodePath("Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxCo
 StartButtonPath = NodePath("Lobby/HBoxContainer/Start")
 KickDialogPath = NodePath("KickPlayerDialog")
 KickedDialogPath = NodePath("KickedDialog")
-ChatBoxPath = NodePath("Lobby/HBoxContainer2/ChatPanel/MarginContainer/VBoxContainer/ChatBox")
+GameModeTitlePath = NodePath("Lobby/HBoxContainer2/VBoxContainer/Context/MarginContainer/VBoxContainer/GameModeTitle")
+GameModeDescriptionPath = NodePath("Lobby/HBoxContainer2/VBoxContainer/Context/MarginContainer/VBoxContainer/GameModeDescription")
+ChatBoxPath = NodePath("Lobby/HBoxContainer2/VBoxContainer/ChatPanel/MarginContainer/VBoxContainer/ChatBox")
 NetworkedPlayerLabelScene = ExtResource( 6 )
 
 [node name="PrimaryMenu" type="VBoxContainer" parent="."]
@@ -171,11 +174,11 @@ margin_right = 833.0
 margin_bottom = 36.0
 custom_constants/margin_right = 5
 custom_constants/margin_top = 5
-custom_constants/margin_left = 5
+custom_constants/margin_left = 20
 custom_constants/margin_bottom = 5
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Lobby/PanelContainer/MarginContainer"]
-margin_left = 5.0
+margin_left = 20.0
 margin_top = 5.0
 margin_right = 827.0
 margin_bottom = 30.0
@@ -337,35 +340,79 @@ margin_bottom = 411.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="ChatPanel" type="PanelContainer" parent="Lobby/HBoxContainer2"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Lobby/HBoxContainer2"]
 margin_left = 554.0
 margin_right = 834.0
 margin_bottom = 450.0
-rect_min_size = Vector2( 280, 0 )
 
-[node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/ChatPanel"]
+[node name="Context" type="PanelContainer" parent="Lobby/HBoxContainer2/VBoxContainer"]
+margin_right = 280.0
+margin_bottom = 223.0
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/VBoxContainer/Context"]
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 279.0
-margin_bottom = 449.0
+margin_bottom = 222.0
+custom_constants/margin_right = 10
+custom_constants/margin_top = 10
+custom_constants/margin_left = 10
+custom_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Lobby/HBoxContainer2/VBoxContainer/Context/MarginContainer"]
+margin_left = 10.0
+margin_top = 10.0
+margin_right = 268.0
+margin_bottom = 211.0
+
+[node name="GameModeTitle" type="Label" parent="Lobby/HBoxContainer2/VBoxContainer/Context/MarginContainer/VBoxContainer"]
+margin_right = 258.0
+margin_bottom = 17.0
+custom_fonts/font = ExtResource( 4 )
+text = "GAME_MODE_TITLE"
+align = 1
+__meta__ = {
+"_editor_description_": "PLACEHOLDER"
+}
+
+[node name="GameModeDescription" parent="Lobby/HBoxContainer2/VBoxContainer/Context/MarginContainer/VBoxContainer" instance=ExtResource( 13 )]
+margin_top = 21.0
+margin_right = 258.0
+margin_bottom = 201.0
+size_flags_vertical = 3
+fit_content_height = false
+
+[node name="ChatPanel" type="PanelContainer" parent="Lobby/HBoxContainer2/VBoxContainer"]
+margin_top = 227.0
+margin_right = 280.0
+margin_bottom = 450.0
+rect_min_size = Vector2( 280, 0 )
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/VBoxContainer/ChatPanel"]
+margin_left = 1.0
+margin_top = 1.0
+margin_right = 279.0
+margin_bottom = 222.0
 custom_constants/margin_right = 5
 custom_constants/margin_top = 5
 custom_constants/margin_left = 5
 custom_constants/margin_bottom = 5
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Lobby/HBoxContainer2/ChatPanel/MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Lobby/HBoxContainer2/VBoxContainer/ChatPanel/MarginContainer"]
 margin_left = 5.0
 margin_top = 5.0
 margin_right = 273.0
-margin_bottom = 443.0
+margin_bottom = 216.0
 
-[node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/ChatPanel/MarginContainer/VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/VBoxContainer/ChatPanel/MarginContainer/VBoxContainer"]
 margin_right = 268.0
 margin_bottom = 17.0
 custom_constants/margin_right = 5
 custom_constants/margin_left = 5
 
-[node name="Label" type="Label" parent="Lobby/HBoxContainer2/ChatPanel/MarginContainer/VBoxContainer/MarginContainer"]
+[node name="Label" type="Label" parent="Lobby/HBoxContainer2/VBoxContainer/ChatPanel/MarginContainer/VBoxContainer/MarginContainer"]
 margin_left = 5.0
 margin_right = 263.0
 margin_bottom = 17.0
@@ -373,12 +420,12 @@ custom_fonts/font = ExtResource( 4 )
 text = "CHAT_ROOM"
 align = 1
 
-[node name="ChatBox" parent="Lobby/HBoxContainer2/ChatPanel/MarginContainer/VBoxContainer" instance=ExtResource( 3 )]
+[node name="ChatBox" parent="Lobby/HBoxContainer2/VBoxContainer/ChatPanel/MarginContainer/VBoxContainer" instance=ExtResource( 3 )]
 anchor_top = 0.0
 anchor_bottom = 0.0
 margin_top = 21.0
 margin_right = 268.0
-margin_bottom = 438.0
+margin_bottom = 211.0
 size_flags_vertical = 3
 ReleaseLineEditFocusAfterMessageSent = false
 
@@ -442,6 +489,7 @@ HideCancelButton = true
 HideConfirmButton = true
 
 [node name="ServerSetup" parent="." instance=ExtResource( 7 )]
+visible = false
 margin_left = 640.0
 margin_top = 360.0
 margin_right = 640.0

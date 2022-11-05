@@ -63,6 +63,8 @@ public class MultiplayerEditorBase<TAction, TStage> : EditorBase<TAction, TStage
 
     protected override void InitEditor(bool fresh)
     {
+        pauseMenu.GameProperties = CurrentGame;
+
         ApplyEditorTab();
 
         if (!receivedSpeciesFromServer)

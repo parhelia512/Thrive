@@ -26,7 +26,7 @@ public class GameProperties
     private GameProperties(MultiplayerGameWorld multiplayerGame)
     {
         GameWorld = multiplayerGame;
-        TutorialState = null!;
+        TutorialState = new TutorialState();
     }
 
     [JsonConstructor]
@@ -83,7 +83,7 @@ public class GameProperties
         var map = new PatchMap();
         var region = new PatchRegion(0, string.Empty, PatchRegion.RegionType.Predefined, Vector2.Zero);
 
-        var tidepool = SimulationParameters.Instance.GetBiome("aavolcanic_vent");
+        var tidepool = SimulationParameters.Instance.GetBiome("tidepool");
         var patch = new Patch(new LocalizedString("MICROBIAL_ARENA"), 0, tidepool, BiomeType.Tidepool, region);
 
         map.AddRegion(region);

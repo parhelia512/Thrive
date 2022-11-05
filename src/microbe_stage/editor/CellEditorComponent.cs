@@ -536,6 +536,7 @@ public partial class CellEditorComponent :
         {
             behaviourTabButton.Visible = false;
             autoEvoPredictionPanel.Visible = false;
+            componentBottomLeftButtons.ShowNewButton = false;
         }
 
         UpdateMicrobePartSelections();

@@ -23,7 +23,7 @@ public class NetPlayerInfo
             case NetPlayerStatus.Active:
                 return TranslationServer.Translate("IN_GAME_LOWERCASE");
             case NetPlayerStatus.Lobby:
-                return TranslationServer.Translate("LOBBY_LOWERCASE");
+                return TranslationServer.Translate("IN_LOBBY_LOWERCASE");
             case NetPlayerStatus.Joining:
                 return TranslationServer.Translate("JOINING_LOWERCASE");
             case NetPlayerStatus.Leaving:
