@@ -16,10 +16,14 @@ public class ServerSetup : CustomDialog
     [Export]
     public NodePath UseUPNPPath = null!;
 
+    [Export]
+    public NodePath UseUPNPHintPath = null!;
+
     private LineEdit name = null!;
     private SpinBox maxPlayers = null!;
     private OptionButton gameMode = null!;
     private CustomCheckBox useUPNP = null!;
+    private TextureButton useUPNPHint = null!;
 
     private ServerSettings? settings;
     private string playerName = "unnamed";
@@ -35,6 +39,9 @@ public class ServerSetup : CustomDialog
         maxPlayers = GetNode<SpinBox>(MaxPlayerPath);
         gameMode = GetNode<OptionButton>(GameModePath);
         useUPNP = GetNode<CustomCheckBox>(UseUPNPPath);
+        useUPNPHint = GetNode<TextureButton>(UseUPNPHintPath);
+
+        useUPNPHint.RegisterToolTipForControl("upnp", "serverSetup");
     }
 
     public void Open(string playerName, string address, int port)

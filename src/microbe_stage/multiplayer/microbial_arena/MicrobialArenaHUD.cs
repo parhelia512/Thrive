@@ -19,7 +19,7 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     public NodePath UnbindAllHotkeyPath = null!;
 
     [Export]
-    public NodePath ArenaMinimapPath = null!;
+    public NodePath ArenaMapPath = null!;
 
     [Export]
     public NodePath KillFeedPath = null!;
@@ -34,7 +34,7 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
 
     private CustomDialog? winBox;
 
-    private ArenaMinimap minimap = null!;
+    private ArenaMap map = null!;
     private VBoxContainer killFeed = null!;
     private Label gameTime = null!;
 
@@ -66,7 +66,7 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         bindingModeHotkey = GetNode<ActionButton>(BindingModeHotkeyPath);
         unbindAllHotkey = GetNode<ActionButton>(UnbindAllHotkeyPath);
 
-        minimap = GetNode<ArenaMinimap>(ArenaMinimapPath);
+        map = GetNode<ArenaMap>(ArenaMapPath);
         killFeed = GetNode<VBoxContainer>(KillFeedPath);
         gameTime = GetNode<Label>(GameTimePath);
     }
@@ -156,14 +156,14 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         winBox.GetNode<Timer>("Timer").Connect("timeout", this, nameof(ToggleWinBox));
     }
 
+    public void ToggleMap()
+    {
+        map.Visible = !map.Visible;
+    }
+
     public void AddKillFeedLog(string content)
     {
-        var log = new KillFeedLog
-        {
-            ExtendedBbcode = $"[center]{content}[/center]",
-            FitContentHeight = true,
-        };
-
+        var log = new KillFeedLog(content);
         killFeedLogs.Add(log);
         killFeed.AddChild(log);
     }
@@ -349,11 +349,11 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
 
     private void UpdateMinimap()
     {
-        minimap.MapRadius = stage!.ArenaRadius;
-        minimap.SpawnCoordinates = stage.SpawnCoordinates;
+        map.MapRadius = stage!.ArenaRadius;
+        map.SpawnCoordinates = stage.SpawnCoordinates;
 
         if (stage.Player?.IsInsideTree() == true)
-            minimap.PlayerPosition = stage.Player.GlobalTranslation;
+            map.PlayerPosition = stage.Player.GlobalTranslation;
     }
 
     private void OnRadialItemSelected(int itemId)
@@ -376,5 +376,11 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     {
         public float OpaqueLifetime = 5.0f;
         public float Alpha = 1.0f;
+
+        public KillFeedLog(string content)
+        {
+            ExtendedBbcode = $"[right]{content}[/right]";
+            FitContentHeight = true;
+        }
     }
 }

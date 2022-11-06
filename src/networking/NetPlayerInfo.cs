@@ -14,6 +14,8 @@ public class NetPlayerInfo
 
     public Dictionary<string, int> Ints { get; set; } = new();
 
+    public Dictionary<string, float> Floats { get; set; } = new();
+
     // TODO: add more important properties...
 
     public string GetStatusReadable()

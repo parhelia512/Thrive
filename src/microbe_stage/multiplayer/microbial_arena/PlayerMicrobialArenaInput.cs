@@ -66,6 +66,12 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
         stage?.HUD.ToggleInfoScreen();
     }
 
+    [RunOnKeyChange("g_toggle_map")]
+    public void ShowMap(bool heldDown)
+    {
+        stage?.HUD.ToggleMap();
+    }
+
     [RunOnKeyDown("g_focus_chat")]
     public void FocusChat()
     {

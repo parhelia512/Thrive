@@ -340,7 +340,7 @@
     <Compile Include="src\microbe_stage\CompoundCloudPlane.cs" />
     <Compile Include="src\microbe_stage\MicrobeStage.Network.cs" />
     <Compile Include="src\microbe_stage\MicrobeSystem.cs" />
-    <Compile Include="src\microbe_stage\multiplayer\microbial_arena\ArenaMinimap.cs" />
+    <Compile Include="src\microbe_stage\multiplayer\microbial_arena\ArenaMap.cs" />
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\editor\MicrobialArenaEditor.cs" />
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\MicrobialArena.cs" />
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\MicrobialArenaHUD.cs" />

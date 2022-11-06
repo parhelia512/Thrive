@@ -51,7 +51,7 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
 
     /// <summary>
     ///   Don't know why this is only one-dimension but we may need SizeX and SizeY if
-    ///   we want the cloud extent to not be symmetrical.
+    ///   we want the cloud extent to support asymmetry.
     /// </summary>
     [JsonProperty]
     public int Size { get; private set; }

@@ -105,6 +105,7 @@ public class MultiplayerGUI : CenterContainer
     private enum ConnectionJob
     {
         None,
+        Hosting,
         Connecting,
         SettingUpUPNP,
         PortForwarding,
@@ -173,7 +174,7 @@ public class MultiplayerGUI : CenterContainer
         var builder = new StringBuilder(100);
         builder.Append(" - ");
         builder.Append(network.GameInSession ?
-            $" [in progress] [{network.FormattedGameTimeHumanized}]" : " [preparing]");
+            $" [in progress] [{network.FormattedGameTimeHumanized}]" : " [pending]");
 
         serverAttributes.Text = builder.ToString();
     }
@@ -351,6 +352,8 @@ public class MultiplayerGUI : CenterContainer
 
     private void OnServerSetupConfirmed(string data)
     {
+        currentJobStatus = ConnectionJob.Hosting;
+
         ServerSettings parsedData;
 
         try
@@ -376,14 +379,16 @@ public class MultiplayerGUI : CenterContainer
             return;
         }
 
-        CurrentMenu = Submenu.Lobby;
-
         if (parsedData.UseUPNP)
         {
             ShowLoadingDialog(
                 TranslationServer.Translate("UPNP_SETUP"), "[UPnP] Discovering devices", false);
 
             currentJobStatus = ConnectionJob.SettingUpUPNP;
+        }
+        else
+        {
+            CurrentMenu = Submenu.Lobby;
         }
     }
 
@@ -419,7 +424,7 @@ public class MultiplayerGUI : CenterContainer
 
     private void OnRegisteredToServer(int peerId, NetworkManager.RegistrationToServerResult result)
     {
-        if (peerId != GetTree().GetNetworkUniqueId())
+        if (peerId != NetworkManager.Instance.PeerId || currentJobStatus == ConnectionJob.Hosting)
             return;
 
         loadingDialog.Hide();
@@ -499,9 +504,11 @@ public class MultiplayerGUI : CenterContainer
                     loadingDialog.Hide();
 
                     ShowGeneralDialog(TranslationServer.Translate("UPNP_SETUP"),
-                        "[UPnP] An error occurred while trying to set up: " + result.ToString());
+                        "[UPnP] An error occurred while setting up: " + result.ToString());
 
                     currentJobStatus = ConnectionJob.None;
+
+                    NetworkManager.Instance.Disconnect();
                 }
                 else
                 {
@@ -525,6 +532,8 @@ public class MultiplayerGUI : CenterContainer
                 }
 
                 currentJobStatus = ConnectionJob.None;
+
+                NetworkManager.Instance.Disconnect();
 
                 break;
             }

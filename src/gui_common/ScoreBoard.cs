@@ -42,12 +42,11 @@ public class ScoreBoard : VBoxContainer
 
     public void SortHighestScoreFirst()
     {
-        // TODO: use actual score instead of kill count
         var ordered = NetworkManager.Instance.PlayerList
             .OrderByDescending(p =>
             {
-                p.Value.Ints.TryGetValue("kills", out int killCount);
-                return killCount;
+                p.Value.Ints.TryGetValue("score", out int score);
+                return score;
             })
             .Select(p => p.Key)
             .ToList();

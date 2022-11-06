@@ -37,9 +37,7 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
     {
         base.Init(containedInStage);
 
-        bottomLeftBar.ShowPauseButton = chatBoxActive = !GetTree().HasNetworkPeer();
-        bottomLeftBar.ShowChatButton = bottomLeftBar.ChatPressed = chatBox.Visible = GetTree().HasNetworkPeer();
-        chatBoxAnimationPlayer.Play(GetTree().HasNetworkPeer() ? "Open" : "Close");
+        chatBoxAnimationPlayer.Play("Open");
     }
 
     public void ToggleInfoScreen()

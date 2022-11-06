@@ -293,6 +293,20 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         }
     }
 
+    /// <summary>
+    ///   Gamemode specific score calculation.
+    /// </summary>
+    protected abstract int CalculateScore(int peerId);
+
+    /// <summary>
+    ///   Notifies a player's new score to all other peers.
+    /// </summary>
+    /// <param name="peerId">The player's peer id.</param>
+    protected void NotifyScore(int peerId)
+    {
+        NetworkManager.Instance.SetPlayerInfoInts(peerId, "score", CalculateScore(peerId));
+    }
+
     private void ReplicateEntity(int targetPeerId, INetEntity entity, int serverEntityCount = -1)
     {
         var replicableVars = entity.PackReplicableVars();

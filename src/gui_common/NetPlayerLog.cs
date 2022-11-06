@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using Godot;
 
@@ -16,6 +17,7 @@ public class NetPlayerLog : PanelContainer
     public NodePath SpacerPath = null!;
 
     private CustomRichTextLabel? nameLabel;
+    private Label scoreLabel = null!;
     private Label killsLabel = null!;
     private Label deathsLabel = null!;
     private Button kickButton = null!;
@@ -62,6 +64,7 @@ public class NetPlayerLog : PanelContainer
         cross = GetNode<TextureRect>(CrossPath);
         spacer = GetNode<Control>(SpacerPath);
 
+        scoreLabel = GetNode<Label>("HBoxContainer/Score");
         killsLabel = GetNode<Label>("HBoxContainer/Kills");
         deathsLabel = GetNode<Label>("HBoxContainer/Deaths");
 
@@ -79,11 +82,13 @@ public class NetPlayerLog : PanelContainer
         if (info == null)
             return;
 
+        info.Ints.TryGetValue("score", out int score);
         info.Ints.TryGetValue("kills", out int kills);
         info.Ints.TryGetValue("deaths", out int deaths);
 
-        killsLabel.Text = kills.ToString();
-        deathsLabel.Text = deaths.ToString();
+        scoreLabel.Text = score.ToString(CultureInfo.CurrentCulture);
+        killsLabel.Text = kills.ToString(CultureInfo.CurrentCulture);
+        deathsLabel.Text = deaths.ToString(CultureInfo.CurrentCulture);
     }
 
     private void UpdateName()

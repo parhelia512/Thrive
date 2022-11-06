@@ -4,7 +4,7 @@
 [ext_resource path="res://src/networking/MultiplayerGUI.cs" type="Script" id=2]
 [ext_resource path="res://src/networking/ChatBox.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/gui_common/fonts/Lato-Bold-Small.tres" type="DynamicFont" id=4]
-[ext_resource path="res://src/gui_common/fonts/Lato-Regular-Small.tres" type="DynamicFont" id=5]
+[ext_resource path="res://assets/textures/gui/bevel/popUp.png" type="Texture" id=5]
 [ext_resource path="res://src/gui_common/NetPlayerLog.tscn" type="PackedScene" id=6]
 [ext_resource path="res://src/networking/ServerSetup.tscn" type="PackedScene" id=7]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-AlmostSmaller.tres" type="DynamicFont" id=8]
@@ -234,29 +234,6 @@ margin_bottom = 18.0
 custom_constants/margin_right = 5
 custom_constants/margin_left = 5
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer"]
-visible = false
-margin_left = 5.0
-margin_right = 533.0
-margin_bottom = 18.0
-
-[node name="Label" type="Label" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
-margin_right = 59.0
-margin_bottom = 17.0
-custom_fonts/font = ExtResource( 4 )
-text = "PLAYERS"
-
-[node name="PeerCount" type="Label" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/HBoxContainer"]
-margin_left = 63.0
-margin_right = 153.0
-margin_bottom = 17.0
-size_flags_horizontal = 0
-custom_fonts/font = ExtResource( 5 )
-text = "PEER_COUNT"
-__meta__ = {
-"_editor_description_": "PLACEHOLDER"
-}
-
 [node name="PanelContainer" type="PanelContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer"]
 margin_left = 5.0
 margin_right = 533.0
@@ -271,31 +248,43 @@ margin_bottom = 18.0
 mouse_filter = 2
 
 [node name="Name" type="Label" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer"]
-margin_right = 380.0
+margin_right = 320.0
 margin_bottom = 18.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 16 )
 text = "NAME"
 
 [node name="Indicators" type="HBoxContainer" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer"]
-margin_left = 384.0
+margin_left = 324.0
 margin_right = 464.0
 margin_bottom = 18.0
 custom_constants/separation = 40
 
-[node name="Kills" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
+[node name="Score" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
 margin_right = 20.0
 margin_bottom = 18.0
 rect_min_size = Vector2( 20, 0 )
+hint_tooltip = "SCORE"
+size_flags_vertical = 3
+texture = ExtResource( 5 )
+expand = true
+
+[node name="Kills" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
+margin_left = 60.0
+margin_right = 80.0
+margin_bottom = 18.0
+rect_min_size = Vector2( 20, 0 )
+hint_tooltip = "KILLS"
 size_flags_vertical = 3
 texture = ExtResource( 12 )
 expand = true
 
 [node name="Death" type="TextureRect" parent="Lobby/HBoxContainer2/PlayerList/MarginContainer/VBoxContainer/MarginContainer/PanelContainer/HBoxContainer/Indicators"]
-margin_left = 60.0
-margin_right = 80.0
+margin_left = 120.0
+margin_right = 140.0
 margin_bottom = 18.0
 rect_min_size = Vector2( 20, 0 )
+hint_tooltip = "DEATHS"
 size_flags_vertical = 3
 texture = ExtResource( 14 )
 expand = true
@@ -489,7 +478,6 @@ HideCancelButton = true
 HideConfirmButton = true
 
 [node name="ServerSetup" parent="." instance=ExtResource( 7 )]
-visible = false
 margin_left = 640.0
 margin_top = 360.0
 margin_right = 640.0

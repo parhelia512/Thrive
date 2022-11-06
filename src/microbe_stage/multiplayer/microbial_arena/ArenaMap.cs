@@ -1,10 +1,8 @@
 using System.Collections.Generic;
 using Godot;
 
-public class ArenaMinimap : HBoxContainer
+public class ArenaMap : Panel
 {
-    private Panel map = null!;
-
     private float updateTimer;
 
     public float MapRadius { get; set; }
@@ -13,25 +11,20 @@ public class ArenaMinimap : HBoxContainer
 
     public Vector3? PlayerPosition { get; set; }
 
-    public override void _Ready()
-    {
-        map = GetNode<Panel>("Map");
-    }
-
     public override void _Process(float delta)
     {
         updateTimer -= delta;
 
         if (updateTimer <= 0)
         {
-            map.Update();
+            Update();
             updateTimer = 1;
         }
     }
 
-    private void OnMapDraw()
+    public override void _Draw()
     {
-        map.DrawSetTransform(map.RectSize * 0.5f, 0, Vector2.One);
+        DrawSetTransform(RectSize * 0.5f, 0, Vector2.One);
 
         if (PlayerPosition.HasValue)
             DrawPoint(new Vector2(PlayerPosition.Value.x, PlayerPosition.Value.z), 1.5f, Colors.Yellow);
@@ -45,6 +38,6 @@ public class ArenaMinimap : HBoxContainer
 
     private void DrawPoint(Vector2 position, float size, Color colour)
     {
-        map.DrawCircle((position / MapRadius) * (map.RectSize / 2), size, colour);
+        DrawCircle((position / MapRadius) * (RectSize / 2), size, colour);
     }
 }

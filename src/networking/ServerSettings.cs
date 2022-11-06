@@ -40,7 +40,8 @@ public class ServerSettings
             case MultiplayerGameState.MicrobialArena:
                 return "[img=245]res://assets/concept_art/cell-gang-clean.jpg[/img]\nStart as a simple microbe, " +
                 "make your way to the top of the food chain or just try to survive your own way.\n\nCompete, " +
-                "cooperate with or even annihilate each other in a confined tidepool \"arena\".";
+                "cooperate with or even annihilate each other to be the dominant species in a confined tidepool " +
+                "arena!";
             default:
                 return TranslationServer.Translate("N_A");
         }

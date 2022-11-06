@@ -246,6 +246,10 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         if (peerId != NetworkManager.DEFAULT_SERVER_ID)
             RpcId(peerId, nameof(SyncSpawnCoordinates), SpawnCoordinates);
+
+        var species = (MicrobeSpecies)MpGameWorld.GetSpecies((uint)peerId);
+        NetworkManager.Instance.SetPlayerInfoFloats(peerId, "base_size", species.BaseHexSize);
+        NotifyScore(peerId);
     }
 
     protected override void OnOwnPlayerSpawned(Microbe player)
@@ -310,6 +314,22 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         ProcessSystem.SetBiome(MpGameWorld.Map.CurrentPatch.Biome);
 
         HUD.UpdateEnvironmentalBars(GameWorld.Map.CurrentPatch!.Biome);
+    }
+
+    /// <summary>
+    ///   Gamemode specific score calculation.
+    ///   Score is calculated from the number of kills + species base hex size.
+    /// </summary>
+    protected override int CalculateScore(int peerId)
+    {
+        var info = NetworkManager.Instance.GetPlayerInfo(peerId);
+        if (info == null)
+            return 0;
+
+        info.Ints.TryGetValue("kills", out int kills);
+        info.Floats.TryGetValue("base_size", out float size);
+
+        return kills + (int)size;
     }
 
     private void HandlePlayersVisibility()
@@ -382,16 +402,17 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         }
     }
 
-    private void OnPlayerKilled(int attackerPeerId, int victimPeerId, string source)
+    private void OnPlayerKilled(int attackerId, int victimId, string source)
     {
-        var attackerInfo = NetworkManager.Instance.GetPlayerInfo(attackerPeerId);
+        var attackerInfo = NetworkManager.Instance.GetPlayerInfo(attackerId);
         if (attackerInfo == null)
             return;
 
         attackerInfo.Ints.TryGetValue("kills", out int kills);
-        NetworkManager.Instance.SetPlayerInfoInts(attackerPeerId, "kills", kills + 1);
+        NetworkManager.Instance.SetPlayerInfoInts(attackerId, "kills", kills + 1);
+        NotifyScore(attackerId);
 
-        Rpc(nameof(NotifyKill), attackerPeerId, victimPeerId, source);
+        Rpc(nameof(NotifyKill), attackerId, victimId, source);
     }
 
     private void OnPlayerReproductionStatusChanged(Microbe player, bool ready)
@@ -434,26 +455,24 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     }
 
     [PuppetSync]
-    private void NotifyKill(int attackerPeerId, int victimPeerId, string source)
+    private void NotifyKill(int attackerId, int victimId, string source)
     {
         HUD.SortScoreBoard();
 
-        if (attackerPeerId != NetworkManager.Instance.PeerId)
-            return;
-
-        var victimName = NetworkManager.Instance.GetPlayerInfo(victimPeerId)!.Name;
+        var attackerName = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(attackerId)!.Name}[/color]";
+        var victimName = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(victimId)!.Name}[/color]";
 
         switch (source)
         {
             case "pilus":
-                HUD.AddKillFeedLog($"Ripped apart [color=yellow]{victimName}[/color]");
+                HUD.AddKillFeedLog($"{attackerName} ripped apart {victimName}");
                 break;
             case "engulf":
-                HUD.AddKillFeedLog($"Engulfed [color=yellow]{victimName}[/color]");
+                HUD.AddKillFeedLog($"{attackerName} engulfed {victimName}");
                 break;
             case "toxin":
             case "oxytoxy":
-                HUD.AddKillFeedLog($"Fatally poisoned [color=yellow]{victimName}[/color]");
+                HUD.AddKillFeedLog($"{attackerName} fatally poisoned {victimName}");
                 break;
         }
     }
@@ -490,6 +509,13 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         // TODO: server-side check to make sure client aren't sending unnaturally edited species
         Rpc(nameof(SyncSpecies), editedSpecies);
+
+        // Get the species's base hex size
+        var deserialized = ThriveJsonConverter.Instance.DeserializeObject<MicrobeSpecies>(editedSpecies);
+        if (deserialized != null)
+            NetworkManager.Instance.SetPlayerInfoFloats(sender, "base_size", deserialized.BaseHexSize);
+
+        NotifyScore(sender);
     }
 
     [Master]

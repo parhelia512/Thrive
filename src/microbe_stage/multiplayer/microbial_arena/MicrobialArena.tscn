@@ -1,7 +1,9 @@
-[gd_scene load_steps=110 format=2]
+[gd_scene load_steps=112 format=2]
 
 [ext_resource path="res://src/microbe_stage/MicrobeCamera.tscn" type="PackedScene" id=1]
-[ext_resource path="res://src/microbe_stage/multiplayer/microbial_arena/ArenaMinimap.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/microbe_stage/multiplayer/microbial_arena/ArenaMap.tscn" type="PackedScene" id=2]
+[ext_resource path="res://src/gui_common/CustomRichTextLabel.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/gui_common/fonts/Lato-Bold-Tiny.tres" type="DynamicFont" id=4]
 [ext_resource path="res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs" type="Script" id=7]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Bigger.tres" type="DynamicFont" id=8]
 [ext_resource path="res://src/gui_common/fonts/Lato-Regular-Small.tres" type="DynamicFont" id=9]
@@ -658,15 +660,15 @@ IngestedMatterBarPath = NodePath("BottomLeft/LeftPanels/CompoundsGroup/Compounds
 WinBoxScene = ExtResource( 69 )
 BindingModeHotkeyPath = NodePath("ScrollContainer/HotBar/BindingMode")
 UnbindAllHotkeyPath = NodePath("ScrollContainer/HotBar/UnbindAll")
-ArenaMinimapPath = NodePath("BottomRight/VBoxContainer/ArenaMinimap")
-KillFeedPath = NodePath("KillFeed")
+ArenaMapPath = NodePath("ArenaMap")
+KillFeedPath = NodePath("BottomRight/VBoxContainer/KillFeed")
 GameTimePath = NodePath("InfoScreen/VBoxContainer/HBoxContainer/ElapsedTime")
 
 [node name="MouseHoverPanel" type="MarginContainer" parent="GUI/MicrobialArenaHUD"]
 anchor_left = 1.0
 anchor_right = 1.0
-anchor_bottom = 1.0
-margin_bottom = -300.0
+margin_left = -260.0
+margin_bottom = 79.0
 grow_horizontal = 0
 mouse_filter = 2
 theme = ExtResource( 10 )
@@ -852,9 +854,6 @@ margin_top = 1.0
 margin_right = 196.0
 margin_bottom = 233.0
 rect_min_size = Vector2( 195, 0 )
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Header" type="MarginContainer" parent="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/EnvironmentGroup/EnvironmentPanel/VBoxContainer"]
 margin_right = 197.0
@@ -1880,6 +1879,9 @@ size_flags_horizontal = 0
 [node name="HUDBottomBar" parent="GUI/MicrobialArenaHUD/BottomLeft" instance=ExtResource( 54 )]
 margin_top = -43.0
 margin_bottom = -8.0
+ChatPressed = true
+ShowPauseButton = false
+ShowChatButton = true
 
 [node name="CompoundsPanelAnimationPlayer" type="AnimationPlayer" parent="GUI/MicrobialArenaHUD"]
 anims/HideCompoundsPanels = SubResource( 31 )
@@ -1911,20 +1913,14 @@ anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -125.0
-margin_top = -352.0
+margin_left = -260.0
+margin_top = -270.0
 margin_right = -10.0
 margin_bottom = -242.0
 grow_horizontal = 0
 grow_vertical = 0
 custom_constants/separation = 8
 alignment = 2
-
-[node name="ArenaMinimap" parent="GUI/MicrobialArenaHUD/BottomRight/VBoxContainer" instance=ExtResource( 2 )]
-margin_top = 0.0
-margin_right = 140.0
-margin_bottom = 110.0
-rect_min_size = Vector2( 140, 0 )
 
 [node name="PopulationData" type="HBoxContainer" parent="GUI/MicrobialArenaHUD/BottomRight/VBoxContainer"]
 visible = false
@@ -1966,6 +1962,29 @@ align = 1
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="KillFeed" type="VBoxContainer" parent="GUI/MicrobialArenaHUD/BottomRight/VBoxContainer"]
+margin_right = 250.0
+grow_vertical = 0
+rect_clip_content = true
+mouse_filter = 2
+theme = ExtResource( 10 )
+__meta__ = {
+"_editor_description_": ""
+}
+
+[node name="Spacer" type="Control" parent="GUI/MicrobialArenaHUD/BottomRight/VBoxContainer"]
+margin_top = 8.0
+margin_right = 250.0
+margin_bottom = 10.0
+rect_min_size = Vector2( 0, 2 )
+
+[node name="MapHint" parent="GUI/MicrobialArenaHUD/BottomRight/VBoxContainer" instance=ExtResource( 3 )]
+margin_top = 18.0
+margin_right = 250.0
+margin_bottom = 38.0
+custom_fonts/normal_font = ExtResource( 4 )
+ExtendedBbcode = "[right]Hold [thrive:input]g_toggle_map[/thrive:input] to show map[/right]"
 
 [node name="DataValue" type="PanelContainer" parent="GUI/MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
@@ -2336,7 +2355,6 @@ margin_bottom = 59.0
 custom_fonts/font = ExtResource( 8 )
 align = 1
 __meta__ = {
-"_edit_use_anchors_": false,
 "_editor_description_": "PLACEHOLDER"
 }
 
@@ -2379,22 +2397,20 @@ __meta__ = {
 margin_top = 29.0
 margin_bottom = 564.0
 
-[node name="KillFeed" type="VBoxContainer" parent="GUI/MicrobialArenaHUD"]
+[node name="ArenaMap" parent="GUI/MicrobialArenaHUD" instance=ExtResource( 2 )]
+visible = false
 anchor_left = 0.5
-anchor_top = 1.0
+anchor_top = 0.5
 anchor_right = 0.5
-anchor_bottom = 1.0
-margin_left = -100.0
-margin_top = -120.0
-margin_right = 100.0
-margin_bottom = -98.0
-grow_vertical = 0
-rect_clip_content = true
-mouse_filter = 2
-theme = ExtResource( 10 )
-__meta__ = {
-"_editor_description_": ""
-}
+anchor_bottom = 0.5
+margin_left = -250.0
+margin_top = -250.0
+margin_right = 250.0
+margin_bottom = 250.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GUI/MicrobialArenaHUD"]
+margin_right = 40.0
+margin_bottom = 40.0
 
 [node name="PatchNameOverlay" parent="GUI" instance=ExtResource( 73 )]
 visible = false
@@ -2437,3 +2453,4 @@ MultiplayerMode = true
 [connection signal="OnClosed" from="GUI/MicrobialArenaHUD/ProcessPanel" to="GUI/MicrobialArenaHUD" method="OnProcessPanelClosed"]
 
 [editable path="GUI/MicrobialArenaHUD/PausePrompt"]
+[editable path="GUI/MicrobialArenaHUD/ArenaMap"]

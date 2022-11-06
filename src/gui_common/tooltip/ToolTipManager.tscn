@@ -1232,7 +1232,7 @@ Description = "SLIME_JET_DESCRIPTION"
 MutationPointCost = 60
 
 [node name="VBoxContainer" parent="GroupHolder/organelleSelection/slimeJet/MarginContainer" index="0"]
-margin_bottom = 223.0
+margin_bottom = 247.0
 
 [node name="storage" type="HBoxContainer" parent="GroupHolder/organelleSelection/slimeJet/MarginContainer/VBoxContainer/ModifierList" index="0"]
 margin_right = 40.0
@@ -4071,6 +4071,17 @@ margin_bottom = 40.0
 [node name="navigationHint" parent="GroupHolder/patchMap" instance=ExtResource( 1 )]
 Description = "PATCH_MAP_NAVIGATION_TOOLTIP"
 DisplayDelay = 0.5
+DescriptionLabelPath = NodePath("MarginContainer/VBoxContainer/Description")
+
+[node name="serverSetup" type="Control" parent="GroupHolder"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="upnp" parent="GroupHolder/serverSetup" instance=ExtResource( 1 )]
+visible = false
+Description = "Automatically forward port to let others join your server seamlessly"
+DisplayDelay = 0.0
+Positioning = 2
 DescriptionLabelPath = NodePath("MarginContainer/VBoxContainer/Description")
 
 [editable path="GroupHolder/editor/rigiditySlider"]

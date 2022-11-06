@@ -51,7 +51,7 @@ margin_bottom = 29.0
 mouse_filter = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer"]
-margin_right = 262.0
+margin_right = 203.0
 margin_bottom = 29.0
 mouse_filter = 2
 size_flags_horizontal = 3
@@ -61,7 +61,7 @@ custom_constants/margin_bottom = -5
 [node name="Name" parent="HBoxContainer/MarginContainer" instance=ExtResource( 4 )]
 margin_left = 10.0
 margin_top = 6.0
-margin_right = 262.0
+margin_right = 203.0
 margin_bottom = 28.0
 mouse_filter = 2
 size_flags_horizontal = 3
@@ -71,6 +71,21 @@ __meta__ = {
 "_editor_description_": "PLACEHOLDER"
 }
 
+[node name="Score" type="Label" parent="HBoxContainer"]
+margin_left = 207.0
+margin_right = 262.0
+margin_bottom = 29.0
+rect_min_size = Vector2( 55, 0 )
+size_flags_vertical = 3
+custom_fonts/font = ExtResource( 6 )
+text = "N_A"
+align = 1
+valign = 1
+clip_text = true
+__meta__ = {
+"_editor_description_": ""
+}
+
 [node name="Kills" type="Label" parent="HBoxContainer"]
 margin_left = 266.0
 margin_right = 321.0
@@ -78,12 +93,12 @@ margin_bottom = 29.0
 rect_min_size = Vector2( 55, 0 )
 size_flags_vertical = 3
 custom_fonts/font = ExtResource( 6 )
-text = "200"
+text = "N_A"
 align = 1
 valign = 1
 clip_text = true
 __meta__ = {
-"_editor_description_": "PLACEHOLDER"
+"_editor_description_": ""
 }
 
 [node name="Deaths" type="Label" parent="HBoxContainer"]
@@ -93,12 +108,12 @@ margin_bottom = 29.0
 rect_min_size = Vector2( 55, 0 )
 size_flags_vertical = 3
 custom_fonts/font = ExtResource( 6 )
-text = "200"
+text = "N_A"
 align = 1
 valign = 1
 clip_text = true
 __meta__ = {
-"_editor_description_": "PLACEHOLDER"
+"_editor_description_": ""
 }
 
 [node name="KickButton" type="Button" parent="HBoxContainer"]

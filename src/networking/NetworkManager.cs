@@ -265,6 +265,14 @@ public class NetworkManager : Node
         Rpc(nameof(SyncPlayerInfoInts), peerId, key, value);
     }
 
+    public void SetPlayerInfoFloats(int peerId, string key, float value)
+    {
+        if (IsClient)
+            return;
+
+        Rpc(nameof(SyncPlayerInfoFloats), peerId, key, value);
+    }
+
     public void StartGame()
     {
         if (IsClient && !GameInSession)
@@ -775,5 +783,19 @@ public class NetworkManager : Node
             return;
 
         info.Ints[key] = value;
+    }
+
+    [PuppetSync]
+    private void SyncPlayerInfoFloats(int peerId, string key, float value)
+    {
+        var sender = GetTree().GetRpcSenderId();
+        if (sender != DEFAULT_SERVER_ID)
+            return;
+
+        var info = GetPlayerInfo(peerId);
+        if (info == null)
+            return;
+
+        info.Floats[key] = value;
     }
 }

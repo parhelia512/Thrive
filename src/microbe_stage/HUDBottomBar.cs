@@ -29,6 +29,7 @@ public class HUDBottomBar : HBoxContainer
     private bool processPanelPressed;
     private bool chatPressed;
 
+    private bool showEnvironmentButton = true;
     private bool showPauseButton = true;
     private bool showChatButton;
 
@@ -78,6 +79,7 @@ public class HUDBottomBar : HBoxContainer
         }
     }
 
+    [Export]
     public bool EnvironmentPressed
     {
         get => environmentPressed;
@@ -98,6 +100,7 @@ public class HUDBottomBar : HBoxContainer
         }
     }
 
+    [Export]
     public bool ChatPressed
     {
         get => chatPressed;
@@ -108,6 +111,18 @@ public class HUDBottomBar : HBoxContainer
         }
     }
 
+    [Export]
+    public bool ShowEnvironmentButton
+    {
+        get => showEnvironmentButton;
+        set
+        {
+            showEnvironmentButton = value;
+            UpdateEnvironmentButton();
+        }
+    }
+
+    [Export]
     public bool ShowPauseButton
     {
         get => showPauseButton;
@@ -118,6 +133,7 @@ public class HUDBottomBar : HBoxContainer
         }
     }
 
+    [Export]
     public bool ShowChatButton
     {
         get => showChatButton;
@@ -140,6 +156,7 @@ public class HUDBottomBar : HBoxContainer
         UpdateCompoundButton();
         UpdateEnvironmentButton();
         UpdateProcessPanelButton();
+        UpdatePauseButton();
         UpdateChatButton();
     }
 
@@ -213,6 +230,7 @@ public class HUDBottomBar : HBoxContainer
         if (environmentButton == null)
             return;
 
+        environmentButton.Visible = ShowEnvironmentButton;
         environmentButton.Pressed = EnvironmentPressed;
     }
 
