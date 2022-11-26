@@ -25,6 +25,10 @@
       {
         "InputName": "g_hold_forward",
         "Name": "AUTO_MOVE_FORWARDS"
+      },
+      {
+        "InputName": "g_microbe_sprint",
+        "Name": "MICROBE_SPEED_BOOST"
       }
     ]
   },

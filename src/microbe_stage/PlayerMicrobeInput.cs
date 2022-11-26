@@ -149,6 +149,18 @@ public class PlayerMicrobeInput : NodeWithInput
         return true;
     }
 
+    [RunOnKeyDown("g_microbe_sprint")]
+    public bool StartSprint()
+    {
+        stage.Player.microbeSprinting = true;
+        return false;
+    }
+    [RunOnKeyUp("g_microbe_sprint")]
+    public void StopSprint()
+    {
+        stage.Player.microbeSprinting = false;
+    }
+
     [RunOnKeyDown("g_pack_commands")]
     public bool ShowSignalingCommandsMenu()
     {

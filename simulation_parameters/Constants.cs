@@ -100,12 +100,20 @@ public static class Constants
     ///   this is applied *per* hex
     /// </remarks>
     public const float BASE_MOVEMENT_ATP_COST = 1.0f;
+    ///<summary>
+    /// How much movement cost is multiplied while sprinting.
+    ///</summary>
+    public const float BASE_SPRINT_ATP_COST_MULTIPLIER = 2.0f;
 
     public const float FLAGELLA_ENERGY_COST = 4.0f;
 
     public const float FLAGELLA_BASE_FORCE = 75.7f;
 
     public const float CELL_BASE_THRUST = 50.6f;
+    ///<summary>
+    /// How much creature movement speed is multiplied while sprinting.
+    ///</summary>
+    public const float SPRINT_BASE_MULTIPLIER = 1.5f;
 
     public const float MICROBE_MOVEMENT_SOUND_EMIT_COOLDOWN = 1.3f;
 

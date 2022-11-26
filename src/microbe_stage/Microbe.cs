@@ -69,6 +69,8 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
     /// </summary>
     private bool slowedBySlime;
 
+    public bool microbeSprinting;
+
     [JsonProperty]
     private int renderPriority = 18;
 
@@ -1076,6 +1078,8 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
     private Vector3 DoBaseMovementForce(float delta)
     {
         var cost = (Constants.BASE_MOVEMENT_ATP_COST * HexCount) * delta;
+            if (microbeSprinting)
+            cost *= Constants.BASE_SPRINT_ATP_COST_MULTIPLIER;
 
         var got = Compounds.TakeCompound(atp, cost);
 
@@ -1095,12 +1099,15 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         // Halve speed if out of ATP
         if (got < cost)
         {
-            // Not enough ATP to move at full speed
+            // Not enough ATP to move at full speed or sprint
             force *= 0.5f;
+            microbeSprinting = false;
         }
 
         if (slowedBySlime)
             force /= Constants.MUCILAGE_IMPEDE_FACTOR;
+        if (microbeSprinting)
+            force *= Constants.SPRINT_BASE_MULTIPLIER;
 
         if (IsPlayerMicrobe && CheatManager.Speed > 1)
             force *= Mass * CheatManager.Speed;
