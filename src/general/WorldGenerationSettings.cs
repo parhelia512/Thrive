@@ -1,10 +1,13 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Globalization;
 using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
 ///   Player configurable options for creating the game world
 /// </summary>
+[JsonObject(IsReference = true)]
 public class WorldGenerationSettings
 {
     [JsonConstructor]
@@ -28,18 +31,31 @@ public class WorldGenerationSettings
     {
         // Default to normal difficulty unless otherwise specified
         Difficulty = SimulationParameters.Instance.GetDifficultyPreset("normal");
+
+        var defaultDayNight = SimulationParameters.Instance.GetDayNightCycleConfiguration();
+
+        HoursPerDay = defaultDayNight.HoursPerDay;
+        DaytimeFraction = defaultDayNight.DaytimeFraction;
     }
 
     public enum LifeOrigin
     {
+        [Description("LIFE_ORIGIN_VENTS")]
         Vent,
+
+        [Description("LIFE_ORIGIN_POND")]
         Pond,
+
+        [Description("LIFE_ORIGIN_PANSPERMIA")]
         Panspermia,
     }
 
     public enum PatchMapType
     {
+        [Description("PATCH_MAP_TYPE_PROCEDURAL")]
         Procedural,
+
+        [Description("PATCH_MAP_TYPE_CLASSIC")]
         Classic,
     }
 
@@ -97,6 +113,22 @@ public class WorldGenerationSettings
     public PatchMapType MapType { get; set; } = PatchMapType.Procedural;
 
     /// <summary>
+    ///   Whether the day/night cycle in this game is enabled
+    /// </summary>
+    public bool DayNightCycleEnabled { get; set; }
+
+    /// <summary>
+    ///   Real-time length of a full day on the planet in seconds
+    /// </summary>
+    public int DayLength { get; set; } = Constants.DEFAULT_DAY_LENGTH;
+
+    /// <inheritdoc cref="DayNightConfiguration.HoursPerDay"/>
+    public float HoursPerDay { get; set; }
+
+    /// <inheritdoc cref="DayNightConfiguration.DaytimeFraction"/>
+    public float DaytimeFraction { get; set; }
+
+    /// <summary>
     ///  Whether the player can enter the Multicellular Stage in this game
     /// </summary>
     public bool IncludeMulticellular { get; set; } = true;
@@ -120,8 +152,56 @@ public class WorldGenerationSettings
             $", Life origin: {Origin}" +
             $", Seed: {Seed}" +
             $", Map type: {MapType}" +
-            $", Include Multicellular: {IncludeMulticellular}" +
+            $", Day/night cycle enabled: {DayNightCycleEnabled}" +
+            $", Day length: {DayLength}" +
+            $", Include multicellular: {IncludeMulticellular}" +
             $", Easter eggs: {EasterEggs}" +
             "]";
+    }
+
+    /// <summary>
+    ///   Generates a formatted string containing translated difficulty details.
+    /// </summary>
+    public string GetTranslatedDifficultyString()
+    {
+        string translatedDifficulty = Difficulty is DifficultyPreset difficulty ?
+            difficulty.Name :
+            TranslationServer.Translate("DIFFICULTY_PRESET_CUSTOM");
+
+        return string.Format(CultureInfo.CurrentCulture, TranslationServer.Translate("DIFFICULTY_DETAILS_STRING"),
+            translatedDifficulty,
+            MPMultiplier,
+            AIMutationMultiplier,
+            CompoundDensity,
+            PlayerDeathPopulationPenalty,
+            TranslationServer.Translate("PERCENTAGE_VALUE").FormatSafe(Math.Round(GlucoseDecay * 100, 1)),
+            OsmoregulationMultiplier,
+            TranslationHelper.TranslateFeatureFlag(FreeGlucoseCloud),
+            TranslationHelper.TranslateFeatureFlag(PassiveGainOfReproductionCompounds),
+            TranslationHelper.TranslateFeatureFlag(LimitReproductionCompoundUseSpeed));
+    }
+
+    /// <summary>
+    ///   Generates a formatted string containing translated planet details.
+    /// </summary>
+    public string GetTranslatedPlanetString()
+    {
+        return string.Format(CultureInfo.CurrentCulture, TranslationServer.Translate("PLANET_DETAILS_STRING"),
+            TranslationServer.Translate(MapType.GetAttribute<DescriptionAttribute>().Description),
+            TranslationHelper.TranslateFeatureFlag(LAWK),
+            TranslationServer.Translate(Origin.GetAttribute<DescriptionAttribute>().Description),
+            TranslationHelper.TranslateFeatureFlag(DayNightCycleEnabled),
+            DayLength,
+            Seed);
+    }
+
+    /// <summary>
+    ///   Generates a formatted string containing translated miscellaneous details.
+    /// </summary>
+    public string GetTranslatedMiscString()
+    {
+        return string.Format(CultureInfo.CurrentCulture, TranslationServer.Translate("WORLD_MISC_DETAILS_STRING"),
+            TranslationHelper.TranslateFeatureFlag(IncludeMulticellular),
+            TranslationHelper.TranslateFeatureFlag(EasterEggs));
     }
 }

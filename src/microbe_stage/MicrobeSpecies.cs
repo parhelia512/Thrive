@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 [TypeConverter(typeof(ThriveTypeConverter))]
 [JSONDynamicTypeAllowed]
 [UseThriveConverter]
+[UseThriveSerializer]
 public class MicrobeSpecies : Species, ICellProperties, IPhotographable
 {
     [JsonConstructor]
@@ -71,6 +72,9 @@ public class MicrobeSpecies : Species, ICellProperties, IPhotographable
     [JsonIgnore]
     public float BaseHexSize => Organelles.Organelles.Sum(organelle => organelle.Definition.HexCount)
         * (IsBacteria ? 0.5f : 1.0f);
+
+    [JsonIgnore]
+    public float StorageCapacity => MicrobeInternalCalculations.CalculateCapacity(Organelles);
 
     [JsonIgnore]
     public string SceneToPhotographPath => "res://src/microbe_stage/Microbe.tscn";
@@ -170,6 +174,17 @@ public class MicrobeSpecies : Species, ICellProperties, IPhotographable
         }
 
         return result;
+    }
+
+    public override string GetDetailString()
+    {
+        return base.GetDetailString() + "\n" +
+            TranslationServer.Translate("MICROBE_SPECIES_DETAIL_TEXT").FormatSafe(
+                MembraneType.Name,
+                MembraneRigidity,
+                BaseSpeed,
+                BaseRotationSpeed,
+                BaseHexSize);
     }
 
     public override int GetVisualHashCode()

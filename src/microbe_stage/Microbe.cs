@@ -354,6 +354,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         }
 
         atp = SimulationParameters.Instance.GetCompound("atp");
+        glucose = SimulationParameters.Instance.GetCompound("glucose");
         mucilage = SimulationParameters.Instance.GetCompound("mucilage");
         lipase = SimulationParameters.Instance.GetEnzyme("lipase");
 
@@ -673,6 +674,8 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         }
 
         HandleHitpointsRegeneration(delta);
+
+        HandleInvulnerabilityDecay(delta);
 
         HandleOsmoregulation(delta);
 

@@ -12,6 +12,12 @@ using Path = System.IO.Path;
 public static class Constants
 {
     /// <summary>
+    ///   Default length in seconds for an in-game day. If this is changed, the placeholder values in
+    ///   NewGameSettings.tscn should also be changed.
+    /// </summary>
+    public const int DEFAULT_DAY_LENGTH = 180;
+
+    /// <summary>
     ///   How long the player stays dead before respawning
     /// </summary>
     public const float PLAYER_RESPAWN_TIME = 5.0f;
@@ -495,6 +501,8 @@ public static class Constants
     /// </summary>
     public const float ENZYME_DIGESTION_EFFICIENCY_MAXIMUM = 0.6f;
 
+    public const float ADDITIONAL_DIGESTIBLE_GLUCOSE_AMOUNT_MULTIPLIER = 0.25f;
+
     public const string LYSOSOME_DEFAULT_ENZYME_NAME = "lipase";
 
     /// <summary>
@@ -505,7 +513,12 @@ public static class Constants
     /// <summary>
     ///   Damage a single pilus stab does
     /// </summary>
-    public const float PILUS_BASE_DAMAGE = 3.0f;
+    public const float PILUS_BASE_DAMAGE = 20.0f;
+
+    /// <summary>
+    ///   How much time (in seconds) a pilus applies invulnerability upon damage.
+    /// </summary>
+    public const float PILUS_INVULNERABLE_TIME = 0.25f;
 
     /// <summary>
     ///   Osmoregulation ATP cost per second per hex
@@ -698,6 +711,10 @@ public static class Constants
     public const float AUTO_EVO_COMPOUND_ENERGY_AMOUNT = 2400;
     public const float AUTO_EVO_CHUNK_ENERGY_AMOUNT = 90000000;
     public const float AUTO_EVO_CHUNK_AMOUNT_NERF = 0.01f;
+
+    public const float AUTO_EVO_MINIMUM_VIABLE_RESERVE_PER_TIME_UNIT = 1.0f;
+    public const float AUTO_EVO_NON_VIABLE_RESERVE_PENALTY = 10;
+
     public const int AUTO_EVO_MINIMUM_SPECIES_SIZE_BEFORE_SPLIT = 80;
     public const bool AUTO_EVO_ALLOW_SPECIES_SPLIT_ON_NO_MUTATION = true;
 
@@ -905,6 +922,7 @@ public static class Constants
     public const string WORKSHOP_DATA_FILE = "user://workshop_data.json";
 
     public const string SAVE_FOLDER = "user://saves";
+    public const string FOSSILISED_SPECIES_FOLDER = "user://fossils";
 
     public const string EXPLICIT_PATH_PREFIX = "file://";
 
@@ -916,6 +934,8 @@ public static class Constants
     public const string LOGS_FOLDER = "user://" + LOGS_FOLDER_NAME;
 
     public const string JSON_DEBUG_OUTPUT_FILE = LOGS_FOLDER + "/json_debug.txt";
+
+    public const string STARTUP_ATTEMPT_INFO_FILE = "user://startup_attempt.json";
 
     public const string LICENSE_FILE = "res://LICENSE.txt";
     public const string STEAM_LICENSE_FILE = "res://doc/steam_license_readme.txt";
@@ -959,6 +979,15 @@ public static class Constants
     public const string SAVE_BACKUP_SUFFIX = ".backup" + SAVE_EXTENSION_WITH_DOT;
 
     public const int SAVE_LIST_SCREENSHOT_HEIGHT = 720;
+    public const int FOSSILISED_PREVIEW_IMAGE_HEIGHT = 400;
+
+    public const string FOSSIL_EXTENSION = "thrivefossil";
+    public const string FOSSIL_EXTENSION_WITH_DOT = "." + FOSSIL_EXTENSION;
+
+    /// <summary>
+    ///   How long the main menu needs to be ready before game startup is considered successful
+    /// </summary>
+    public const float MAIN_MENU_TIME_BEFORE_STARTUP_SUCCESS = 1.25f;
 
     public const int KIBIBYTE = 1024;
     public const int MEBIBYTE = 1024 * KIBIBYTE;
@@ -1028,7 +1057,15 @@ public static class Constants
 
     public const float COLOUR_PICKER_PICK_INTERVAL = 0.2f;
 
+    // TODO: combine to a common module with launcher as these are there as well
     public const string DISABLE_VIDEOS_LAUNCH_OPTION = "--thrive-disable-videos";
+    public const string OPENED_THROUGH_LAUNCHER_OPTION = "--thrive-started-by-launcher";
+    public const string OPENING_LAUNCHER_IS_HIDDEN = "--thrive-launcher-hidden";
+    public const string THRIVE_LAUNCHER_STORE_PREFIX = "--thrive-store=";
+
+    public const string STARTUP_SUCCEEDED_MESSAGE = "------------ Thrive Startup Succeeded ------------";
+    public const string USER_REQUESTED_QUIT = "User requested program exit, Thrive will close shortly";
+    public const string REQUEST_LAUNCHER_OPEN = "------------ SHOWING LAUNCHER REQUESTED ------------";
 
     public const string RUN_AS_SERVER_LAUNCH_OPTION = "--server";
 

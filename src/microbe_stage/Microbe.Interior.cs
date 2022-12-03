@@ -18,6 +18,7 @@ public partial class Microbe
     private readonly Dictionary<Compound, float> requiredCompoundsForBaseReproduction = new();
 
     private Compound atp = null!;
+    private Compound glucose = null!;
     private Compound mucilage = null!;
 
     private Enzyme lipase = null!;
@@ -540,7 +541,7 @@ public partial class Microbe
 
         foreach (var entry in totalCompounds)
         {
-            if (gatheredCompounds.TryGetValue(entry.Key, out var gathered))
+            if (gatheredCompounds.TryGetValue(entry.Key, out var gathered) && entry.Value != 0)
                 totalFraction += gathered / entry.Value;
         }
 
@@ -629,6 +630,7 @@ public partial class Microbe
             }
         }
 
+        CalculateBonusDigestibleGlucose(result);
         return result;
     }
 
@@ -1468,6 +1470,11 @@ public partial class Microbe
             var containedCompounds = engulfable.Compounds;
             var additionalCompounds = engulfedObject.AdditionalEngulfableCompounds;
 
+            // Workaround to avoid NaN compounds in engulfed objects, leading to glitches like infinite compound
+            // ejection and incorrect ingested matter display
+            // https://github.com/Revolutionary-Games/Thrive/issues/3548
+            containedCompounds.FixNaNCompounds();
+
             var totalAmountLeft = 0.0f;
 
             foreach (var compound in compoundTypes.Values)
@@ -1520,10 +1527,12 @@ public partial class Microbe
                 SpawnEjectedCompound(compound, takenAdjusted - added, Vector3.Back);
             }
 
-            if (engulfedObject.InitialTotalEngulfableCompounds.HasValue)
+            var initialTotalEngulfableCompounds = engulfedObject.InitialTotalEngulfableCompounds;
+
+            if (initialTotalEngulfableCompounds.HasValue && initialTotalEngulfableCompounds.Value != 0)
             {
                 engulfable.DigestedAmount = 1 -
-                    (totalAmountLeft / engulfedObject.InitialTotalEngulfableCompounds.Value);
+                    (totalAmountLeft / initialTotalEngulfableCompounds.Value);
             }
 
             if (totalAmountLeft <= 0 || engulfable.DigestedAmount >= Constants.FULLY_DIGESTED_LIMIT)
@@ -1592,6 +1601,13 @@ public partial class Microbe
                 }
             }
         }
+    }
+
+    private void CalculateBonusDigestibleGlucose(Dictionary<Compound, float> result)
+    {
+        result.TryGetValue(glucose, out float existingGlucose);
+        result[glucose] = existingGlucose + Compounds.Capacity *
+            Constants.ADDITIONAL_DIGESTIBLE_GLUCOSE_AMOUNT_MULTIPLIER;
     }
 
     private void HandleSlimeSecretion(float delta)

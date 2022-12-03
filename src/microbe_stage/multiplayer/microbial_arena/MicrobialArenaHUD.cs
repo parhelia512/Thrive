@@ -372,6 +372,11 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         return stage!.Player!.Colony?.UsedIngestionCapacity ?? stage.Player.UsedIngestionCapacity;
     }
 
+    public override void ShowFossilisationButtons()
+    {
+        // TODO: implement this
+    }
+
     public class KillFeedLog : CustomRichTextLabel
     {
         public float OpaqueLifetime = 5.0f;

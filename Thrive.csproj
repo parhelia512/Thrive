@@ -38,6 +38,7 @@
     <Compile Include="src\auto-evo\simulation\food_source\FoodSource.cs" />
     <Compile Include="src\auto-evo\simulation\food_source\HeterotrophicFoodSource.cs" />
     <Compile Include="src\auto-evo\simulation\food_source\EnvironmentalFoodSource.cs" />
+    <Compile Include="src\auto-evo\simulation\food_source\RandomEncounterFoodSource.cs" />
     <Compile Include="src\auto-evo\simulation\SimulationCache.cs" />
     <Compile Include="src\auto-evo\steps\ForceExtinction.cs" />
     <Compile Include="src\auto-evo\steps\IncreaseBiodiversity.cs" />
@@ -73,6 +74,8 @@
     <Compile Include="src\engine\IResource.cs" />
     <Compile Include="src\engine\ITextureResource.cs" />
     <Compile Include="src\engine\ResourceManager.cs" />
+    <Compile Include="src\engine\SafeModeStartupHandler.cs" />
+    <Compile Include="src\engine\StartupAttemptInfo.cs" />
     <Compile Include="src\engine\UnhandledExceptionLogger.cs" />
     <Compile Include="src\engine\DebugOverlays.cs" />
     <Compile Include="src\engine\DebugOverlays.EntityLabel.cs" />
@@ -134,6 +137,7 @@
     <Compile Include="src\general\AssetCategory.cs" />
     <Compile Include="src\general\AssetType.cs" />
     <Compile Include="src\general\CustomDifficulty.cs" />
+    <Compile Include="src\general\DictionaryWithFallback.cs" />
     <Compile Include="src\general\IDifficulty.cs" />
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\CloudBlob.cs" />
     <Compile Include="src\networking\INetPlayer.cs" />
@@ -142,7 +146,9 @@
     <Compile Include="src\networking\MultiplayerStageBase.cs" />
     <Compile Include="src\networking\MultiplayerStageHUDBase.cs" />
     <Compile Include="src\general\PlayerInputBase.cs" />
+    <Compile Include="src\general\MultiCollection.cs" />
     <Compile Include="src\gui_common\art_gallery\TextureThumbnailResource.cs" />
+    <Compile Include="src\gui_common\DismissibleNotice.cs" />
     <Compile Include="src\gui_common\FocusFlowDynamicChildrenHelper.cs" />
     <Compile Include="src\gui_common\PhotographablePreview.cs" />
     <Compile Include="src\microbe_stage\CellHexesPhotoBuilder.cs" />
@@ -153,6 +159,9 @@
     <Compile Include="src\general\BehaviouralValueType.cs" />
     <Compile Include="src\general\BehaviourDictionary.cs" />
     <Compile Include="src\general\ColorUtils.cs" />
+    <Compile Include="src\general\CompoundAmountType.cs" />
+    <Compile Include="src\general\DayNightCycle.cs" />
+    <Compile Include="src\general\DayNightConfiguration.cs" />
     <Compile Include="src\general\EditorComponentBase.cs" />
     <Compile Include="src\general\EditorComponentWithActionsBase.cs" />
     <Compile Include="src\general\EditorUserOverride.cs" />
@@ -208,6 +217,7 @@
     <Compile Include="src\gui_common\CreditsScroll.cs" />
     <Compile Include="src\gui_common\CustomDialog.cs" />
     <Compile Include="src\gui_common\CustomDropDown.cs" />
+    <Compile Include="src\gui_common\CustomExpandingWordWrappedLabel.cs" />
     <Compile Include="src\gui_common\DraggableScrollContainer.cs" />
     <Compile Include="src\gui_common\art_gallery\GalleryViewer.cs" />
     <Compile Include="src\gui_common\dialogs\TutorialDialog.cs" />
@@ -359,7 +369,7 @@
     <Compile Include="src\microbe_stage\editor\OrganellePopupMenu.cs" />
     <Compile Include="src\microbe_stage\editor\PatchMapDrawer.cs" />
     <Compile Include="src\microbe_stage\editor\PatchMapNode.cs" />
-    <Compile Include="src\microbe_stage\EnvironmentalCompoundProperties.cs" />
+    <Compile Include="src\microbe_stage\BiomeCompoundProperties.cs" />
     <Compile Include="src\microbe_stage\FloatingChunk.cs" />
     <Compile Include="src\microbe_stage\IProcessDisplayInfo.cs" />
     <Compile Include="src\microbe_stage\Membrane.cs" />
@@ -452,9 +462,13 @@
     <Compile Include="src\auto-evo\AutoEvo.cs" />
     <Compile Include="src\auto-evo\AutoEvoConfiguration.cs" />
     <Compile Include="src\auto-evo\AutoEvoRun.cs" />
+    <Compile Include="src\auto-evo\records\GenerationRecord.cs" />
     <Compile Include="src\auto-evo\IRunStep.cs" />
     <Compile Include="src\auto-evo\RunResults.cs" />
     <Compile Include="src\auto-evo\RunParameters.cs" />
+    <Compile Include="src\auto-evo\records\SpeciesRecord.cs" />
+    <Compile Include="src\auto-evo\records\SpeciesRecordFull.cs" />
+    <Compile Include="src\auto-evo\records\SpeciesRecordLite.cs" />
     <Compile Include="src\auto-evo\steps\LambdaStep.cs" />
     <Compile Include="src\auto-evo\steps\FindBestMutation.cs" />
     <Compile Include="src\auto-evo\steps\FindBestMigration.cs" />
@@ -542,6 +556,7 @@
     <Compile Include="src\saving\serializers\SystemVector4ArrayConverter.cs" />
     <Compile Include="src\saving\serializers\ThriveJsonConverter.cs" />
     <Compile Include="src\saving\serializers\ThriveTypeConverter.cs" />
+    <Compile Include="src\saving\TarHelper.cs" />
     <Compile Include="src\saving\TemporaryLoadedNodeDeleter.cs" />
     <Compile Include="src\general\VersionUtils.cs" />
     <Compile Include="src\steam\ISteamClient.cs" />
@@ -552,6 +567,18 @@
     <Compile Include="src\steam\WorkshopItemData.cs" />
     <Compile Include="src\steam\WorkshopItemState.cs" />
     <Compile Include="src\steam\WorkshopResult.cs" />
+    <Compile Include="src\thriveopedia\Thriveopedia.cs" />
+    <Compile Include="src\thriveopedia\ThriveopediaPage.cs" />
+    <Compile Include="src\thriveopedia\pages\ThriveopediaHomePage.cs" />
+    <Compile Include="src\thriveopedia\pages\ThriveopediaCurrentWorldPage.cs" />
+    <Compile Include="src\thriveopedia\pages\ThriveopediaMuseumPage.cs" />
+    <Compile Include="src\thriveopedia\pages\ThriveopediaEvolutionaryTreePage.cs" />
+    <Compile Include="src\thriveopedia\pages\ThriveopediaPatchMapPage.cs" />
+    <Compile Include="src\thriveopedia\fossilisation\FossilisedSpecies.cs" />
+    <Compile Include="src\thriveopedia\fossilisation\FossilisedSpeciesInformation.cs" />
+    <Compile Include="src\thriveopedia\fossilisation\FossilisationButton.cs" />
+    <Compile Include="src\thriveopedia\fossilisation\FossilisationDialog.cs" />
+    <Compile Include="src\thriveopedia\fossilisation\MuseumCard.cs" />
     <Compile Include="src\tutorial\early_multicellular_stage\EarlyMulticellularWelcome.cs" />
     <Compile Include="src\tutorial\ITutorialGUI.cs" />
     <Compile Include="src\tutorial\ITutorialInput.cs" />
@@ -603,11 +630,11 @@
     <PackageReference Include="SharpZipLib">
       <Version>1.3.3</Version>
     </PackageReference>
-    <PackageReference Include="Nito.Collections.Deque">
-      <Version>1.1.1</Version>
-    </PackageReference>
     <PackageReference Include="StyleCop.Analyzers">
       <Version>1.2.0-beta.435</Version>
+    </PackageReference>
+    <PackageReference Include="Nito.Collections.Deque">
+      <Version>1.1.1</Version>
     </PackageReference>
     <PackageReference Include="Lib.Harmony">
       <Version>2.2.2</Version>

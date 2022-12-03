@@ -57,6 +57,9 @@ public class HUDBottomBar : HBoxContainer
     public delegate void OnHelpPressed();
 
     [Signal]
+    public delegate void OnStatisticsPressed();
+
+    [Signal]
     public delegate void OnChatPressed(bool opened);
 
     public bool Paused
@@ -203,6 +206,12 @@ public class HUDBottomBar : HBoxContainer
     {
         GUICommon.Instance.PlayButtonPressSound();
         EmitSignal(nameof(OnHelpPressed));
+    }
+
+    private void StatisticsButtonPressed()
+    {
+        // No need to play a sound as changing Thriveopedia page does it anyway
+        EmitSignal(nameof(OnStatisticsPressed));
     }
 
     private void PausePressed(bool paused)

@@ -54,8 +54,7 @@ public class MicrobialArenaEditor : MultiplayerEditorBase<EditorAction, Microbia
 
     public void OnCurrentPatchUpdated(Patch patch)
     {
-        cellEditorTab.CalculateOrganelleEffectivenessInPatch(patch);
-        cellEditorTab.UpdatePatchDependentBalanceData();
+        cellEditorTab.OnCurrentPatchUpdated(patch);
         cellEditorTab.UpdateBackgroundImage(patch.BiomeTemplate);
     }
 

@@ -80,6 +80,18 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
     private int? mutationPointsCache;
 
     /// <summary>
+    ///   The light level the editor is previewing things at
+    /// </summary>
+    /// <remarks>
+    ///   <para>
+    ///     This is saved but there's a slight bug that the selected light level gets reset anyway when loading a save
+    ///     made in the editor
+    ///   </para>
+    /// </remarks>
+    [JsonProperty]
+    private float lightLevel = 1.0f;
+
+    /// <summary>
     ///   Base Node where all dynamically created world Nodes in the editor should go. Optionally grouped under
     ///   a one more level of parent nodes so that different editor components can have their things visible at
     ///   different times
@@ -135,6 +147,18 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
     public bool IsLoadedFromSave { get; set; }
 
     public bool NodeReferencesResolved { get; private set; }
+
+    [JsonIgnore]
+    public float LightLevel
+    {
+        get => lightLevel;
+        set
+        {
+            lightLevel = value;
+
+            ApplyComponentLightLevels();
+        }
+    }
 
     [JsonProperty]
     public bool Ready
@@ -603,6 +627,8 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
             throw new Exception($"Editor setup which was just ran didn't setup {nameof(EditedBaseSpecies)}");
 
         pauseMenu.SetNewSaveNameFromSpeciesName();
+
+        ApplyComponentLightLevels();
     }
 
     /// <summary>
@@ -664,7 +690,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
     protected void ExitPressed()
     {
         GUICommon.Instance.PlayButtonPressSound();
-        GetTree().Quit();
+        SceneManager.Instance.QuitThrive();
     }
 
     protected IEditorComponent? GetActiveEditorComponent()
@@ -805,6 +831,9 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
         GD.Print("Applying auto-evo results. Auto-evo run took: ", run.RunDuration);
         run.ApplyAllResultsAndEffects(FreeBuilding);
 
+        // Add the current generation to history before resetting Auto-Evo
+        CurrentGame.GameWorld.AddCurrentGenerationToHistory();
+
         // Clear the run to make the cell stage start a new run when we go back there
         CurrentGame.GameWorld.ResetAutoEvoRun();
     }
@@ -829,5 +858,13 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
         OnMutationPointsChanged();
 
         return mutationPointsCache.Value;
+    }
+
+    private void ApplyComponentLightLevels()
+    {
+        foreach (var editorComponent in GetAllEditorComponents())
+        {
+            editorComponent.OnLightLevelChanged(lightLevel);
+        }
     }
 }
