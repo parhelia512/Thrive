@@ -37,7 +37,7 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
     {
         base.Init(containedInStage);
 
-        chatBoxAnimationPlayer.Play("Open");
+        ChatButtonPressed(true);
     }
 
     public void ToggleInfoScreen()

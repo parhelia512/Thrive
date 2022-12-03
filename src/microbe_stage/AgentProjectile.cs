@@ -100,7 +100,7 @@ public class AgentProjectile : RigidBody, ITimedLife, INetEntity
         return vars;
     }
 
-    public void OnReplicated(Dictionary<string, string>? data)
+    public void OnReplicated(Dictionary<string, string>? data, GameProperties currentGame)
     {
         if (data == null)
             return;

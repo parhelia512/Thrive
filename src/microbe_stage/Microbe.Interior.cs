@@ -757,9 +757,6 @@ public partial class Microbe
     /// </remarks>
     private void HandleReproduction(float delta)
     {
-        if (NetworkManager.Instance.IsClient)
-            return;
-
         // Dead or engulfed cells can't reproduce
         if (Dead || PhagocytosisStep != PhagocytosisPhase.None)
             return;
@@ -1008,7 +1005,8 @@ public partial class Microbe
                 left = 0;
             }
 
-            requiredCompoundsForBaseReproduction[key] = left;
+            if (!NetworkManager.Instance.IsClient)
+                requiredCompoundsForBaseReproduction[key] = left;
 
             // As we don't make duplicate lists, we can only process a single type per call
             // So we can't know here if we are fully ready
@@ -1098,9 +1096,6 @@ public partial class Microbe
     /// </summary>
     private void ReadyToReproduce()
     {
-        if (NetworkManager.Instance.IsClient)
-            return;
-
         if (IsPlayerMicrobe)
         {
             // The player doesn't split automatically
@@ -1110,6 +1105,9 @@ public partial class Microbe
         }
         else
         {
+            if (NetworkManager.Instance.IsClient)
+                return;
+
             // Skip reproducing if we would go too much over the entity limit
             if (!spawnSystem!.IsUnderEntityLimitForReproducing())
             {

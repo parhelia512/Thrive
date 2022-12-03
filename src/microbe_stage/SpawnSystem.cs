@@ -366,6 +366,17 @@ public class SpawnSystem : ISpawnSystem
     }
 
     /// <summary>
+    ///   Add the entity to the spawned group and add the despawn radius
+    /// </summary>
+    protected virtual void ProcessSpawnedEntity(ISpawned entity, Spawner spawnType)
+    {
+        float radius = spawnType.SpawnRadius + Constants.DESPAWN_RADIUS_OFFSET;
+        entity.DespawnRadiusSquared = (int)(radius * radius);
+
+        entity.EntityNode.AddToGroup(Constants.SPAWNED_GROUP);
+    }
+
+    /// <summary>
     ///   Handles all spawning for this section of the play area, as it will look when the player enters. Does NOT
     ///   handle recording that the sector was spawned.
     /// </summary>
@@ -464,17 +475,6 @@ public class SpawnSystem : ISpawnSystem
             debugOverlay.ReportDespawns(entitiesDeleted);
 
         return spawnedEntityWeight - entitiesDeleted;
-    }
-
-    /// <summary>
-    ///   Add the entity to the spawned group and add the despawn radius
-    /// </summary>
-    private void ProcessSpawnedEntity(ISpawned entity, Spawner spawnType)
-    {
-        float radius = spawnType.SpawnRadius + Constants.DESPAWN_RADIUS_OFFSET;
-        entity.DespawnRadiusSquared = (int)(radius * radius);
-
-        entity.EntityNode.AddToGroup(Constants.SPAWNED_GROUP);
     }
 
     /// <summary>

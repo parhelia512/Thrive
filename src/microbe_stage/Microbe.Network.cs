@@ -57,6 +57,9 @@ public partial class Microbe
         var parsedCompounds = JsonConvert.DeserializeObject<Dictionary<string, float>>(
             data[nameof(Compounds.Compounds)]);
 
+        var parsedRequiredCompoundsForBaseReproduction = JsonConvert.DeserializeObject<Dictionary<string, float>>(
+            data[nameof(requiredCompoundsForBaseReproduction)]);
+
         Rotation = rotation;
         networkTweener?.InterpolateProperty(this, "global_translation", null, position, 0.1f);
         networkTweener?.Start();
@@ -76,6 +79,12 @@ public partial class Microbe
         {
             var compound = SimulationParameters.Instance.GetCompound(entry.Key);
             Compounds.Compounds[compound] = entry.Value;
+        }
+
+        foreach (var entry in parsedRequiredCompoundsForBaseReproduction!)
+        {
+            var compound = SimulationParameters.Instance.GetCompound(entry.Key);
+            requiredCompoundsForBaseReproduction[compound] = entry.Value;
         }
 
         if (Enum.TryParse(data[nameof(State)], out MicrobeState parsedMicrobeState))
@@ -152,6 +161,10 @@ public partial class Microbe
                 nameof(Compounds.Compounds), JsonConvert.SerializeObject(
                     Compounds.Compounds.ToDictionary(c => c.Key.InternalName, c => c.Value))
             },
+            {
+                nameof(requiredCompoundsForBaseReproduction), JsonConvert.SerializeObject(
+                    requiredCompoundsForBaseReproduction.ToDictionary(c => c.Key.InternalName, c => c.Value))
+            },
             { nameof(Hitpoints), Hitpoints.ToString(CultureInfo.CurrentCulture) },
             { nameof(Dead), Dead.ToString(CultureInfo.CurrentCulture) },
             { nameof(State), State.ToString() },
@@ -171,9 +184,22 @@ public partial class Microbe
         var vars = new Dictionary<string, string>
         {
             { nameof(PeerId), PeerId.ToString() },
-            { nameof(CurrentGame), ThriveJsonConverter.Instance.SerializeObject(CurrentGame) },
             { nameof(Species), ThriveJsonConverter.Instance.SerializeObject(Species) },
         };
+
+        if (organelles != null)
+        {
+            foreach (var organelle in organelles)
+            {
+                vars.Add($"organelle_def_{organelle.Name}", organelle.Definition.InternalName);
+                vars.Add($"organelle_hex_{organelle.Name}", ThriveJsonConverter.Instance.SerializeObject(
+                    organelle.Position));
+                vars.Add($"organelle_orientation_{organelle.Name}", organelle.Orientation.ToString(
+                    CultureInfo.CurrentCulture));
+                vars.Add($"organelle_compounds_{organelle.Name}", JsonConvert.SerializeObject(
+                    organelle.CompoundsLeft.ToDictionary(c => c.Key.InternalName, c => c.Value)));
+            }
+        }
 
         return vars;
     }
@@ -193,19 +219,75 @@ public partial class Microbe
         return vars;
     }
 
-    public void OnReplicated(Dictionary<string, string>? data)
+    public void OnReplicated(Dictionary<string, string>? data, GameProperties currentGame)
     {
         if (data == null)
             return;
 
-        var currentGame = ThriveJsonConverter.Instance.DeserializeObject<GameProperties>(data[nameof(CurrentGame)]);
-        var species = ThriveJsonConverter.Instance.DeserializeObject<MicrobeSpecies>(data[nameof(Species)]);
+        AddToGroup(Constants.AI_TAG_MICROBE);
+        AddToGroup(Constants.PROCESS_GROUP);
+        AddToGroup(Constants.RUNNABLE_MICROBE_GROUP);
 
-        if (currentGame != null && int.TryParse(data[nameof(PeerId)], out int peerId))
+        if (int.TryParse(data[nameof(PeerId)], out int peerId))
             Init(null!, null!, currentGame, true, peerId);
 
-        if (species != null)
-            ApplySpecies(species);
+        if (data.TryGetValue(nameof(Species), out string serializedSpecies))
+        {
+            var species = ThriveJsonConverter.Instance.DeserializeObject<MicrobeSpecies>(serializedSpecies);
+
+            if (species != null)
+            {
+                var world = (MultiplayerGameWorld)currentGame.GameWorld;
+                world.UpdateSpecies(species.ID, species);
+                ApplySpecies(species);
+            }
+        }
+
+        var organellesNodeName = data
+            .Where(o => o.Key.StartsWith("organelle_def_", true, CultureInfo.CurrentCulture))
+            .Select(o => o.Key.Split("_")[2]);
+
+        organelles?.Clear();
+
+        foreach (var name in organellesNodeName)
+        {
+            if (!data.TryGetValue($"organelle_def_{name}", out string definition))
+                continue;
+
+            if (!data.TryGetValue($"organelle_hex_{name}", out string position))
+                continue;
+
+            if (!data.TryGetValue($"organelle_orientation_{name}", out string orientation))
+                continue;
+
+            if (!data.TryGetValue($"organelle_compounds_{name}", out string compoundsLeft))
+                continue;
+
+            if (!int.TryParse(orientation, out int orientationResult))
+                continue;
+
+            var deserializedPos = ThriveJsonConverter.Instance.DeserializeObject<Hex>(position);
+            var deserializedCompounds = JsonConvert.DeserializeObject<Dictionary<string, float>>(compoundsLeft);
+
+            if (deserializedCompounds != null)
+            {
+                var organelle = SimulationParameters.Instance.GetOrganelleType(definition);
+                var parsedCompounds = deserializedCompounds.ToDictionary(
+                    c => SimulationParameters.Instance.GetCompound(c.Key), c => c.Value);
+
+                var replicatedOrganelle = new PlacedOrganelle(organelle, deserializedPos, orientationResult);
+
+                if (organelles != null)
+                {
+                    organelles.Add(replicatedOrganelle);
+                    replicatedOrganelle.ForceSetCompoundsLeft(parsedCompounds);
+                }
+                else
+                {
+                    replicatedOrganelle.DetachAndQueueFree();
+                }
+            }
+        }
     }
 
     private void SetupNetworking()

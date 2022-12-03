@@ -161,9 +161,9 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         map.Visible = !map.Visible;
     }
 
-    public void AddKillFeedLog(string content)
+    public void AddKillFeedLog(string content, bool highlight)
     {
-        var log = new KillFeedLog(content);
+        var log = new KillFeedLog(content, highlight);
         killFeedLogs.Add(log);
         killFeed.AddChild(log);
     }
@@ -377,10 +377,16 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         public float OpaqueLifetime = 5.0f;
         public float Alpha = 1.0f;
 
-        public KillFeedLog(string content)
+        public KillFeedLog(string content, bool highlight)
         {
-            ExtendedBbcode = $"[right]{content}[/right]";
+            ExtendedBbcode = $"[center]{content}[/center]";
             FitContentHeight = true;
+
+            if (highlight)
+            {
+                var stylebox = new StyleBoxFlat { BgColor = new Color(0, 0.44f, 0.53f, 0.5f) };
+                AddStyleboxOverride("normal", stylebox);
+            }
         }
     }
 }

@@ -135,6 +135,7 @@
     <Compile Include="src\general\AssetType.cs" />
     <Compile Include="src\general\CustomDifficulty.cs" />
     <Compile Include="src\general\IDifficulty.cs" />
+    <Compile Include="src\microbe_stage\multiplayer\microbial_arena\CloudBlob.cs" />
     <Compile Include="src\networking\INetPlayer.cs" />
     <Compile Include="src\networking\MultiplayerEditorBase.cs" />
     <Compile Include="src\networking\MultiplayerGameWorld.cs" />

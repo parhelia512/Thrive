@@ -96,6 +96,9 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
     }
 
     [JsonIgnore]
+    public IReadOnlyDictionary<Compound, float> CompoundsLeft => compoundsLeft;
+
+    [JsonIgnore]
     public float DissolveEffectValue
     {
         get => dissolveEffectValue;
@@ -381,6 +384,12 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
 
             ApplyScale();
         }
+    }
+
+    public void ForceSetCompoundsLeft(Dictionary<Compound, float> newValues)
+    {
+        compoundsLeft = newValues;
+        ApplyScale();
     }
 
     /// <summary>

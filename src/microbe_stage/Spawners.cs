@@ -206,38 +206,28 @@ public static class SpawnHelpers
         clouds.AddCloud(compound, amount, location + new Vector3(0, 0, 0));
     }
 
-    public static void SpawnCloudBlob(CompoundCloudSystem clouds, Vector3 location,
-        float radius, Compound compound, float amount, Random random)
+    public static CloudBlob SpawnCloudBlob(CompoundCloudSystem clouds, Vector3 location,
+        float radius, Compound compound, float amount, Node worldNode, PackedScene cloudBlobScene, Random random)
     {
-        int resolution = Settings.Instance.CloudResolution;
-
         // Randomise the cloud radius a bit
         radius *= random.Next(0.5f, 1);
 
         // Randomise amount of compound in the cloud a bit
         amount *= random.Next(0.5f, 1);
 
-        // Circle drawing algorithm taken from https://www.redblobgames.com/grids/circle-drawing/
+        var blob = cloudBlobScene.Instance<CloudBlob>();
+        blob.Init(compound, location, radius, amount);
 
-        var center = new Int2((int)location.x, (int)location.z);
+        worldNode.AddChild(blob);
 
-        var top = Mathf.CeilToInt(center.y - radius);
-        var bottom = Mathf.FloorToInt(center.y + radius);
-        var left = Mathf.CeilToInt(center.x - radius);
-        var right = Mathf.FloorToInt(center.x + radius);
+        OnNetEntitySpawned?.Invoke(blob);
 
-        for (int y = top; y <= bottom; ++y)
-        {
-            for (int x = left; x <= right; ++x)
-            {
-                var dx = center.x - x;
-                var dy = center.y - y;
-                var distanceSqr = dx * dx + dy * dy;
+        return blob;
+    }
 
-                if (distanceSqr <= radius * radius)
-                    clouds.AddCloud(compound, amount, new Vector3(x + resolution, 0, y + resolution));
-            }
-        }
+    public static PackedScene LoadCloudBlobScene()
+    {
+        return GD.Load<PackedScene>("res://src/microbe_stage/multiplayer/microbial_arena/CloudBlob.tscn");
     }
 
     /// <summary>
@@ -416,10 +406,8 @@ public class CompoundCloudBlobSpawner : CompoundCloudSpawner
 
     public override IEnumerable<ISpawned>? Spawn(Node worldNode, Vector3 location, ISpawnSystem spawnSystem)
     {
-        SpawnHelpers.SpawnCloudBlob(clouds, location, radius, compound, amount, random);
-
-        // We don't spawn entities
-        return null;
+        yield return SpawnHelpers.SpawnCloudBlob(
+            clouds, location, radius, compound, amount, worldNode, SpawnHelpers.LoadCloudBlobScene(), random);
     }
 
     public override string ToString()

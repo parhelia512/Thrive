@@ -174,11 +174,11 @@ margin_right = 833.0
 margin_bottom = 36.0
 custom_constants/margin_right = 5
 custom_constants/margin_top = 5
-custom_constants/margin_left = 20
+custom_constants/margin_left = 5
 custom_constants/margin_bottom = 5
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Lobby/PanelContainer/MarginContainer"]
-margin_left = 20.0
+margin_left = 5.0
 margin_top = 5.0
 margin_right = 827.0
 margin_bottom = 30.0

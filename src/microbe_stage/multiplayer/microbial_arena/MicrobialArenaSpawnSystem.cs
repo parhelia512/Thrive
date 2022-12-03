@@ -16,6 +16,7 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
     private CompoundCloudSystem clouds;
 
     private List<SpawnSpot> spawnSpots = new();
+    private List<CloudBlob> cloudBlobs = new();
 
     private float spawnAreaRadius;
 
@@ -32,7 +33,7 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
         this.spawnAreaRadius = radius;
     }
 
-    public Action<List<Vector2>>? OnSpawnCoordinatesChanged;
+    public Action<List<Vector2>>? OnSpawnCoordinatesChanged { get; set; }
 
     public override void Init()
     {
@@ -94,6 +95,22 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
 
             GenerateSpawnSpots();
             UpdateSpawnSpots(delta, ref spawnsLeftThisFrame);
+            UpdateCloudBlobs();
+        }
+    }
+
+    protected override void ProcessSpawnedEntity(ISpawned entity, Spawner spawnType)
+    {
+        base.ProcessSpawnedEntity(entity, spawnType);
+
+        if (entity is CloudBlob blob)
+        {
+            cloudBlobs.Add(blob);
+
+            foreach (var cell in blob.Content)
+            {
+                clouds.AddCloud(blob.Compound, cell.Amount, new Vector3(cell.Position.x, 0, cell.Position.y));
+            }
         }
     }
 
@@ -106,6 +123,27 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
         }
 
         spawnSpots.RemoveAll(s => s.TimeUntilRemoval <= 0);
+    }
+
+    private void UpdateCloudBlobs()
+    {
+        foreach (var blob in cloudBlobs)
+        {
+            foreach (var cell in blob.Content)
+            {
+                var available = new Dictionary<Compound, float>();
+                clouds.GetAllAvailableAt(new Vector3(cell.Position.x, 0, cell.Position.y), available);
+
+                available.TryGetValue(blob.Compound, out float amount);
+                cell.Amount = amount;
+            }
+        }
+
+        cloudBlobs.Where(c => c.Empty).ToList().ForEach(blob =>
+        {
+            blob.DestroyDetachAndQueueFree();
+            cloudBlobs.Remove(blob);
+        });
     }
 
     private void SpawnInSpot(SpawnSpot spot, ref float spawnsLeftThisFrame)

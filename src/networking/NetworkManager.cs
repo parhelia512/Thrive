@@ -120,6 +120,8 @@ public class NetworkManager : Node
         GetTree().Connect("connection_failed", this, nameof(OnConnectionFailed));
 
         Connect(nameof(UPNPCallResultReceived), this, nameof(OnUPNPCallResultReceived));
+
+        ProcessPriority = 100;
     }
 
     public override void _Process(float delta)

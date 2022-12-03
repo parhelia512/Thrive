@@ -29,6 +29,11 @@ public interface INetEntity : IEntity
     public void OnNetworkSync(Dictionary<string, string> data);
 
     /// <summary>
+    ///   Called client-side when this entity is replicated.
+    /// </summary>
+    public void OnReplicated(Dictionary<string, string>? data, GameProperties currentGame);
+
+    /// <summary>
     ///   A naive implementation for marshaling entity states to be sent across network.
     /// </summary>
     /// <remarks>
@@ -43,6 +48,4 @@ public interface INetEntity : IEntity
     ///   TODO: can this possibly be optimized to be far more efficient?
     /// </remarks>
     public Dictionary<string, string>? PackReplicableVars();
-
-    public void OnReplicated(Dictionary<string, string>? data);
 }
