@@ -506,7 +506,7 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
     private void OnCloudAdded(Compound compound, float density, Vector3 worldPosition)
     {
         // Sync to peers
-        foreach (var player in NetworkManager.Instance.PlayerList)
+        foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
             if (player.Key == NetworkManager.DEFAULT_SERVER_ID || player.Value.Status != NetPlayerStatus.Active)
                 continue;
@@ -518,7 +518,7 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
     private void OnCompoundTaken(Compound compound, Vector3 worldPosition, float fraction)
     {
         // Sync to peers
-        foreach (var player in NetworkManager.Instance.PlayerList)
+        foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
             if (player.Key == NetworkManager.DEFAULT_SERVER_ID || player.Value.Status != NetPlayerStatus.Active)
                 continue;

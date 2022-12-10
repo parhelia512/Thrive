@@ -147,6 +147,8 @@ public partial class Microbe
 
     public Dictionary<string, string>? PackStates()
     {
+        // TODO: Optimize.
+
         var states = new Dictionary<string, string>
         {
             { nameof(randomSeed), randomSeed.ToString(CultureInfo.CurrentCulture) },
@@ -318,7 +320,7 @@ public partial class Microbe
         var tag = tagBox.GetChild<Label3D>(0);
 
         tagBox.Visible = true;
-        tag.Text = NetworkManager.Instance.PlayerList[PeerId.Value].Name;
+        tag.Text = NetworkManager.Instance.ConnectedPlayers[PeerId.Value].Name;
 
         tagBoxMesh.Size = tag.Font.GetStringSize(tag.Text) * tag.PixelSize * 1.2f;
         tagBoxMaterial.RenderPriority = RenderPriority + 1;

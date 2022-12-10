@@ -34,6 +34,7 @@ public class SimulationParameters : Node
     private DayNightConfiguration lightCycle = null!;
     private Dictionary<string, DifficultyPreset> difficultyPresets = null!;
     private BuildInfo? buildInfo;
+    private Dictionary<string, MultiplayerGameMode> multiplayerGameModes = null!;
 
     // These are for mutations to be able to randomly pick items in a weighted manner
     private List<OrganelleDefinition> prokaryoticOrganelles = null!;
@@ -109,6 +110,9 @@ public class SimulationParameters : Node
 
         difficultyPresets =
             LoadRegistry<DifficultyPreset>("res://simulation_parameters/common/difficulty_presets.json");
+
+        multiplayerGameModes =
+            LoadRegistry<MultiplayerGameMode>("res://simulation_parameters/common/multiplayer_gamemodes.json");
 
         PatchMapNameGenerator = LoadDirectObject<PatchMapNameGenerator>(
             "res://simulation_parameters/microbe_stage/patch_syllables.json");
@@ -188,6 +192,11 @@ public class SimulationParameters : Node
     public Biome GetBiome(string name)
     {
         return biomes[name];
+    }
+
+    public IEnumerable<Biome> GetAllBiomes()
+    {
+        return biomes.Values;
     }
 
     public BioProcess GetBioProcess(string name)
@@ -348,6 +357,21 @@ public class SimulationParameters : Node
         return PatchMapNameGenerator;
     }
 
+    public MultiplayerGameMode GetMultiplayerGameMode(string name)
+    {
+        return multiplayerGameModes[name];
+    }
+
+    public MultiplayerGameMode GetMultiplayerGameModeByIndex(int index)
+    {
+        return multiplayerGameModes.Values.First(p => p.Index == index);
+    }
+
+    public IEnumerable<MultiplayerGameMode> GetAllMultiplayerGameMode()
+    {
+        return multiplayerGameModes.Values;
+    }
+
     public BuildInfo? GetBuildInfoIfExists()
     {
         return buildInfo;
@@ -370,6 +394,7 @@ public class SimulationParameters : Node
         ApplyRegistryObjectTranslations(inputGroups);
         ApplyRegistryObjectTranslations(gallery);
         ApplyRegistryObjectTranslations(difficultyPresets);
+        ApplyRegistryObjectTranslations(multiplayerGameModes);
     }
 
     private static void CheckRegistryType<T>(Dictionary<string, T> registry)
@@ -492,6 +517,7 @@ public class SimulationParameters : Node
         CheckRegistryType(inputGroups);
         CheckRegistryType(gallery);
         CheckRegistryType(difficultyPresets);
+        CheckRegistryType(multiplayerGameModes);
 
         NameGenerator.Check(string.Empty);
         PatchMapNameGenerator.Check(string.Empty);

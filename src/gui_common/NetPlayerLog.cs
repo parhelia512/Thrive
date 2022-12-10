@@ -8,6 +8,15 @@ public class NetPlayerLog : PanelContainer
     public NodePath NamePath = null!;
 
     [Export]
+    public NodePath ScorePath = null!;
+
+    [Export]
+    public NodePath KillsPath = null!;
+
+    [Export]
+    public NodePath DeathsPath = null!;
+
+    [Export]
     public NodePath KickButtonPath = null!;
 
     [Export]
@@ -60,13 +69,12 @@ public class NetPlayerLog : PanelContainer
     public override void _Ready()
     {
         nameLabel = GetNode<CustomRichTextLabel>(NamePath);
+        scoreLabel = GetNode<Label>(ScorePath);
+        killsLabel = GetNode<Label>(KillsPath);
+        deathsLabel = GetNode<Label>(DeathsPath);
         kickButton = GetNode<Button>(KickButtonPath);
         cross = GetNode<TextureRect>(CrossPath);
         spacer = GetNode<Control>(SpacerPath);
-
-        scoreLabel = GetNode<Label>("HBoxContainer/Score");
-        killsLabel = GetNode<Label>("HBoxContainer/Kills");
-        deathsLabel = GetNode<Label>("HBoxContainer/Deaths");
 
         NetworkManager.Instance.Connect(
             nameof(NetworkManager.PlayerStatusChanged), this, nameof(OnPlayerStatusChanged));
@@ -103,13 +111,13 @@ public class NetPlayerLog : PanelContainer
         if (ID == NetworkManager.DEFAULT_SERVER_ID)
         {
             builder.Append(' ');
-            builder.Append("[color=#fe82ff][host][/color]");
+            builder.Append($"[color=#fe82ff][{TranslationServer.Translate("HOST_LOWERCASE")}][/color]");
         }
 
         var network = NetworkManager.Instance;
 
         var player = network.GetPlayerInfo(ID);
-        if (player != null && player.Status != network.PlayerInfo?.Status)
+        if (player != null && player.Status != network.LocalPlayer?.Status)
         {
             builder.Append(' ');
             builder.Append($"[{player.GetStatusReadable()}]");

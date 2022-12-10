@@ -60,7 +60,7 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
         stage.Player.WantsToEngulf = !stage.Player.WantsToEngulf;
     }
 
-    [RunOnKeyChange("g_toggle_scoreboard")]
+    [RunOnKeyToggle("g_toggle_scoreboard")]
     public void ShowInfoScreen(bool heldDown)
     {
         stage?.HUD.ToggleInfoScreen();
@@ -70,12 +70,6 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
     public void ShowMap(bool heldDown)
     {
         stage?.HUD.ToggleMap();
-    }
-
-    [RunOnKeyDown("g_focus_chat")]
-    public void FocusChat()
-    {
-        stage?.HUD.FocusChat();
     }
 
     [RunOnKey("g_cheat_glucose")]

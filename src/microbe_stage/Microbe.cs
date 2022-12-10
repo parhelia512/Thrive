@@ -337,8 +337,11 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
 
     public override void _Ready()
     {
-        if (cloudSystem == null && !IsForPreviewOnly && !NetworkManager.Instance.Connected)
+        if (cloudSystem == null && !IsForPreviewOnly && NetworkManager.Instance.Status !=
+            NetworkedMultiplayerPeer.ConnectionStatus.Connected)
+        {
             throw new InvalidOperationException("Microbe not initialized");
+        }
 
         if (onReadyCalled)
             return;

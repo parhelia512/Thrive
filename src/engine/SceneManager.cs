@@ -131,19 +131,6 @@ public class SceneManager : Node
         }
     }
 
-    public PackedScene LoadScene(MultiplayerGameState state)
-    {
-        switch (state)
-        {
-            case MultiplayerGameState.MicrobialArena:
-                return LoadScene("res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn");
-            case MultiplayerGameState.MicrobialArenaEditor:
-                return LoadScene("res://src/microbe_stage/multiplayer/microbial_arena/editor/MicrobialArenaEditor.tscn");
-            default:
-                throw new ArgumentException("unknown scene path for given multiplayer game mode");
-        }
-    }
-
     public PackedScene LoadScene(string scenePath)
     {
         return GD.Load<PackedScene>(scenePath);

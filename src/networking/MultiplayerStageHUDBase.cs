@@ -16,8 +16,8 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
     protected AnimationPlayer chatBoxAnimationPlayer = null!;
 
     protected ChatBox chatBox = null!;
-    protected CenterContainer infoScreen = null!;
-    protected ScoreBoard scoreBoard = null!;
+    protected Control infoScreen = null!;
+    protected NetPlayerList scoreBoard = null!;
 
     // The values of the following variable is the opposite of the expected value.
     // I.e. its value is true when its respective panel is collapsed.
@@ -29,8 +29,8 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
 
         chatBoxAnimationPlayer = GetNode<AnimationPlayer>(ChatBoxAnimationPlayerPath);
         chatBox = GetNode<ChatBox>(ChatBoxPath);
-        infoScreen = GetNode<CenterContainer>(InfoScreenPath);
-        scoreBoard = GetNode<ScoreBoard>(ScoreBoardPath);
+        infoScreen = GetNode<Control>(InfoScreenPath);
+        scoreBoard = GetNode<NetPlayerList>(ScoreBoardPath);
     }
 
     public override void Init(TStage containedInStage)
@@ -40,7 +40,7 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
         ChatButtonPressed(true);
     }
 
-    public void ToggleInfoScreen()
+    public virtual void ToggleInfoScreen()
     {
         infoScreen.Visible = !infoScreen.Visible;
     }
@@ -50,11 +50,15 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
         scoreBoard.SortHighestScoreFirst();
     }
 
-    public void FocusChat()
+    public NetPlayerLog GetFirstOnTheScoreBoard()
+    {
+        return scoreBoard.GetFirst();
+    }
+
+    public void OnChatFocused()
     {
         bottomLeftBar.ChatPressed = true;
         ChatButtonPressed(true);
-        chatBox.Focus();
     }
 
     private void ChatButtonPressed(bool wantedState)

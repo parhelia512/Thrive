@@ -13,16 +13,38 @@ public class ChatBox : VBoxContainer
     [Export]
     public NodePath SendButtonPath = null!;
 
+    protected LineEdit lineEdit = null!;
+
     private CustomRichTextLabel chatDisplay = null!;
-    private LineEdit lineEdit = null!;
     private Button sendButton = null!;
 
     private Deque<string> chatHistory = new();
 
     private bool controlsHoveredOver;
 
+    [Signal]
+    public delegate void Focused();
+
+    [Export]
+    public int ChatHistoryRange { get; set; } = 50;
+
     [Export]
     public bool ReleaseLineEditFocusAfterMessageSent { get; set; } = true;
+
+    [Export]
+    public bool CaptureFocusWhenInvisible { get; set; } = true;
+
+    public override void _EnterTree()
+    {
+        InputManager.RegisterReceiver(this);
+        base._EnterTree();
+    }
+
+    public override void _ExitTree()
+    {
+        InputManager.UnregisterReceiver(this);
+        base._ExitTree();
+    }
 
     public override void _Ready()
     {
@@ -41,9 +63,38 @@ public class ChatBox : VBoxContainer
         DisplayChat();
     }
 
-    public void Focus()
+    [RunOnKeyDown("g_focus_chat")]
+    public bool Focus()
     {
+        if (!CaptureFocusWhenInvisible && !Visible)
+            return false;
+
         lineEdit.GrabFocus();
+        return true;
+    }
+
+    protected virtual void OnFocusEntered()
+    {
+        EmitSignal(nameof(Focused));
+    }
+
+    protected virtual void OnMessageEntered(string message)
+    {
+        if (string.IsNullOrEmpty(message))
+            return;
+
+        ParseChat(message);
+        lineEdit.Text = string.Empty;
+
+        if (ReleaseLineEditFocusAfterMessageSent)
+            lineEdit.ReleaseFocus();
+
+        OnMessageChanged(lineEdit.Text);
+    }
+
+    protected virtual void OnMessageChanged(string newText)
+    {
+        sendButton.Disabled = string.IsNullOrEmpty(newText);
     }
 
     private void DisplayChat()
@@ -83,30 +134,11 @@ public class ChatBox : VBoxContainer
 
     private void OnMessageReceived(string message)
     {
-        if (chatHistory.Count > Constants.CHAT_HISTORY_RANGE)
+        if (chatHistory.Count > ChatHistoryRange)
             chatHistory.RemoveFromFront();
 
         chatHistory.AddToBack(message);
         DisplayChat();
-    }
-
-    private void OnMessageEntered(string message)
-    {
-        if (string.IsNullOrEmpty(message))
-            return;
-
-        ParseChat(message);
-        lineEdit.Text = string.Empty;
-
-        if (ReleaseLineEditFocusAfterMessageSent)
-            lineEdit.ReleaseFocus();
-
-        OnMessageChanged(lineEdit.Text);
-    }
-
-    private void OnMessageChanged(string newText)
-    {
-        sendButton.Disabled = string.IsNullOrEmpty(newText);
     }
 
     private void OnSendPressed()

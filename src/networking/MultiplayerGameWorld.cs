@@ -1,13 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
-[JsonObject(IsReference = true)]
-[JSONAlwaysDynamicType]
-[UseThriveSerializer]
 public class MultiplayerGameWorld : GameWorld
 {
-    [JsonIgnore]
     private readonly Dictionary<uint, EntityReference<INetEntity>> entities = new();
 
     private readonly List<uint> entityIds = new();
@@ -31,7 +26,6 @@ public class MultiplayerGameWorld : GameWorld
         Map.UpdateGlobalPopulations();
     }
 
-    [JsonConstructor]
     public MultiplayerGameWorld() : base()
     {
     }
@@ -39,7 +33,6 @@ public class MultiplayerGameWorld : GameWorld
     /// <summary>
     ///   Dictionary of players that has joined the game.
     /// </summary>
-    [JsonIgnore]
     public Dictionary<int, NetPlayerState> Players { get; } = new();
 
     public IReadOnlyDictionary<uint, EntityReference<INetEntity>> Entities => entities;

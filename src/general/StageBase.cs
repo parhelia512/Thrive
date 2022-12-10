@@ -60,8 +60,6 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
 
     private bool transitionFinished;
 
-    public event EventHandler? GameReady;
-
     /// <summary>
     ///   The main current game object holding various details
     /// </summary>
@@ -376,6 +374,12 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
         SpawnPlayer();
     }
 
+    public virtual bool IsGameOver()
+    {
+        return GameWorld.Map.GetSpeciesGlobalGameplayPopulation(CurrentGame!.GameWorld.PlayerSpecies) <= 0 &&
+            !CurrentGame.FreeBuild;
+    }
+
     /// <summary>
     ///   Prepares the stage for playing. Also begins a new game if one hasn't been started yet for easier debugging.
     /// </summary>
@@ -462,12 +466,6 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
         SpawnPlayer();
     }
 
-    protected bool IsGameOver()
-    {
-        return GameWorld.Map.GetSpeciesGlobalGameplayPopulation(CurrentGame!.GameWorld.PlayerSpecies) <= 0 &&
-            !CurrentGame.FreeBuild;
-    }
-
     /// <summary>
     ///   Base class handling of the player dying
     /// </summary>
@@ -530,11 +528,6 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
         playerExtinctInCurrentPatch = true;
 
         BaseHUD.ShowPatchExtinctionBox();
-    }
-
-    protected void NotifyGameReady()
-    {
-        GameReady?.Invoke(this, EventArgs.Empty);
     }
 
     private void PatchExtinctionResolved()

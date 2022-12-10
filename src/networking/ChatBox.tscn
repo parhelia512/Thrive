@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=7 format=2]
 
 [ext_resource path="res://src/networking/ChatBox.cs" type="Script" id=1]
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=2]
@@ -6,18 +6,6 @@
 [ext_resource path="res://src/gui_common/fonts/Lato-Regular-AlmostTiny.tres" type="DynamicFont" id=5]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Tiny.tres" type="DynamicFont" id=6]
 [ext_resource path="res://src/gui_common/fonts/Lato-Bold-AlmostTiny.tres" type="DynamicFont" id=7]
-
-[sub_resource type="StyleBoxFlat" id=1]
-bg_color = Color( 0, 0, 0, 1 )
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color( 1, 1, 1, 1 )
-corner_radius_top_left = 5
-corner_radius_top_right = 5
-corner_radius_bottom_right = 5
-corner_radius_bottom_left = 5
 
 [node name="ChatBox" type="VBoxContainer"]
 anchor_top = 1.0
@@ -29,7 +17,7 @@ theme = ExtResource( 2 )
 custom_constants/separation = 0
 script = ExtResource( 1 )
 MessagesPath = NodePath("PanelContainer/MarginContainer/Messages")
-LineEditPath = NodePath("HBoxContainer/LineEdit")
+LineEditPath = NodePath("HBoxContainer/HBoxContainer/LineEdit")
 SendButtonPath = NodePath("HBoxContainer/Send")
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
@@ -64,12 +52,22 @@ margin_right = 100.0
 margin_bottom = 42.0
 custom_constants/separation = 0
 
-[node name="LineEdit" type="LineEdit" parent="HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer"]
+margin_right = 58.0
+margin_bottom = 30.0
+size_flags_horizontal = 3
+
+[node name="ChatInputPrefix" type="Label" parent="HBoxContainer/HBoxContainer"]
+visible = false
+margin_top = 7.0
+margin_bottom = 23.0
+custom_fonts/font = ExtResource( 5 )
+
+[node name="LineEdit" type="LineEdit" parent="HBoxContainer/HBoxContainer"]
 margin_right = 58.0
 margin_bottom = 30.0
 size_flags_horizontal = 3
 custom_fonts/font = ExtResource( 5 )
-custom_styles/focus = SubResource( 1 )
 placeholder_text = "Chat..."
 caret_blink = true
 
@@ -81,8 +79,9 @@ custom_fonts/font = ExtResource( 6 )
 text = "SEND"
 expand_icon = true
 
-[connection signal="mouse_entered" from="HBoxContainer/LineEdit" to="." method="OnControlMouseEntered"]
-[connection signal="mouse_exited" from="HBoxContainer/LineEdit" to="." method="OnControlMouseExited"]
-[connection signal="text_changed" from="HBoxContainer/LineEdit" to="." method="OnMessageChanged"]
-[connection signal="text_entered" from="HBoxContainer/LineEdit" to="." method="OnMessageEntered"]
+[connection signal="focus_entered" from="HBoxContainer/HBoxContainer/LineEdit" to="." method="OnFocusEntered"]
+[connection signal="mouse_entered" from="HBoxContainer/HBoxContainer/LineEdit" to="." method="OnControlMouseEntered"]
+[connection signal="mouse_exited" from="HBoxContainer/HBoxContainer/LineEdit" to="." method="OnControlMouseExited"]
+[connection signal="text_changed" from="HBoxContainer/HBoxContainer/LineEdit" to="." method="OnMessageChanged"]
+[connection signal="text_entered" from="HBoxContainer/HBoxContainer/LineEdit" to="." method="OnMessageEntered"]
 [connection signal="pressed" from="HBoxContainer/Send" to="." method="OnSendPressed"]

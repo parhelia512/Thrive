@@ -1,11 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
 using Godot;
-using Newtonsoft.Json;
 
 public class MultiplayerGUI : CenterContainer
 {
@@ -34,13 +31,7 @@ public class MultiplayerGUI : CenterContainer
     public NodePath ServerAttributesPath = null!;
 
     [Export]
-    public NodePath PeerCountPath = null!;
-
-    [Export]
     public NodePath StartButtonPath = null!;
-
-    [Export]
-    public NodePath KickDialogPath = null!;
 
     [Export]
     public NodePath KickedDialogPath = null!;
@@ -66,11 +57,9 @@ public class MultiplayerGUI : CenterContainer
     private CustomConfirmationDialog loadingDialog = null!;
     private Button connectButton = null!;
     private Button createServerButton = null!;
-    private VBoxContainer list = null!;
+    private NetPlayerList list = null!;
     private ServerSetup serverSetup = null!;
-    private Label peerCount = null!;
     private Button startButton = null!;
-    private KickPlayerDialog kickDialog = null!;
     private CustomConfirmationDialog kickedDialog = null!;
     private Label serverName = null!;
     private Label serverAttributes = null!;
@@ -83,8 +72,6 @@ public class MultiplayerGUI : CenterContainer
 
     private Submenu currentMenu = Submenu.Main;
 
-    private Dictionary<int, NetPlayerLog> playerLabels = new();
-
     private string loadingDialogTitle = string.Empty;
     private string loadingDialogText = string.Empty;
 
@@ -92,6 +79,7 @@ public class MultiplayerGUI : CenterContainer
     private int ellipsisAnimationStep;
 
     private ConnectionJob currentJobStatus = ConnectionJob.None;
+    private NetworkManager.RegistrationResult registrationResult;
 
     [Signal]
     public delegate void OnClosed();
@@ -130,10 +118,8 @@ public class MultiplayerGUI : CenterContainer
         portBox = GetNode<LineEdit>(PortBoxPath);
         connectButton = GetNode<Button>(ConnectButtonPath);
         createServerButton = GetNode<Button>(CreateServerButtonPath);
-        list = GetNode<VBoxContainer>(LobbyPlayerListPath);
-        peerCount = GetNode<Label>(PeerCountPath);
+        list = GetNode<NetPlayerList>(LobbyPlayerListPath);
         startButton = GetNode<Button>(StartButtonPath);
-        kickDialog = GetNode<KickPlayerDialog>(KickDialogPath);
         kickedDialog = GetNode<CustomConfirmationDialog>(KickedDialogPath);
         serverName = GetNode<Label>(ServerNamePath);
         serverAttributes = GetNode<Label>(ServerAttributesPath);
@@ -150,7 +136,7 @@ public class MultiplayerGUI : CenterContainer
         GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
 
         NetworkManager.Instance.Connect(
-            nameof(NetworkManager.RegistrationToServerResultReceived), this, nameof(OnRegisteredToServer));
+            nameof(NetworkManager.RegistrationResultReceived), this, nameof(OnServerRegistrationReceived));
         NetworkManager.Instance.Connect(nameof(NetworkManager.ConnectionFailed), this, nameof(OnConnectionFailed));
         NetworkManager.Instance.Connect(nameof(NetworkManager.ServerStateUpdated), this, nameof(UpdateLobby));
         NetworkManager.Instance.Connect(nameof(NetworkManager.Kicked), this, nameof(OnKicked));
@@ -174,49 +160,39 @@ public class MultiplayerGUI : CenterContainer
         var builder = new StringBuilder(100);
         builder.Append(" - ");
         builder.Append(network.GameInSession ?
-            $" [in progress] [{network.FormattedGameTimeHumanized}]" : " [pending]");
+            $" [{TranslationServer.Translate("IN_PROGRESS_LOWERCASE")}] [{network.GameTimeHumanized}]"
+            :
+            $" [{TranslationServer.Translate("PENDING_LOWERCASE")}]");
 
         serverAttributes.Text = builder.ToString();
     }
 
     public void ShowKickedDialog(string reason)
     {
-        kickedDialog.DialogText = "You have been kicked. Reason for kick: " + (string.IsNullOrEmpty(reason) ? "unspecified" : reason);
+        kickedDialog.DialogText = string.Format(
+            CultureInfo.CurrentCulture, TranslationServer.Translate("MULTIPLAYER_PLAYER_IS_KICKED"),
+            string.IsNullOrEmpty(reason) ? TranslationServer.Translate("UNSPECIFIED_LOWERCASE") : reason);
         kickedDialog.PopupCenteredShrink();
     }
 
     private void UpdateLobby()
     {
         var network = NetworkManager.Instance;
-        if (!network.Connected)
+        if (network.Status != NetworkedMultiplayerPeer.ConnectionStatus.Connected)
             return;
 
-        list.QueueFreeChildren();
-        playerLabels.Clear();
+        list.RefreshPlayers();
+        list.SortHighestScoreFirst();
 
-        foreach (var peer in network.PlayerList)
-            CreatePlayerLabel(peer.Key, peer.Value.Name);
-
-        peerCount.Text = $"{network.PlayerList.Count} / {network.Settings?.MaxPlayers}";
         serverName.Text = network.Settings?.Name;
 
-        gameModeTitle.Text = network.Settings?.GetGameModeReadable();
-        gameModeDescription.ExtendedBbcode = network.Settings?.GetGameModeDescription();
+        gameModeTitle.Text = network.Settings?.SelectedGameMode!.Name;
+        gameModeDescription.ExtendedBbcode = network.Settings?.SelectedGameMode!.Description;
+
+        foreach (var player in network.ConnectedPlayers)
+            UpdateReadyStatus(player.Key, player.Value.ReadyForSession);
 
         UpdateStartButton();
-    }
-
-    private void CreatePlayerLabel(int peerId, string name)
-    {
-        var label = NetworkedPlayerLabelScene.Instance<NetPlayerLog>();
-        label.ID = peerId;
-        label.PlayerName = name;
-        label.Highlight = NetworkManager.Instance.GetPlayerInfo(peerId)!.ReadyForSession;
-
-        label.Connect(nameof(NetPlayerLog.KickRequested), this, nameof(OnKickButtonPressed));
-
-        list.AddChild(label);
-        playerLabels.Add(peerId, label);
     }
 
     private void ResetFields()
@@ -237,7 +213,7 @@ public class MultiplayerGUI : CenterContainer
         if (NetworkManager.Instance.IsAuthoritative)
         {
             startButton.Text = TranslationServer.Translate("START");
-            startButton.Disabled = network.PlayerList.Any(
+            startButton.Disabled = network.ConnectedPlayers.Any(
                 p => p.Key != NetworkManager.DEFAULT_SERVER_ID && !p.Value.ReadyForSession);
             startButton.ToggleMode = false;
         }
@@ -249,17 +225,20 @@ public class MultiplayerGUI : CenterContainer
             startButton.Disabled = false;
             startButton.ToggleMode = !network.GameInSession;
 
-            if (network.PlayerInfo != null)
-                startButton.SetPressedNoSignal(network.PlayerInfo.ReadyForSession);
+            if (network.LocalPlayer != null)
+                startButton.SetPressedNoSignal(network.LocalPlayer.ReadyForSession);
         }
     }
 
     private void UpdateReadyStatus(int peerId, bool ready)
     {
-        if (playerLabels.TryGetValue(peerId, out NetPlayerLog list))
-            list.Highlight = ready;
+        var log = list.GetPlayer(peerId);
 
-        UpdateStartButton();
+        if (log != null)
+        {
+            log.Highlight = ready;
+            UpdateStartButton();
+        }
     }
 
     private void ShowGeneralDialog(string title, string text)
@@ -279,7 +258,7 @@ public class MultiplayerGUI : CenterContainer
 
     private void UpdateLoadingDialog(float delta)
     {
-        // 1 whitespace and 3 trailing dots loading animation (  . .. ...)
+        // One whitespace and three trailing dots loading animation (  . .. ...)
         ellipsisAnimationTimer += delta;
         if (ellipsisAnimationTimer >= 1.0f)
         {
@@ -290,7 +269,7 @@ public class MultiplayerGUI : CenterContainer
         loadingDialog.WindowTitle = loadingDialogTitle;
         loadingDialog.DialogText = loadingDialogText + ellipsisAnimationSequence[ellipsisAnimationStep];
 
-        if (GetTree().NetworkPeer.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connecting)
+        if (NetworkManager.Instance.Status == NetworkedMultiplayerPeer.ConnectionStatus.Connecting)
         {
             loadingDialog.WindowTitle += " (" + Mathf.RoundToInt(NetworkManager.Instance.TimePassedConnecting) + "s)";
         }
@@ -327,7 +306,8 @@ public class MultiplayerGUI : CenterContainer
         GUICommon.Instance.PlayButtonPressSound();
 
         ShowLoadingDialog(
-            TranslationServer.Translate("CONNECTING"), "Establishing connection to " + addressBox.Text + ":" + portBox.Text);
+            TranslationServer.Translate("CONNECTING"), string.Format(CultureInfo.CurrentCulture,
+            TranslationServer.Translate("ESTABLISHING_CONNECTION_TO"), addressBox.Text, portBox.Text));
 
         ReadNameAndPort(out string name, out int port);
 
@@ -336,7 +316,8 @@ public class MultiplayerGUI : CenterContainer
         {
             loadingDialog.Hide();
             ShowGeneralDialog(
-                TranslationServer.Translate("CONNECTION_FAILED"), "Failed to establish connection: " + error);
+                TranslationServer.Translate("CONNECTION_FAILED"), string.Format(CultureInfo.CurrentCulture,
+                TranslationServer.Translate("FAILED_TO_ESTABLISH_CONNECTION"), error));
             return;
         }
 
@@ -358,13 +339,13 @@ public class MultiplayerGUI : CenterContainer
 
         try
         {
-            parsedData = JsonSerializer.Create()
-                    .Deserialize<ServerSettings>(new JsonTextReader(new StringReader(data))) ??
+            parsedData = ThriveJsonConverter.Instance.DeserializeObject<ServerSettings>(data) ??
                 throw new Exception("deserialized value is null");
         }
         catch (Exception e)
         {
-            ShowGeneralDialog(TranslationServer.Translate("HOSTING_FAILED"), "Failed to create server: " + e);
+            ShowGeneralDialog(TranslationServer.Translate("HOSTING_FAILED"), string.Format(
+                CultureInfo.CurrentCulture, TranslationServer.Translate("FAILED_TO_CREATE_SERVER"), e));
             GD.PrintErr("Can't setup server due to parse failure on data: ", e);
             return;
         }
@@ -375,14 +356,16 @@ public class MultiplayerGUI : CenterContainer
         if (error != Error.Ok)
         {
             loadingDialog.Hide();
-            ShowGeneralDialog(TranslationServer.Translate("HOSTING_FAILED"), "Failed to create server: " + error);
+            ShowGeneralDialog(TranslationServer.Translate("HOSTING_FAILED"), string.Format(
+                CultureInfo.CurrentCulture, TranslationServer.Translate("FAILED_TO_CREATE_SERVER"), error));
             return;
         }
 
         if (parsedData.UseUPNP)
         {
             ShowLoadingDialog(
-                TranslationServer.Translate("UPNP_SETUP"), "[UPnP] Discovering devices", false);
+                TranslationServer.Translate("UPNP_SETUP"),
+                TranslationServer.Translate("UPNP_DISCOVERING_DEVICES"), false);
 
             currentJobStatus = ConnectionJob.SettingUpUPNP;
         }
@@ -422,23 +405,20 @@ public class MultiplayerGUI : CenterContainer
         currentJobStatus = ConnectionJob.None;
     }
 
-    private void OnRegisteredToServer(int peerId, NetworkManager.RegistrationToServerResult result)
+    private void OnServerRegistrationReceived(int peerId, NetworkManager.RegistrationResult result)
     {
         if (peerId != NetworkManager.Instance.PeerId || currentJobStatus == ConnectionJob.Hosting)
             return;
 
         loadingDialog.Hide();
 
-        if (result == NetworkManager.RegistrationToServerResult.ServerFull)
-        {
-            ShowGeneralDialog(TranslationServer.Translate("SERVER_FULL"), $"Server is full " +
-                $"{NetworkManager.Instance.PlayerList.Count}/{NetworkManager.Instance.Settings?.MaxPlayers}");
+        registrationResult = result;
+        currentJobStatus = ConnectionJob.None;
+
+        if (result != NetworkManager.RegistrationResult.Success)
             return;
-        }
 
         CurrentMenu = Submenu.Lobby;
-
-        currentJobStatus = ConnectionJob.None;
 
         NetworkManager.Instance.Print(
             "Connection to ", addressBox.Text, ":", portBox.Text, " succeeded," +
@@ -453,7 +433,8 @@ public class MultiplayerGUI : CenterContainer
         loadingDialog.Hide();
 
         ShowGeneralDialog(
-            TranslationServer.Translate("CONNECTION_FAILED"), "Failed to establish connection: " + reason);
+            TranslationServer.Translate("CONNECTION_FAILED"), string.Format(CultureInfo.CurrentCulture,
+            TranslationServer.Translate("FAILED_TO_ESTABLISH_CONNECTION"), reason));
 
         currentJobStatus = ConnectionJob.None;
 
@@ -465,15 +446,25 @@ public class MultiplayerGUI : CenterContainer
     {
         chatBox.ClearMessages();
 
-        ShowGeneralDialog(
-            TranslationServer.Translate("SERVER_DISCONNECTED"), "Connection was closed by the remote host");
+        loadingDialog.Hide();
+
+        switch (registrationResult)
+        {
+            case NetworkManager.RegistrationResult.ServerFull:
+                ShowGeneralDialog(
+                    TranslationServer.Translate("SERVER_DISCONNECTED"), TranslationServer.Translate("SERVER_IS_FULL"));
+                return;
+            case NetworkManager.RegistrationResult.DuplicateName:
+                ShowGeneralDialog(TranslationServer.Translate("SERVER_DISCONNECTED"),
+                    TranslationServer.Translate("NAME_IS_ALREADY_TAKEN"));
+                return;
+            default:
+                ShowGeneralDialog(TranslationServer.Translate("SERVER_DISCONNECTED"),
+                    TranslationServer.Translate("CLOSED_BY_REMOTE_HOST"));
+                break;
+        }
 
         CurrentMenu = Submenu.Main;
-    }
-
-    private void OnKickButtonPressed(int peerId)
-    {
-        kickDialog.RequestKick(peerId);
     }
 
     private void OnKicked(string reason)
@@ -503,8 +494,9 @@ public class MultiplayerGUI : CenterContainer
                 {
                     loadingDialog.Hide();
 
-                    ShowGeneralDialog(TranslationServer.Translate("UPNP_SETUP"),
-                        "[UPnP] An error occurred while setting up: " + result.ToString());
+                    ShowGeneralDialog(TranslationServer.Translate("UPNP_SETUP"), string.Format(
+                        CultureInfo.CurrentCulture, TranslationServer.Translate("UPNP_ERROR_WHILE_SETTING_UP"),
+                        result.ToString()));
 
                     currentJobStatus = ConnectionJob.None;
 
@@ -512,8 +504,9 @@ public class MultiplayerGUI : CenterContainer
                 }
                 else
                 {
-                    ShowLoadingDialog(TranslationServer.Translate("PORT_FORWARDING"),
-                        "[UPnP] Attempting to forward port (" + portBox.Text + ")", false);
+                    ShowLoadingDialog(TranslationServer.Translate("PORT_FORWARDING"), string.Format(
+                        CultureInfo.CurrentCulture, TranslationServer.Translate("UPNP_ATTEMPTING_TO_FORWARD_PORT"),
+                        portBox.Text), false);
 
                     currentJobStatus = ConnectionJob.PortForwarding;
                 }
@@ -527,8 +520,9 @@ public class MultiplayerGUI : CenterContainer
 
                 if (result != UPNP.UPNPResult.Success)
                 {
-                    ShowGeneralDialog(TranslationServer.Translate("PORT_FORWARDING"),
-                        "[UPnP] Attempting to forward port failed: " + result.ToString());
+                    ShowGeneralDialog(TranslationServer.Translate("PORT_FORWARDING"), string.Format(
+                        CultureInfo.CurrentCulture,
+                        TranslationServer.Translate("UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED"), result.ToString()));
                 }
 
                 currentJobStatus = ConnectionJob.None;

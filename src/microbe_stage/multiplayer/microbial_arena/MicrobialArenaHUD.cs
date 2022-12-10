@@ -27,6 +27,9 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     [Export]
     public NodePath GameTimePath = null!;
 
+    [Export]
+    public NodePath InfoScreenChatBoxPath = null!;
+
     private ActionButton bindingModeHotkey = null!;
     private ActionButton unbindAllHotkey = null!;
 
@@ -37,6 +40,7 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     private ArenaMap map = null!;
     private VBoxContainer killFeed = null!;
     private Label gameTime = null!;
+    private ChatBoxUndecorated infoScreenChatBox = null!;
 
     /// <summary>
     ///   If not null the signaling agent radial menu is open for the given microbe, which should be the player
@@ -69,6 +73,7 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         map = GetNode<ArenaMap>(ArenaMapPath);
         killFeed = GetNode<VBoxContainer>(KillFeedPath);
         gameTime = GetNode<Label>(GameTimePath);
+        infoScreenChatBox = GetNode<ChatBoxUndecorated>(InfoScreenChatBoxPath);
     }
 
     public override void _Process(float delta)
@@ -166,6 +171,19 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         var log = new KillFeedLog(content, highlight);
         killFeedLogs.Add(log);
         killFeed.AddChild(log);
+    }
+
+    public override void ToggleInfoScreen()
+    {
+        if (stage!.IsGameOver())
+        {
+            Visible = false;
+            infoScreen.Visible = infoScreenChatBox.Visible = true;
+            return;
+        }
+
+        base.ToggleInfoScreen();
+        Visible = !infoScreen.Visible;
     }
 
     protected override void ReadPlayerHitpoints(out float hp, out float maxHP)
@@ -344,12 +362,14 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
 
     private void UpdateGameTime()
     {
-        gameTime.Text = NetworkManager.Instance.FormattedGameTime;
+        gameTime.Text = stage!.IsGameOver() ? TranslationServer.Translate("GAME_OVER")
+            :
+            NetworkManager.Instance.GameTime;
     }
 
     private void UpdateMinimap()
     {
-        map.MapRadius = stage!.ArenaRadius;
+        map.MapRadius = stage!.Settings.ArenaRadius;
         map.SpawnCoordinates = stage.SpawnCoordinates;
 
         if (stage.Player?.IsInsideTree() == true)

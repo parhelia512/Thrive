@@ -1119,7 +1119,6 @@ public static class Constants
     public const int MULTIPLAYER_DEFAULT_TIMEOUT_LIMIT_SECONDS = 32;
 
     public const float MICROBIAL_ARENA_CLOUD_SPAWN_AMOUNT_SCALE_FACTOR = 0.003f;
-    public const int CHAT_HISTORY_RANGE = 50;
 
     /// <summary>
     ///   The duration for which a save is considered recently performed.

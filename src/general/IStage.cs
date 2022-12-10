@@ -6,8 +6,6 @@ using Newtonsoft.Json;
 /// </summary>
 public interface IStage : IReturnableGameState
 {
-    public event EventHandler? GameReady;
-
     [JsonIgnore]
     public bool HasPlayer { get; }
 

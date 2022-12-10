@@ -132,7 +132,7 @@ public class MultiplayerEditorBase<TAction, TStage> : EditorBase<TAction, TStage
 
     protected override GameProperties StartNewGameForEditor()
     {
-        return GameProperties.StartNewMicrobialArenaGame();
+        return GameProperties.StartNewMicrobialArenaGame(SimulationParameters.Instance.GetBiome("tidepool"));
     }
 
     protected override void UpdateHistoryCallbackTargets(ActionHistory<TAction> actionHistory)

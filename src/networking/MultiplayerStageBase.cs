@@ -18,13 +18,15 @@ using Newtonsoft.Json;
 ///     to make singleplayer to multiplayer seamless.
 ///   </para>
 /// </remarks>
-public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
+public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMultiplayerStage
     where TPlayer : class, INetPlayer
 {
     public NetPlayerState PlayerState => GetPlayerState(NetworkManager.Instance.PeerId!.Value) ??
         throw new NullReferenceException("Player has not been set");
 
     public MultiplayerGameWorld MultiplayerGameWorld => (MultiplayerGameWorld)GameWorld;
+
+    public event EventHandler? GameReady;
 
     protected abstract string StageLoadingMessage { get; }
 
@@ -63,6 +65,11 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
 
     public override void _Process(float delta)
     {
+        if (NetworkManager.Instance.Status == NetworkedMultiplayerPeer.ConnectionStatus.Disconnected &&
+            NetworkManager.Instance.LocalPlayer?.Status == NetPlayerStatus.Joining && LoadingScreen.Instance.Visible)
+        {
+            OnServerDisconnected();
+        }
     }
 
     public override void OnFinishLoading(Save save)
@@ -124,7 +131,10 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         var inputs = Player?.PackInputs();
 
         if (inputs != null)
-            RpcUnreliable(nameof(PlayerInputsReceived), NetworkManager.Instance.PeerId, inputs);
+        {
+            RpcUnreliableId(NetworkManager.DEFAULT_SERVER_ID, nameof(PlayerInputsReceived),
+                NetworkManager.Instance.PeerId, inputs);
+        }
     }
 
     protected virtual void RegisterPlayer(int peerId)
@@ -176,7 +186,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         if (entity is INetPlayer player && player.PeerId == NetworkManager.Instance.PeerId)
             OnOwnPlayerSpawned((TPlayer)entity);
 
-        if (NetworkManager.Instance.PlayerInfo?.Status == NetPlayerStatus.Joining)
+        if (NetworkManager.Instance.LocalPlayer?.Status == NetPlayerStatus.Joining)
         {
             LoadingScreen.Instance.Show(StageLoadingMessage,
                 MainGameState.Invalid, "Loading entities... " + MultiplayerGameWorld?.EntityCount + "/" +
@@ -184,8 +194,8 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
 
             if (serverEntityCount > -1 && MultiplayerGameWorld?.EntityCount == serverEntityCount)
             {
-                Rpc(nameof(RequestExcessEntitiesRemoval));
-                Rpc(nameof(RequestServerSidePlayerStates));
+                RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(RequestExcessEntitiesRemoval));
+                RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(RequestServerSidePlayerStates));
                 OnReady();
             }
         }
@@ -302,9 +312,9 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
     ///   Notifies a player's new score to all other peers.
     /// </summary>
     /// <param name="peerId">The player's peer id.</param>
-    protected void NotifyScore(int peerId)
+    protected void NotifyScoreUpdate(int peerId)
     {
-        NetworkManager.Instance.SetPlayerInfoInts(peerId, "score", CalculateScore(peerId));
+        NetworkManager.Instance.ServerSetInts(peerId, "score", CalculateScore(peerId));
     }
 
     private void ReplicateEntity(int targetPeerId, INetEntity entity, int serverEntityCount = -1)
@@ -354,7 +364,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
             if (!entity.Synchronize || !entity.EntityNode.IsInsideTree())
                 continue;
 
-            foreach (var player in NetworkManager.Instance.PlayerList)
+            foreach (var player in NetworkManager.Instance.ConnectedPlayers)
             {
                 if (player.Value.Status != NetPlayerStatus.Active || player.Key == NetworkManager.DEFAULT_SERVER_ID)
                     continue;
@@ -371,7 +381,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
 
         var id = MultiplayerGameWorld.RegisterEntity(spawned);
 
-        foreach (var player in NetworkManager.Instance.PlayerList)
+        foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
             if (player.Key == GetTree().GetNetworkUniqueId() || player.Value.Status != NetPlayerStatus.Active)
                 continue;
@@ -387,7 +397,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
 
         MultiplayerGameWorld.UnregisterEntity(id);
 
-        foreach (var player in NetworkManager.Instance.PlayerList)
+        foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
             if (player.Key == NetworkManager.DEFAULT_SERVER_ID || player.Value.Status != NetPlayerStatus.Active)
                 continue;
@@ -424,7 +434,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
             if (NetworkManager.Instance.IsAuthoritative)
                 RegisterPlayer(NetworkManager.Instance.PeerId!.Value);
 
-            NotifyGameReady();
+            GameReady?.Invoke(this, EventArgs.Empty);
             LoadingScreen.Instance.Hide();
             BaseHUD.OnEnterStageTransition(true, false);
         }, false, false);
@@ -511,7 +521,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
             DestroySpawnedEntity(id);
     }
 
-    [Master]
+    [Remote]
     private void PlayerInputsReceived(int peerId, Dictionary<string, string> data)
     {
         if (peerId == NetworkManager.DEFAULT_SERVER_ID)
@@ -528,7 +538,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
         player.OnNetworkInput(data);
     }
 
-    [Master]
+    [Remote]
     private void RequestServerSidePlayerStates()
     {
         var sender = GetTree().GetRpcSenderId();
@@ -537,7 +547,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>
             RpcId(sender, nameof(SyncPlayerState), state.Key, JsonConvert.SerializeObject(state.Value));
     }
 
-    [Master]
+    [Remote]
     private void RequestExcessEntitiesRemoval()
     {
         var sender = GetTree().GetRpcSenderId();

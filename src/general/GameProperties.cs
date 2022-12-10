@@ -79,13 +79,12 @@ public class GameProperties
         return game;
     }
 
-    public static GameProperties StartNewMicrobialArenaGame()
+    public static GameProperties StartNewMicrobialArenaGame(Biome biome)
     {
         var map = new PatchMap();
         var region = new PatchRegion(0, string.Empty, PatchRegion.RegionType.Predefined, Vector2.Zero);
 
-        var tidepool = SimulationParameters.Instance.GetBiome("tidepool");
-        var patch = new Patch(new LocalizedString("MICROBIAL_ARENA"), 0, tidepool, BiomeType.Tidepool, region);
+        var patch = new Patch(new LocalizedString("MICROBIAL_ARENA"), 0, biome, BiomeType.Tidepool, region);
 
         map.AddRegion(region);
         map.AddPatch(patch);

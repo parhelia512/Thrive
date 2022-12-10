@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=75 format=2]
+[gd_resource type="Theme" load_steps=74 format=2]
 
 [ext_resource path="res://src/gui_common/fonts/Jura-Regular-AlmostSmaller.tres" type="DynamicFont" id=1]
 [ext_resource path="res://assets/textures/gui/bevel/grab.png" type="Texture" id=2]
@@ -202,9 +202,17 @@ corner_radius_top_right = 5
 corner_radius_bottom_right = 5
 corner_radius_bottom_left = 5
 
-[sub_resource type="StyleBoxEmpty" id=21]
-content_margin_left = 13.0
-content_margin_top = 2.0
+[sub_resource type="StyleBoxFlat" id=49]
+bg_color = Color( 0, 0, 0, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.0666667, 1, 0.835294, 1 )
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [sub_resource type="StyleBoxFlat" id=22]
 content_margin_left = 10.0
@@ -326,10 +334,6 @@ border_width_top = 1
 border_color = Color( 0.0666667, 1, 0.835294, 1 )
 expand_margin_left = 5.0
 expand_margin_right = 5.0
-
-[sub_resource type="StyleBoxEmpty" id=31]
-content_margin_left = 5.0
-content_margin_right = 5.0
 
 [sub_resource type="StyleBoxFlat" id=32]
 content_margin_left = 10.0
@@ -650,7 +654,7 @@ LineEdit/colors/selection_color = Color( 1, 1, 1, 0.537255 )
 LineEdit/constants/minimum_spaces = 12
 LineEdit/fonts/font = ExtResource( 10 )
 LineEdit/icons/clear = null
-LineEdit/styles/focus = SubResource( 21 )
+LineEdit/styles/focus = SubResource( 49 )
 LineEdit/styles/normal = SubResource( 22 )
 LineEdit/styles/read_only = SubResource( 23 )
 LinkButton/colors/font_color = Color( 0.215686, 0.588235, 0.882353, 1 )
@@ -807,7 +811,7 @@ TextEdit/icons/folded = null
 TextEdit/icons/space = null
 TextEdit/icons/tab = null
 TextEdit/styles/completion = null
-TextEdit/styles/focus = SubResource( 31 )
+TextEdit/styles/focus = SubResource( 49 )
 TextEdit/styles/normal = SubResource( 32 )
 TextEdit/styles/read_only = SubResource( 33 )
 ToolButton/colors/font_color = Color( 0, 0, 0, 1 )
