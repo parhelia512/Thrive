@@ -358,21 +358,20 @@ public class NetworkManager : Node
     /// <summary>
     ///   Sends a chat message to all peers.
     /// </summary>
-    public void BroadcastChat(string message, bool asSystem = false)
+    public void BroadcastChat(string message)
     {
         if (Status != NetworkedMultiplayerPeer.ConnectionStatus.Connected)
             return;
 
-        Rpc(nameof(NotifyChatSend), message, asSystem);
+        Rpc(nameof(SendChat), message);
     }
 
     /// <summary>
-    ///   Checks if we are a network server and if so sends a chat message to all peers as system.
+    ///   Outputs a chat with the sender marked as system to the chat history.
     /// </summary>
-    public void SystemBroadcastChat(string message)
+    public void SystemChatNotification(string message)
     {
-        if (IsAuthoritative)
-            BroadcastChat(message, true);
+        SendChatInternal(TranslationServer.Translate("CHAT_PREFIX_AS_SYSTEM").FormatSafe(message));
     }
 
     public void ClearChatHistory()
@@ -432,6 +431,16 @@ public class NetworkManager : Node
         EmitSignal(nameof(UPNPCallResultReceived), UPNP.UPNPResult.Success, UPNPActionStep.PortMapping);
     }
 
+    private void SendChatInternal(string message)
+    {
+        if (chatHistory.Count > MAX_CHAT_HISTORY_RANGE)
+            chatHistory.RemoveFromFront();
+
+        chatHistory.AddToBack(message);
+
+        EmitSignal(nameof(ChatReceived));
+    }
+
     private void OnPeerConnected(int id)
     {
         // Will probaby be useful later.
@@ -444,7 +453,8 @@ public class NetworkManager : Node
 
         Print("User ", GetPlayerInfo(id)!.Name, " (", id, ") has disconnected");
 
-        SystemBroadcastChat($"[b]{GetPlayerInfo(id)!.Name}[/b] has disconnected.");
+        SystemChatNotification(
+            TranslationServer.Translate("PLAYER_HAS_DISCONNECTED").FormatSafe(GetPlayerInfo(id)!.Name));
 
         NotifyPlayerDisconnected(id);
     }
@@ -566,7 +576,6 @@ public class NetworkManager : Node
 
             // TODO: might not be true...
             Print("User ", deserializedInfo.Name, " (", id, ") has connected");
-            SystemBroadcastChat($"[b]{deserializedInfo.Name}[/b] has connected.");
         }
 
         if (HasPlayer(id))
@@ -574,6 +583,9 @@ public class NetworkManager : Node
 
         connectedPlayers.Add(id, deserializedInfo);
         EmitSignal(nameof(ServerStateUpdated));
+
+        SystemChatNotification(
+            TranslationServer.Translate("PLAYER_HAS_CONNECTED").FormatSafe(deserializedInfo.Name));
 
         if (IsAuthoritative)
         {
@@ -728,7 +740,7 @@ public class NetworkManager : Node
             return;
 
         EmitSignal(nameof(PlayerJoined), peerId);
-        SystemBroadcastChat($"[b]{playerInfo.Name}[/b] has joined.");
+        SystemChatNotification(TranslationServer.Translate("PLAYER_HAS_JOINED").FormatSafe(playerInfo.Name));
     }
 
     [RemoteSync]
@@ -757,7 +769,7 @@ public class NetworkManager : Node
         EmitSignal(nameof(ReadyForSessionReceived), peerId, playerInfo.ReadyForSession);
         EmitSignal(nameof(ServerStateUpdated));
 
-        SystemBroadcastChat($"[b]{playerInfo.Name}[/b] has left.");
+        SystemChatNotification(TranslationServer.Translate("PLAYER_HAS_LEFT").FormatSafe(playerInfo.Name));
     }
 
     [RemoteSync]
@@ -774,27 +786,14 @@ public class NetworkManager : Node
     }
 
     [RemoteSync]
-    private void NotifyChatSend(string message, bool asSystem)
+    private void SendChat(string message)
     {
         var senderId = GetTree().GetRpcSenderId();
         var senderState = GetPlayerInfo(senderId);
 
-        var formatted = string.Empty;
-        if (senderState == null || (senderId == DEFAULT_SERVER_ID && asSystem))
-        {
-            formatted = $"[color=#d8d8d8][{TranslationServer.Translate("SYSTEM_LOWERCASE")}]: {message}[/color]";
-        }
-        else
-        {
-            formatted = $"[b]({senderState.GetStatusReadableShort()}) [{senderState.Name}]:[/b] {message}";
-        }
+        var formatted = $"[b]({senderState?.GetStatusReadableShort()}) [{senderState?.Name}]:[/b] {message}";
 
-        if (chatHistory.Count > MAX_CHAT_HISTORY_RANGE)
-            chatHistory.RemoveFromFront();
-
-        chatHistory.AddToBack(formatted);
-
-        EmitSignal(nameof(ChatReceived));
+        SendChatInternal(formatted);
     }
 
     [PuppetSync]

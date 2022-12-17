@@ -1,3 +1,5 @@
+using Godot;
+
 public class MultiplayerGameMode : IRegistryType
 {
     /// <summary>
@@ -59,5 +61,12 @@ public class MultiplayerGameMode : IRegistryType
     public void ApplyTranslations()
     {
         TranslationHelper.ApplyTranslations(this);
+    }
+
+    // TODO: REMOVE THIS!!
+    // A temporary hack until thrive-pybabel's json extractor is updated to include "Description" key to extract.
+    private void TempTranslationHack()
+    {
+        TranslationServer.Translate("MICROBIAL_ARENA_DESCRIPTION");
     }
 }

@@ -176,9 +176,9 @@ public class MultiplayerGUI : CenterContainer
         var builder = new StringBuilder(100);
         builder.Append(" - ");
         builder.Append(network.GameInSession ?
-            $" [{TranslationServer.Translate("IN_PROGRESS_LOWERCASE")}] [{network.GameTimeHumanized}]"
+            TranslationServer.Translate("LOBBY_ATTRIBUTE_IN_PROGRESS").FormatSafe(network.GameTimeHumanized)
             :
-            $" [{TranslationServer.Translate("PENDING_LOWERCASE")}]");
+            TranslationServer.Translate("LOBBY_ATTRIBUTE_PENDING"));
 
         serverAttributes.Text = builder.ToString();
     }
@@ -224,6 +224,7 @@ public class MultiplayerGUI : CenterContainer
 
     private void ResetFields()
     {
+        nameBox.PlaceholderText = Settings.EnvironmentUserName;
         portBox.Text = Constants.MULTIPLAYER_DEFAULT_PORT.ToString(CultureInfo.CurrentCulture);
         addressBox.Text = Constants.LOCAL_HOST;
     }

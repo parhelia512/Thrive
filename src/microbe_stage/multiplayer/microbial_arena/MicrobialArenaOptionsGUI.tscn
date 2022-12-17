@@ -48,7 +48,7 @@ rect_min_size = Vector2( 200, 0 )
 min_value = 30.0
 max_value = 240.0
 value = 60.0
-suffix = "MINUTES"
+suffix = "MINUTES_LOWERCASE"
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
 margin_top = 35.0
@@ -79,6 +79,9 @@ max_value = 5000.0
 value = 1000.0
 editable = false
 suffix = "μm"
+__meta__ = {
+"_editor_description_": "PLACEHOLDER"
+}
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="VBoxContainer"]
 margin_top = 70.0

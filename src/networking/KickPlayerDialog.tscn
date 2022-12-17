@@ -25,7 +25,7 @@ mouse_filter = 2
 margin_right = 200.0
 margin_bottom = 17.0
 custom_fonts/font = ExtResource( 1 )
-text = "REASON_FOR_KICK:"
+text = "REASON_FOR_KICK"
 
 [node name="LineEdit" type="LineEdit" parent="CustomConfirmationDialog/VBoxContainer2"]
 margin_top = 21.0

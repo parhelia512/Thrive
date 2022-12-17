@@ -4096,7 +4096,7 @@ margin_bottom = 40.0
 
 [node name="upnp" parent="GroupHolder/serverSetup" instance=ExtResource( 1 )]
 visible = false
-Description = "Automatically forward port to let others join your server seamlessly"
+Description = "SERVER_SETUP_UPNP_HINT"
 DisplayDelay = 0.0
 Positioning = 2
 DescriptionLabelPath = NodePath("MarginContainer/VBoxContainer/Description")

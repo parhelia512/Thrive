@@ -26,11 +26,24 @@ public class MicrobialArenaOptionsGUI : MarginContainer, IGameModeOptionsMenu
         {
             biomes.AddItem(biome.Name);
         }
+
+        UpdateSuffix();
+    }
+
+    public override void _Notification(int what)
+    {
+        if (what == NotificationTranslationChanged)
+            UpdateSuffix();
     }
 
     public IGameModeSettings ReadSettings()
     {
         return new MicrobialArenaSettings((float)timeLimit.Value, shownBiomes?[biomes.Selected].InternalName ??
             SimulationParameters.Instance.GetBiome("tidepool").InternalName);
+    }
+
+    private void UpdateSuffix()
+    {
+        timeLimit.Suffix = TranslationServer.Translate("MINUTES_LOWERCASE");
     }
 }

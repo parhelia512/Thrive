@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-07 10:47+0200\n"
+"POT-Creation-Date: 2022-12-18 02:03+0700\n"
 "PO-Revision-Date: 2022-12-15 06:57+0000\n"
 "Last-Translator: Henri Hyyryläinen <hhyyrylainen@revolutionarygamesstudio.com>\n"
 "Language-Team: Chinese (Simplified) <https://translate.revolutionarygamesstudio.com/projects/thrive/thrive-game/zh_Hans/>\n"
@@ -43,6 +43,7 @@ msgstr "概念美术"
 #: ../simulation_parameters/common/gallery.json:6
 #: ../simulation_parameters/common/gallery.json:141
 #: ../simulation_parameters/common/gallery.json:291
+#: ../src/networking/ServerSetup.cs:119
 msgid "MICROBE_STAGE"
 msgstr "微生物阶段"
 
@@ -374,19 +375,22 @@ msgstr "能力"
 
 #: ../simulation_parameters/common/input_options.json:40
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2068
-#: ../src/microbe_stage/MicrobeStage.tscn:2131
+#: ../src/microbe_stage/MicrobeStage.tscn:2303
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2303
 msgid "FIRE_TOXIN"
 msgstr "发射毒素"
 
 #: ../simulation_parameters/common/input_options.json:44
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2092
-#: ../src/microbe_stage/MicrobeStage.tscn:2177
+#: ../src/microbe_stage/MicrobeStage.tscn:2349
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2352
 msgid "SECRETE_SLIME"
 msgstr "喷射黏液"
 
 #: ../simulation_parameters/common/input_options.json:48
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2054
-#: ../src/microbe_stage/MicrobeStage.tscn:2118
+#: ../src/microbe_stage/MicrobeStage.tscn:2290
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2289
 msgid "TOGGLE_ENGULF"
 msgstr "切换吞噬模式"
 
@@ -395,7 +399,8 @@ msgid "HOLD_PACK_COMMANDS_MENU"
 msgstr "按住以显示群体指令菜单"
 
 #: ../simulation_parameters/common/input_options.json:56
-#: ../src/microbe_stage/MicrobeStage.tscn:2142
+#: ../src/microbe_stage/MicrobeStage.tscn:2314
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2315
 msgid "TOGGLE_BINDING"
 msgstr "切换连接模式"
 
@@ -404,7 +409,8 @@ msgid "TOGGLE_UNBINDING"
 msgstr "切换解除连接模式"
 
 #: ../simulation_parameters/common/input_options.json:64
-#: ../src/microbe_stage/MicrobeStage.tscn:2154
+#: ../src/microbe_stage/MicrobeStage.tscn:2326
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2328
 msgid "UNBIND_ALL"
 msgstr "取消所有连接"
 
@@ -597,6 +603,13 @@ msgstr "切换全屏"
 msgid "TOGGLE_HUD_HIDE"
 msgstr "切换HUD"
 
+#: ../simulation_parameters/common/multiplayer_gamemodes.json:3
+#: ../src/general/GameProperties.cs:87
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2430
+#, fuzzy
+msgid "MICROBIAL_ARENA"
+msgstr "微生物阶段"
+
 #: ../simulation_parameters/microbe_stage/bio_processes.json:3
 #: ../simulation_parameters/microbe_stage/bio_processes.json:111
 msgid "RESPIRATION"
@@ -764,48 +777,55 @@ msgstr "ATP"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:17
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1306
-#: ../src/microbe_stage/MicrobeStage.tscn:1348
+#: ../src/microbe_stage/MicrobeStage.tscn:1504
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:678
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1507
 msgid "AMMONIA"
 msgstr "氨"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:32
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1358
-#: ../src/microbe_stage/MicrobeStage.tscn:1397
+#: ../src/microbe_stage/MicrobeStage.tscn:1553
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:749
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1556
 msgid "PHOSPHATE"
 msgstr "磷酸盐"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:47
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1410
-#: ../src/microbe_stage/MicrobeStage.tscn:1449
+#: ../src/microbe_stage/MicrobeStage.tscn:1605
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:643
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1608
 msgid "HYDROGEN_SULFIDE"
 msgstr "硫化氢"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:62
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1254
-#: ../src/microbe_stage/MicrobeStage.tscn:1302
+#: ../src/microbe_stage/MicrobeStage.tscn:1458
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:713
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1461
 msgid "GLUCOSE"
 msgstr "葡萄糖"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:77
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1589
-#: ../src/microbe_stage/MicrobeStage.tscn:1663
+#: ../src/microbe_stage/MicrobeStage.tscn:1819
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1822
 msgid "OXYTOXY_NT"
 msgstr "氧化毒素"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:92
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1640
-#: ../src/microbe_stage/MicrobeStage.tscn:1711
+#: ../src/microbe_stage/MicrobeStage.tscn:1867
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1870
 msgid "MUCILAGE"
 msgstr "黏液"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:109
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1462
-#: ../src/microbe_stage/MicrobeStage.tscn:1495
+#: ../src/microbe_stage/MicrobeStage.tscn:1651
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:784
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1654
 msgid "IRON"
 msgstr "铁"
 
@@ -1113,6 +1133,7 @@ msgid "STATUS_COLON"
 msgstr "状态："
 
 #: ../src/auto-evo/AutoEvoExploringTool.tscn:448
+#: ../src/networking/MultiplayerGUI.cs:258
 msgid "READY"
 msgstr "准备就绪"
 
@@ -1162,23 +1183,23 @@ msgid "SPECIES_DETAILS"
 msgstr "物种信息"
 
 #: ../src/auto-evo/AutoEvoExploringTool.tscn:830
-#: ../src/general/MainMenu.tscn:411 ../src/general/MainMenu.tscn:504
-#: ../src/general/MainMenu.tscn:762 ../src/general/NewGameSettings.tscn:1183
-#: ../src/general/OptionsMenu.tscn:1686 ../src/general/PauseMenu.tscn:264
+#: ../src/general/MainMenu.tscn:413 ../src/general/MainMenu.tscn:519
+#: ../src/general/MainMenu.tscn:780 ../src/general/NewGameSettings.tscn:1183
+#: ../src/general/OptionsMenu.tscn:1686 ../src/general/PauseMenu.tscn:268
 #: ../src/microbe_stage/gui/ExtinctionBox.tscn:76
-#: ../src/modding/ModManager.tscn:81 ../src/saving/NewSaveMenu.tscn:110
-#: ../src/saving/SaveManagerGUI.tscn:120
+#: ../src/modding/ModManager.tscn:81 ../src/networking/MultiplayerGUI.tscn:138
+#: ../src/saving/NewSaveMenu.tscn:110 ../src/saving/SaveManagerGUI.tscn:120
 msgid "BACK"
 msgstr "返回"
 
 #: ../src/auto-evo/AutoEvoExploringTool.tscn:834
-#: ../src/general/PauseMenu.tscn:292
+#: ../src/general/PauseMenu.tscn:296
 #: ../src/thriveopedia/pages/ThriveopediaMuseumPage.tscn:176
 msgid "CONFIRM_EXIT"
 msgstr "确认退出"
 
 #: ../src/auto-evo/AutoEvoExploringTool.tscn:835
-#: ../src/general/PauseMenu.cs:380
+#: ../src/general/PauseMenu.cs:438
 msgid "RETURN_TO_MENU_WARNING"
 msgstr ""
 "你确定要退出到主菜单吗？\n"
@@ -2065,7 +2086,7 @@ msgid "CLOSE"
 msgstr "关闭"
 
 #: ../src/general/IWorldEffect.cs:72 ../src/general/IWorldEffect.cs:91
-#: ../src/general/NewGameSettings.cs:618 ../src/general/StageHUDBase.cs:717
+#: ../src/general/NewGameSettings.cs:618 ../src/general/StageHUDBase.cs:744
 #: ../src/general/WorldGenerationSettings.cs:177
 #: ../src/gui_common/CompoundAmount.cs:175
 #: ../src/microbe_stage/MicrobeHUD.cs:229
@@ -2074,7 +2095,8 @@ msgstr "关闭"
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.cs:177
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.cs:371
 #: ../src/microbe_stage/editor/tooltips/SelectionMenuToolTip.cs:264
-#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:262
+#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:263
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:217
 msgid "PERCENTAGE_VALUE"
 msgstr "{0}%"
 
@@ -2086,7 +2108,7 @@ msgstr "{0}的浓度已减少了{1}"
 msgid "GLUCOSE_CONCENTRATIONS_DRASTICALLY_DROPPED"
 msgstr "葡萄糖的浓度大幅度降低了！"
 
-#: ../src/general/MainMenu.cs:193 ../src/general/MainMenu.tscn:854
+#: ../src/general/MainMenu.cs:202 ../src/general/MainMenu.tscn:872
 msgid "THANKS_FOR_BUYING_THRIVE"
 msgstr ""
 "感谢你的游玩！如果你喜欢这款游戏，请记得也向你的朋友们推荐一下。\n"
@@ -2095,207 +2117,212 @@ msgstr ""
 "\n"
 "如果您想在Thrive启动之前看到Thrive Launcher，您可以使用主菜单中的按钮退出到启动器，然后在启动器选项菜单中禁用无缝模式。"
 
-#: ../src/general/MainMenu.cs:414
+#: ../src/general/MainMenu.cs:436
 msgid "STORE_LOGGED_IN_AS"
 msgstr "已登录为：{0}"
 
-#: ../src/general/MainMenu.tscn:244
+#: ../src/general/MainMenu.tscn:246
 msgid "NEW_GAME_BUTTON_TOOLTIP"
 msgstr "开始新游戏"
 
-#: ../src/general/MainMenu.tscn:247
+#: ../src/general/MainMenu.tscn:249
 msgid "NEW_GAME"
 msgstr "新游戏"
 
-#: ../src/general/MainMenu.tscn:257 ../src/general/PauseMenu.tscn:197
+#: ../src/general/MainMenu.tscn:259 ../src/general/PauseMenu.tscn:201
 msgid "LOAD_GAME_BUTTON_TOOLTIP"
 msgstr "载入之前保存的游戏"
 
-#: ../src/general/MainMenu.tscn:260 ../src/general/PauseMenu.tscn:198
+#: ../src/general/MainMenu.tscn:262 ../src/general/PauseMenu.tscn:202
 #: ../src/microbe_stage/gui/ExtinctionBox.tscn:146
 msgid "LOAD_GAME"
 msgstr "载入游戏"
 
-#: ../src/general/MainMenu.tscn:267 ../src/general/PauseMenu.tscn:221
+#: ../src/general/MainMenu.tscn:269 ../src/general/PauseMenu.tscn:225
 msgid "OPTIONS_BUTTON_TOOLTIP"
 msgstr "改变你的设置"
 
-#: ../src/general/MainMenu.tscn:271 ../src/general/PauseMenu.tscn:222
+#: ../src/general/MainMenu.tscn:273 ../src/general/PauseMenu.tscn:226
 msgid "OPTIONS"
 msgstr "选项"
 
-#: ../src/general/MainMenu.tscn:281
+#: ../src/general/MainMenu.tscn:283
 msgid "TOOLS"
 msgstr "工具"
 
-#: ../src/general/MainMenu.tscn:291
+#: ../src/general/MainMenu.tscn:293
 msgid "VIEW_SOURCE_CODE"
 msgstr "查看源代码"
 
-#: ../src/general/MainMenu.tscn:301
+#: ../src/general/MainMenu.tscn:303
 msgid "EXTRAS"
 msgstr "额外内容"
 
-#: ../src/general/MainMenu.tscn:311
+#: ../src/general/MainMenu.tscn:313
 msgid "CREDITS"
 msgstr "制作人名单"
 
-#: ../src/general/MainMenu.tscn:318 ../src/general/MainMenu.tscn:328
-#: ../src/general/PauseMenu.tscn:237
+#: ../src/general/MainMenu.tscn:320 ../src/general/MainMenu.tscn:330
+#: ../src/general/PauseMenu.tscn:241
 msgid "QUIT_BUTTON_TOOLTIP"
 msgstr "退出游戏"
 
-#: ../src/general/MainMenu.tscn:321
+#: ../src/general/MainMenu.tscn:323
 msgid "EXIT_TO_LAUNCHER"
 msgstr "退出至启动器"
 
-#: ../src/general/MainMenu.tscn:332
+#: ../src/general/MainMenu.tscn:334
 msgid "QUIT"
 msgstr "退出"
 
-#: ../src/general/MainMenu.tscn:353
+#: ../src/general/MainMenu.tscn:355
 msgid "MICROBE_FREEBUILD_EDITOR"
 msgstr "微生物阶段自由编辑器"
 
-#: ../src/general/MainMenu.tscn:364
+#: ../src/general/MainMenu.tscn:366
 msgid "AUTO_EVO_EXPLORING_TOOL"
 msgstr "Auto-Evo探索工具"
 
-#: ../src/general/MainMenu.tscn:433 ../src/general/PauseMenu.tscn:206
+#: ../src/general/MainMenu.tscn:435 ../src/general/PauseMenu.tscn:210
 msgid "THRIVEOPEDIA"
 msgstr "Thrive百科"
 
-#: ../src/general/MainMenu.tscn:448
+#: ../src/general/MainMenu.tscn:450
 msgid "MODS"
 msgstr "Mods"
 
-#: ../src/general/MainMenu.tscn:463
+#: ../src/general/MainMenu.tscn:464
+#, fuzzy
+msgid "MULTIPLAYER"
+msgstr "小键盘*键"
+
+#: ../src/general/MainMenu.tscn:479
 msgid "ART_GALLERY"
 msgstr "艺术画廊"
 
-#: ../src/general/MainMenu.tscn:475
+#: ../src/general/MainMenu.tscn:491
 msgid "LICENSES"
 msgstr "许可"
 
-#: ../src/general/MainMenu.tscn:490 ../src/general/MainMenu.tscn:594
+#: ../src/general/MainMenu.tscn:505 ../src/general/MainMenu.tscn:609
 msgid "VISIT_SUGGESTIONS_SITE"
 msgstr "提出功能建议"
 
-#: ../src/general/MainMenu.tscn:531
+#: ../src/general/MainMenu.tscn:546
 msgid "OFFICIAL_WEBSITE_BUTTON_TOOLTIP"
 msgstr "访问Revolutionary Games的官方网站"
 
-#: ../src/general/MainMenu.tscn:534
+#: ../src/general/MainMenu.tscn:549
 msgid "OFFICIAL_WEBSITE"
 msgstr "官方网站"
 
-#: ../src/general/MainMenu.tscn:543
+#: ../src/general/MainMenu.tscn:558
 msgid "COMMUNITY_FORUM_BUTTON_TOOLTIP"
 msgstr "在我们的社区论坛上加入Thrive社区"
 
-#: ../src/general/MainMenu.tscn:546
+#: ../src/general/MainMenu.tscn:561
 msgid "COMMUNITY_FORUM"
 msgstr "社区论坛"
 
-#: ../src/general/MainMenu.tscn:555
+#: ../src/general/MainMenu.tscn:570
 msgid "DEVELOPMENT_FORUM_BUTTON_TOOLTIP"
 msgstr "在开发论坛上了解开发进度"
 
-#: ../src/general/MainMenu.tscn:558
+#: ../src/general/MainMenu.tscn:573
 msgid "DEVELOPMENT_FORUM"
 msgstr "开发论坛"
 
-#: ../src/general/MainMenu.tscn:567
+#: ../src/general/MainMenu.tscn:582
 msgid "DEVELOPMENT_WIKI_BUTTON_TOOLTIP"
 msgstr "访问我们的开发者wiki"
 
-#: ../src/general/MainMenu.tscn:570
+#: ../src/general/MainMenu.tscn:585
 msgid "DEVELOPMENT_WIKI"
 msgstr "开发者wiki"
 
-#: ../src/general/MainMenu.tscn:579
+#: ../src/general/MainMenu.tscn:594
 msgid "COMMUNITY_WIKI_BUTTON_TOOLTIP"
 msgstr "访问我们的社区wiki"
 
-#: ../src/general/MainMenu.tscn:582
+#: ../src/general/MainMenu.tscn:597
 msgid "COMMUNITY_WIKI"
 msgstr "社区wiki"
 
-#: ../src/general/MainMenu.tscn:613
+#: ../src/general/MainMenu.tscn:628
 msgid "REVOLUTIONARY_GAMES_SOCIAL_TOOLTIP"
 msgstr "访问Revolutionary Games Studio网站"
 
-#: ../src/general/MainMenu.tscn:624
+#: ../src/general/MainMenu.tscn:639
 msgid "STEAM_TOOLTIP"
 msgstr "访问我们在Steam上的页面"
 
-#: ../src/general/MainMenu.tscn:635
+#: ../src/general/MainMenu.tscn:650
 msgid "ITCH_TOOLTIP"
 msgstr "访问我们在Itch.io上的页面"
 
-#: ../src/general/MainMenu.tscn:646
+#: ../src/general/MainMenu.tscn:661
 msgid "PATREON_TOOLTIP"
 msgstr "访问我们在Patreon上的页面"
 
-#: ../src/general/MainMenu.tscn:657
+#: ../src/general/MainMenu.tscn:672
 msgid "GITHUB_TOOLTIP"
 msgstr "访问我们在GitHub上的代码仓库"
 
-#: ../src/general/MainMenu.tscn:668
+#: ../src/general/MainMenu.tscn:683
 msgid "YOUTUBE_TOOLTIP"
 msgstr "访问我们的YouTube频道"
 
-#: ../src/general/MainMenu.tscn:679
+#: ../src/general/MainMenu.tscn:694
 msgid "REDDIT_TOOLTIP"
 msgstr "访问我们的subreddit页面"
 
-#: ../src/general/MainMenu.tscn:690
+#: ../src/general/MainMenu.tscn:705
 msgid "DISCORD_TOOLTIP"
 msgstr "加入我们社区的Discord服务器"
 
-#: ../src/general/MainMenu.tscn:701
+#: ../src/general/MainMenu.tscn:716
 msgid "FACEBOOK_TOOLTIP"
 msgstr "访问我们的Facebook页面"
 
-#: ../src/general/MainMenu.tscn:712
+#: ../src/general/MainMenu.tscn:727
 msgid "TWITTER_TOOLTIP"
 msgstr "访问我们的推特"
 
-#: ../src/general/MainMenu.tscn:779
+#: ../src/general/MainMenu.tscn:797
 msgid "GLES2_MODE_WARNING"
 msgstr "GLES2模式警告"
 
-#: ../src/general/MainMenu.tscn:781
+#: ../src/general/MainMenu.tscn:799
 msgid "GLES2_MODE_WARNING_TEXT"
 msgstr "你在用GLES2模式运行Thrive。这种情况没有被测试过并且很可能导致种种问题。你应该考虑更新下你的显卡驱动，或者强制使用你的AMD/Nvidia显卡来运行Thrive。"
 
-#: ../src/general/MainMenu.tscn:784
+#: ../src/general/MainMenu.tscn:802
 msgid "NO_MODS_ENABLED"
 msgstr "模组已禁用"
 
-#: ../src/general/MainMenu.tscn:797
+#: ../src/general/MainMenu.tscn:815
 msgid "MODS_INSTALLED_BUT_NOT_ENABLED"
 msgstr ""
 "检测到安装的模组，但没有启用的模组。\n"
 "\n"
 "模组在安装后需要被启用。在“额外内容”中使用模组按钮访问模组管理器。"
 
-#: ../src/general/MainMenu.tscn:813
+#: ../src/general/MainMenu.tscn:831
 msgid "DO_NOT_SHOW_AGAIN"
 msgstr "不再提醒这项内容"
 
-#: ../src/general/MainMenu.tscn:827 ../src/general/MainMenu.tscn:884
+#: ../src/general/MainMenu.tscn:845 ../src/general/MainMenu.tscn:902
 #: ../src/gui_common/dialogs/CustomConfirmationDialog.tscn:64
 #: ../src/gui_common/dialogs/ErrorDialog.tscn:118
 #: ../src/modding/ModUploader.tscn:357
 msgid "OK"
 msgstr "好的"
 
-#: ../src/general/MainMenu.tscn:831
+#: ../src/general/MainMenu.tscn:849
 msgid "SAFE_MODE_TITLE"
 msgstr "Thrive在安全模式下启动"
 
-#: ../src/general/MainMenu.tscn:833
+#: ../src/general/MainMenu.tscn:851
 msgid "SAFE_MODE_EXPLANATION"
 msgstr ""
 "由于先前的启动错误，Thrive已在安全模式下启动。\n"
@@ -2307,19 +2334,19 @@ msgstr ""
 "\n"
 "如果你未能修复导致启动错误的问题，你在未来几次启动中将会崩溃数次并最后再次返回安全模式。"
 
-#: ../src/general/MainMenu.tscn:837
+#: ../src/general/MainMenu.tscn:855
 msgid "MOD_LOAD_ERRORS"
 msgstr "Mod加载错误"
 
-#: ../src/general/MainMenu.tscn:838
+#: ../src/general/MainMenu.tscn:856
 msgid "MOD_LOAD_ERRORS_OCCURRED"
 msgstr "在加载一个或多个mod时发生了错误。日志可能包含其它信息。"
 
-#: ../src/general/MainMenu.tscn:844
+#: ../src/general/MainMenu.tscn:862
 msgid "THANK_YOU_TITLE"
 msgstr "感谢"
 
-#: ../src/general/MainMenu.tscn:870
+#: ../src/general/MainMenu.tscn:888
 msgid "DISMISS_PERMANENTLY"
 msgstr "不再显示"
 
@@ -3026,7 +3053,7 @@ msgstr "放弃更改并继续"
 
 #: ../src/general/OptionsMenu.tscn:1826
 #: ../src/gui_common/dialogs/CustomConfirmationDialog.tscn:51
-#: ../src/modding/NewModGUI.tscn:472
+#: ../src/modding/NewModGUI.tscn:472 ../src/networking/ServerSetup.tscn:173
 #: ../src/thriveopedia/fossilisation/FossilisationDialog.tscn:207
 msgid "CANCEL"
 msgstr "取消"
@@ -3047,50 +3074,59 @@ msgstr "找不到截图目录"
 msgid "TRY_TAKING_SOME_SCREENSHOTS"
 msgstr "试着截一些图吧！"
 
-#: ../src/general/PauseMenu.cs:399
+#: ../src/general/PauseMenu.cs:403
+#, fuzzy
+msgid "BACK_TO_GAME"
+msgstr "自定义用户名："
+
+#: ../src/general/PauseMenu.cs:403 ../src/general/PauseMenu.tscn:186
+msgid "RESUME"
+msgstr "返回"
+
+#: ../src/general/PauseMenu.cs:415
+msgid "LEAVE"
+msgstr ""
+
+#: ../src/general/PauseMenu.cs:415 ../src/general/PauseMenu.tscn:234
+#: ../src/microbe_stage/gui/ExtinctionBox.tscn:155
+msgid "RETURN_TO_MENU"
+msgstr "返回主菜单"
+
+#: ../src/general/PauseMenu.cs:457
 msgid "QUIT_GAME_WARNING"
 msgstr ""
 "你确定要退出游戏吗？\n"
 "你会失去任何未保存的进度。"
 
-#: ../src/general/PauseMenu.tscn:181
+#: ../src/general/PauseMenu.tscn:185
 msgid "PAUSE_MENU_RESUME_TOOLTIP"
 msgstr "返回游戏"
 
-#: ../src/general/PauseMenu.tscn:182
-msgid "RESUME"
-msgstr "返回"
-
-#: ../src/general/PauseMenu.tscn:189
+#: ../src/general/PauseMenu.tscn:193
 msgid "SAVE_GAME_BUTTON_TOOLTIP"
 msgstr "打开保存菜单来保存游戏"
 
-#: ../src/general/PauseMenu.tscn:190
+#: ../src/general/PauseMenu.tscn:194
 msgid "SAVE_GAME"
 msgstr "保存游戏"
 
-#: ../src/general/PauseMenu.tscn:205
+#: ../src/general/PauseMenu.tscn:209
 msgid "THRIVEOPEDIA_HINT_IN_GAME"
 msgstr "打开Thrive百科"
 
-#: ../src/general/PauseMenu.tscn:213 ../src/microbe_stage/HUDBottomBar.tscn:139
+#: ../src/general/PauseMenu.tscn:217 ../src/microbe_stage/HUDBottomBar.tscn:158
 msgid "HELP_BUTTON_TOOLTIP"
 msgstr "帮助菜单"
 
-#: ../src/general/PauseMenu.tscn:214
+#: ../src/general/PauseMenu.tscn:218
 msgid "HELP"
 msgstr "帮助"
 
-#: ../src/general/PauseMenu.tscn:229
+#: ../src/general/PauseMenu.tscn:233
 msgid "RETURN_TO_MENU_TOOLTIP"
 msgstr "退回主菜单"
 
-#: ../src/general/PauseMenu.tscn:230
-#: ../src/microbe_stage/gui/ExtinctionBox.tscn:155
-msgid "RETURN_TO_MENU"
-msgstr "返回主菜单"
-
-#: ../src/general/PauseMenu.tscn:238
+#: ../src/general/PauseMenu.tscn:242
 msgid "EXIT"
 msgstr "退出"
 
@@ -3108,7 +3144,7 @@ msgstr ""
 "[b]行为[/b]\n"
 "  {5}"
 
-#: ../src/general/StageBase.cs:424
+#: ../src/general/StageBase.cs:430
 msgid "PLAYER_REPRODUCED"
 msgstr "玩家繁殖"
 
@@ -3120,40 +3156,40 @@ msgstr "玩家死亡"
 msgid "EXTINCT_IN_PATCH"
 msgstr "在这个地区里灭绝了"
 
-#: ../src/general/StageHUDBase.cs:718 ../src/gui_common/CompoundAmount.cs:171
-#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:263
+#: ../src/general/StageHUDBase.cs:745 ../src/gui_common/CompoundAmount.cs:171
+#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:264
 msgid "VALUE_WITH_UNIT"
 msgstr "{0} {1}"
 
-#: ../src/general/StageHUDBase.cs:955
+#: ../src/general/StageHUDBase.cs:982
 msgid "CATEGORY_AN_ABUNDANCE"
 msgstr "很多"
 
-#: ../src/general/StageHUDBase.cs:957
+#: ../src/general/StageHUDBase.cs:984
 msgid "CATEGORY_QUITE_A_BIT"
 msgstr "多"
 
-#: ../src/general/StageHUDBase.cs:959
+#: ../src/general/StageHUDBase.cs:986
 msgid "CATEGORY_A_FAIR_AMOUNT"
 msgstr "较多"
 
-#: ../src/general/StageHUDBase.cs:961
+#: ../src/general/StageHUDBase.cs:988
 msgid "CATEGORY_SOME"
 msgstr "中等"
 
-#: ../src/general/StageHUDBase.cs:963
+#: ../src/general/StageHUDBase.cs:990
 msgid "CATEGORY_LITTLE"
 msgstr "少"
 
-#: ../src/general/StageHUDBase.cs:965
+#: ../src/general/StageHUDBase.cs:992
 msgid "CATEGORY_VERY_LITTLE"
 msgstr "很少"
 
-#: ../src/general/StageHUDBase.cs:1175
+#: ../src/general/StageHUDBase.cs:1202
 msgid "PLAYER_CELL"
 msgstr "玩家细胞"
 
-#: ../src/general/StageHUDBase.cs:1188
+#: ../src/general/StageHUDBase.cs:1215
 msgid "SPECIES_N_TIMES"
 msgstr "{0}（x{1}）"
 
@@ -3440,6 +3476,42 @@ msgstr "由Revolutionary Games Studio ry支持的开发"
 msgid "DEVELOPERS"
 msgstr "开发者"
 
+#: ../src/gui_common/NetPlayerList.tscn:87
+#: ../src/networking/MultiplayerGUI.tscn:63 ../src/saving/NewSaveMenu.tscn:49
+msgid "NAME"
+msgstr "名称："
+
+#: ../src/gui_common/NetPlayerList.tscn:99
+msgid "SCORE"
+msgstr ""
+
+#: ../src/gui_common/NetPlayerList.tscn:109
+msgid "KILLS"
+msgstr ""
+
+#: ../src/gui_common/NetPlayerList.tscn:119
+#, fuzzy
+msgid "DEATHS"
+msgstr "死亡数"
+
+#: ../src/gui_common/NetPlayerLog.cs:114
+msgid "PLAYER_LOG_HOST_ATTRIBUTE"
+msgstr ""
+
+#: ../src/gui_common/NetPlayerLog.tscn:84
+#: ../src/gui_common/NetPlayerLog.tscn:99
+#: ../src/gui_common/NetPlayerLog.tscn:114
+#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:24
+#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:34
+#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:44
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2228
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2238
+#: ../src/microbe_stage/editor/MicrobePartSelection.tscn:140
+#: ../src/networking/NetPlayerInfo.cs:34 ../src/networking/NetPlayerInfo.cs:47
+#: ../src/networking/ServerSettings.cs:8
+msgid "N_A"
+msgstr "N/A"
+
 #: ../src/gui_common/PlaybackControls.tscn:107
 msgid "STOP"
 msgstr "暂停"
@@ -3530,15 +3602,6 @@ msgstr ""
 "在 {1} 分支上的 Devbuild {0}\n"
 "{3}"
 
-#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:24
-#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:34
-#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:44
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2218
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2228
-#: ../src/microbe_stage/editor/MicrobePartSelection.tscn:140
-msgid "N_A"
-msgstr "N/A"
-
 #: ../src/gui_common/art_gallery/GalleryDetailsTooltip.tscn:54
 msgid "DOUBLE_CLICK_TO_VIEW_IN_FULLSCREEN"
 msgstr "双击可全屏查看"
@@ -3573,7 +3636,7 @@ msgid "SLIDESHOW"
 msgstr "幻灯片"
 
 #: ../src/gui_common/charts/line/LineChart.cs:651
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2360
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2370
 msgid "NO_DATA_TO_SHOW"
 msgstr "没有数据可显示"
 
@@ -4102,22 +4165,29 @@ msgstr "当玩家试图退出游戏时，启用/禁用未保存的进度警告�
 msgid "PATCH_MAP_NAVIGATION_TOOLTIP"
 msgstr "通过点击、拖动和缩放移动"
 
+#: ../src/gui_common/tooltip/ToolTipManager.tscn:4099
+msgid "SERVER_SETUP_UPNP_HINT"
+msgstr ""
+
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:517
 msgid "LOOKING_AT"
 msgstr "看着："
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:543
-#: ../src/microbe_stage/MicrobeStage.tscn:595
+#: ../src/microbe_stage/MicrobeStage.tscn:752
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:760
 msgid "NOTHING_HERE"
 msgstr "这里啥都没有"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:568
-#: ../src/microbe_stage/MicrobeStage.tscn:620
+#: ../src/microbe_stage/MicrobeStage.tscn:777
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:785
 msgid "COMPOUNDS_COLON"
 msgstr "化合物："
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:608
-#: ../src/microbe_stage/MicrobeStage.tscn:660
+#: ../src/microbe_stage/MicrobeStage.tscn:817
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:825
 msgid "SPECIES_COLON"
 msgstr "物种："
 
@@ -4126,36 +4196,42 @@ msgid "HOLD_TO_SHOW_CURSOR_ADVICE_TEXT"
 msgstr "按住[thrive:input]g_free_cursor[/thrive:input]以显示鼠标指针"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:690
-#: ../src/microbe_stage/MicrobeStage.tscn:741
+#: ../src/microbe_stage/MicrobeStage.tscn:897
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:903
 msgid "ENVIRONMENT"
 msgstr "环境"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:958
-#: ../src/microbe_stage/MicrobeStage.tscn:1009
+#: ../src/microbe_stage/MicrobeStage.tscn:1165
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1169
 msgid "TEMPERATURE_SHORT"
 msgstr "温度"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1014
-#: ../src/microbe_stage/MicrobeStage.tscn:1065
+#: ../src/microbe_stage/MicrobeStage.tscn:1221
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1225
 msgid "LIGHT"
 msgstr "光强"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1069
-#: ../src/microbe_stage/MicrobeStage.tscn:1120
+#: ../src/microbe_stage/MicrobeStage.tscn:1276
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1280
 msgid "PRESSURE_SHORT"
 msgstr "压力"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1156
-#: ../src/microbe_stage/MicrobeStage.tscn:1204
+#: ../src/microbe_stage/MicrobeStage.tscn:1360
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.cs:399
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:681
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:715
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:603
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1365
 msgid "COMPOUNDS"
 msgstr "化合物"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1529
-#: ../src/microbe_stage/MicrobeStage.tscn:1606
+#: ../src/microbe_stage/MicrobeStage.tscn:1762
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1765
 msgid "AGENTS"
 msgstr "物质"
 
@@ -4172,7 +4248,8 @@ msgid "AWAKEN"
 msgstr "唤醒"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1750
-#: ../src/microbe_stage/MicrobeStage.tscn:1816
+#: ../src/microbe_stage/MicrobeStage.tscn:1988
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1966
 msgid "POPULATION_CAPITAL"
 msgstr "种群数量："
 
@@ -4236,57 +4313,62 @@ msgstr "你可以通过复制现有的组织类型并给它们一个新的名字
 msgid "MULTIPLE_METABALLS"
 msgstr "多个元球"
 
-#: ../src/microbe_stage/HUDBottomBar.tscn:48
+#: ../src/microbe_stage/HUDBottomBar.tscn:52
 msgid "STAGE_MENU_BUTTON_TOOLTIP"
 msgstr "暂停菜单"
 
-#: ../src/microbe_stage/HUDBottomBar.tscn:63
+#: ../src/microbe_stage/HUDBottomBar.tscn:67
 msgid "PAUSE_TOOLTIP"
 msgstr "暂停游戏"
 
-#: ../src/microbe_stage/HUDBottomBar.tscn:64
+#: ../src/microbe_stage/HUDBottomBar.tscn:68
 msgid "RESUME_TOOLTIP"
 msgstr "返回游戏"
 
-#: ../src/microbe_stage/HUDBottomBar.tscn:72
+#: ../src/microbe_stage/HUDBottomBar.tscn:76
 msgid "ENVIRONMENT_BUTTON_MICROBE_TOOLTIP"
 msgstr "显示/隐藏环境"
 
-#: ../src/microbe_stage/HUDBottomBar.tscn:86
+#: ../src/microbe_stage/HUDBottomBar.tscn:90
 msgid "COMPOUNDS_BUTTON_MICROBE_TOOLTIP"
 msgstr "显示/隐藏化合物"
 
-#: ../src/microbe_stage/HUDBottomBar.tscn:101
+#: ../src/microbe_stage/HUDBottomBar.tscn:105
+#, fuzzy
+msgid "CHAT_BUTTON_TOOLTIP"
+msgstr "退出游戏"
+
+#: ../src/microbe_stage/HUDBottomBar.tscn:120
 msgid "CHEMICAL_BUTTON_MICROBE_TOOLTIP"
 msgstr "显示/隐藏细胞过程"
 
-#: ../src/microbe_stage/HUDBottomBar.tscn:114
+#: ../src/microbe_stage/HUDBottomBar.tscn:133
 #: ../src/microbe_stage/editor/EditorCommonBottomLeftButtons.tscn:57
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:491
 msgid "STATISTICS"
 msgstr "统计数据"
 
-#: ../src/microbe_stage/HUDBottomBar.tscn:151
+#: ../src/microbe_stage/HUDBottomBar.tscn:170
 msgid "SUICIDE_BUTTON_TOOLTIP"
 msgstr "自杀"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:743
+#: ../src/microbe_stage/Microbe.Contact.cs:915
 msgid "SUCCESSFUL_SCAVENGE"
 msgstr "成功扫荡的细胞器"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:750
+#: ../src/microbe_stage/Microbe.Contact.cs:922
 msgid "SUCCESSFUL_KILL"
 msgstr "成功杀死"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:931
+#: ../src/microbe_stage/Microbe.Contact.cs:1110
 msgid "DEATH"
 msgstr "死亡数"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:1195
+#: ../src/microbe_stage/Microbe.Contact.cs:1385
 msgid "ESCAPE_ENGULFING"
 msgstr "逃脱被吞噬的命运"
 
-#: ../src/microbe_stage/Microbe.Interior.cs:1114
+#: ../src/microbe_stage/Microbe.Interior.cs:1126
 msgid "REPRODUCED"
 msgstr "繁殖次数"
 
@@ -4321,30 +4403,37 @@ msgid "DESPAWN_ENTITIES"
 msgstr "杀死所有实体"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:62
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:61
 msgid "PAUSE_PROMPT"
 msgstr "[center]按[thrive:input]g_pause[/thrive:input]以解除暂停[/center]"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:109
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:104
 msgid "SIGNAL_COMMAND_NONE"
 msgstr "无指令"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:110
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:105
 msgid "SIGNAL_COMMAND_FOLLOW"
 msgstr "跟我来"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:111
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:106
 msgid "SIGNAL_COMMAND_TO_ME"
 msgstr "到我这边来"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:112
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:107
 msgid "SIGNAL_COMMAND_FLEE"
 msgstr "逃跑"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:113
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:108
 msgid "SIGNAL_COMMAND_AGGRESSION"
 msgstr "变得更有侵略性"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:116
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:111
 msgid "SIGNAL_TO_EMIT"
 msgstr "要发出的信号"
 
@@ -4358,20 +4447,22 @@ msgid "FOSSILISATION_HINT"
 msgstr "保存该物种到化石中"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:223
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:211
 msgid "DEVOURED"
 msgstr "被吞噬"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:322
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:310
 msgid "STUFF_AT"
 msgstr "在{0:F1}, {1:F1}的东西："
 
 #: ../src/microbe_stage/MicrobeHUD.cs:414
-#: ../src/microbe_stage/MicrobeStage.tscn:1785
+#: ../src/microbe_stage/MicrobeStage.tscn:1957
 msgid "BECOME_MULTICELLULAR"
 msgstr "成为多细胞（{0}/{1}）"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:450
-#: ../src/microbe_stage/MicrobeStage.tscn:1796
+#: ../src/microbe_stage/MicrobeStage.tscn:1968
 msgid "BECOME_MACROSCOPIC"
 msgstr "成为宏观生物（{0}/{1}）"
 
@@ -4391,23 +4482,26 @@ msgstr ""
 "[b]基础六角格大小[/b]\n"
 "  {4}"
 
-#: ../src/microbe_stage/MicrobeStage.cs:732
+#: ../src/microbe_stage/MicrobeStage.cs:741
 msgid "SPAWN_ENEMY_CHEAT_FAIL"
 msgstr "无法使用生成敌人作弊，因为这个地区没有任何敌对物种"
 
-#: ../src/microbe_stage/MicrobeStage.tscn:569
+#: ../src/microbe_stage/MicrobeStage.tscn:726
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:734
 msgid "AT_CURSOR"
 msgstr "鼠标指针处："
 
-#: ../src/microbe_stage/MicrobeStage.tscn:1545
+#: ../src/microbe_stage/MicrobeStage.tscn:1701
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1704
 msgid "INGESTED_MATTER"
 msgstr "摄入的物质"
 
-#: ../src/microbe_stage/MicrobeStage.tscn:1781
+#: ../src/microbe_stage/MicrobeStage.tscn:1953
 msgid "MOVE_TO_MULTICELLULAR_STAGE_TOOLTIP"
 msgstr "进入游戏的下一个阶段（多细胞）。在你有一个足够大的细胞群后就可以使用。"
 
-#: ../src/microbe_stage/MicrobeStage.tscn:1964
+#: ../src/microbe_stage/MicrobeStage.tscn:2136
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2121
 msgid "EDITOR_BUTTON_TOOLTIP"
 msgstr "进入编辑器并修改你的物种"
 
@@ -4423,7 +4517,7 @@ msgstr "{0}{1}"
 msgid "PAUSED"
 msgstr "暂停中"
 
-#: ../src/microbe_stage/PlayerMicrobeInput.cs:125
+#: ../src/microbe_stage/PlayerMicrobeInput.cs:107
 msgid "UNBIND_HELP_TEXT"
 msgstr "解连接模式"
 
@@ -4504,37 +4598,37 @@ msgstr "移动需求"
 msgid "ENERGY_BALANCE_TOOLTIP_CONSUMPTION"
 msgstr "{0}：-{1} ATP"
 
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:577
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:580
 msgid "CELL_TYPE_NAME"
 msgstr "细胞类型名称"
 
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:1273
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:1283
 msgid "NUCLEUS_DELETE_OPTION_DISABLED_TOOLTIP"
 msgstr ""
 "不能删除细胞核，因为这是个不可逆的进化。\n"
 "除非是在当前世代中进化的，那样仍允许撤消或重做。"
 
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:1275
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:1285
 msgid "LAST_ORGANELLE_DELETE_OPTION_DISABLED_TOOLTIP"
 msgstr "无法删除最后的细胞器"
 
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2209
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2219
 msgid "POPULATION_IN_PATCH_SHORT"
 msgstr "{0} （{1}）"
 
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2328
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2338
 msgid "ENERGY_IN_PATCH_FOR"
 msgstr "{1}在{0}的能量"
 
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2332
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2342
 msgid "ENERGY_SUMMARY_LINE"
 msgstr "收集的总能量为{0}，每个体的成本为{1}，在修正前的种群数量为{2}"
 
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2339
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2349
 msgid "ENERGY_SOURCES"
 msgstr "能量来源："
 
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2345
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2355
 msgid "FOOD_SOURCE_ENERGY_INFO"
 msgstr "{0}能量：{1}（适应性：{2}）总可用能量：{3}（总适应性：{4}）"
 
@@ -4708,6 +4802,7 @@ msgid "SPECIES_NAME_DOT_DOT_DOT"
 msgstr "物种名…"
 
 #: ../src/microbe_stage/editor/MicrobeEditor.cs:65
+#: ../src/microbe_stage/multiplayer/microbial_arena/editor/MicrobialArenaEditor.cs:31
 msgid "LOADING_MICROBE_EDITOR"
 msgstr "载入微生物编辑器中"
 
@@ -4899,19 +4994,19 @@ msgstr "灭绝"
 msgid "EXTINCTION_BOX_TEXT"
 msgstr "就像世上存在过的99%的物种一样，你的物种灭绝了。其它的物种会来取代你的生态位并发展兴盛，但那不会是你。作为进化中一个失败的实验品，你将被遗忘。"
 
-#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:256
+#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:257
 msgid "BIOME_LABEL"
 msgstr "生物群系：{0}"
 
-#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:259
+#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:260
 msgid "BELOW_SEA_LEVEL"
 msgstr "在海平面下方{0}-{1}米处"
 
-#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:274
+#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:275
 msgid "LIGHT_LEVEL_LABEL_AT_NOON"
 msgstr "{0} 正午"
 
-#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:300
+#: ../src/microbe_stage/gui/PatchDetailsPanel.cs:304
 msgid "SPECIES_WITH_POPULATION"
 msgstr "{0}的种群数量：{1}"
 
@@ -4956,6 +5051,63 @@ msgstr "你已发展繁荣（Thrived）！"
 #: ../src/microbe_stage/gui/WinBox.tscn:91
 msgid "WIN_TEXT"
 msgstr "恭喜你！你已赢得了这个版本的Thrive！如果你愿意你可以关掉这个页面并继续游玩，或者在新世界开始一场新游戏。"
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:51
+msgid "JOINING_MICROBIAL_ARENA"
+msgstr ""
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:531
+msgid "KILL_FEED_RIPPED_APART"
+msgstr ""
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:534
+msgid "KILL_FEED_ENGULFED"
+msgstr ""
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:538
+msgid "KILL_FEED_POISONED"
+msgstr ""
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:550
+msgid "KILL_FEED_EVOLVED"
+msgstr ""
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:559
+msgid "KILL_FEED_SUICIDE"
+msgstr ""
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1993
+#, fuzzy
+msgid "MICROBIAL_ARENA_MAP_HINT"
+msgstr "微生物阶段"
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2454
+msgid "SCOREBOARD_UPPERCASE"
+msgstr ""
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:368
+msgid "GAME_OVER"
+msgstr ""
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.cs:47
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:51
+msgid "MINUTES_LOWERCASE"
+msgstr ""
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:34
+#, fuzzy
+msgid "TIME_LIMIT"
+msgstr "时间线"
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:63
+#, fuzzy
+msgid "ARENA_RADIUS"
+msgstr "搜索半径："
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:95
+#, fuzzy
+msgid "BIOME"
+msgstr "生物群系：{0}"
 
 #: ../src/modding/ModLoader.cs:302 ../src/modding/ModLoader.cs:350
 msgid "CANT_LOAD_MOD_INFO"
@@ -5424,6 +5576,269 @@ msgstr "使用自动Harmony加载"
 msgid "CREATE"
 msgstr "创建"
 
+#: ../src/networking/ChatBox.tscn:71
+#, fuzzy
+msgid "TYPE_MESSAGE"
+msgstr "逗知识：栉毛虫和草履虫被当做教科书级的捕食者与猎物关系研究了几十年。你是栉毛虫，还是草履虫呢？捕食者，还是猎物？"
+
+#: ../src/networking/ChatBox.tscn:79
+#: ../src/networking/ChatBoxUndecorated.tscn:70
+msgid "SEND"
+msgstr ""
+
+#: ../src/networking/KickPlayerDialog.tscn:17
+msgid "KICK_PLAYER"
+msgstr ""
+
+#: ../src/networking/KickPlayerDialog.tscn:28
+msgid "REASON_FOR_KICK"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:179
+msgid "LOBBY_ATTRIBUTE_IN_PROGRESS"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:181
+msgid "LOBBY_ATTRIBUTE_PENDING"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:188
+msgid "MULTIPLAYER_PLAYER_IS_KICKED"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:189
+msgid "UNSPECIFIED_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:243
+#: ../src/networking/MultiplayerGUI.tscn:373
+#, fuzzy
+msgid "START"
+msgstr "启动中"
+
+#: ../src/networking/MultiplayerGUI.cs:256
+msgid "JOIN"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:375
+msgid "CONNECTING"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:376
+msgid "ESTABLISHING_CONNECTION_TO"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:385
+#: ../src/networking/MultiplayerGUI.cs:500
+#, fuzzy
+msgid "CONNECTION_FAILED"
+msgstr "Mod创建失败"
+
+#: ../src/networking/MultiplayerGUI.cs:386
+#: ../src/networking/MultiplayerGUI.cs:501
+msgid "FAILED_TO_ESTABLISH_CONNECTION"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:413
+#: ../src/networking/MultiplayerGUI.cs:425
+#, fuzzy
+msgid "HOSTING_FAILED"
+msgstr "保存失败！发生了一个异常"
+
+#: ../src/networking/MultiplayerGUI.cs:414
+#: ../src/networking/MultiplayerGUI.cs:426
+msgid "FAILED_TO_CREATE_SERVER"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:433
+#: ../src/networking/MultiplayerGUI.cs:559
+msgid "UPNP_SETUP"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:434
+msgid "UPNP_DISCOVERING_DEVICES"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:517
+#: ../src/networking/MultiplayerGUI.cs:520
+#: ../src/networking/MultiplayerGUI.cs:524
+#, fuzzy
+msgid "SERVER_DISCONNECTED"
+msgstr "未连接的细胞"
+
+#: ../src/networking/MultiplayerGUI.cs:517
+msgid "SERVER_IS_FULL"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:521
+msgid "NAME_IS_ALREADY_TAKEN"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:525
+msgid "CLOSED_BY_REMOTE_HOST"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:560
+msgid "UPNP_ERROR_WHILE_SETTING_UP"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:568
+#: ../src/networking/MultiplayerGUI.cs:583
+#, fuzzy
+msgid "PORT_FORWARDING"
+msgstr "前进"
+
+#: ../src/networking/MultiplayerGUI.cs:569
+msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.cs:584
+#, fuzzy
+msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED"
+msgstr "尝试写入存档失败了。存档名称可能过长，或者你没有在存档文件夹写入的权限。"
+
+#: ../src/networking/MultiplayerGUI.tscn:82
+msgid "ADDRESS"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.tscn:106
+#, fuzzy
+msgid "PORT"
+msgstr "报告"
+
+#: ../src/networking/MultiplayerGUI.tscn:147
+msgid "HOST"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.tscn:155
+msgid "CONNECT"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.tscn:241
+#, fuzzy
+msgid "PLAYER_LIST"
+msgstr "玩家分裂"
+
+#: ../src/networking/MultiplayerGUI.tscn:251
+#, fuzzy
+msgid "GAME_INFO"
+msgstr "显示更多信息"
+
+#: ../src/networking/MultiplayerGUI.tscn:336
+msgid "CHAT_ROOM"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.tscn:359
+#, fuzzy
+msgid "DISCONNECT"
+msgstr "未连接的细胞"
+
+#: ../src/networking/MultiplayerGUI.tscn:389
+msgid "KICKED"
+msgstr ""
+
+#: ../src/networking/MultiplayerGameMode.cs:70
+#, fuzzy
+msgid "MICROBIAL_ARENA_DESCRIPTION"
+msgstr "微生物阶段"
+
+#: ../src/networking/NetPlayerInfo.cs:26
+msgid "IN_GAME_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetPlayerInfo.cs:28
+msgid "IN_LOBBY_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetPlayerInfo.cs:30
+msgid "JOINING_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetPlayerInfo.cs:32
+msgid "LEAVING_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetPlayerInfo.cs:43
+msgid "G_LETTER"
+msgstr ""
+
+#: ../src/networking/NetPlayerInfo.cs:45
+msgid "L_LETTER"
+msgstr ""
+
+#: ../src/networking/NetworkManager.cs:127
+msgid "GAME_TIME_MINUTES_SECONDS"
+msgstr ""
+
+#: ../src/networking/NetworkManager.cs:374
+msgid "CHAT_PREFIX_AS_SYSTEM"
+msgstr ""
+
+#: ../src/networking/NetworkManager.cs:457
+#, fuzzy
+msgid "PLAYER_HAS_DISCONNECTED"
+msgstr "未连接的细胞"
+
+#: ../src/networking/NetworkManager.cs:490
+#, fuzzy
+msgid "BAD_CONNECTION"
+msgstr "色盲修正："
+
+#: ../src/networking/NetworkManager.cs:494
+msgid "TIMEOUT"
+msgstr ""
+
+#: ../src/networking/NetworkManager.cs:588
+#, fuzzy
+msgid "PLAYER_HAS_CONNECTED"
+msgstr ""
+"玩家\n"
+"速度"
+
+#: ../src/networking/NetworkManager.cs:743
+#, fuzzy
+msgid "PLAYER_HAS_JOINED"
+msgstr "玩家死亡"
+
+#: ../src/networking/NetworkManager.cs:772
+#, fuzzy
+msgid "PLAYER_HAS_LEFT"
+msgstr "玩家分裂"
+
+#: ../src/networking/ServerSetup.cs:120
+#, fuzzy
+msgid "OPEN_WORLD"
+msgstr "打开文件夹"
+
+#: ../src/networking/ServerSetup.tscn:24
+msgid "SERVER_SETUP"
+msgstr ""
+
+#: ../src/networking/ServerSetup.tscn:46
+#, fuzzy
+msgid "SERVER_NAME"
+msgstr "使用的渲染器："
+
+#: ../src/networking/ServerSetup.tscn:73
+#, fuzzy
+msgid "MAX_PLAYERS"
+msgstr "最高FPS："
+
+#: ../src/networking/ServerSetup.tscn:104
+#, fuzzy
+msgid "USE_UPNP"
+msgstr "[center]按[thrive:input]g_pause[/thrive:input]以解除暂停[/center]"
+
+#: ../src/networking/ServerSetup.tscn:131
+#, fuzzy
+msgid "GAME_MODE"
+msgstr "上帝模式"
+
+#: ../src/networking/ServerSetup.tscn:167
+#, fuzzy
+msgid "CONFIRM"
+msgstr "设置"
+
 #: ../src/saving/InProgressLoad.cs:78 ../src/saving/InProgressLoad.cs:102
 #: ../src/saving/InProgressLoad.cs:151
 msgid "LOADING_GAME"
@@ -5492,10 +5907,6 @@ msgstr "存档名称不应包含特殊字符(<>:\"/|?*)"
 #: ../src/saving/NewSaveMenu.tscn:32
 msgid "CREATE_NEW_SAVE"
 msgstr "创建新存档"
-
-#: ../src/saving/NewSaveMenu.tscn:49
-msgid "NAME"
-msgstr "名称："
 
 #: ../src/saving/NewSaveMenu.tscn:67
 msgid "EXTRA_OPTIONS"
@@ -6141,10 +6552,6 @@ msgstr "继续游戏"
 #~ msgstr "免疫胞吞"
 
 #, fuzzy
-#~ msgid "AUTO_GPU_NAME"
-#~ msgstr "自定义用户名："
-
-#, fuzzy
 #~ msgid "CURRENT_USED_RENDERER_NAME"
 #~ msgstr "显示细胞器名称"
 
@@ -6208,9 +6615,6 @@ msgstr "继续游戏"
 
 #~ msgid "OVERWRITE_EXISTING_SAVE_TITLE"
 #~ msgstr "覆写已有的存档？"
-
-#~ msgid "SAVING_FAILED"
-#~ msgstr "保存失败！发生了一个异常"
 
 #~ msgid "TYPE"
 #~ msgstr "类型："

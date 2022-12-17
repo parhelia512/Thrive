@@ -111,7 +111,7 @@ public class NetPlayerLog : PanelContainer
         if (ID == NetworkManager.DEFAULT_SERVER_ID)
         {
             builder.Append(' ');
-            builder.Append($"[color=#fe82ff][{TranslationServer.Translate("HOST_LOWERCASE")}][/color]");
+            builder.Append(TranslationServer.Translate("PLAYER_LOG_HOST_ATTRIBUTE"));
         }
 
         var network = NetworkManager.Instance;

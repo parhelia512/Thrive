@@ -544,7 +544,18 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     private void ClientNotifyReturningFromEditor(int peerId)
     {
         var name = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(peerId)!.Name}[/color]";
-        HUD.AddKillFeedLog(TranslationServer.Translate("KILL_FEED_EVOLVED"), peerId == NetworkManager.Instance.PeerId);
+
+        HUD.AddKillFeedLog(TranslationServer.Translate("KILL_FEED_EVOLVED").FormatSafe(name),
+            peerId == NetworkManager.Instance.PeerId);
+    }
+
+    [PuppetSync]
+    private void ClientNotifyMicrobeSuicide(int peerId)
+    {
+        var name = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(peerId)!.Name}[/color]";
+
+        HUD.AddKillFeedLog(TranslationServer.Translate("KILL_FEED_SUICIDE").FormatSafe(name),
+            peerId == NetworkManager.Instance.PeerId);
     }
 
     [RemoteSync]
@@ -607,6 +618,8 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
             var entity = MultiplayerGameWorld.GetEntity(state.EntityID);
             var microbe = (Microbe?)entity;
             microbe?.Damage(9999.0f, "suicide");
+
+            Rpc(nameof(ClientNotifyMicrobeSuicide), peerId);
         }
     }
 }

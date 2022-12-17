@@ -1990,7 +1990,7 @@ margin_top = 8.0
 margin_right = 250.0
 margin_bottom = 28.0
 custom_fonts/normal_font = ExtResource( 4 )
-ExtendedBbcode = "[right]Hold [thrive:input]g_toggle_map[/thrive:input] to show map[/right]"
+ExtendedBbcode = "MICROBIAL_ARENA_MAP_HINT"
 
 [node name="DataValue" type="PanelContainer" parent="GUI/MicrobialArenaHUD/BottomRight"]
 anchor_left = 1.0
@@ -2451,7 +2451,7 @@ margin_top = 1.0
 margin_right = 879.0
 margin_bottom = 26.0
 size_flags_horizontal = 3
-text = "SCOREBOARD"
+text = "SCOREBOARD_UPPERCASE"
 align = 1
 
 [node name="NetPlayerList" parent="GUI/InfoScreen/MarginContainer/VBoxContainer" instance=ExtResource( 52 )]
@@ -2469,7 +2469,6 @@ margin_top = -201.0
 margin_right = 323.0
 margin_bottom = -51.0
 rect_min_size = Vector2( 313, 150 )
-ChatHistoryRange = 10
 CaptureFocusWhenInvisible = false
 
 [node name="PatchNameOverlay" parent="GUI" instance=ExtResource( 73 )]

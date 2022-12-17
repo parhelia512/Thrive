@@ -67,7 +67,6 @@ margin_left = 97.0
 margin_right = 297.0
 margin_bottom = 31.0
 rect_min_size = Vector2( 200, 0 )
-placeholder_text = "Use default"
 caret_blink = true
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="PrimaryMenu/VBoxContainer"]
@@ -90,6 +89,9 @@ rect_min_size = Vector2( 200, 0 )
 text = "127.0.0.1"
 placeholder_text = "Use default"
 caret_blink = true
+__meta__ = {
+"_editor_description_": "PLACEHOLDER"
+}
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="PrimaryMenu/VBoxContainer"]
 margin_top = 70.0
@@ -111,6 +113,9 @@ rect_min_size = Vector2( 200, 0 )
 text = "4321"
 placeholder_text = "Use default"
 caret_blink = true
+__meta__ = {
+"_editor_description_": "PLACEHOLDER"
+}
 
 [node name="HSeparator" type="HSeparator" parent="PrimaryMenu"]
 margin_top = 110.0
