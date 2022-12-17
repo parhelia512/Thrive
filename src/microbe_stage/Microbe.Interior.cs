@@ -12,10 +12,10 @@ using Newtonsoft.Json;
 public partial class Microbe
 {
     [JsonProperty]
-    private CompoundBag compounds = new(0.0f);
+    private readonly Dictionary<Compound, float> requiredCompoundsForBaseReproduction = new();
 
     [JsonProperty]
-    private readonly Dictionary<Compound, float> requiredCompoundsForBaseReproduction = new();
+    private CompoundBag compounds = new(0.0f);
 
     private Compound atp = null!;
     private Compound glucose = null!;

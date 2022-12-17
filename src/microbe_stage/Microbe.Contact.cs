@@ -338,7 +338,7 @@ public partial class Microbe
     /// </summary>
     public void Damage(float amount, string source, int? attackerPeerId = null)
     {
-        if (IsPlayerMicrobe && CheatManager.GodMode || NetworkManager.Instance.IsClient)
+        if (IsPlayerMicrobe && (CheatManager.GodMode || NetworkManager.Instance.IsClient))
             return;
 
         if (amount == 0 || Dead)

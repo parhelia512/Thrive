@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using Godot;
-using Nito.Collections;
 
 public class ChatBox : VBoxContainer
 {
@@ -18,15 +17,10 @@ public class ChatBox : VBoxContainer
     private CustomRichTextLabel chatDisplay = null!;
     private Button sendButton = null!;
 
-    private Deque<string> chatHistory = new();
-
     private bool controlsHoveredOver;
 
     [Signal]
     public delegate void Focused();
-
-    [Export]
-    public int ChatHistoryRange { get; set; } = 50;
 
     [Export]
     public bool ReleaseLineEditFocusAfterMessageSent { get; set; } = true;
@@ -55,11 +49,6 @@ public class ChatBox : VBoxContainer
         NetworkManager.Instance.Connect(nameof(NetworkManager.ChatReceived), this, nameof(OnMessageReceived));
 
         OnMessageChanged(string.Empty);
-    }
-
-    public void ClearMessages()
-    {
-        chatHistory.Clear();
         DisplayChat();
     }
 
@@ -101,7 +90,7 @@ public class ChatBox : VBoxContainer
     {
         var builder = new StringBuilder(100);
 
-        foreach (var message in chatHistory)
+        foreach (var message in NetworkManager.Instance.ChatHistory)
         {
             builder.AppendLine(message);
         }
@@ -113,7 +102,8 @@ public class ChatBox : VBoxContainer
     {
         if (chat == "/clear")
         {
-            ClearMessages();
+            NetworkManager.Instance.ClearChatHistory();
+            DisplayChat();
         }
         else if (chat.BeginsWith("/updateintv "))
         {
@@ -132,12 +122,8 @@ public class ChatBox : VBoxContainer
         }
     }
 
-    private void OnMessageReceived(string message)
+    private void OnMessageReceived()
     {
-        if (chatHistory.Count > ChatHistoryRange)
-            chatHistory.RemoveFromFront();
-
-        chatHistory.AddToBack(message);
         DisplayChat();
     }
 
@@ -146,7 +132,7 @@ public class ChatBox : VBoxContainer
         OnMessageEntered(lineEdit.Text);
     }
 
-    public void OnClickedOffTextBox()
+    private void OnClickedOffTextBox()
     {
         var focused = GetFocusOwner();
 

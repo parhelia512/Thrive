@@ -206,9 +206,6 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     [Export]
     public NodePath FossilisationDialogPath = null!;
 
-    [Signal]
-    public delegate void Clicked();
-
     // Inspections and cleanup disagree here
     // ReSharper disable RedundantNameQualifier
     protected readonly System.Collections.Generic.Dictionary<Species, int> hoveredSpeciesCounts = new();
@@ -353,6 +350,9 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
     [Signal]
     public delegate void OnOpenMenuToHelp();
+
+    [Signal]
+    public delegate void Clicked();
 
     /// <summary>
     ///   Gets and sets the text that appears at the upper HUD.

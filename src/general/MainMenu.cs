@@ -244,11 +244,11 @@ public class MainMenu : NodeWithInput
         }
     }
 
-    public void OpenMultiplayerMenu(MultiplayerGUI.Submenu submenu)
+    public void OpenMultiplayerMenu(MultiplayerGUI.SubMenu submenu)
     {
         SetCurrentMenu(uint.MaxValue, false);
         multiplayerMenu.Show();
-        multiplayerMenu.CurrentMenu = submenu;
+        multiplayerMenu.SetSubMenu(submenu);
     }
 
     public void ShowKickedDialog(string reason)

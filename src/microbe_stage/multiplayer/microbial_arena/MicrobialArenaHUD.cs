@@ -47,8 +47,6 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     /// </summary>
     private Microbe? signalingAgentMenuOpenForMicrobe;
 
-    private int? playerColonySize;
-
     private bool playerWasDigested;
 
     private List<KillFeedLog> killFeedLogs = new();
@@ -184,6 +182,11 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
 
         base.ToggleInfoScreen();
         Visible = !infoScreen.Visible;
+    }
+
+    public override void ShowFossilisationButtons()
+    {
+        // TODO: implement this
     }
 
     protected override void ReadPlayerHitpoints(out float hp, out float maxHP)
@@ -390,11 +393,6 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     private float GetPlayerUsedIngestionCapacity()
     {
         return stage!.Player!.Colony?.UsedIngestionCapacity ?? stage.Player.UsedIngestionCapacity;
-    }
-
-    public override void ShowFossilisationButtons()
-    {
-        // TODO: implement this
     }
 
     public class KillFeedLog : CustomRichTextLabel

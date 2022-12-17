@@ -21,12 +21,12 @@ using Newtonsoft.Json;
 public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMultiplayerStage
     where TPlayer : class, INetPlayer
 {
+    public event EventHandler? GameReady;
+
     public NetPlayerState PlayerState => GetPlayerState(NetworkManager.Instance.PeerId!.Value) ??
-        throw new NullReferenceException("Player has not been set");
+        throw new InvalidOperationException("Player has not been set");
 
     public MultiplayerGameWorld MultiplayerGameWorld => (MultiplayerGameWorld)GameWorld;
-
-    public event EventHandler? GameReady;
 
     protected abstract string StageLoadingMessage { get; }
 
@@ -417,13 +417,13 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         LoadingScreen.Instance.Hide();
 
         var menu = SceneManager.Instance.ReturnToMenu();
-        menu.OpenMultiplayerMenu(MultiplayerGUI.Submenu.Main);
+        menu.OpenMultiplayerMenu(MultiplayerGUI.SubMenu.Main);
     }
 
     private void OnKicked(string reason)
     {
         var menu = SceneManager.Instance.ReturnToMenu();
-        menu.OpenMultiplayerMenu(MultiplayerGUI.Submenu.Main);
+        menu.OpenMultiplayerMenu(MultiplayerGUI.SubMenu.Main);
         menu.ShowKickedDialog(reason);
     }
 

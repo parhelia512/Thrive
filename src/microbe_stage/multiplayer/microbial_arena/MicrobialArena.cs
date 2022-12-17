@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using Godot;
 
 /// <summary>
@@ -49,7 +48,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
     protected override IStageHUD BaseHUD => HUD;
 
-    protected override string StageLoadingMessage => "Joining Microbial Arena";
+    protected override string StageLoadingMessage => TranslationServer.Translate("JOINING_MICROBIAL_ARENA");
 
     private LocalizedString CurrentPatchName =>
         MultiplayerGameWorld.Map.CurrentPatch?.Name ?? throw new InvalidOperationException("no current patch");
@@ -82,7 +81,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         {
             TimedLifeSystem.Process(delta);
             ProcessSystem.Process(delta);
-            //spawner.Process(delta, Vector3.Zero);
+            spawner.Process(delta, Vector3.Zero);
 
             NetworkHandleRespawns(delta);
 
@@ -121,7 +120,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
                 microbe.ApplySpecies(species);
         }
 
-        if (!gameOver && NetworkManager.Instance.ElapsedGameTimeMinutes >= Settings.TimeLimit)
+        if (!gameOver && IsGameOver())
         {
             GameOver();
         }
@@ -155,8 +154,6 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     public override void OnFinishTransitioning()
     {
         base.OnFinishTransitioning();
-
-        HUD.ShowPatchName(CurrentPatchName.ToString());
     }
 
     public override void StartMusic()
@@ -211,12 +208,12 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         MovingToEditor = false;
 
-        RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(NotifyMovingToEditor));
+        RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerNotifyMovingToEditor));
     }
 
     public override bool IsGameOver()
     {
-        return gameOver;
+        return NetworkManager.Instance.ElapsedGameTimeMinutes >= Settings.TimeLimit;
     }
 
     public override void OnReturnFromEditor()
@@ -228,14 +225,15 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         StartMusic();
 
-        RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(NotifyReturningFromEditor),
+        RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerNotifyReturningFromEditor),
             ThriveJsonConverter.Instance.SerializeObject(
                 MultiplayerGameWorld.GetSpecies((uint)NetworkManager.Instance.PeerId!.Value)));
     }
 
     public override void OnSuicide()
     {
-        RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(NotifyMicrobeSuicide), NetworkManager.Instance.PeerId!.Value);
+        RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerNotifyMicrobeSuicide),
+            NetworkManager.Instance.PeerId!.Value);
     }
 
     protected override void SetupStage()
@@ -245,10 +243,8 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         // Supply inactive fluid system just to fulfill init parameter
         Clouds.Init(FluidSystem, Settings.ArenaRadius, COMPOUND_PLANE_SIZE_MAGIC_NUMBER);
 
-        // Disable clouds simulation as it's too chaotic to synchronize
+        // Disable clouds simulation as it's currently too chaotic to synchronize
         Clouds.RunSimulation = false;
-
-        Clouds.SetProcess(false);
 
         if (NetworkManager.Instance.IsAuthoritative)
         {
@@ -541,13 +537,22 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
                 break;
         }
 
-        HUD.AddKillFeedLog(string.Format(
-            CultureInfo.CurrentCulture, content, attackerName, victimName), highlight);
+        HUD.AddKillFeedLog(content.FormatSafe(attackerName, victimName), highlight);
     }
 
-    [Remote]
-    private void NotifyMovingToEditor()
+    [PuppetSync]
+    private void ClientNotifyReturningFromEditor(int peerId)
     {
+        var name = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(peerId)!.Name}[/color]";
+        HUD.AddKillFeedLog(TranslationServer.Translate("KILL_FEED_EVOLVED"), peerId == NetworkManager.Instance.PeerId);
+    }
+
+    [RemoteSync]
+    private void ServerNotifyMovingToEditor()
+    {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
         var sender = GetTree().GetRpcSenderId();
 
         MultiplayerGameWorld.Players.TryGetValue(sender, out NetPlayerState state);
@@ -565,9 +570,12 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
             ThriveJsonConverter.Instance.SerializeObject(MultiplayerGameWorld.Species[(uint)sender]));
     }
 
-    [Remote]
-    private void NotifyReturningFromEditor(string editedSpecies)
+    [RemoteSync]
+    private void ServerNotifyReturningFromEditor(string editedSpecies)
     {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
         var sender = GetTree().GetRpcSenderId();
 
         MultiplayerGameWorld.Players.TryGetValue(sender, out NetPlayerState state);
@@ -584,11 +592,16 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
             NetworkManager.Instance.ServerSetFloats(sender, "base_size", deserialized.BaseHexSize);
 
         NotifyScoreUpdate(sender);
+
+        Rpc(nameof(ClientNotifyReturningFromEditor), sender);
     }
 
-    [Remote]
-    private void NotifyMicrobeSuicide(int peerId)
+    [RemoteSync]
+    private void ServerNotifyMicrobeSuicide(int peerId)
     {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
         if (MultiplayerGameWorld.Players.TryGetValue(peerId, out NetPlayerState state))
         {
             var entity = MultiplayerGameWorld.GetEntity(state.EntityID);

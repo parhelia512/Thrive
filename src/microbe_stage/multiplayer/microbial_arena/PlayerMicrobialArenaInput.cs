@@ -1,5 +1,5 @@
-using Godot;
 using System;
+using Godot;
 
 public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
 {
@@ -60,7 +60,7 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
         stage.Player.WantsToEngulf = !stage.Player.WantsToEngulf;
     }
 
-    [RunOnKeyToggle("g_toggle_scoreboard")]
+    [RunOnKeyChange("g_toggle_scoreboard")]
     public void ShowInfoScreen(bool heldDown)
     {
         stage?.HUD.ToggleInfoScreen();

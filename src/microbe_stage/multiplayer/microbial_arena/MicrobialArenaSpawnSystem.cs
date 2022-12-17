@@ -20,17 +20,12 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
 
     private float spawnAreaRadius;
 
-    /// <summary>
-    ///   Estimate count of existing spawned entities, cached to make delayed spawns cheaper
-    /// </summary>
-    private float estimateEntityCount;
-
     public MicrobialArenaSpawnSystem(Node root, MultiplayerGameWorld gameWorld, CompoundCloudSystem clouds,
         float radius) : base(root)
     {
         this.gameWorld = gameWorld;
         this.clouds = clouds;
-        this.spawnAreaRadius = radius;
+        spawnAreaRadius = radius;
     }
 
     public Action<List<Vector2>>? OnSpawnCoordinatesChanged { get; set; }

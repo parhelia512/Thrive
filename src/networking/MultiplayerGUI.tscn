@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=1]
 [ext_resource path="res://src/networking/MultiplayerGUI.cs" type="Script" id=2]
@@ -10,7 +10,11 @@
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-AlmostSmaller.tres" type="DynamicFont" id=8]
 [ext_resource path="res://src/gui_common/dialogs/CustomConfirmationDialog.tscn" type="PackedScene" id=9]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Smaller.tres" type="DynamicFont" id=10]
+[ext_resource path="res://src/gui_common/fonts/Lato-Bold-Smaller.tres" type="DynamicFont" id=11]
+[ext_resource path="res://src/gui_common/fonts/Jura-Regular-Small.tres" type="DynamicFont" id=12]
 [ext_resource path="res://src/gui_common/CustomRichTextLabel.tscn" type="PackedScene" id=13]
+
+[sub_resource type="ButtonGroup" id=1]
 
 [node name="MultiplayerGUI" type="CenterContainer"]
 anchor_right = 1.0
@@ -27,9 +31,13 @@ ServerNamePath = NodePath("Lobby/PanelContainer/MarginContainer/HBoxContainer/Se
 ServerAttributesPath = NodePath("Lobby/PanelContainer/MarginContainer/HBoxContainer/ServerAttributes")
 StartButtonPath = NodePath("Lobby/HBoxContainer/Start")
 KickedDialogPath = NodePath("KickedDialog")
-GameModeTitlePath = NodePath("Lobby/HBoxContainer2/VBoxContainer/Context/MarginContainer/VBoxContainer/GameModeTitle")
-GameModeDescriptionPath = NodePath("Lobby/HBoxContainer2/VBoxContainer/Context/MarginContainer/VBoxContainer/GameModeDescription")
+GameModeTitlePath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context/MarginContainer/VBoxContainer/GameModeTitle")
+GameModeDescriptionPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context/MarginContainer/VBoxContainer/GameModeDescription")
 ChatBoxPath = NodePath("Lobby/HBoxContainer2/VBoxContainer/ChatPanel/MarginContainer/VBoxContainer/ChatBox")
+PlayerListTabPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/NetPlayerList")
+GameInfoTabPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context")
+PlayerListTabButtonPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs/PlayerList")
+GameInfoTabButtonPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs/GameInfo")
 NetworkedPlayerLabelScene = ExtResource( 6 )
 
 [node name="PrimaryMenu" type="VBoxContainer" parent="."]
@@ -144,9 +152,9 @@ text = "CONNECT"
 [node name="Lobby" type="VBoxContainer" parent="."]
 visible = false
 margin_left = 223.0
-margin_top = 114.0
+margin_top = 115.0
 margin_right = 1057.0
-margin_bottom = 606.0
+margin_bottom = 605.0
 
 [node name="PanelContainer" type="PanelContainer" parent="Lobby"]
 margin_right = 834.0
@@ -213,64 +221,81 @@ margin_top = 5.0
 margin_right = 543.0
 margin_bottom = 443.0
 
-[node name="Label" type="Label" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="Tabs" type="HBoxContainer" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer"]
 margin_right = 538.0
-margin_bottom = 17.0
-custom_fonts/font = ExtResource( 4 )
+margin_bottom = 28.0
+
+[node name="PlayerList" type="Button" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs"]
+margin_right = 91.0
+margin_bottom = 28.0
+custom_fonts/font = ExtResource( 12 )
+toggle_mode = true
+pressed = true
+action_mode = 0
+group = SubResource( 1 )
 text = "PLAYER_LIST"
-align = 1
+
+[node name="GameInfo" type="Button" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs"]
+margin_left = 95.0
+margin_right = 178.0
+margin_bottom = 28.0
+custom_fonts/font = ExtResource( 12 )
+toggle_mode = true
+action_mode = 0
+group = SubResource( 1 )
+text = "GAME_INFO"
 
 [node name="NetPlayerList" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource( 5 )]
-margin_top = 21.0
+margin_top = 32.0
 margin_right = 538.0
 margin_bottom = 438.0
 size_flags_vertical = 3
+
+[node name="Context" type="PanelContainer" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer"]
+visible = false
+margin_top = 237.0
+margin_right = 538.0
+margin_bottom = 438.0
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context"]
+margin_left = 1.0
+margin_top = 1.0
+margin_right = 537.0
+margin_bottom = 200.0
+custom_constants/margin_right = 5
+custom_constants/margin_top = 5
+custom_constants/margin_left = 5
+custom_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context/MarginContainer"]
+margin_left = 5.0
+margin_top = 5.0
+margin_right = 531.0
+margin_bottom = 194.0
+
+[node name="GameModeTitle" type="Label" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context/MarginContainer/VBoxContainer"]
+margin_right = 526.0
+margin_bottom = 17.0
+custom_fonts/font = ExtResource( 4 )
+text = "GAME_MODE_TITLE"
+__meta__ = {
+"_editor_description_": "PLACEHOLDER"
+}
+
+[node name="GameModeDescription" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context/MarginContainer/VBoxContainer" instance=ExtResource( 13 )]
+margin_top = 21.0
+margin_right = 526.0
+margin_bottom = 189.0
+size_flags_vertical = 3
+fit_content_height = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Lobby/HBoxContainer2"]
 margin_left = 554.0
 margin_right = 834.0
 margin_bottom = 450.0
 
-[node name="Context" type="PanelContainer" parent="Lobby/HBoxContainer2/VBoxContainer"]
-margin_right = 280.0
-margin_bottom = 223.0
-size_flags_vertical = 3
-
-[node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/VBoxContainer/Context"]
-margin_left = 1.0
-margin_top = 1.0
-margin_right = 279.0
-margin_bottom = 222.0
-custom_constants/margin_right = 10
-custom_constants/margin_top = 10
-custom_constants/margin_left = 10
-custom_constants/margin_bottom = 10
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Lobby/HBoxContainer2/VBoxContainer/Context/MarginContainer"]
-margin_left = 10.0
-margin_top = 10.0
-margin_right = 268.0
-margin_bottom = 211.0
-
-[node name="GameModeTitle" type="Label" parent="Lobby/HBoxContainer2/VBoxContainer/Context/MarginContainer/VBoxContainer"]
-margin_right = 258.0
-margin_bottom = 17.0
-custom_fonts/font = ExtResource( 4 )
-text = "GAME_MODE_TITLE"
-align = 1
-__meta__ = {
-"_editor_description_": "PLACEHOLDER"
-}
-
-[node name="GameModeDescription" parent="Lobby/HBoxContainer2/VBoxContainer/Context/MarginContainer/VBoxContainer" instance=ExtResource( 13 )]
-margin_top = 21.0
-margin_right = 258.0
-margin_bottom = 201.0
-size_flags_vertical = 3
-fit_content_height = false
-
 [node name="ChatPanel" type="PanelContainer" parent="Lobby/HBoxContainer2/VBoxContainer"]
-margin_top = 227.0
 margin_right = 280.0
 margin_bottom = 450.0
 rect_min_size = Vector2( 280, 0 )
@@ -280,7 +305,7 @@ size_flags_vertical = 3
 margin_left = 1.0
 margin_top = 1.0
 margin_right = 279.0
-margin_bottom = 222.0
+margin_bottom = 449.0
 custom_constants/margin_right = 5
 custom_constants/margin_top = 5
 custom_constants/margin_left = 5
@@ -290,7 +315,7 @@ custom_constants/margin_bottom = 5
 margin_left = 5.0
 margin_top = 5.0
 margin_right = 273.0
-margin_bottom = 216.0
+margin_bottom = 443.0
 
 [node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/VBoxContainer/ChatPanel/MarginContainer/VBoxContainer"]
 margin_right = 268.0
@@ -311,35 +336,35 @@ anchor_top = 0.0
 anchor_bottom = 0.0
 margin_top = 21.0
 margin_right = 268.0
-margin_bottom = 211.0
+margin_bottom = 438.0
 size_flags_vertical = 3
 ReleaseLineEditFocusAfterMessageSent = false
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Lobby"]
 margin_top = 495.0
 margin_right = 834.0
-margin_bottom = 527.0
+margin_bottom = 525.0
 
 [node name="Disconnect" type="Button" parent="Lobby/HBoxContainer"]
-margin_right = 125.0
-margin_bottom = 32.0
+margin_right = 114.0
+margin_bottom = 30.0
 size_flags_horizontal = 0
 size_flags_vertical = 0
-custom_fonts/font = ExtResource( 8 )
+custom_fonts/font = ExtResource( 11 )
 text = "DISCONNECT"
 
 [node name="Control" type="Control" parent="Lobby/HBoxContainer"]
-margin_left = 129.0
+margin_left = 118.0
 margin_right = 730.0
-margin_bottom = 32.0
+margin_bottom = 30.0
 size_flags_horizontal = 3
 
 [node name="Start" type="Button" parent="Lobby/HBoxContainer"]
 margin_left = 734.0
 margin_right = 834.0
-margin_bottom = 32.0
+margin_bottom = 30.0
 rect_min_size = Vector2( 100, 0 )
-custom_fonts/font = ExtResource( 8 )
+custom_fonts/font = ExtResource( 11 )
 text = "START"
 
 [node name="GeneralDialog" parent="." instance=ExtResource( 9 )]
@@ -377,6 +402,8 @@ margin_bottom = 360.0
 [connection signal="pressed" from="PrimaryMenu/HBoxContainer2/Back" to="." method="OnBackPressed"]
 [connection signal="pressed" from="PrimaryMenu/HBoxContainer2/Host" to="." method="OnCreatePressed"]
 [connection signal="pressed" from="PrimaryMenu/HBoxContainer2/Connect" to="." method="OnConnectPressed"]
+[connection signal="pressed" from="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs/PlayerList" to="." method="OnLobbyTabPressed" binds= [ "PlayerList" ]]
+[connection signal="pressed" from="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs/GameInfo" to="." method="OnLobbyTabPressed" binds= [ "GameInfo" ]]
 [connection signal="pressed" from="Lobby/HBoxContainer/Disconnect" to="." method="OnDisconnectPressed"]
 [connection signal="pressed" from="Lobby/HBoxContainer/Start" to="." method="OnStartPressed"]
 [connection signal="toggled" from="Lobby/HBoxContainer/Start" to="." method="OnReadyToggled"]

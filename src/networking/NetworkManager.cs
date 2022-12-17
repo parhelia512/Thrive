@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 using Newtonsoft.Json;
+using Nito.Collections;
 
 /// <summary>
 ///   Manages online game sessions.
@@ -12,10 +12,13 @@ using Newtonsoft.Json;
 public class NetworkManager : Node
 {
     public const int DEFAULT_SERVER_ID = 1;
+    public const int MAX_CHAT_HISTORY_RANGE = 200;
 
     private static NetworkManager? instance;
 
     private readonly Dictionary<int, NetPlayerInfo> connectedPlayers = new();
+
+    private Deque<string> chatHistory = new();
 
     private NetworkedMultiplayerENet? peer;
     private UPNP? upnp;
@@ -44,7 +47,7 @@ public class NetworkManager : Node
     public delegate void Kicked(string reason);
 
     [Signal]
-    public delegate void ChatReceived(string message);
+    public delegate void ChatReceived();
 
     [Signal]
     public delegate void PlayerJoined(int peerId);
@@ -90,11 +93,13 @@ public class NetworkManager : Node
     public int? PeerId { get; private set; }
 
     /// <summary>
-    ///   All peers connected in the network (INCLUDING SELF).
+    ///   All peers connected in the network (INCLUDING SELF), stored by network ID.
     /// </summary>
     public IReadOnlyDictionary<int, NetPlayerInfo> ConnectedPlayers => connectedPlayers;
 
     public NetPlayerInfo? LocalPlayer => PeerId.HasValue ? GetPlayerInfo(PeerId.Value) : null;
+
+    public IReadOnlyList<string> ChatHistory => chatHistory;
 
     public bool IsServer { get; private set; }
 
@@ -119,8 +124,7 @@ public class NetworkManager : Node
     /// <summary>
     ///   Returns the current game time in a more readable format (with explicit minutes and seconds).
     /// </summary>
-    public string GameTimeHumanized => string.Format(
-        CultureInfo.CurrentCulture, TranslationServer.Translate("GAME_TIME_MINUTES_SECONDS"),
+    public string GameTimeHumanized => TranslationServer.Translate("GAME_TIME_MINUTES_SECONDS").FormatSafe(
         ElapsedGameTimeMinutes, ElapsedGameTimeSeconds);
 
     public override void _Ready()
@@ -213,6 +217,7 @@ public class NetworkManager : Node
         }
 
         OnConnectedToServer(playerName);
+        NotifyReadyForSessionStatusChange(DEFAULT_SERVER_ID, true);
 
         Print("Server is player hosted");
 
@@ -257,6 +262,8 @@ public class NetworkManager : Node
         GameInSession = false;
         elapsedGameTime = 0;
         PeerId = null;
+
+        ClearChatHistory();
     }
 
     public bool HasPlayer(int peerId)
@@ -368,6 +375,11 @@ public class NetworkManager : Node
             BroadcastChat(message, true);
     }
 
+    public void ClearChatHistory()
+    {
+        chatHistory.Clear();
+    }
+
     /// <summary>
     ///   Differentiates between print call from server or client. We do this so that they will stand out more
     ///   on the output log.
@@ -457,6 +469,9 @@ public class NetworkManager : Node
         GameInSession = false;
         elapsedGameTime = 0;
         PeerId = null;
+
+        ClearChatHistory();
+
         EmitSignal(nameof(ServerStateUpdated));
     }
 
@@ -685,7 +700,7 @@ public class NetworkManager : Node
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.3f, () =>
         {
             var menu = SceneManager.Instance.ReturnToMenu();
-            menu.OpenMultiplayerMenu(MultiplayerGUI.Submenu.Lobby);
+            menu.OpenMultiplayerMenu(MultiplayerGUI.SubMenu.Lobby);
             Rpc(nameof(NotifyWorldPostExit), PeerId!.Value);
         });
 
@@ -774,7 +789,12 @@ public class NetworkManager : Node
             formatted = $"[b]({senderState.GetStatusReadableShort()}) [{senderState.Name}]:[/b] {message}";
         }
 
-        EmitSignal(nameof(ChatReceived), formatted);
+        if (chatHistory.Count > MAX_CHAT_HISTORY_RANGE)
+            chatHistory.RemoveFromFront();
+
+        chatHistory.AddToBack(formatted);
+
+        EmitSignal(nameof(ChatReceived));
     }
 
     [PuppetSync]

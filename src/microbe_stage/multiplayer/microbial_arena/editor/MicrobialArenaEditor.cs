@@ -1,15 +1,10 @@
 using System;
 using System.Collections.Generic;
 using Godot;
-using Newtonsoft.Json;
 
 /// <summary>
 ///   Main class of the microbe arena editor
 /// </summary>
-[JsonObject(IsReference = true)]
-[SceneLoadedClass("res://src/microbe_stage/multiplayer/microbial_arena/editor/MicrobialArenaEditor.tscn")]
-[DeserializedCallbackTarget]
-[UseThriveSerializer]
 public class MicrobialArenaEditor : MultiplayerEditorBase<EditorAction, MicrobialArena>, ICellEditorData
 {
     [Export]
@@ -104,6 +99,17 @@ public class MicrobialArenaEditor : MultiplayerEditorBase<EditorAction, Microbia
         cellEditorTab.UpdateCamera();
     }
 
+    protected override void UpdateEditor(float delta)
+    {
+        base.UpdateEditor(delta);
+
+        if (ReturnToStage?.IsGameOver() == true)
+        {
+            QueueFree();
+            ReturnToStage.Visible = true;
+        }
+    }
+
     protected override IEnumerable<IEditorComponent> GetAllEditorComponents()
     {
         yield return cellEditorTab;
@@ -131,7 +137,6 @@ public class MicrobialArenaEditor : MultiplayerEditorBase<EditorAction, Microbia
         base.SetupEditedSpecies();
     }
 
-    [DeserializedCallbackAllowed]
     private void NotifyLocalPlayerSpeciesReceived()
     {
         receivedSpeciesFromServer = true;

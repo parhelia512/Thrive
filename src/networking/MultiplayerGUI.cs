@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Text;
 using Godot;
 
@@ -46,6 +45,18 @@ public class MultiplayerGUI : CenterContainer
     public NodePath ChatBoxPath = null!;
 
     [Export]
+    public NodePath PlayerListTabPath = null!;
+
+    [Export]
+    public NodePath GameInfoTabPath = null!;
+
+    [Export]
+    public NodePath PlayerListTabButtonPath = null!;
+
+    [Export]
+    public NodePath GameInfoTabButtonPath = null!;
+
+    [Export]
     public PackedScene NetworkedPlayerLabelScene = null!;
 
     private readonly string[] ellipsisAnimationSequence = { " ", " .", " ..", " ..." };
@@ -67,10 +78,15 @@ public class MultiplayerGUI : CenterContainer
     private CustomRichTextLabel gameModeDescription = null!;
     private ChatBox chatBox = null!;
 
-    private Control? primaryMenu;
-    private Control? lobbyMenu;
+    private Control primaryMenu = null!;
+    private Control lobbyMenu = null!;
+    private Control playerListTab = null!;
+    private Control gameInfoTab = null!;
+    private Button playerListTabButton = null!;
+    private Button gameInfoTabButton = null!;
 
-    private Submenu currentMenu = Submenu.Main;
+    private SubMenu currentSubMenu = SubMenu.Main;
+    private LobbyTab selectedLobbyTab = LobbyTab.PlayerList;
 
     private string loadingDialogTitle = string.Empty;
     private string loadingDialogText = string.Empty;
@@ -84,10 +100,16 @@ public class MultiplayerGUI : CenterContainer
     [Signal]
     public delegate void OnClosed();
 
-    public enum Submenu
+    public enum SubMenu
     {
         Main,
         Lobby,
+    }
+
+    public enum LobbyTab
+    {
+        PlayerList,
+        GameInfo,
     }
 
     private enum ConnectionJob
@@ -97,18 +119,6 @@ public class MultiplayerGUI : CenterContainer
         Connecting,
         SettingUpUPNP,
         PortForwarding,
-    }
-
-    public Submenu CurrentMenu
-    {
-        get => currentMenu;
-        set
-        {
-            currentMenu = value;
-
-            if (primaryMenu != null && lobbyMenu != null)
-                UpdateMenu();
-        }
     }
 
     public override void _Ready()
@@ -126,6 +136,10 @@ public class MultiplayerGUI : CenterContainer
         gameModeTitle = GetNode<Label>(GameModeTitlePath);
         gameModeDescription = GetNode<CustomRichTextLabel>(GameModeDescriptionPath);
         chatBox = GetNode<ChatBox>(ChatBoxPath);
+        playerListTab = GetNode<Control>(PlayerListTabPath);
+        gameInfoTab = GetNode<Control>(GameInfoTabPath);
+        playerListTabButton = GetNode<Button>(PlayerListTabButtonPath);
+        gameInfoTabButton = GetNode<Button>(GameInfoTabButtonPath);
 
         generalDialog = GetNode<CustomConfirmationDialog>("GeneralDialog");
         loadingDialog = GetNode<CustomConfirmationDialog>("LoadingDialog");
@@ -145,7 +159,8 @@ public class MultiplayerGUI : CenterContainer
         NetworkManager.Instance.Connect(
             nameof(NetworkManager.UPNPCallResultReceived), this, nameof(OnUPNPCallResultReceived));
 
-        UpdateMenu();
+        ApplySubMenu();
+        ApplyLobbyTab();
         ResetFields();
         ValidateFields();
     }
@@ -157,6 +172,7 @@ public class MultiplayerGUI : CenterContainer
 
         var network = NetworkManager.Instance;
 
+        // Display game time
         var builder = new StringBuilder(100);
         builder.Append(" - ");
         builder.Append(network.GameInSession ?
@@ -169,10 +185,21 @@ public class MultiplayerGUI : CenterContainer
 
     public void ShowKickedDialog(string reason)
     {
-        kickedDialog.DialogText = string.Format(
-            CultureInfo.CurrentCulture, TranslationServer.Translate("MULTIPLAYER_PLAYER_IS_KICKED"),
+        kickedDialog.DialogText = TranslationServer.Translate("MULTIPLAYER_PLAYER_IS_KICKED").FormatSafe(
             string.IsNullOrEmpty(reason) ? TranslationServer.Translate("UNSPECIFIED_LOWERCASE") : reason);
         kickedDialog.PopupCenteredShrink();
+    }
+
+    public void SetSubMenu(SubMenu menu)
+    {
+        currentSubMenu = menu;
+        ApplySubMenu();
+    }
+
+    public void SetLobbyTab(LobbyTab tab)
+    {
+        selectedLobbyTab = tab;
+        ApplyLobbyTab();
     }
 
     private void UpdateLobby()
@@ -213,8 +240,14 @@ public class MultiplayerGUI : CenterContainer
         if (NetworkManager.Instance.IsAuthoritative)
         {
             startButton.Text = TranslationServer.Translate("START");
-            startButton.Disabled = network.ConnectedPlayers.Any(
-                p => p.Key != NetworkManager.DEFAULT_SERVER_ID && !p.Value.ReadyForSession);
+
+            // Disable start game button if one or more player is not ready
+            // NOTE: For now, we let the host start the game regardless other players' ready status to avoid potential
+            //       annoying long wait time due to uncooperative player. We keep this in case this behavior is
+            //       otherwise preferred.
+            // startButton.Disabled = network.ConnectedPlayers.Any(
+            //    p => p.Key != NetworkManager.DEFAULT_SERVER_ID && !p.Value.ReadyForSession);
+
             startButton.ToggleMode = false;
         }
         else if (NetworkManager.Instance.IsClient)
@@ -275,22 +308,54 @@ public class MultiplayerGUI : CenterContainer
         }
     }
 
-    private void UpdateMenu()
+    private void ApplySubMenu()
     {
-        if (primaryMenu == null || lobbyMenu == null)
-            throw new SceneTreeAttachRequired();
+        primaryMenu.Hide();
+        lobbyMenu.Hide();
 
-        switch (currentMenu)
+        switch (currentSubMenu)
         {
-            case Submenu.Main:
+            case SubMenu.Main:
                 primaryMenu.Show();
-                lobbyMenu.Hide();
                 break;
-            case Submenu.Lobby:
-                primaryMenu.Hide();
+            case SubMenu.Lobby:
                 lobbyMenu.Show();
                 UpdateLobby();
                 break;
+            default:
+                throw new Exception("Invalid submenu");
+        }
+    }
+
+    private void OnLobbyTabPressed(string tab)
+    {
+        var selection = (LobbyTab)Enum.Parse(typeof(LobbyTab), tab);
+
+        if (selection == selectedLobbyTab)
+            return;
+
+        GUICommon.Instance.PlayButtonPressSound();
+
+        SetLobbyTab(selection);
+    }
+
+    private void ApplyLobbyTab()
+    {
+        playerListTab.Hide();
+        gameInfoTab.Hide();
+
+        switch (selectedLobbyTab)
+        {
+            case LobbyTab.PlayerList:
+                playerListTab.Show();
+                playerListTabButton.Pressed = true;
+                break;
+            case LobbyTab.GameInfo:
+                gameInfoTab.Show();
+                gameInfoTabButton.Pressed = true;
+                break;
+            default:
+                throw new Exception("Invalid lobby tab");
         }
     }
 
@@ -306,8 +371,8 @@ public class MultiplayerGUI : CenterContainer
         GUICommon.Instance.PlayButtonPressSound();
 
         ShowLoadingDialog(
-            TranslationServer.Translate("CONNECTING"), string.Format(CultureInfo.CurrentCulture,
-            TranslationServer.Translate("ESTABLISHING_CONNECTION_TO"), addressBox.Text, portBox.Text));
+            TranslationServer.Translate("CONNECTING"),
+            TranslationServer.Translate("ESTABLISHING_CONNECTION_TO").FormatSafe(addressBox.Text, portBox.Text));
 
         ReadNameAndPort(out string name, out int port);
 
@@ -316,8 +381,8 @@ public class MultiplayerGUI : CenterContainer
         {
             loadingDialog.Hide();
             ShowGeneralDialog(
-                TranslationServer.Translate("CONNECTION_FAILED"), string.Format(CultureInfo.CurrentCulture,
-                TranslationServer.Translate("FAILED_TO_ESTABLISH_CONNECTION"), error));
+                TranslationServer.Translate("CONNECTION_FAILED"),
+                TranslationServer.Translate("FAILED_TO_ESTABLISH_CONNECTION").FormatSafe(error));
             return;
         }
 
@@ -344,8 +409,8 @@ public class MultiplayerGUI : CenterContainer
         }
         catch (Exception e)
         {
-            ShowGeneralDialog(TranslationServer.Translate("HOSTING_FAILED"), string.Format(
-                CultureInfo.CurrentCulture, TranslationServer.Translate("FAILED_TO_CREATE_SERVER"), e));
+            ShowGeneralDialog(TranslationServer.Translate("HOSTING_FAILED"), TranslationServer.Translate(
+                "FAILED_TO_CREATE_SERVER").FormatSafe(e));
             GD.PrintErr("Can't setup server due to parse failure on data: ", e);
             return;
         }
@@ -356,8 +421,8 @@ public class MultiplayerGUI : CenterContainer
         if (error != Error.Ok)
         {
             loadingDialog.Hide();
-            ShowGeneralDialog(TranslationServer.Translate("HOSTING_FAILED"), string.Format(
-                CultureInfo.CurrentCulture, TranslationServer.Translate("FAILED_TO_CREATE_SERVER"), error));
+            ShowGeneralDialog(TranslationServer.Translate("HOSTING_FAILED"), TranslationServer.Translate(
+                "FAILED_TO_CREATE_SERVER").FormatSafe(error));
             return;
         }
 
@@ -371,7 +436,7 @@ public class MultiplayerGUI : CenterContainer
         }
         else
         {
-            CurrentMenu = Submenu.Lobby;
+            SetSubMenu(SubMenu.Lobby);
         }
     }
 
@@ -385,9 +450,7 @@ public class MultiplayerGUI : CenterContainer
     {
         GUICommon.Instance.PlayButtonPressSound();
         NetworkManager.Instance.Disconnect();
-        CurrentMenu = Submenu.Main;
-
-        chatBox.ClearMessages();
+        SetSubMenu(SubMenu.Main);
     }
 
     private void OnLoadingCancelled()
@@ -418,7 +481,7 @@ public class MultiplayerGUI : CenterContainer
         if (result != NetworkManager.RegistrationResult.Success)
             return;
 
-        CurrentMenu = Submenu.Lobby;
+        SetSubMenu(SubMenu.Lobby);
 
         NetworkManager.Instance.Print(
             "Connection to ", addressBox.Text, ":", portBox.Text, " succeeded," +
@@ -433,8 +496,8 @@ public class MultiplayerGUI : CenterContainer
         loadingDialog.Hide();
 
         ShowGeneralDialog(
-            TranslationServer.Translate("CONNECTION_FAILED"), string.Format(CultureInfo.CurrentCulture,
-            TranslationServer.Translate("FAILED_TO_ESTABLISH_CONNECTION"), reason));
+            TranslationServer.Translate("CONNECTION_FAILED"),
+            TranslationServer.Translate("FAILED_TO_ESTABLISH_CONNECTION").FormatSafe(reason));
 
         currentJobStatus = ConnectionJob.None;
 
@@ -444,8 +507,6 @@ public class MultiplayerGUI : CenterContainer
 
     private void OnServerDisconnected()
     {
-        chatBox.ClearMessages();
-
         loadingDialog.Hide();
 
         switch (registrationResult)
@@ -464,13 +525,13 @@ public class MultiplayerGUI : CenterContainer
                 break;
         }
 
-        CurrentMenu = Submenu.Main;
+        SetSubMenu(SubMenu.Main);
     }
 
     private void OnKicked(string reason)
     {
         ShowKickedDialog(reason);
-        CurrentMenu = Submenu.Main;
+        SetSubMenu(SubMenu.Main);
     }
 
     private void OnStartPressed()
@@ -494,9 +555,8 @@ public class MultiplayerGUI : CenterContainer
                 {
                     loadingDialog.Hide();
 
-                    ShowGeneralDialog(TranslationServer.Translate("UPNP_SETUP"), string.Format(
-                        CultureInfo.CurrentCulture, TranslationServer.Translate("UPNP_ERROR_WHILE_SETTING_UP"),
-                        result.ToString()));
+                    ShowGeneralDialog(TranslationServer.Translate("UPNP_SETUP"), TranslationServer.Translate(
+                        "UPNP_ERROR_WHILE_SETTING_UP").FormatSafe(result.ToString()));
 
                     currentJobStatus = ConnectionJob.None;
 
@@ -504,9 +564,8 @@ public class MultiplayerGUI : CenterContainer
                 }
                 else
                 {
-                    ShowLoadingDialog(TranslationServer.Translate("PORT_FORWARDING"), string.Format(
-                        CultureInfo.CurrentCulture, TranslationServer.Translate("UPNP_ATTEMPTING_TO_FORWARD_PORT"),
-                        portBox.Text), false);
+                    ShowLoadingDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
+                        "UPNP_ATTEMPTING_TO_FORWARD_PORT").FormatSafe(portBox.Text), false);
 
                     currentJobStatus = ConnectionJob.PortForwarding;
                 }
@@ -520,9 +579,8 @@ public class MultiplayerGUI : CenterContainer
 
                 if (result != UPNP.UPNPResult.Success)
                 {
-                    ShowGeneralDialog(TranslationServer.Translate("PORT_FORWARDING"), string.Format(
-                        CultureInfo.CurrentCulture,
-                        TranslationServer.Translate("UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED"), result.ToString()));
+                    ShowGeneralDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
+                        "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED").FormatSafe(result.ToString()));
                 }
 
                 currentJobStatus = ConnectionJob.None;

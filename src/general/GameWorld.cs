@@ -19,13 +19,13 @@ using Newtonsoft.Json;
 public class GameWorld : ISaveLoadable
 {
     [JsonProperty]
-    protected Dictionary<uint, Species> worldSpecies = new();
-
-    [JsonProperty]
     public WorldGenerationSettings WorldSettings = new();
 
     [JsonProperty]
     public Dictionary<int, GenerationRecord> GenerationHistory = new();
+
+    [JsonProperty]
+    protected Dictionary<uint, Species> worldSpecies = new();
 
     [JsonProperty]
     private uint speciesIdCounter;

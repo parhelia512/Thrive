@@ -514,7 +514,7 @@ public class SpawnSystem : ISpawnSystem
         return distance <= Math.PI ? distance : (float)(2 * Math.PI) - distance;
     }
 
-    protected class QueuedSpawn : IDisposable
+    private class QueuedSpawn : IDisposable
     {
         public QueuedSpawn(Spawner spawnType, IEnumerator<ISpawned> spawns)
         {
