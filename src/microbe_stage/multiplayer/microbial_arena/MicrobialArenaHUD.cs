@@ -360,8 +360,8 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
 
     private void UpdateGameTime()
     {
-        gameTime.Text = stage!.IsGameOver() ? TranslationServer.Translate("GAME_OVER")
-            :
+        gameTime.Text = stage!.IsGameOver() ?
+            TranslationServer.Translate("GAME_OVER") :
             NetworkManager.Instance.GameTime;
     }
 

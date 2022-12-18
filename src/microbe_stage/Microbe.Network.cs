@@ -142,7 +142,8 @@ public partial class Microbe
             queuedSlimeSecretionTime = parsedQueuedSlimeSecretionTime;
 
         queuedToxinToEmit = !string.IsNullOrEmpty(queuedToxinToEmitInput) ?
-            SimulationParameters.Instance.GetCompound(queuedToxinToEmitInput) : null;
+            SimulationParameters.Instance.GetCompound(queuedToxinToEmitInput) :
+            null;
     }
 
     public Dictionary<string, string> PackStates()

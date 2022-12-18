@@ -166,8 +166,7 @@ public class MultiplayerGUI : CenterContainer
         var builder = new StringBuilder(100);
         builder.Append(" - ");
         builder.Append(network.GameInSession ?
-            TranslationServer.Translate("LOBBY_ATTRIBUTE_IN_PROGRESS").FormatSafe(network.GameTimeHumanized)
-            :
+            TranslationServer.Translate("LOBBY_ATTRIBUTE_IN_PROGRESS").FormatSafe(network.GameTimeHumanized) :
             TranslationServer.Translate("LOBBY_ATTRIBUTE_PENDING"));
 
         serverAttributes.Text = builder.ToString();
@@ -243,8 +242,8 @@ public class MultiplayerGUI : CenterContainer
         }
         else if (NetworkManager.Instance.IsClient)
         {
-            startButton.Text = network.GameInSession ? TranslationServer.Translate("JOIN")
-                :
+            startButton.Text = network.GameInSession ?
+                TranslationServer.Translate("JOIN") :
                 TranslationServer.Translate("READY");
             startButton.Disabled = false;
             startButton.ToggleMode = !network.GameInSession;
@@ -354,7 +353,8 @@ public class MultiplayerGUI : CenterContainer
     {
         name = string.IsNullOrEmpty(nameBox.Text) ? Settings.Instance.ActiveUsername : nameBox.Text;
         port = string.IsNullOrEmpty(portBox.Text) || !int.TryParse(portBox.Text, out int parsedPort) ?
-            Constants.MULTIPLAYER_DEFAULT_PORT : parsedPort;
+            Constants.MULTIPLAYER_DEFAULT_PORT :
+            parsedPort;
     }
 
     private void OnConnectPressed()

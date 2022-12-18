@@ -1,5 +1,4 @@
 ﻿using Godot;
-using Object = Godot.Object;
 
 public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
     where TStage : Object, IStage

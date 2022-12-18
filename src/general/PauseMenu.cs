@@ -400,7 +400,8 @@ public class PauseMenu : CustomDialog
         if (resumeButton != null)
         {
             resumeButton.Text = MultiplayerMode ?
-                TranslationServer.Translate("BACK_TO_GAME") : TranslationServer.Translate("RESUME");
+                TranslationServer.Translate("BACK_TO_GAME") :
+                TranslationServer.Translate("RESUME");
         }
 
         if (saveGameButton != null)
@@ -412,7 +413,8 @@ public class PauseMenu : CustomDialog
         if (returnToMenuButton != null)
         {
             returnToMenuButton.Text = MultiplayerMode ?
-                TranslationServer.Translate("LEAVE") : TranslationServer.Translate("RETURN_TO_MENU");
+                TranslationServer.Translate("LEAVE") :
+                TranslationServer.Translate("RETURN_TO_MENU");
         }
     }
 

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Godot;
 using Newtonsoft.Json;
 using Nito.Collections;
+using Array = Godot.Collections.Array;
 
 /// <summary>
 ///   Manages online game sessions.
@@ -233,7 +234,7 @@ public class NetworkManager : Node
         // TODO: enable DTLS for secure transport?
 
         GetTree().CheckAndConnect(
-            "connected_to_server", this, nameof(OnConnectedToServer), new Godot.Collections.Array { playerName },
+            "connected_to_server", this, nameof(OnConnectedToServer), new Array { playerName },
             (int)ConnectFlags.Oneshot);
 
         var result = peer.CreateClient(address, port);
@@ -385,14 +386,14 @@ public class NetworkManager : Node
     /// </summary>
     public void Print(params object[] what)
     {
-        var str = string.Concat(Array.ConvertAll(what, x => x?.ToString() ?? "null"));
+        var str = string.Concat(System.Array.ConvertAll(what, x => x?.ToString() ?? "null"));
         var serverOrHost = IsDedicated ? "[Server] " : "[Host] ";
         GD.Print(IsAuthoritative ? serverOrHost : "[Client] ", str);
     }
 
     public void PrintError(params object[] what)
     {
-        var str = string.Concat(Array.ConvertAll(what, x => x?.ToString() ?? "null"));
+        var str = string.Concat(System.Array.ConvertAll(what, x => x?.ToString() ?? "null"));
         var serverOrHost = IsDedicated ? "[Server] " : "[Host] ";
         GD.PrintErr(IsAuthoritative ? serverOrHost : "[Client] ", str);
     }

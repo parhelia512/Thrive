@@ -437,7 +437,8 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
 
         GraphicsScene = GD.Load<PackedScene>(graphicsScene);
         ConvexPhysicsMesh = ResourceLoader.Exists(convexPhysicsMesh) ?
-            GD.Load<ConvexPolygonShape>(convexPhysicsMesh) : null;
+            GD.Load<ConvexPolygonShape>(convexPhysicsMesh) :
+            null;
         ModelNodePath = modelPath;
         AnimationPath = animationPath;
     }
