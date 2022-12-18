@@ -18,9 +18,6 @@ public class MultiplayerGUI : CenterContainer
     public NodePath ConnectButtonPath = null!;
 
     [Export]
-    public NodePath CreateServerButtonPath = null!;
-
-    [Export]
     public NodePath LobbyPlayerListPath = null!;
 
     [Export]
@@ -40,9 +37,6 @@ public class MultiplayerGUI : CenterContainer
 
     [Export]
     public NodePath GameModeDescriptionPath = null!;
-
-    [Export]
-    public NodePath ChatBoxPath = null!;
 
     [Export]
     public NodePath PlayerListTabPath = null!;
@@ -67,7 +61,6 @@ public class MultiplayerGUI : CenterContainer
     private CustomConfirmationDialog generalDialog = null!;
     private CustomConfirmationDialog loadingDialog = null!;
     private Button connectButton = null!;
-    private Button createServerButton = null!;
     private NetPlayerList list = null!;
     private ServerSetup serverSetup = null!;
     private Button startButton = null!;
@@ -76,7 +69,6 @@ public class MultiplayerGUI : CenterContainer
     private Label serverAttributes = null!;
     private Label gameModeTitle = null!;
     private CustomRichTextLabel gameModeDescription = null!;
-    private ChatBox chatBox = null!;
 
     private Control primaryMenu = null!;
     private Control lobbyMenu = null!;
@@ -117,7 +109,7 @@ public class MultiplayerGUI : CenterContainer
         None,
         Hosting,
         Connecting,
-        SettingUpUPNP,
+        SettingUpUpnp,
         PortForwarding,
     }
 
@@ -127,7 +119,6 @@ public class MultiplayerGUI : CenterContainer
         addressBox = GetNode<LineEdit>(AddressBoxPath);
         portBox = GetNode<LineEdit>(PortBoxPath);
         connectButton = GetNode<Button>(ConnectButtonPath);
-        createServerButton = GetNode<Button>(CreateServerButtonPath);
         list = GetNode<NetPlayerList>(LobbyPlayerListPath);
         startButton = GetNode<Button>(StartButtonPath);
         kickedDialog = GetNode<CustomConfirmationDialog>(KickedDialogPath);
@@ -135,7 +126,6 @@ public class MultiplayerGUI : CenterContainer
         serverAttributes = GetNode<Label>(ServerAttributesPath);
         gameModeTitle = GetNode<Label>(GameModeTitlePath);
         gameModeDescription = GetNode<CustomRichTextLabel>(GameModeDescriptionPath);
-        chatBox = GetNode<ChatBox>(ChatBoxPath);
         playerListTab = GetNode<Control>(PlayerListTabPath);
         gameInfoTab = GetNode<Control>(GameInfoTabPath);
         playerListTabButton = GetNode<Button>(PlayerListTabButtonPath);
@@ -157,7 +147,7 @@ public class MultiplayerGUI : CenterContainer
         NetworkManager.Instance.Connect(
             nameof(NetworkManager.ReadyForSessionReceived), this, nameof(UpdateReadyStatus));
         NetworkManager.Instance.Connect(
-            nameof(NetworkManager.UPNPCallResultReceived), this, nameof(OnUPNPCallResultReceived));
+            nameof(NetworkManager.UpnpCallResultReceived), this, nameof(OnUPNPCallResultReceived));
 
         ApplySubMenu();
         ApplyLobbyTab();
@@ -427,13 +417,13 @@ public class MultiplayerGUI : CenterContainer
             return;
         }
 
-        if (parsedData.UseUPNP)
+        if (parsedData.UseUpnp)
         {
             ShowLoadingDialog(
                 TranslationServer.Translate("UPNP_SETUP"),
                 TranslationServer.Translate("UPNP_DISCOVERING_DEVICES"), false);
 
-            currentJobStatus = ConnectionJob.SettingUpUPNP;
+            currentJobStatus = ConnectionJob.SettingUpUpnp;
         }
         else
         {
@@ -546,11 +536,11 @@ public class MultiplayerGUI : CenterContainer
         NetworkManager.Instance.SetReadyForSessionStatus(active);
     }
 
-    private void OnUPNPCallResultReceived(UPNP.UPNPResult result, NetworkManager.UPNPActionStep step)
+    private void OnUPNPCallResultReceived(UPNP.UPNPResult result, NetworkManager.UpnpJobStep step)
     {
         switch (step)
         {
-            case NetworkManager.UPNPActionStep.Setup:
+            case NetworkManager.UpnpJobStep.Setup:
             {
                 if (result != UPNP.UPNPResult.Success)
                 {
@@ -574,7 +564,7 @@ public class MultiplayerGUI : CenterContainer
                 break;
             }
 
-            case NetworkManager.UPNPActionStep.PortMapping:
+            case NetworkManager.UpnpJobStep.PortMapping:
             {
                 loadingDialog.Hide();
 

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-18 02:03+0700\n"
+"POT-Creation-Date: 2022-12-18 11:31+0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -41,7 +41,7 @@ msgstr ""
 #: ../simulation_parameters/common/gallery.json:6
 #: ../simulation_parameters/common/gallery.json:141
 #: ../simulation_parameters/common/gallery.json:291
-#: ../src/networking/ServerSetup.cs:119
+#: ../src/networking/ServerSetup.cs:117
 msgid "MICROBE_STAGE"
 msgstr ""
 
@@ -1074,7 +1074,7 @@ msgid "STATUS_COLON"
 msgstr ""
 
 #: ../src/auto-evo/AutoEvoExploringTool.tscn:448
-#: ../src/networking/MultiplayerGUI.cs:258
+#: ../src/networking/MultiplayerGUI.cs:248
 msgid "READY"
 msgstr ""
 
@@ -2012,7 +2012,7 @@ msgstr ""
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.cs:371
 #: ../src/microbe_stage/editor/tooltips/SelectionMenuToolTip.cs:264
 #: ../src/microbe_stage/gui/PatchDetailsPanel.cs:263
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:217
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:212
 msgid "PERCENTAGE_VALUE"
 msgstr ""
 
@@ -3336,8 +3336,7 @@ msgid "DEVELOPERS"
 msgstr ""
 
 #: ../src/gui_common/NetPlayerList.tscn:87
-#: ../src/networking/MultiplayerGUI.tscn:63 ../src/saving/NewSaveMenu.tscn:49
-msgid "NAME"
+msgid "PLAYER_NAME"
 msgstr ""
 
 #: ../src/gui_common/NetPlayerList.tscn:99
@@ -3352,7 +3351,7 @@ msgstr ""
 msgid "DEATHS"
 msgstr ""
 
-#: ../src/gui_common/NetPlayerLog.cs:114
+#: ../src/gui_common/NetPlayerLog.cs:112
 msgid "PLAYER_LOG_HOST_ATTRIBUTE"
 msgstr ""
 
@@ -4160,19 +4159,19 @@ msgstr ""
 msgid "SUICIDE_BUTTON_TOOLTIP"
 msgstr ""
 
-#: ../src/microbe_stage/Microbe.Contact.cs:915
+#: ../src/microbe_stage/Microbe.Contact.cs:902
 msgid "SUCCESSFUL_SCAVENGE"
 msgstr ""
 
-#: ../src/microbe_stage/Microbe.Contact.cs:922
+#: ../src/microbe_stage/Microbe.Contact.cs:909
 msgid "SUCCESSFUL_KILL"
 msgstr ""
 
-#: ../src/microbe_stage/Microbe.Contact.cs:1110
+#: ../src/microbe_stage/Microbe.Contact.cs:1097
 msgid "DEATH"
 msgstr ""
 
-#: ../src/microbe_stage/Microbe.Contact.cs:1385
+#: ../src/microbe_stage/Microbe.Contact.cs:1372
 msgid "ESCAPE_ENGULFING"
 msgstr ""
 
@@ -4214,32 +4213,32 @@ msgid "PAUSE_PROMPT"
 msgstr ""
 
 #: ../src/microbe_stage/MicrobeHUD.cs:109
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:104
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:99
 msgid "SIGNAL_COMMAND_NONE"
 msgstr ""
 
 #: ../src/microbe_stage/MicrobeHUD.cs:110
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:105
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:100
 msgid "SIGNAL_COMMAND_FOLLOW"
 msgstr ""
 
 #: ../src/microbe_stage/MicrobeHUD.cs:111
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:106
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:101
 msgid "SIGNAL_COMMAND_TO_ME"
 msgstr ""
 
 #: ../src/microbe_stage/MicrobeHUD.cs:112
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:107
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:102
 msgid "SIGNAL_COMMAND_FLEE"
 msgstr ""
 
 #: ../src/microbe_stage/MicrobeHUD.cs:113
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:108
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:103
 msgid "SIGNAL_COMMAND_AGGRESSION"
 msgstr ""
 
 #: ../src/microbe_stage/MicrobeHUD.cs:116
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:111
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:106
 msgid "SIGNAL_TO_EMIT"
 msgstr ""
 
@@ -4253,12 +4252,12 @@ msgid "FOSSILISATION_HINT"
 msgstr ""
 
 #: ../src/microbe_stage/MicrobeHUD.cs:223
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:211
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:206
 msgid "DEVOURED"
 msgstr ""
 
 #: ../src/microbe_stage/MicrobeHUD.cs:322
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:310
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:305
 msgid "STUFF_AT"
 msgstr ""
 
@@ -4840,23 +4839,23 @@ msgstr ""
 msgid "JOINING_MICROBIAL_ARENA"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:531
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:524
 msgid "KILL_FEED_RIPPED_APART"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:534
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:527
 msgid "KILL_FEED_ENGULFED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:538
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:531
 msgid "KILL_FEED_POISONED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:550
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:543
 msgid "KILL_FEED_EVOLVED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:559
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:552
 msgid "KILL_FEED_SUICIDE"
 msgstr ""
 
@@ -4868,7 +4867,7 @@ msgstr ""
 msgid "SCOREBOARD_UPPERCASE"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:368
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:363
 msgid "GAME_OVER"
 msgstr ""
 
@@ -5373,101 +5372,105 @@ msgstr ""
 msgid "REASON_FOR_KICK"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:179
+#: ../src/networking/MultiplayerGUI.cs:169
 msgid "LOBBY_ATTRIBUTE_IN_PROGRESS"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:181
+#: ../src/networking/MultiplayerGUI.cs:171
 msgid "LOBBY_ATTRIBUTE_PENDING"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:188
+#: ../src/networking/MultiplayerGUI.cs:178
 msgid "MULTIPLAYER_PLAYER_IS_KICKED"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:189
+#: ../src/networking/MultiplayerGUI.cs:179
 msgid "UNSPECIFIED_LOWERCASE"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:243
+#: ../src/networking/MultiplayerGUI.cs:233
 #: ../src/networking/MultiplayerGUI.tscn:373
 msgid "START"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:256
+#: ../src/networking/MultiplayerGUI.cs:246
 msgid "JOIN"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:375
+#: ../src/networking/MultiplayerGUI.cs:365
 msgid "CONNECTING"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:376
+#: ../src/networking/MultiplayerGUI.cs:366
 msgid "ESTABLISHING_CONNECTION_TO"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:385
-#: ../src/networking/MultiplayerGUI.cs:500
+#: ../src/networking/MultiplayerGUI.cs:375
+#: ../src/networking/MultiplayerGUI.cs:490
 msgid "CONNECTION_FAILED"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:386
-#: ../src/networking/MultiplayerGUI.cs:501
+#: ../src/networking/MultiplayerGUI.cs:376
+#: ../src/networking/MultiplayerGUI.cs:491
 msgid "FAILED_TO_ESTABLISH_CONNECTION"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:413
-#: ../src/networking/MultiplayerGUI.cs:425
+#: ../src/networking/MultiplayerGUI.cs:403
+#: ../src/networking/MultiplayerGUI.cs:415
 msgid "HOSTING_FAILED"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:414
-#: ../src/networking/MultiplayerGUI.cs:426
+#: ../src/networking/MultiplayerGUI.cs:404
+#: ../src/networking/MultiplayerGUI.cs:416
 msgid "FAILED_TO_CREATE_SERVER"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:433
-#: ../src/networking/MultiplayerGUI.cs:559
+#: ../src/networking/MultiplayerGUI.cs:423
+#: ../src/networking/MultiplayerGUI.cs:549
 msgid "UPNP_SETUP"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:434
+#: ../src/networking/MultiplayerGUI.cs:424
 msgid "UPNP_DISCOVERING_DEVICES"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:517
-#: ../src/networking/MultiplayerGUI.cs:520
-#: ../src/networking/MultiplayerGUI.cs:524
+#: ../src/networking/MultiplayerGUI.cs:507
+#: ../src/networking/MultiplayerGUI.cs:510
+#: ../src/networking/MultiplayerGUI.cs:514
 msgid "SERVER_DISCONNECTED"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:517
+#: ../src/networking/MultiplayerGUI.cs:507
 msgid "SERVER_IS_FULL"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:521
+#: ../src/networking/MultiplayerGUI.cs:511
 msgid "NAME_IS_ALREADY_TAKEN"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:525
+#: ../src/networking/MultiplayerGUI.cs:515
 msgid "CLOSED_BY_REMOTE_HOST"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:560
+#: ../src/networking/MultiplayerGUI.cs:550
 msgid "UPNP_ERROR_WHILE_SETTING_UP"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:568
-#: ../src/networking/MultiplayerGUI.cs:583
+#: ../src/networking/MultiplayerGUI.cs:558
+#: ../src/networking/MultiplayerGUI.cs:573
 msgid "PORT_FORWARDING"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:569
+#: ../src/networking/MultiplayerGUI.cs:559
 msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:584
+#: ../src/networking/MultiplayerGUI.cs:574
 msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED"
+msgstr ""
+
+#: ../src/networking/MultiplayerGUI.tscn:63 ../src/saving/NewSaveMenu.tscn:49
+msgid "NAME"
 msgstr ""
 
 #: ../src/networking/MultiplayerGUI.tscn:82
@@ -5510,6 +5513,14 @@ msgstr ""
 msgid "MICROBIAL_ARENA_DESCRIPTION"
 msgstr ""
 
+#: ../src/networking/MultiplayerStageBase.cs:97
+msgid "PREPARING_DOT_DOT_DOT"
+msgstr ""
+
+#: ../src/networking/MultiplayerStageBase.cs:193
+msgid "LOADING_ENTITIES"
+msgstr ""
+
 #: ../src/networking/NetPlayerInfo.cs:26
 msgid "IN_GAME_LOWERCASE"
 msgstr ""
@@ -5542,31 +5553,31 @@ msgstr ""
 msgid "CHAT_PREFIX_AS_SYSTEM"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:457
+#: ../src/networking/NetworkManager.cs:459
 msgid "PLAYER_HAS_DISCONNECTED"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:490
+#: ../src/networking/NetworkManager.cs:492
 msgid "BAD_CONNECTION"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:494
+#: ../src/networking/NetworkManager.cs:496
 msgid "TIMEOUT"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:588
+#: ../src/networking/NetworkManager.cs:590
 msgid "PLAYER_HAS_CONNECTED"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:743
+#: ../src/networking/NetworkManager.cs:745
 msgid "PLAYER_HAS_JOINED"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:772
+#: ../src/networking/NetworkManager.cs:774
 msgid "PLAYER_HAS_LEFT"
 msgstr ""
 
-#: ../src/networking/ServerSetup.cs:120
+#: ../src/networking/ServerSetup.cs:118
 msgid "OPEN_WORLD"
 msgstr ""
 

@@ -111,7 +111,6 @@ public class ChatBox : VBoxContainer
 
             if (float.TryParse(args[1], out float result))
             {
-                var oldTickRate = NetworkManager.Instance.UpdateInterval;
                 NetworkManager.Instance.UpdateInterval = result;
                 NetworkManager.Instance.BroadcastChat($"Update interval has been changed to {result} by the host");
             }

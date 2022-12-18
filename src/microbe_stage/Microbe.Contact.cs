@@ -100,9 +100,6 @@ public partial class Microbe
     [JsonProperty]
     private MicrobeState state;
 
-    [JsonIgnore]
-    private PhagocytosisPhase phagocytosisStep;
-
     public enum MicrobeState
     {
         /// <summary>
@@ -157,17 +154,7 @@ public partial class Microbe
 
     // Properties for engulfing
     [JsonProperty]
-    public PhagocytosisPhase PhagocytosisStep
-    {
-        get => phagocytosisStep;
-        set
-        {
-            if (phagocytosisStep == value)
-                return;
-
-            phagocytosisStep = value;
-        }
-    }
+    public PhagocytosisPhase PhagocytosisStep { get; set; }
 
     /// <summary>
     ///   The amount of space all of the currently engulfed objects occupy in the cytoplasm. This is used to determine

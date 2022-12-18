@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-18 02:03+0700\n"
+"POT-Creation-Date: 2022-12-18 11:31+0700\n"
 "PO-Revision-Date: 2022-12-15 06:57+0000\n"
 "Last-Translator: Allstreamer <cbredenbach@gmail.com>\n"
 "Language-Team: German <https://translate.revolutionarygamesstudio.com/projects/thrive/thrive-game/de/>\n"
@@ -43,7 +43,7 @@ msgstr "Konzept Kunst"
 #: ../simulation_parameters/common/gallery.json:6
 #: ../simulation_parameters/common/gallery.json:141
 #: ../simulation_parameters/common/gallery.json:291
-#: ../src/networking/ServerSetup.cs:119
+#: ../src/networking/ServerSetup.cs:117
 msgid "MICROBE_STAGE"
 msgstr "Mikroben Stadium"
 
@@ -1125,7 +1125,7 @@ msgid "STATUS_COLON"
 msgstr "Status:"
 
 #: ../src/auto-evo/AutoEvoExploringTool.tscn:448
-#: ../src/networking/MultiplayerGUI.cs:258
+#: ../src/networking/MultiplayerGUI.cs:248
 msgid "READY"
 msgstr "Bereit"
 
@@ -2087,7 +2087,7 @@ msgstr "Schließen"
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.cs:371
 #: ../src/microbe_stage/editor/tooltips/SelectionMenuToolTip.cs:264
 #: ../src/microbe_stage/gui/PatchDetailsPanel.cs:263
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:217
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:212
 msgid "PERCENTAGE_VALUE"
 msgstr "{0}%"
 
@@ -3472,9 +3472,9 @@ msgid "DEVELOPERS"
 msgstr "Entwickler(innen)"
 
 #: ../src/gui_common/NetPlayerList.tscn:87
-#: ../src/networking/MultiplayerGUI.tscn:63 ../src/saving/NewSaveMenu.tscn:49
-msgid "NAME"
-msgstr "Name:"
+#, fuzzy
+msgid "PLAYER_NAME"
+msgstr "Fähigkeitenleiste anzeigen"
 
 #: ../src/gui_common/NetPlayerList.tscn:99
 msgid "SCORE"
@@ -3489,7 +3489,7 @@ msgstr ""
 msgid "DEATHS"
 msgstr "Tot"
 
-#: ../src/gui_common/NetPlayerLog.cs:114
+#: ../src/gui_common/NetPlayerLog.cs:112
 msgid "PLAYER_LOG_HOST_ATTRIBUTE"
 msgstr ""
 
@@ -4357,19 +4357,19 @@ msgstr "Statistiken"
 msgid "SUICIDE_BUTTON_TOOLTIP"
 msgstr "Suizid"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:915
+#: ../src/microbe_stage/Microbe.Contact.cs:902
 msgid "SUCCESSFUL_SCAVENGE"
 msgstr "erfolgreiche Plünderung"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:922
+#: ../src/microbe_stage/Microbe.Contact.cs:909
 msgid "SUCCESSFUL_KILL"
 msgstr "erfolgreiche Tötung"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:1110
+#: ../src/microbe_stage/Microbe.Contact.cs:1097
 msgid "DEATH"
 msgstr "Tot"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:1385
+#: ../src/microbe_stage/Microbe.Contact.cs:1372
 msgid "ESCAPE_ENGULFING"
 msgstr "Verschlingung entflohen"
 
@@ -4414,32 +4414,32 @@ msgid "PAUSE_PROMPT"
 msgstr "[center]Zum Fortfahren [thrive:input]g_pause[/thrive:input] drücken[/center]"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:109
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:104
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:99
 msgid "SIGNAL_COMMAND_NONE"
 msgstr "Kein Befehl"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:110
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:105
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:100
 msgid "SIGNAL_COMMAND_FOLLOW"
 msgstr "Folge mir"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:111
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:106
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:101
 msgid "SIGNAL_COMMAND_TO_ME"
 msgstr "Bewege dich zu mir"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:112
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:107
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:102
 msgid "SIGNAL_COMMAND_FLEE"
 msgstr "Fliehe"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:113
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:108
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:103
 msgid "SIGNAL_COMMAND_AGGRESSION"
 msgstr "Werde aggressiv"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:116
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:111
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:106
 msgid "SIGNAL_TO_EMIT"
 msgstr "Signal zum aussenden"
 
@@ -4453,12 +4453,12 @@ msgid "FOSSILISATION_HINT"
 msgstr "Diese Art fossilisieren"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:223
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:211
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:206
 msgid "DEVOURED"
 msgstr "Entrückt"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:322
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:310
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:305
 msgid "STUFF_AT"
 msgstr "Sachen bei {0:F1}, {1:F1}:"
 
@@ -5076,23 +5076,23 @@ msgstr "Herzlichen Glückwunsch, du hast diese Version von Thrive gewonnen! Wenn
 msgid "JOINING_MICROBIAL_ARENA"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:531
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:524
 msgid "KILL_FEED_RIPPED_APART"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:534
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:527
 msgid "KILL_FEED_ENGULFED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:538
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:531
 msgid "KILL_FEED_POISONED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:550
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:543
 msgid "KILL_FEED_EVOLVED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:559
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:552
 msgid "KILL_FEED_SUICIDE"
 msgstr ""
 
@@ -5105,7 +5105,7 @@ msgstr "Mikroben Stadium"
 msgid "SCOREBOARD_UPPERCASE"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:368
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:363
 msgid "GAME_OVER"
 msgstr ""
 
@@ -5620,108 +5620,112 @@ msgstr ""
 msgid "REASON_FOR_KICK"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:179
+#: ../src/networking/MultiplayerGUI.cs:169
 msgid "LOBBY_ATTRIBUTE_IN_PROGRESS"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:181
+#: ../src/networking/MultiplayerGUI.cs:171
 msgid "LOBBY_ATTRIBUTE_PENDING"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:188
+#: ../src/networking/MultiplayerGUI.cs:178
 msgid "MULTIPLAYER_PLAYER_IS_KICKED"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:189
+#: ../src/networking/MultiplayerGUI.cs:179
 msgid "UNSPECIFIED_LOWERCASE"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:243
+#: ../src/networking/MultiplayerGUI.cs:233
 #: ../src/networking/MultiplayerGUI.tscn:373
 #, fuzzy
 msgid "START"
 msgstr "Startet"
 
-#: ../src/networking/MultiplayerGUI.cs:256
+#: ../src/networking/MultiplayerGUI.cs:246
 msgid "JOIN"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:375
+#: ../src/networking/MultiplayerGUI.cs:365
 msgid "CONNECTING"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:376
+#: ../src/networking/MultiplayerGUI.cs:366
 msgid "ESTABLISHING_CONNECTION_TO"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:385
-#: ../src/networking/MultiplayerGUI.cs:500
+#: ../src/networking/MultiplayerGUI.cs:375
+#: ../src/networking/MultiplayerGUI.cs:490
 #, fuzzy
 msgid "CONNECTION_FAILED"
 msgstr "Moderstellung fehlgeschlagen"
 
-#: ../src/networking/MultiplayerGUI.cs:386
-#: ../src/networking/MultiplayerGUI.cs:501
+#: ../src/networking/MultiplayerGUI.cs:376
+#: ../src/networking/MultiplayerGUI.cs:491
 msgid "FAILED_TO_ESTABLISH_CONNECTION"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:413
-#: ../src/networking/MultiplayerGUI.cs:425
+#: ../src/networking/MultiplayerGUI.cs:403
+#: ../src/networking/MultiplayerGUI.cs:415
 #, fuzzy
 msgid "HOSTING_FAILED"
 msgstr "Speichern fehlgeschlagen! Eine Ausnahme ist aufgetreten"
 
-#: ../src/networking/MultiplayerGUI.cs:414
-#: ../src/networking/MultiplayerGUI.cs:426
+#: ../src/networking/MultiplayerGUI.cs:404
+#: ../src/networking/MultiplayerGUI.cs:416
 msgid "FAILED_TO_CREATE_SERVER"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:433
-#: ../src/networking/MultiplayerGUI.cs:559
+#: ../src/networking/MultiplayerGUI.cs:423
+#: ../src/networking/MultiplayerGUI.cs:549
 msgid "UPNP_SETUP"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:434
+#: ../src/networking/MultiplayerGUI.cs:424
 msgid "UPNP_DISCOVERING_DEVICES"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:517
-#: ../src/networking/MultiplayerGUI.cs:520
-#: ../src/networking/MultiplayerGUI.cs:524
+#: ../src/networking/MultiplayerGUI.cs:507
+#: ../src/networking/MultiplayerGUI.cs:510
+#: ../src/networking/MultiplayerGUI.cs:514
 #, fuzzy
 msgid "SERVER_DISCONNECTED"
 msgstr "Getrennte Zellen"
 
-#: ../src/networking/MultiplayerGUI.cs:517
+#: ../src/networking/MultiplayerGUI.cs:507
 msgid "SERVER_IS_FULL"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:521
+#: ../src/networking/MultiplayerGUI.cs:511
 msgid "NAME_IS_ALREADY_TAKEN"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:525
+#: ../src/networking/MultiplayerGUI.cs:515
 msgid "CLOSED_BY_REMOTE_HOST"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:560
+#: ../src/networking/MultiplayerGUI.cs:550
 msgid "UPNP_ERROR_WHILE_SETTING_UP"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:568
-#: ../src/networking/MultiplayerGUI.cs:583
+#: ../src/networking/MultiplayerGUI.cs:558
+#: ../src/networking/MultiplayerGUI.cs:573
 #, fuzzy
 msgid "PORT_FORWARDING"
 msgstr "Vorwärts bewegen"
 
-#: ../src/networking/MultiplayerGUI.cs:569
+#: ../src/networking/MultiplayerGUI.cs:559
 msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT"
 msgstr ""
 
-#: ../src/networking/MultiplayerGUI.cs:584
+#: ../src/networking/MultiplayerGUI.cs:574
 #, fuzzy
 msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED"
 msgstr "Der Versuch zu speichern ist missglückt. Möglicherweise ist der Speichername zu lang oder du hast keinen Zugang zum Speicherordner."
+
+#: ../src/networking/MultiplayerGUI.tscn:63 ../src/saving/NewSaveMenu.tscn:49
+msgid "NAME"
+msgstr "Name:"
 
 #: ../src/networking/MultiplayerGUI.tscn:82
 msgid "ADDRESS"
@@ -5768,6 +5772,16 @@ msgstr ""
 msgid "MICROBIAL_ARENA_DESCRIPTION"
 msgstr "Mikroben Stadium"
 
+#: ../src/networking/MultiplayerStageBase.cs:97
+#, fuzzy
+msgid "PREPARING_DOT_DOT_DOT"
+msgstr "Erstelle..."
+
+#: ../src/networking/MultiplayerStageBase.cs:193
+#, fuzzy
+msgid "LOADING_ENTITIES"
+msgstr "Drücke die Rückgängig-Schaltfläche im Editor, um einen Fehler zu korrigieren"
+
 #: ../src/networking/NetPlayerInfo.cs:26
 msgid "IN_GAME_LOWERCASE"
 msgstr ""
@@ -5800,38 +5814,38 @@ msgstr ""
 msgid "CHAT_PREFIX_AS_SYSTEM"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:457
+#: ../src/networking/NetworkManager.cs:459
 #, fuzzy
 msgid "PLAYER_HAS_DISCONNECTED"
 msgstr "Getrennte Zellen"
 
-#: ../src/networking/NetworkManager.cs:490
+#: ../src/networking/NetworkManager.cs:492
 #, fuzzy
 msgid "BAD_CONNECTION"
 msgstr "Farbenblindheits-Korrektur:"
 
-#: ../src/networking/NetworkManager.cs:494
+#: ../src/networking/NetworkManager.cs:496
 msgid "TIMEOUT"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:588
+#: ../src/networking/NetworkManager.cs:590
 #, fuzzy
 msgid "PLAYER_HAS_CONNECTED"
 msgstr ""
 "Spieler\n"
 "Tempo"
 
-#: ../src/networking/NetworkManager.cs:743
+#: ../src/networking/NetworkManager.cs:745
 #, fuzzy
 msgid "PLAYER_HAS_JOINED"
 msgstr "Spieler starb"
 
-#: ../src/networking/NetworkManager.cs:772
+#: ../src/networking/NetworkManager.cs:774
 #, fuzzy
 msgid "PLAYER_HAS_LEFT"
 msgstr "Spieler duplizieren"
 
-#: ../src/networking/ServerSetup.cs:120
+#: ../src/networking/ServerSetup.cs:118
 #, fuzzy
 msgid "OPEN_WORLD"
 msgstr "Verzeichnis öffnen"
@@ -6577,10 +6591,6 @@ msgstr "Gedeihe"
 
 #, fuzzy
 #~ msgid "CURRENT_USED_RENDERER_NAME"
-#~ msgstr "Fähigkeitenleiste anzeigen"
-
-#, fuzzy
-#~ msgid "DISPLAY_DRIVER_NAME"
 #~ msgstr "Fähigkeitenleiste anzeigen"
 
 #~ msgid "NOT_RUNNING_DOT"

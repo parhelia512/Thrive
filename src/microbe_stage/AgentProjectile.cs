@@ -75,7 +75,7 @@ public class AgentProjectile : RigidBody, ITimedLife, INetEntity
         GlobalTranslation = position;
     }
 
-    public Dictionary<string, string>? PackStates()
+    public Dictionary<string, string> PackStates()
     {
         var states = new Dictionary<string, string>
         {
@@ -86,12 +86,12 @@ public class AgentProjectile : RigidBody, ITimedLife, INetEntity
         return states;
     }
 
-    public Dictionary<string, string>? PackReplicableVars()
+    public Dictionary<string, string> PackReplicableVars()
     {
         var vars = new Dictionary<string, string>
         {
-            { nameof(TimeToLiveRemaining), TimeToLiveRemaining.ToString(CultureInfo.CurrentCulture) },
-            { nameof(Amount), Amount.ToString(CultureInfo.CurrentCulture) },
+            { nameof(TimeToLiveRemaining), TimeToLiveRemaining.ToString(CultureInfo.InvariantCulture) },
+            { nameof(Amount), Amount.ToString(CultureInfo.InvariantCulture) },
         };
 
         if (Properties != null)
@@ -100,11 +100,8 @@ public class AgentProjectile : RigidBody, ITimedLife, INetEntity
         return vars;
     }
 
-    public void OnReplicated(Dictionary<string, string>? data, GameProperties currentGame)
+    public void OnReplicated(Dictionary<string, string> data, GameProperties currentGame)
     {
-        if (data == null)
-            return;
-
         data.TryGetValue(nameof(TimeToLiveRemaining), out string timeToLive);
         data.TryGetValue(nameof(Amount), out string amount);
         data.TryGetValue(nameof(Properties), out string props);

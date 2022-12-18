@@ -3,6 +3,9 @@ using System.Linq;
 using Godot;
 using Newtonsoft.Json;
 
+/// <summary>
+///   A static predefined compound cloud with a circular form. Network synchronizable.
+/// </summary>
 public class CloudBlob : Spatial, INetEntity, ISpawned
 {
     private List<Cell> content = new();
@@ -71,20 +74,20 @@ public class CloudBlob : Spatial, INetEntity, ISpawned
 
     public void OnNetworkSync(Dictionary<string, string> data)
     {
-        data!.TryGetValue(nameof(GlobalTranslation), out string serializedCenter);
+        data.TryGetValue(nameof(GlobalTranslation), out string serializedCenter);
         GlobalTranslation = (Vector3)GD.Str2Var(serializedCenter);
     }
 
-    public void OnReplicated(Dictionary<string, string>? data, GameProperties currentGame)
+    public void OnReplicated(Dictionary<string, string> data, GameProperties currentGame)
     {
-        data!.TryGetValue(nameof(Compound), out string compoundInternalName);
+        data.TryGetValue(nameof(Compound), out string compoundInternalName);
         data.TryGetValue(nameof(Content), out string serializedContent);
 
         Compound = SimulationParameters.Instance.GetCompound(compoundInternalName);
         content = JsonConvert.DeserializeObject<List<Cell>>(serializedContent)!;
     }
 
-    public Dictionary<string, string>? PackReplicableVars()
+    public Dictionary<string, string> PackReplicableVars()
     {
         var vars = new Dictionary<string, string>
         {
@@ -95,7 +98,7 @@ public class CloudBlob : Spatial, INetEntity, ISpawned
         return vars;
     }
 
-    public Dictionary<string, string>? PackStates()
+    public Dictionary<string, string> PackStates()
     {
         var states = new Dictionary<string, string>
         {

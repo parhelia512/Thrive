@@ -32,7 +32,7 @@ public class NetworkManager : Node
     }
 
     [Signal]
-    public delegate void UPNPCallResultReceived(UPNP.UPNPResult result, UPNPActionStep step);
+    public delegate void UpnpCallResultReceived(UPNP.UPNPResult result, UpnpJobStep step);
 
     [Signal]
     public delegate void RegistrationResultReceived(int peerId, RegistrationResult result);
@@ -66,7 +66,7 @@ public class NetworkManager : Node
 
     public event EventHandler<float>? NetworkTick;
 
-    public enum UPNPActionStep
+    public enum UpnpJobStep
     {
         Setup,
         PortMapping,
@@ -134,7 +134,7 @@ public class NetworkManager : Node
         GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
         GetTree().Connect("connection_failed", this, nameof(OnConnectionFailed));
 
-        Connect(nameof(UPNPCallResultReceived), this, nameof(OnUPNPCallResultReceived));
+        Connect(nameof(UpnpCallResultReceived), this, nameof(OnUPNPCallResultReceived));
 
         ProcessPriority = 100;
         PauseMode = PauseModeEnum.Process;
@@ -210,10 +210,10 @@ public class NetworkManager : Node
         if (result != Error.Ok)
             return result;
 
-        if (settings.UseUPNP)
+        if (settings.UseUpnp)
         {
             // Automatic port mapping/forwarding with UPnP
-            TaskExecutor.Instance.AddTask(new Task(() => SetupUPNP()));
+            TaskExecutor.Instance.AddTask(new Task(() => SetupUpnp()));
         }
 
         OnConnectedToServer(playerName);
@@ -397,7 +397,7 @@ public class NetworkManager : Node
         GD.PrintErr(IsAuthoritative ? serverOrHost : "[Client] ", str);
     }
 
-    private void SetupUPNP()
+    private void SetupUpnp()
     {
         upnp ??= new UPNP();
 
@@ -406,7 +406,7 @@ public class NetworkManager : Node
         if (result != UPNP.UPNPResult.Success)
             PrintError("UPnP devices discovery failed: ", result);
 
-        EmitSignal(nameof(UPNPCallResultReceived), result, UPNPActionStep.Setup);
+        EmitSignal(nameof(UpnpCallResultReceived), result, UpnpJobStep.Setup);
     }
 
     private void AddPortMapping(int port)
@@ -424,11 +424,11 @@ public class NetworkManager : Node
 
             // TODO: error handling
 
-            EmitSignal(nameof(UPNPCallResultReceived), pmResult, UPNPActionStep.PortMapping);
+            EmitSignal(nameof(UpnpCallResultReceived), pmResult, UpnpJobStep.PortMapping);
             return;
         }
 
-        EmitSignal(nameof(UPNPCallResultReceived), UPNP.UPNPResult.Success, UPNPActionStep.PortMapping);
+        EmitSignal(nameof(UpnpCallResultReceived), UPNP.UPNPResult.Success, UpnpJobStep.PortMapping);
     }
 
     private void SendChatInternal(string message)
@@ -443,6 +443,8 @@ public class NetworkManager : Node
 
     private void OnPeerConnected(int id)
     {
+        _ = id;
+
         // Will probaby be useful later.
     }
 
@@ -498,11 +500,11 @@ public class NetworkManager : Node
         TimePassedConnecting = 0;
     }
 
-    private void OnUPNPCallResultReceived(UPNP.UPNPResult result, UPNPActionStep step)
+    private void OnUPNPCallResultReceived(UPNP.UPNPResult result, UpnpJobStep step)
     {
         switch (step)
         {
-            case UPNPActionStep.Setup:
+            case UpnpJobStep.Setup:
             {
                 if (result == UPNP.UPNPResult.Success)
                     TaskExecutor.Instance.AddTask(new Task(() => AddPortMapping(Settings!.Port)));

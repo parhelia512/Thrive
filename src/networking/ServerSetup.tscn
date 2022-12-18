@@ -25,8 +25,8 @@ WindowTitle = "SERVER_SETUP"
 NamePath = NodePath("VBoxContainer/HBoxContainer/LineEdit")
 MaxPlayerPath = NodePath("VBoxContainer/HBoxContainer2/SpinBox")
 GameModePath = NodePath("VBoxContainer/HBoxContainer3/OptionButton")
-UseUPNPPath = NodePath("VBoxContainer/HBoxContainer4/CheckBox")
-UseUPNPHintPath = NodePath("VBoxContainer/HBoxContainer4/Hint")
+UseUpnpPath = NodePath("VBoxContainer/HBoxContainer4/CheckBox")
+UseUpnpHintPath = NodePath("VBoxContainer/HBoxContainer4/Hint")
 GameModeSpecificSettingsPath = NodePath("VBoxContainer/GameModeSpecificOptions")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]

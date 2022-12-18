@@ -74,8 +74,7 @@ public class NetPlayerList : VBoxContainer
 
     public NetPlayerLog GetFirst()
     {
-        if (sortedKeys == null)
-            sortedKeys = playerLogs.Select(p => p.Key).ToList();
+        sortedKeys ??= playerLogs.Select(p => p.Key).ToList();
 
         return playerLogs[sortedKeys.First()];
     }

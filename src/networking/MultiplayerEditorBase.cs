@@ -9,18 +9,19 @@ public class MultiplayerEditorBase<TAction, TStage> : EditorBase<TAction, TStage
 
     private bool fadingOutFromLoadingScreen;
 
-    public override bool CanCancelAction { get; }
+    public override bool CanCancelAction => false;
 
-    public override Species EditedBaseSpecies { get; } = null!;
+    public override Species EditedBaseSpecies => null!;
+
     protected MultiplayerGameWorld MultiplayerWorld => (MultiplayerGameWorld)CurrentGame.GameWorld;
 
-    protected override string MusicCategory { get; } = string.Empty;
+    protected override string MusicCategory => string.Empty;
 
     protected override MainGameState ReturnToState => MainGameState.Invalid;
 
-    protected override string EditorLoadingMessage { get; } = string.Empty;
+    protected override string EditorLoadingMessage => string.Empty;
 
-    protected override bool HasInProgressAction { get; }
+    protected override bool HasInProgressAction => false;
 
     public override void _Process(float delta)
     {

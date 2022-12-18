@@ -13,7 +13,7 @@ public class ServerSettings
 
     public int MaxPlayers { get; set; } = Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS;
 
-    public bool UseUPNP { get; set; }
+    public bool UseUpnp { get; set; }
 
     public MultiplayerGameMode? SelectedGameMode { get; set; }
 

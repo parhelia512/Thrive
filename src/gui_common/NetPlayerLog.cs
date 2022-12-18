@@ -30,7 +30,6 @@ public class NetPlayerLog : PanelContainer
     private Label killsLabel = null!;
     private Label deathsLabel = null!;
     private Button kickButton = null!;
-    private TextureRect cross = null!;
     private Control spacer = null!;
 
     private string playerName = string.Empty;
@@ -73,7 +72,6 @@ public class NetPlayerLog : PanelContainer
         killsLabel = GetNode<Label>(KillsPath);
         deathsLabel = GetNode<Label>(DeathsPath);
         kickButton = GetNode<Button>(KickButtonPath);
-        cross = GetNode<TextureRect>(CrossPath);
         spacer = GetNode<Control>(SpacerPath);
 
         NetworkManager.Instance.Connect(

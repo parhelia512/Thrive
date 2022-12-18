@@ -93,7 +93,8 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
     protected override void SetupStage()
     {
-        LoadingScreen.Instance.Show(StageLoadingMessage, MainGameState.Invalid, "Preparing...");
+        LoadingScreen.Instance.Show(StageLoadingMessage, MainGameState.Invalid, TranslationServer.Translate(
+            "PREPARING_DOT_DOT_DOT"));
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeIn, 0.5f, null, false, false);
 
         pauseMenu.GameProperties = CurrentGame ?? throw new InvalidOperationException("current game is not set");
@@ -189,8 +190,8 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (NetworkManager.Instance.LocalPlayer?.Status == NetPlayerStatus.Joining)
         {
             LoadingScreen.Instance.Show(StageLoadingMessage,
-                MainGameState.Invalid, "Loading entities... " + MultiplayerGameWorld?.EntityCount + "/" +
-                serverEntityCount);
+                MainGameState.Invalid, TranslationServer.Translate("LOADING_ENTITIES").FormatSafe(
+                    MultiplayerGameWorld.EntityCount, serverEntityCount));
 
             if (serverEntityCount > -1 && MultiplayerGameWorld?.EntityCount == serverEntityCount)
             {
@@ -379,7 +380,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (NetworkManager.Instance.IsClient)
             return;
 
-        var id = MultiplayerGameWorld.RegisterEntity(spawned);
+        MultiplayerGameWorld.RegisterEntity(spawned);
 
         foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
@@ -475,8 +476,12 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
         replicated.EntityNode.Name = name;
 
-        replicated.OnReplicated(
-            parsedVars, CurrentGame ?? throw new InvalidOperationException("current game is not set"));
+        if (parsedVars != null)
+        {
+            replicated.OnReplicated(
+                parsedVars, CurrentGame ?? throw new InvalidOperationException("current game is not set"));
+        }
+
         MultiplayerGameWorld.RegisterEntity(id, replicated);
         OnNetEntityReplicated(id, replicated, serverEntityCount);
 
@@ -528,14 +533,10 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
             return;
 
         var state = GetPlayerState(peerId);
-        if (!state.HasValue)
-            return;
+        var entity = MultiplayerGameWorld.GetEntity(state.GetValueOrDefault().EntityID);
 
-        var entity = MultiplayerGameWorld.GetEntity(state.Value.EntityID);
-        if (entity == null || entity is not INetPlayer player)
-            return;
-
-        player.OnNetworkInput(data);
+        if (entity != null && entity is INetPlayer player)
+            player.OnNetworkInput(data);
     }
 
     [Remote]

@@ -151,11 +151,6 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
             rootOfDynamicallySpawned, MultiplayerGameWorld, Clouds, Settings.ArenaRadius);
     }
 
-    public override void OnFinishTransitioning()
-    {
-        base.OnFinishTransitioning();
-    }
-
     public override void StartMusic()
     {
         Jukebox.Instance.PlayCategory("MicrobeStage");

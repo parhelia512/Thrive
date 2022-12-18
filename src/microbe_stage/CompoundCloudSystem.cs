@@ -33,7 +33,7 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
     private float currentBrightness = 1.0f;
 
     [JsonIgnore]
-    public Int2 CloudSize { get; set; } = new Int2(Constants.CLOUD_WIDTH, Constants.CLOUD_HEIGHT);
+    public Int2 CloudSize { get; set; } = new(Constants.CLOUD_WIDTH, Constants.CLOUD_HEIGHT);
 
     [JsonIgnore]
     public int CloudExtentX => CloudSize.x * 2;

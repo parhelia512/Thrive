@@ -62,9 +62,6 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
     [JsonProperty]
     private float engulfSize;
 
-    [JsonIgnore]
-    private PhagocytosisPhase phagocytosisStep;
-
     public int DespawnRadiusSquared { get; set; }
 
     [JsonIgnore]
@@ -162,17 +159,7 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
     public AliveMarker AliveMarker { get; } = new();
 
     [JsonProperty]
-    public PhagocytosisPhase PhagocytosisStep
-    {
-        get => phagocytosisStep;
-        set
-        {
-            if (phagocytosisStep == value)
-                return;
-
-            phagocytosisStep = value;
-        }
-    }
+    public PhagocytosisPhase PhagocytosisStep { get; set; }
 
     [JsonProperty]
     public EntityReference<Microbe> HostileEngulfer { get; private set; } = new();
@@ -396,7 +383,7 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
         }
     }
 
-    public Dictionary<string, string>? PackStates()
+    public Dictionary<string, string> PackStates()
     {
         var states = new Dictionary<string, string>
         {
@@ -411,7 +398,7 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
         return states;
     }
 
-    public Dictionary<string, string>? PackReplicableVars()
+    public Dictionary<string, string> PackReplicableVars()
     {
         var vars = new Dictionary<string, string>
         {
@@ -434,12 +421,12 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
         return vars;
     }
 
-    public void OnReplicated(Dictionary<string, string>? data, GameProperties currentGame)
+    public void OnReplicated(Dictionary<string, string> data, GameProperties currentGame)
     {
-        if (data == null)
+        data.TryGetValue(nameof(ChunkConfiguration), out string config);
+        if (string.IsNullOrEmpty(config))
             return;
 
-        data.TryGetValue(nameof(ChunkConfiguration), out string config);
         data.TryGetValue(nameof(GraphicsScene), out string graphicsScene);
         data.TryGetValue(nameof(ConvexPhysicsMesh), out string convexPhysicsMesh);
         data.TryGetValue(nameof(ModelNodePath), out string modelPath);

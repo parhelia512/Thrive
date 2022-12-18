@@ -19,7 +19,7 @@ public class MicrobialArenaEditor : MultiplayerEditorBase<EditorAction, Microbia
     public override Species EditedBaseSpecies =>
         editedSpecies ?? throw new InvalidOperationException("species not initialized");
 
-    public ICellProperties? EditedCellProperties =>
+    public ICellProperties EditedCellProperties =>
         editedSpecies ?? throw new InvalidOperationException("species not initialized");
 
     public Patch CurrentPatch => CurrentGame.GameWorld.Map.CurrentPatch!;
@@ -132,7 +132,7 @@ public class MicrobialArenaEditor : MultiplayerEditorBase<EditorAction, Microbia
     protected override void SetupEditedSpecies()
     {
         MultiplayerWorld.Species.TryGetValue((uint)GetTree().GetNetworkUniqueId(), out Species species);
-        editedSpecies = (MicrobeSpecies)species ?? throw new NullReferenceException("didn't find edited species");
+        editedSpecies = (MicrobeSpecies?)species ?? throw new NullReferenceException("didn't find edited species");
 
         base.SetupEditedSpecies();
     }

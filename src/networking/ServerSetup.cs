@@ -1,6 +1,4 @@
-﻿using System.IO;
-using Godot;
-using Newtonsoft.Json;
+﻿using Godot;
 
 public class ServerSetup : CustomDialog
 {
@@ -14,10 +12,10 @@ public class ServerSetup : CustomDialog
     public NodePath GameModePath = null!;
 
     [Export]
-    public NodePath UseUPNPPath = null!;
+    public NodePath UseUpnpPath = null!;
 
     [Export]
-    public NodePath UseUPNPHintPath = null!;
+    public NodePath UseUpnpHintPath = null!;
 
     [Export]
     public NodePath GameModeSpecificSettingsPath = null!;
@@ -25,8 +23,8 @@ public class ServerSetup : CustomDialog
     private LineEdit name = null!;
     private SpinBox maxPlayers = null!;
     private OptionButton gameMode = null!;
-    private CustomCheckBox useUPNP = null!;
-    private TextureButton useUPNPHint = null!;
+    private CustomCheckBox useUpnp = null!;
+    private TextureButton useUpnpHint = null!;
     private Container gameModeSpecificOptions = null!;
 
     private ServerSettings? settings;
@@ -45,11 +43,11 @@ public class ServerSetup : CustomDialog
         name = GetNode<LineEdit>(NamePath);
         maxPlayers = GetNode<SpinBox>(MaxPlayerPath);
         gameMode = GetNode<OptionButton>(GameModePath);
-        useUPNP = GetNode<CustomCheckBox>(UseUPNPPath);
-        useUPNPHint = GetNode<TextureButton>(UseUPNPHintPath);
+        useUpnp = GetNode<CustomCheckBox>(UseUpnpPath);
+        useUpnpHint = GetNode<TextureButton>(UseUpnpHintPath);
         gameModeSpecificOptions = GetNode<Container>(GameModeSpecificSettingsPath);
 
-        useUPNPHint.RegisterToolTipForControl("upnp", "serverSetup");
+        useUpnpHint.RegisterToolTipForControl("upnp", "serverSetup");
     }
 
     public void Open(string playerName, string address, int port)
@@ -94,7 +92,7 @@ public class ServerSetup : CustomDialog
             Address = address,
             Port = port,
             MaxPlayers = Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS,
-            UseUPNP = false,
+            UseUpnp = false,
             SelectedGameMode = SimulationParameters.Instance.GetMultiplayerGameMode("MicrobialArena"),
         };
 
@@ -106,7 +104,7 @@ public class ServerSetup : CustomDialog
         name.Text = settings!.Name;
         maxPlayers.Value = settings.MaxPlayers;
         gameMode.Selected = settings.SelectedGameMode!.Index;
-        useUPNP.Pressed = settings.UseUPNP;
+        useUpnp.Pressed = settings.UseUpnp;
 
         gameMode.Clear();
 
@@ -132,7 +130,7 @@ public class ServerSetup : CustomDialog
         settings!.Name = name.Text;
         settings.MaxPlayers = (int)maxPlayers.Value;
         settings.SelectedGameMode = currentGameMode;
-        settings.UseUPNP = useUPNP.Pressed;
+        settings.UseUpnp = useUpnp.Pressed;
         settings.GameModeSettings = gameModeOptions?.ReadSettings();
     }
 

@@ -86,11 +86,6 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         UpdateGameTime();
     }
 
-    public override void Init(MicrobialArena containedInStage)
-    {
-        base.Init(containedInStage);
-    }
-
     public void ShowSignalingCommandsMenu(Microbe player)
     {
         if (packControlRadial.Visible)

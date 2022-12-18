@@ -31,7 +31,7 @@ public interface INetEntity : IEntity
     /// <summary>
     ///   Called client-side when this entity is replicated.
     /// </summary>
-    public void OnReplicated(Dictionary<string, string>? data, GameProperties currentGame);
+    public void OnReplicated(Dictionary<string, string> data, GameProperties currentGame);
 
     /// <summary>
     ///   A naive implementation for marshaling entity states to be sent across network.

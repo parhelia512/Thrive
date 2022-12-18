@@ -1,9 +1,9 @@
 ﻿/// <summary>
 ///   The networking part of MicrobeStage for multiplayer.
 /// </summary>
-public partial class MicrobeStage : StageBase<Microbe>
+public partial class MicrobeStage
 {
-    // WIP
+    // TODO: implement?
 
     /*
     protected override void NetworkUpdateGameState()

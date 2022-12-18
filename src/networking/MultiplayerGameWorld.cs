@@ -13,7 +13,7 @@ public class MultiplayerGameWorld : GameWorld
     {
     }
 
-    public MultiplayerGameWorld(PatchMap map) : base()
+    public MultiplayerGameWorld(PatchMap map)
     {
         PlayerSpecies = CreatePlayerSpecies();
 
@@ -24,10 +24,6 @@ public class MultiplayerGameWorld : GameWorld
 
         // Apply initial populations
         Map.UpdateGlobalPopulations();
-    }
-
-    public MultiplayerGameWorld() : base()
-    {
     }
 
     /// <summary>
@@ -56,6 +52,10 @@ public class MultiplayerGameWorld : GameWorld
             entityIds.Add(id);
     }
 
+    /// <summary>
+    ///   Registers the given entity to the game world.
+    /// </summary>
+    /// <returns>The entity's assigned ID.</returns>
     public uint RegisterEntity(INetEntity entity)
     {
         RegisterEntity(++entityIdCounter, entity);

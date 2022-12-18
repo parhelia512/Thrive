@@ -145,20 +145,20 @@ public partial class Microbe
             SimulationParameters.Instance.GetCompound(queuedToxinToEmitInput) : null;
     }
 
-    public Dictionary<string, string>? PackStates()
+    public Dictionary<string, string> PackStates()
     {
         // TODO: Optimize.
 
         var states = new Dictionary<string, string>
         {
-            { nameof(randomSeed), randomSeed.ToString(CultureInfo.CurrentCulture) },
+            { nameof(randomSeed), randomSeed.ToString(CultureInfo.InvariantCulture) },
             { nameof(GlobalTranslation), GD.Var2Str(GlobalTranslation) },
             { nameof(GlobalRotation), GD.Var2Str(GlobalRotation) },
             {
                 nameof(Compounds.UsefulCompounds), JsonConvert.SerializeObject(
                     Compounds.UsefulCompounds.Select(c => c.InternalName).ToList())
             },
-            { nameof(Compounds.Capacity), Compounds.Capacity.ToString() },
+            { nameof(Compounds.Capacity), Compounds.Capacity.ToString(CultureInfo.InvariantCulture) },
             {
                 nameof(Compounds.Compounds), JsonConvert.SerializeObject(
                     Compounds.Compounds.ToDictionary(c => c.Key.InternalName, c => c.Value))
@@ -167,12 +167,12 @@ public partial class Microbe
                 nameof(requiredCompoundsForBaseReproduction), JsonConvert.SerializeObject(
                     requiredCompoundsForBaseReproduction.ToDictionary(c => c.Key.InternalName, c => c.Value))
             },
-            { nameof(Hitpoints), Hitpoints.ToString(CultureInfo.CurrentCulture) },
-            { nameof(Dead), Dead.ToString(CultureInfo.CurrentCulture) },
+            { nameof(Hitpoints), Hitpoints.ToString(CultureInfo.InvariantCulture) },
+            { nameof(Dead), Dead.ToString(CultureInfo.InvariantCulture) },
             { nameof(State), State.ToString() },
             { nameof(PhagocytosisStep), PhagocytosisStep.ToString() },
             { nameof(Membrane.Tint), GD.Var2Str(Membrane.Tint) },
-            { nameof(DigestedAmount), DigestedAmount.ToString(CultureInfo.CurrentCulture) },
+            { nameof(DigestedAmount), DigestedAmount.ToString(CultureInfo.InvariantCulture) },
         };
 
         if (HostileEngulfer.Value != null)
@@ -181,7 +181,7 @@ public partial class Microbe
         return states;
     }
 
-    public Dictionary<string, string>? PackReplicableVars()
+    public Dictionary<string, string> PackReplicableVars()
     {
         var vars = new Dictionary<string, string>
         {
@@ -221,11 +221,8 @@ public partial class Microbe
         return vars;
     }
 
-    public void OnReplicated(Dictionary<string, string>? data, GameProperties currentGame)
+    public void OnReplicated(Dictionary<string, string> data, GameProperties currentGame)
     {
-        if (data == null)
-            return;
-
         AddToGroup(Constants.AI_TAG_MICROBE);
         AddToGroup(Constants.PROCESS_GROUP);
         AddToGroup(Constants.RUNNABLE_MICROBE_GROUP);
