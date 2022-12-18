@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 /// <summary>
 ///   Multiplayer equivalent of <see cref="IStage"/>.

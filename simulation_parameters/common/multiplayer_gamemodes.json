@@ -1,10 +1,10 @@
-{
-    "MicrobialArena": {
-        "Name": "MICROBIAL_ARENA",
-        "Index": 0,
-        "Description": "MICROBIAL_ARENA_DESCRIPTION",
-        "MainScene": "res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn",
-        "EditorScene": "res://src/microbe_stage/multiplayer/microbial_arena/editor/MicrobialArenaEditor.tscn",
-        "SettingsGUI": "res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn"
-    }
+﻿{
+  "MicrobialArena": {
+    "Name": "MICROBIAL_ARENA",
+    "Index": 0,
+    "Description": "MICROBIAL_ARENA_DESCRIPTION",
+    "MainScene": "res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn",
+    "EditorScene": "res://src/microbe_stage/multiplayer/microbial_arena/editor/MicrobialArenaEditor.tscn",
+    "SettingsGUI": "res://src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn"
+  }
 }

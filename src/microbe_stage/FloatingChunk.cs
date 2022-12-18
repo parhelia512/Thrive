@@ -415,7 +415,10 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable, INetEntity
     {
         var vars = new Dictionary<string, string>
         {
-            { nameof(ChunkConfiguration), ThriveJsonConverter.Instance.SerializeObject(CreateChunkConfigurationFromThis()) },
+            {
+                nameof(ChunkConfiguration), ThriveJsonConverter.Instance.SerializeObject(
+                    CreateChunkConfigurationFromThis())
+            },
             { nameof(GraphicsScene), GraphicsScene.ResourcePath },
         };
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -552,6 +552,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     {
         var sender = GetTree().GetRpcSenderId();
 
-        RpcId(sender, nameof(ReceivedExcessEntitiesRemoval), JsonConvert.SerializeObject(MultiplayerGameWorld.EntityIDs));
+        RpcId(sender, nameof(ReceivedExcessEntitiesRemoval),
+            JsonConvert.SerializeObject(MultiplayerGameWorld.EntityIDs));
     }
 }

@@ -1,4 +1,4 @@
-public interface IGameModeOptionsMenu
+﻿public interface IGameModeOptionsMenu
 {
     public IGameModeSettings ReadSettings();
 }

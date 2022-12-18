@@ -1,4 +1,4 @@
-using Object = Godot.Object;
+﻿using Object = Godot.Object;
 
 public abstract class PlayerInputBase<TStage> : NodeWithInput
     where TStage : Object, IStage

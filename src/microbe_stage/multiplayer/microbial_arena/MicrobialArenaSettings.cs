@@ -1,4 +1,4 @@
-[JSONDynamicTypeAllowed]
+﻿[JSONDynamicTypeAllowed]
 public class MicrobialArenaSettings : IGameModeSettings
 {
     public MicrobialArenaSettings(float timeLimit, string biomeType)

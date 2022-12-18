@@ -1,4 +1,4 @@
-/// <summary>
+﻿/// <summary>
 ///   Describes the state of a player in-game.
 /// </summary>
 public struct NetPlayerState
