@@ -206,7 +206,7 @@ public partial class Microbe
         return vars;
     }
 
-    public Dictionary<string, string>? PackInputs()
+    public Dictionary<string, string> PackInputs()
     {
         var vars = new Dictionary<string, string>
         {

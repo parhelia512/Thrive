@@ -83,6 +83,9 @@ public class CloudBlob : Spatial, INetEntity, ISpawned
         data.TryGetValue(nameof(Compound), out string compoundInternalName);
         data.TryGetValue(nameof(Content), out string serializedContent);
 
+        if (string.IsNullOrEmpty(compoundInternalName) || string.IsNullOrEmpty(serializedContent))
+            return;
+
         Compound = SimulationParameters.Instance.GetCompound(compoundInternalName);
         content = JsonConvert.DeserializeObject<List<Cell>>(serializedContent)!;
     }

@@ -136,6 +136,8 @@ public class ServerSetup : CustomDialog
 
     private void CreateGameModeSpecificOptions(int index)
     {
+        _ = index;
+
         gameModeSpecificOptions.FreeChildren();
 
         if (currentGameMode == null)

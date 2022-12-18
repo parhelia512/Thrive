@@ -193,7 +193,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
                 MainGameState.Invalid, TranslationServer.Translate("LOADING_ENTITIES").FormatSafe(
                     MultiplayerGameWorld.EntityCount, serverEntityCount));
 
-            if (serverEntityCount > -1 && MultiplayerGameWorld?.EntityCount == serverEntityCount)
+            if (serverEntityCount > -1 && MultiplayerGameWorld.EntityCount == serverEntityCount)
             {
                 RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(RequestExcessEntitiesRemoval));
                 RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(RequestServerSidePlayerStates));
@@ -533,9 +533,12 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
             return;
 
         var state = GetPlayerState(peerId);
-        var entity = MultiplayerGameWorld.GetEntity(state.GetValueOrDefault().EntityID);
+        if (state == null)
+            return;
 
-        if (entity != null && entity is INetPlayer player)
+        var entity = MultiplayerGameWorld.GetEntity(state.Value.EntityID);
+
+        if (entity is INetPlayer player)
             player.OnNetworkInput(data);
     }
 
