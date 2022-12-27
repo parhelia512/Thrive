@@ -1113,10 +1113,13 @@ public static class Constants
 
     public const string LOCAL_HOST = "127.0.0.1";
     public const int MULTIPLAYER_DEFAULT_PORT = 4242;
-    public const int MULTIPLAYER_DEFAULT_MAX_PLAYERS = 32;
+    public const int MULTIPLAYER_DEFAULT_MAX_PLAYERS = 20;
     public const int MULTIPLAYER_DEFAULT_MAX_CLIENTS = 100;
-    public const float MULTIPLAYER_DEFAULT_UPDATE_INTERVAL_SECONDS = 0.03f;
+    public const float MULTIPLAYER_DEFAULT_SESSION_LENGTH = 60;
     public const int MULTIPLAYER_DEFAULT_TIMEOUT_LIMIT_SECONDS = 32;
+
+    public const float DEFAULT_SERVER_TIME_STEP_SECONDS = 0.1f;
+    public const float DEFAULT_CLIENT_TIME_STEP_SECONDS = 0.1f;
 
     public const float MICROBIAL_ARENA_CLOUD_SPAWN_AMOUNT_SCALE_FACTOR = 0.003f;
 

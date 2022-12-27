@@ -164,6 +164,7 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         var log = new KillFeedLog(content, highlight);
         killFeedLogs.Add(log);
         killFeed.AddChild(log);
+        killFeed.MoveChild(log, 0);
     }
 
     public override void ToggleInfoScreen()
@@ -362,7 +363,8 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
     {
         gameTime.Text = stage!.IsGameOver() ?
             TranslationServer.Translate("GAME_OVER") :
-            NetworkManager.Instance.GameTime;
+            TranslationServer.Translate("VALUE_SLASH_MAX_VALUE").FormatSafe(
+                NetworkManager.Instance.GameTime, NetworkManager.Instance.Settings!.SessionLength);
     }
 
     private void UpdateMinimap()

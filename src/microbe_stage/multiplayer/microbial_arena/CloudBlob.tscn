@@ -4,3 +4,5 @@
 
 [node name="CloudBlob" type="Spatial"]
 script = ExtResource( 1 )
+
+[connection signal="tree_exiting" from="." to="." method="OnTreeExiting"]

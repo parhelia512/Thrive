@@ -78,7 +78,7 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
     /// </summary>
     public void Init(FluidSystem fluidSystem, int cloudSize = Constants.CLOUD_WIDTH, int planeSize = 200)
     {
-        // Assume clouds will always be needed symmetrically
+        // Assume clouds will always be symmetrical
         CloudSize = new Int2(cloudSize, cloudSize);
 
         var allCloudCompounds = SimulationParameters.Instance.GetCloudCompounds();
@@ -98,12 +98,6 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
             var createdCloud = (CompoundCloudPlane)cloudScene.Instance();
             clouds.Add(createdCloud);
             AddChild(createdCloud);
-
-            if (NetworkManager.Instance.IsAuthoritative)
-            {
-                createdCloud.OnCloudAdded = OnCloudAdded;
-                createdCloud.OnCompoundTaken = OnCompoundTaken;
-            }
         }
 
         // TODO: this should be changed to detect which clouds are safe to delete
@@ -504,43 +498,5 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
         {
             cloud.UpdateTexture();
         }
-    }
-
-    private void OnCloudAdded(Compound compound, float density, Vector3 worldPosition)
-    {
-        // Sync to peers
-        foreach (var player in NetworkManager.Instance.ConnectedPlayers)
-        {
-            if (player.Key == NetworkManager.DEFAULT_SERVER_ID || player.Value.Status != NetPlayerStatus.Active)
-                continue;
-
-            RpcId(player.Key, nameof(SyncCloudAddition), compound.InternalName, density, worldPosition);
-        }
-    }
-
-    private void OnCompoundTaken(Compound compound, Vector3 worldPosition, float fraction)
-    {
-        // Sync to peers
-        foreach (var player in NetworkManager.Instance.ConnectedPlayers)
-        {
-            if (player.Key == NetworkManager.DEFAULT_SERVER_ID || player.Value.Status != NetPlayerStatus.Active)
-                continue;
-
-            RpcId(player.Key, nameof(SyncCloudReduction), compound.InternalName, worldPosition, fraction);
-        }
-    }
-
-    [Puppet]
-    private void SyncCloudAddition(string compoundName, float density, Vector3 worldPosition)
-    {
-        var compound = SimulationParameters.Instance.GetCompound(compoundName);
-        AddCloud(compound, density, worldPosition);
-    }
-
-    [Puppet]
-    private void SyncCloudReduction(string compoundName, Vector3 worldPosition, float fraction)
-    {
-        var compound = SimulationParameters.Instance.GetCompound(compoundName);
-        TakeCompound(compound, worldPosition, fraction);
     }
 }

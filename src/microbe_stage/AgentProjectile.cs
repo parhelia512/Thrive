@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using Godot;
 using Newtonsoft.Json;
 
@@ -9,7 +7,7 @@ using Newtonsoft.Json;
 /// </summary>
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/AgentProjectile.tscn", UsesEarlyResolve = false)]
-public class AgentProjectile : RigidBody, ITimedLife, INetEntity
+public class AgentProjectile : NetworkRigidBody, ITimedLife
 {
     private Particles particles = null!;
 
@@ -18,15 +16,7 @@ public class AgentProjectile : RigidBody, ITimedLife, INetEntity
     public AgentProperties? Properties { get; set; }
     public EntityReference<IEntity> Emitter { get; set; } = new();
 
-    public Spatial EntityNode => this;
-
-    public string ResourcePath => "res://src/microbe_stage/AgentProjectile.tscn";
-
-    public uint NetEntityId { get; set; }
-
-    public bool Synchronize { get; set; } = true;
-
-    public AliveMarker AliveMarker { get; } = new();
+    public override string ResourcePath => "res://src/microbe_stage/AgentProjectile.tscn";
 
     [JsonProperty]
     private float? FadeTimeRemaining { get; set; }
@@ -62,63 +52,24 @@ public class AgentProjectile : RigidBody, ITimedLife, INetEntity
             this.DestroyDetachAndQueueFree();
     }
 
-    public void NetworkTick(float delta)
+    public override void PackSpawnState(PackedBytesBuffer buffer)
     {
+        buffer.Write(TimeToLiveRemaining);
+        buffer.Write(Amount);
+        buffer.Write(Properties!.Species.ID);
     }
 
-    public void OnNetworkSync(Dictionary<string, string> data)
+    public override void OnNetworkSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
     {
-        var rotation = (Vector3)GD.Str2Var(data[nameof(GlobalRotation)]);
-        var position = (Vector3)GD.Str2Var(data[nameof(GlobalTranslation)]);
+        TimeToLiveRemaining = buffer.ReadSingle();
+        Amount = buffer.ReadSingle();
 
-        GlobalRotation = rotation;
-        GlobalTranslation = position;
-    }
+        var speciesId = buffer.ReadUInt32();
 
-    public Dictionary<string, string> PackStates()
-    {
-        var states = new Dictionary<string, string>
-        {
-            { nameof(GlobalTranslation), GD.Var2Str(GlobalTranslation) },
-            { nameof(GlobalRotation), GD.Var2Str(GlobalRotation) },
-        };
+        // Only toxin agent expected
+        var compound = SimulationParameters.Instance.GetCompound("oxytoxy");
 
-        return states;
-    }
-
-    public Dictionary<string, string> PackReplicableVars()
-    {
-        var vars = new Dictionary<string, string>
-        {
-            { nameof(TimeToLiveRemaining), TimeToLiveRemaining.ToString(CultureInfo.InvariantCulture) },
-            { nameof(Amount), Amount.ToString(CultureInfo.InvariantCulture) },
-        };
-
-        if (Properties != null)
-            vars.Add(nameof(Properties), ThriveJsonConverter.Instance.SerializeObject(Properties));
-
-        return vars;
-    }
-
-    public void OnReplicated(Dictionary<string, string> data, GameProperties currentGame)
-    {
-        data.TryGetValue(nameof(TimeToLiveRemaining), out string timeToLive);
-        data.TryGetValue(nameof(Amount), out string amount);
-        data.TryGetValue(nameof(Properties), out string props);
-
-        if (float.TryParse(timeToLive, out float parsedTimeToLive))
-            TimeToLiveRemaining = parsedTimeToLive;
-
-        if (float.TryParse(amount, out float parsedAmount))
-            Amount = parsedAmount;
-
-        if (!string.IsNullOrEmpty(props))
-            Properties = ThriveJsonConverter.Instance.DeserializeObject<AgentProperties>(props);
-    }
-
-    public void OnDestroyed()
-    {
-        AliveMarker.Alive = false;
+        Properties = new AgentProperties(currentGame.GameWorld.GetSpecies(speciesId), compound);
     }
 
     private void OnContactBegin(int bodyID, Node body, int bodyShape, int localShape)
@@ -139,7 +90,7 @@ public class AgentProjectile : RigidBody, ITimedLife, INetEntity
             return;
 
         int? peerId = null;
-        if (Emitter.Value is INetPlayer netPlayer)
+        if (Emitter.Value is INetworkPlayer netPlayer)
             peerId = netPlayer.PeerId;
 
         Invoke.Instance.Perform(

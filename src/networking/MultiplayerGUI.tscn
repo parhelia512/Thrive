@@ -4,8 +4,8 @@
 [ext_resource path="res://src/networking/MultiplayerGUI.cs" type="Script" id=2]
 [ext_resource path="res://src/networking/ChatBox.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/gui_common/fonts/Lato-Bold-Small.tres" type="DynamicFont" id=4]
-[ext_resource path="res://src/gui_common/NetPlayerList.tscn" type="PackedScene" id=5]
-[ext_resource path="res://src/gui_common/NetPlayerLog.tscn" type="PackedScene" id=6]
+[ext_resource path="res://src/gui_common/NetworkPlayerList.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/gui_common/NetworkPlayerLog.tscn" type="PackedScene" id=6]
 [ext_resource path="res://src/networking/ServerSetup.tscn" type="PackedScene" id=7]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-AlmostSmaller.tres" type="DynamicFont" id=8]
 [ext_resource path="res://src/gui_common/dialogs/CustomConfirmationDialog.tscn" type="PackedScene" id=9]
@@ -25,7 +25,6 @@ NameBoxPath = NodePath("PrimaryMenu/VBoxContainer/HBoxContainer/NameBox")
 AddressBoxPath = NodePath("PrimaryMenu/VBoxContainer/HBoxContainer2/Address")
 PortBoxPath = NodePath("PrimaryMenu/VBoxContainer/HBoxContainer3/Port")
 ConnectButtonPath = NodePath("PrimaryMenu/HBoxContainer2/Connect")
-CreateServerButtonPath = NodePath("PrimaryMenu/HBoxContainer2/Host")
 LobbyPlayerListPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/NetPlayerList")
 ServerNamePath = NodePath("Lobby/PanelContainer/MarginContainer/HBoxContainer/ServerName")
 ServerAttributesPath = NodePath("Lobby/PanelContainer/MarginContainer/HBoxContainer/ServerAttributes")
@@ -33,7 +32,6 @@ StartButtonPath = NodePath("Lobby/HBoxContainer/Start")
 KickedDialogPath = NodePath("KickedDialog")
 GameModeTitlePath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context/MarginContainer/VBoxContainer/GameModeTitle")
 GameModeDescriptionPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context/MarginContainer/VBoxContainer/GameModeDescription")
-ChatBoxPath = NodePath("Lobby/HBoxContainer2/VBoxContainer/ChatPanel/MarginContainer/VBoxContainer/ChatBox")
 PlayerListTabPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/NetPlayerList")
 GameInfoTabPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context")
 PlayerListTabButtonPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs/PlayerList")

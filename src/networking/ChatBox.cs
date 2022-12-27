@@ -62,6 +62,17 @@ public class ChatBox : VBoxContainer
         return true;
     }
 
+    [RunOnKeyDown("g_chat_command")]
+    public bool FocusCommand()
+    {
+        if (!Focus())
+            return false;
+
+        lineEdit.Text = "/";
+        lineEdit.CaretPosition = 1;
+        return true;
+    }
+
     protected virtual void OnFocusEntered()
     {
         EmitSignal(nameof(Focused));
@@ -69,16 +80,16 @@ public class ChatBox : VBoxContainer
 
     protected virtual void OnMessageEntered(string message)
     {
-        if (string.IsNullOrEmpty(message))
-            return;
-
-        ParseChat(message);
-        lineEdit.Text = string.Empty;
-
         if (ReleaseLineEditFocusAfterMessageSent)
             lineEdit.ReleaseFocus();
 
+        if (string.IsNullOrEmpty(message))
+            return;
+
+        lineEdit.Text = string.Empty;
+
         OnMessageChanged(lineEdit.Text);
+        NetworkManager.Instance.Chat(message);
     }
 
     protected virtual void OnMessageChanged(string newText)
@@ -96,29 +107,6 @@ public class ChatBox : VBoxContainer
         }
 
         chatDisplay.ExtendedBbcode = builder.ToString();
-    }
-
-    private void ParseChat(string chat)
-    {
-        if (chat == "/clear")
-        {
-            NetworkManager.Instance.ClearChatHistory();
-            DisplayChat();
-        }
-        else if (chat.BeginsWith("/updateintv "))
-        {
-            var args = chat.Split(" ");
-
-            if (float.TryParse(args[1], out float result))
-            {
-                NetworkManager.Instance.UpdateInterval = result;
-                NetworkManager.Instance.BroadcastChat($"Update interval has been changed to {result} by the host");
-            }
-        }
-        else
-        {
-            NetworkManager.Instance.BroadcastChat(chat);
-        }
     }
 
     private void OnMessageReceived()

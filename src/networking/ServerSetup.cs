@@ -9,6 +9,9 @@ public class ServerSetup : CustomDialog
     public NodePath MaxPlayerPath = null!;
 
     [Export]
+    public NodePath SessionLengthPath = null!;
+
+    [Export]
     public NodePath GameModePath = null!;
 
     [Export]
@@ -22,6 +25,7 @@ public class ServerSetup : CustomDialog
 
     private LineEdit name = null!;
     private SpinBox maxPlayers = null!;
+    private SpinBox sessionLength = null!;
     private OptionButton gameMode = null!;
     private CustomCheckBox useUpnp = null!;
     private TextureButton useUpnpHint = null!;
@@ -42,6 +46,7 @@ public class ServerSetup : CustomDialog
     {
         name = GetNode<LineEdit>(NamePath);
         maxPlayers = GetNode<SpinBox>(MaxPlayerPath);
+        sessionLength = GetNode<SpinBox>(SessionLengthPath);
         gameMode = GetNode<OptionButton>(GameModePath);
         useUpnp = GetNode<CustomCheckBox>(UseUpnpPath);
         useUpnpHint = GetNode<TextureButton>(UseUpnpHintPath);
@@ -92,6 +97,7 @@ public class ServerSetup : CustomDialog
             Address = address,
             Port = port,
             MaxPlayers = Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS,
+            SessionLength = Constants.MULTIPLAYER_DEFAULT_SESSION_LENGTH,
             UseUpnp = false,
             SelectedGameMode = SimulationParameters.Instance.GetMultiplayerGameMode("MicrobialArena"),
         };
@@ -103,6 +109,7 @@ public class ServerSetup : CustomDialog
     {
         name.Text = settings!.Name;
         maxPlayers.Value = settings.MaxPlayers;
+        sessionLength.Value = settings.SessionLength;
         gameMode.Selected = settings.SelectedGameMode!.Index;
         useUpnp.Pressed = settings.UseUpnp;
 
@@ -123,12 +130,15 @@ public class ServerSetup : CustomDialog
         maxPlayers.MaxValue = Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS;
 
         OnGameModeSelected(gameMode.Selected);
+
+        sessionLength.Suffix = TranslationServer.Translate("MINUTES_LOWERCASE");
     }
 
     private void ReadControlsToSettings()
     {
         settings!.Name = name.Text;
         settings.MaxPlayers = (int)maxPlayers.Value;
+        settings.SessionLength = (float)sessionLength.Value;
         settings.SelectedGameMode = currentGameMode;
         settings.UseUpnp = useUpnp.Pressed;
         settings.GameModeSettings = gameModeOptions?.ReadSettings();

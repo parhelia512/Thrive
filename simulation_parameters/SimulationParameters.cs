@@ -219,6 +219,76 @@ public class SimulationParameters : Node
         return compounds.ContainsKey(name);
     }
 
+    // TODO: Make this generalizable
+    public int CompoundToIndex(Compound compound)
+    {
+        if (compound == GetCompound("phosphates"))
+        {
+            return 0;
+        }
+        else if (compound == GetCompound("ammonia"))
+        {
+            return 1;
+        }
+        else if (compound == GetCompound("atp"))
+        {
+            return 2;
+        }
+        else if (compound == GetCompound("glucose"))
+        {
+            return 3;
+        }
+        else if (compound == GetCompound("iron"))
+        {
+            return 4;
+        }
+        else if (compound == GetCompound("hydrogensulfide"))
+        {
+            return 5;
+        }
+        else if (compound == GetCompound("mucilage"))
+        {
+            return 6;
+        }
+
+        return -1;
+    }
+
+    // TODO: Make this generalizable
+    public Compound IndexToCompound(int code)
+    {
+        if (code == 0)
+        {
+            return GetCompound("phosphates");
+        }
+        else if (code == 1)
+        {
+            return GetCompound("ammonia");
+        }
+        else if (code == 2)
+        {
+            return GetCompound("atp");
+        }
+        else if (code == 3)
+        {
+            return GetCompound("glucose");
+        }
+        else if (code == 4)
+        {
+            return GetCompound("iron");
+        }
+        else if (code == 5)
+        {
+            return GetCompound("hydrogensulfide");
+        }
+        else if (code == 6)
+        {
+            return GetCompound("mucilage");
+        }
+
+        return GetCompound("glucose");
+    }
+
     public Enzyme GetEnzyme(string name)
     {
         return enzymes[name];

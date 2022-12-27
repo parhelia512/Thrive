@@ -16,7 +16,7 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
 
     protected ChatBox chatBox = null!;
     protected Control infoScreen = null!;
-    protected NetPlayerList scoreBoard = null!;
+    protected NetworkPlayerList scoreBoard = null!;
 
     // The values of the following variable is the opposite of the expected value.
     // I.e. its value is true when its respective panel is collapsed.
@@ -29,7 +29,7 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
         chatBoxAnimationPlayer = GetNode<AnimationPlayer>(ChatBoxAnimationPlayerPath);
         chatBox = GetNode<ChatBox>(ChatBoxPath);
         infoScreen = GetNode<Control>(InfoScreenPath);
-        scoreBoard = GetNode<NetPlayerList>(ScoreBoardPath);
+        scoreBoard = GetNode<NetworkPlayerList>(ScoreBoardPath);
     }
 
     public override void Init(TStage containedInStage)
@@ -49,7 +49,7 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
         scoreBoard.SortHighestScoreFirst();
     }
 
-    public NetPlayerLog GetFirstOnTheScoreBoard()
+    public NetworkPlayerLog GetFirstOnTheScoreBoard()
     {
         return scoreBoard.GetFirst();
     }

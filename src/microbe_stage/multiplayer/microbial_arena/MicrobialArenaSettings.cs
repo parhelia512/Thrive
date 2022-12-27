@@ -1,13 +1,18 @@
 ﻿[JSONDynamicTypeAllowed]
 public class MicrobialArenaSettings : IGameModeSettings
 {
-    public MicrobialArenaSettings(float timeLimit, string biomeType)
+    public MicrobialArenaSettings(string biomeType)
     {
-        TimeLimit = timeLimit;
         BiomeType = biomeType;
     }
 
-    public float TimeLimit { get; set; }
+    /// <summary>
+    ///   A plain constructor for network serialization/deserialization purposes.
+    /// </summary>
+    public MicrobialArenaSettings()
+    {
+        BiomeType = string.Empty;
+    }
 
     /// <summary>
     ///   NOTE: Changing this require adjusting <see cref="MicrobialArena.COMPOUND_PLANE_SIZE_MAGIC_NUMBER"/>!!!
@@ -16,8 +21,20 @@ public class MicrobialArenaSettings : IGameModeSettings
 
     public string BiomeType { get; set; }
 
+    public void NetworkSerialize(PackedBytesBuffer buffer)
+    {
+        buffer.Write(ArenaRadius);
+        buffer.Write(BiomeType);
+    }
+
+    public void NetworkDeserialize(PackedBytesBuffer buffer)
+    {
+        ArenaRadius = buffer.ReadInt32();
+        BiomeType = buffer.ReadString();
+    }
+
     public override string ToString()
     {
-        return $"Game time: {TimeLimit}\nArena Radius: {ArenaRadius}\nBiome: {BiomeType}";
+        return $"Arena Radius: {ArenaRadius}\nBiome: {BiomeType}";
     }
 }

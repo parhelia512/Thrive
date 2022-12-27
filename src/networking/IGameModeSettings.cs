@@ -1,3 +1,3 @@
-﻿public interface IGameModeSettings
+﻿public interface IGameModeSettings : INetworkSerializable
 {
 }

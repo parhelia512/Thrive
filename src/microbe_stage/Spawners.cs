@@ -45,7 +45,7 @@ public static class Spawners
 /// </summary>
 public static class SpawnHelpers
 {
-    public static Action<INetEntity>? OnNetEntitySpawned;
+    public static Action<INetworkEntity>? OnNetEntitySpawned;
     public static Action<uint>? OnNetEntityDespawned;
 
     public static Microbe SpawnMicrobe(Species species, Vector3 location,
@@ -164,7 +164,7 @@ public static class SpawnHelpers
             throw new ArgumentException("couldn't find a graphics scene for a chunk");
 
         // Pass on the chunk data
-        chunk.Init(chunkType, selectedMesh.SceneModelPath, selectedMesh.SceneAnimationPath);
+        chunk.Init(chunkType, chunkType.Meshes.IndexOf(selectedMesh));
         chunk.UsesDespawnTimer = !chunkType.Dissolves;
 
         worldNode.AddChild(chunk);
@@ -216,7 +216,8 @@ public static class SpawnHelpers
         amount *= random.Next(0.5f, 1);
 
         var blob = cloudBlobScene.Instance<CloudBlob>();
-        blob.Init(compound, location, radius, amount);
+        blob.TimeToLiveRemaining = 30;
+        blob.Init(clouds, compound, location, radius, amount);
 
         worldNode.AddChild(blob);
 

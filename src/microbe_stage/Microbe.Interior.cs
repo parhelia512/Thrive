@@ -20,6 +20,9 @@ public partial class Microbe
     private Compound atp = null!;
     private Compound glucose = null!;
     private Compound mucilage = null!;
+    private Compound ammonia = null!;
+    private Compound phosphates = null!;
+    private Compound oxytoxy = null!;
 
     private Enzyme lipase = null!;
 
@@ -653,7 +656,7 @@ public partial class Microbe
 
     private void HandleCompoundAbsorbing(float delta)
     {
-        if (NetworkManager.Instance.IsClient)
+        if (NetworkManager.Instance.IsClient && cloudSystem == null)
             return;
 
         if (PhagocytosisStep != PhagocytosisPhase.None)
@@ -1574,7 +1577,7 @@ public partial class Microbe
                 Kill();
 
                 if (PeerId.HasValue)
-                    OnNetworkedDeathCompletes?.Invoke(PeerId.Value);
+                    OnNetworkDeathFinished?.Invoke(PeerId.Value);
 
                 if (IsPlayerMicrobe)
                 {
@@ -1588,7 +1591,7 @@ public partial class Microbe
                     return;
 
                 if (PeerId.HasValue && hostile.PeerId.HasValue)
-                    OnKilledByPeer?.Invoke(hostile.PeerId.Value, PeerId.Value, "engulf");
+                    OnKilledByAnotherPlayer?.Invoke(hostile.PeerId.Value, PeerId.Value, "engulf");
 
                 // Transfer ownership of all the objects we engulfed to our engulfer
                 foreach (var other in engulfedObjects.ToList())

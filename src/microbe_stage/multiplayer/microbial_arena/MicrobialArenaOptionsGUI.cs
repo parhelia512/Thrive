@@ -5,19 +5,14 @@ using Godot;
 public class MicrobialArenaOptionsGUI : MarginContainer, IGameModeOptionsMenu
 {
     [Export]
-    public NodePath TimeLimitPath = null!;
-
-    [Export]
     public NodePath BiomesPath = null!;
 
-    private SpinBox timeLimit = null!;
     private OptionButton biomes = null!;
 
     private List<Biome>? shownBiomes;
 
     public override void _Ready()
     {
-        timeLimit = GetNode<SpinBox>(TimeLimitPath);
         biomes = GetNode<OptionButton>(BiomesPath);
 
         shownBiomes = SimulationParameters.Instance.GetAllBiomes().ToList();
@@ -26,24 +21,11 @@ public class MicrobialArenaOptionsGUI : MarginContainer, IGameModeOptionsMenu
         {
             biomes.AddItem(biome.Name);
         }
-
-        UpdateSuffix();
-    }
-
-    public override void _Notification(int what)
-    {
-        if (what == NotificationTranslationChanged)
-            UpdateSuffix();
     }
 
     public IGameModeSettings ReadSettings()
     {
-        return new MicrobialArenaSettings((float)timeLimit.Value, shownBiomes?[biomes.Selected].InternalName ??
+        return new MicrobialArenaSettings(shownBiomes?[biomes.Selected].InternalName ??
             SimulationParameters.Instance.GetBiome("tidepool").InternalName);
-    }
-
-    private void UpdateSuffix()
-    {
-        timeLimit.Suffix = TranslationServer.Translate("MINUTES_LOWERCASE");
     }
 }

@@ -1,23 +1,19 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Godot;
-using Newtonsoft.Json;
 
 /// <summary>
-///   A static predefined compound cloud with a circular form. Network synchronizable.
+///   Represents a networkable version of the compound cloud with a predefined form and is static.
 /// </summary>
-public class CloudBlob : Spatial, INetEntity, ISpawned
+public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
 {
-    private List<Cell> content = new();
+    private CompoundCloudSystem? clouds;
+    private string? cloudsPath;
+
+    private List<Chunk> chunks = new();
 
     public Compound Compound { get; private set; } = null!;
 
-    public IReadOnlyList<Cell> Content => content;
-
-    /// <summary>
-    ///   Returns true if the sum of compound amount in all cloud cells is less than <see cref="MathUtils.EPSILON"/>.
-    /// </summary>
-    public bool Empty => content.Sum(c => c.Amount) <= MathUtils.EPSILON;
+    public IReadOnlyList<Chunk> Chunks => chunks;
 
     public int DespawnRadiusSquared { get; set; }
 
@@ -29,18 +25,20 @@ public class CloudBlob : Spatial, INetEntity, ISpawned
 
     public string ResourcePath => "res://src/microbe_stage/multiplayer/microbial_arena/CloudBlob.tscn";
 
-    public uint NetEntityId { get; set; }
+    public uint NetworkEntityId { get; set; }
 
-    public bool Synchronize { get; set; } = false;
+    public float TimeToLiveRemaining { get; set; }
 
-    public void Init(Compound compound, Vector3 position, float radius, float amount)
+    public void Init(CompoundCloudSystem clouds, Compound compound, Vector3 position, float radius, float amount)
     {
+        this.clouds = clouds;
         Compound = compound;
         Translation = position;
 
         int resolution = Settings.Instance.CloudResolution;
 
         // Circle drawing algorithm from https://www.redblobgames.com/grids/circle-drawing/
+        // TODO: make the shape more "noisy" instead of a perfect circle
 
         var center = new Int2((int)position.x, (int)position.z);
 
@@ -58,8 +56,20 @@ public class CloudBlob : Spatial, INetEntity, ISpawned
                 var distanceSqr = dx * dx + dy * dy;
 
                 if (distanceSqr <= radius * radius)
-                    content.Add(new Cell(new Vector2(x + resolution, y + resolution), amount));
+                    chunks.Add(new Chunk(new Vector3(x + resolution, 0, y + resolution), amount));
             }
+        }
+    }
+
+    public override void _Ready()
+    {
+        // Kind of hackish I guess??
+        clouds ??= GetNode<CompoundCloudSystem>(cloudsPath);
+        cloudsPath ??= clouds.GetPath();
+
+        foreach (var chunk in Chunks)
+        {
+            clouds.AddCloud(Compound, chunk.Amount, chunk.Position);
         }
     }
 
@@ -67,59 +77,94 @@ public class CloudBlob : Spatial, INetEntity, ISpawned
     {
     }
 
+    public void NetworkSerialize(PackedBytesBuffer buffer)
+    {
+        // For now just hope everything sync nicely by themselves on the client side.
+        // Can we even feasibly replicate the amount in the clouds anyway? ...not unless clever tricks were employed.
+    }
+
+    public void NetworkDeserialize(PackedBytesBuffer buffer)
+    {
+    }
+
+    public void PackSpawnState(PackedBytesBuffer buffer)
+    {
+        buffer.Write((byte)SimulationParameters.Instance.CompoundToIndex(Compound));
+
+        buffer.Write((short)Chunks.Count);
+        foreach (var chunk in Chunks)
+        {
+            chunk.Amount = clouds!.AmountAvailable(Compound, chunk.Position, 1.0f);
+
+            var packed = new PackedBytesBuffer();
+            chunk.NetworkSerialize(packed);
+            buffer.Write(packed);
+        }
+
+        buffer.WriteVariant(GlobalTranslation);
+        buffer.Write(cloudsPath!);
+    }
+
+    public void OnNetworkSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
+    {
+        Compound = SimulationParameters.Instance.IndexToCompound(buffer.ReadByte());
+
+        var chunksCount = buffer.ReadInt16();
+        for (int i = 0; i < chunksCount; ++i)
+        {
+            var packed = buffer.ReadBuffer();
+            chunks.Add(new Chunk(packed));
+        }
+
+        Translation = (Vector3)buffer.ReadVariant();
+        cloudsPath = buffer.ReadString();
+    }
+
+    public void OnTimeOver()
+    {
+        this.DestroyDetachAndQueueFree();
+    }
+
     public void OnDestroyed()
     {
         AliveMarker.Alive = false;
     }
 
-    public void OnNetworkSync(Dictionary<string, string> data)
+    private void OnTreeExiting()
     {
-        data.TryGetValue(nameof(GlobalTranslation), out string serializedCenter);
-        GlobalTranslation = (Vector3)GD.Str2Var(serializedCenter);
-    }
-
-    public void OnReplicated(Dictionary<string, string> data, GameProperties currentGame)
-    {
-        data.TryGetValue(nameof(Compound), out string compoundInternalName);
-        data.TryGetValue(nameof(Content), out string serializedContent);
-
-        if (string.IsNullOrEmpty(compoundInternalName) || string.IsNullOrEmpty(serializedContent))
-            return;
-
-        Compound = SimulationParameters.Instance.GetCompound(compoundInternalName);
-        content = JsonConvert.DeserializeObject<List<Cell>>(serializedContent)!;
-    }
-
-    public Dictionary<string, string> PackReplicableVars()
-    {
-        var vars = new Dictionary<string, string>
+        foreach (var chunk in Chunks)
         {
-            { nameof(Compound), Compound.InternalName },
-            { nameof(Content), JsonConvert.SerializeObject(content) },
-        };
-
-        return vars;
+            clouds?.TakeCompound(Compound, chunk.Position, 1.0f);
+        }
     }
 
-    public Dictionary<string, string> PackStates()
+    public class Chunk : INetworkSerializable
     {
-        var states = new Dictionary<string, string>
-        {
-            { nameof(GlobalTranslation), GD.Var2Str(GlobalTranslation) },
-        };
-
-        return states;
-    }
-
-    public class Cell
-    {
-        public Vector2 Position;
+        public Vector3 Position;
         public float Amount;
 
-        public Cell(Vector2 position, float amount)
+        public Chunk(PackedBytesBuffer buffer)
+        {
+            NetworkDeserialize(buffer);
+        }
+
+        public Chunk(Vector3 position, float amount)
         {
             Position = position;
             Amount = amount;
+        }
+
+        public void NetworkSerialize(PackedBytesBuffer buffer)
+        {
+            buffer.Write(Position.x);
+            buffer.Write(Position.z);
+            buffer.Write(Amount);
+        }
+
+        public void NetworkDeserialize(PackedBytesBuffer buffer)
+        {
+            Position = new Vector3(buffer.ReadSingle(), Position.y, buffer.ReadSingle());
+            Amount = buffer.ReadSingle();
         }
     }
 }

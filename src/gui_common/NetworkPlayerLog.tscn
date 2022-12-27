@@ -1,6 +1,6 @@
 [gd_scene load_steps=12 format=2]
 
-[ext_resource path="res://src/gui_common/NetPlayerLog.cs" type="Script" id=1]
+[ext_resource path="res://src/gui_common/NetworkPlayerLog.cs" type="Script" id=1]
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=2]
 [ext_resource path="res://assets/textures/gui/bevel/graphMarkerCross.png" type="Texture" id=3]
 [ext_resource path="res://src/gui_common/CustomRichTextLabel.tscn" type="PackedScene" id=4]
@@ -32,7 +32,7 @@ content_margin_right = 5.0
 content_margin_top = 5.0
 content_margin_bottom = 5.0
 
-[node name="NetPlayerLog" type="PanelContainer"]
+[node name="NetworkPlayerLog" type="PanelContainer"]
 margin_right = 417.0
 margin_bottom = 29.0
 rect_min_size = Vector2( 0, 29 )

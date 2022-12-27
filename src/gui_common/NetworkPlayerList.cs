@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
 /// <summary>
 ///   Lists (networked) players and their gameplay attributes. Code is pretty much self-contained.
 /// </summary>
-public class NetPlayerList : VBoxContainer
+public class NetworkPlayerList : VBoxContainer
 {
     [Export]
     public NodePath ListPath = null!;
@@ -19,7 +19,7 @@ public class NetPlayerList : VBoxContainer
     [Export]
     public PackedScene NetPlayerLogScene = null!;
 
-    private Dictionary<int, NetPlayerLog> playerLogs = new();
+    private Dictionary<int, NetworkPlayerLog> playerLogs = new();
 
     private List<int>? sortedKeys;
 
@@ -57,7 +57,7 @@ public class NetPlayerList : VBoxContainer
         sortedKeys = NetworkManager.Instance.ConnectedPlayers
             .OrderByDescending(p =>
             {
-                p.Value.Ints.TryGetValue("score", out int score);
+                p.Value.TryGetVar("score", out int score);
                 return score;
             })
             .Select(p => p.Key)
@@ -65,23 +65,23 @@ public class NetPlayerList : VBoxContainer
 
         for (int i = 0; i < sortedKeys.Count; i++)
         {
-            if (!playerLogs.TryGetValue(sortedKeys[i], out NetPlayerLog log))
+            if (!playerLogs.TryGetValue(sortedKeys[i], out NetworkPlayerLog log))
                 continue;
 
             list.MoveChild(log, i);
         }
     }
 
-    public NetPlayerLog GetFirst()
+    public NetworkPlayerLog GetFirst()
     {
         sortedKeys ??= playerLogs.Select(p => p.Key).ToList();
 
         return playerLogs[sortedKeys.First()];
     }
 
-    public NetPlayerLog? GetPlayer(int id)
+    public NetworkPlayerLog? GetPlayer(int id)
     {
-        playerLogs.TryGetValue(id, out NetPlayerLog log);
+        playerLogs.TryGetValue(id, out NetworkPlayerLog log);
         return log;
     }
 
@@ -90,11 +90,11 @@ public class NetPlayerList : VBoxContainer
         if (playerLogs.ContainsKey(id))
             return;
 
-        var log = (NetPlayerLog)NetPlayerLogScene.Instance();
+        var log = (NetworkPlayerLog)NetPlayerLogScene.Instance();
         log.ID = id;
         log.PlayerName = name;
 
-        log.Connect(nameof(NetPlayerLog.KickRequested), this, nameof(OnKickButtonPressed));
+        log.Connect(nameof(NetworkPlayerLog.KickRequested), this, nameof(OnKickButtonPressed));
 
         list.AddChild(log);
         playerLogs.Add(id, log);
@@ -105,7 +105,7 @@ public class NetPlayerList : VBoxContainer
 
     private void UnRegisterPlayer(int id)
     {
-        if (playerLogs.TryGetValue(id, out NetPlayerLog log))
+        if (playerLogs.TryGetValue(id, out NetworkPlayerLog log))
         {
             log.QueueFree();
             playerLogs.Remove(id);

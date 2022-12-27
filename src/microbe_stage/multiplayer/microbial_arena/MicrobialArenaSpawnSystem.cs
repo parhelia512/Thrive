@@ -5,18 +5,17 @@ using Godot;
 
 public class MicrobialArenaSpawnSystem : SpawnSystem
 {
-    public const int MAX_SPAWN_SPOTS = 23;
+    public const int MAX_SPAWN_SPOTS = 30;
     public const int MAX_SPAWNS_IN_ONE_SPAWN_SPOT = 20;
     public const float SPAWN_SPOT_MIN_LIFETIME = 15.0f;
     public const float SPAWN_SPOT_MAX_LIFETIME = 35.0f;
-    public const float DEFAULT_SPAWN_SPOT_SIZE = 150.0f;
+    public const float DEFAULT_SPAWN_SPOT_SIZE = 200.0f;
     public const float SPAWN_RADIUS_MARGIN_MULTIPLIER = 0.8f;
 
     private MultiplayerGameWorld gameWorld;
     private CompoundCloudSystem clouds;
 
     private List<SpawnSpot> spawnSpots = new();
-    private List<CloudBlob> cloudBlobs = new();
 
     private float spawnAreaRadius;
 
@@ -61,7 +60,7 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
             var density = entry.Value.Density * Constants.CLOUD_SPAWN_DENSITY_SCALE_FACTOR;
             var amount = entry.Value.Amount * Constants.MICROBIAL_ARENA_CLOUD_SPAWN_AMOUNT_SCALE_FACTOR;
 
-            AddSpawnType(Spawners.MakeCompoundBlobSpawner(entry.Key, clouds, amount, 20), density, 0);
+            AddSpawnType(Spawners.MakeCompoundBlobSpawner(entry.Key, clouds, amount, 40), density, 0);
         }
     }
 
@@ -90,22 +89,6 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
 
             GenerateSpawnSpots();
             UpdateSpawnSpots(delta, ref spawnsLeftThisFrame);
-            UpdateCloudBlobs();
-        }
-    }
-
-    protected override void ProcessSpawnedEntity(ISpawned entity, Spawner spawnType)
-    {
-        base.ProcessSpawnedEntity(entity, spawnType);
-
-        if (entity is CloudBlob blob)
-        {
-            cloudBlobs.Add(blob);
-
-            foreach (var cell in blob.Content)
-            {
-                clouds.AddCloud(blob.Compound, cell.Amount, new Vector3(cell.Position.x, 0, cell.Position.y));
-            }
         }
     }
 
@@ -118,27 +101,6 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
         }
 
         spawnSpots.RemoveAll(s => s.TimeUntilRemoval <= 0);
-    }
-
-    private void UpdateCloudBlobs()
-    {
-        foreach (var blob in cloudBlobs)
-        {
-            foreach (var cell in blob.Content)
-            {
-                var available = new Dictionary<Compound, float>();
-                clouds.GetAllAvailableAt(new Vector3(cell.Position.x, 0, cell.Position.y), available);
-
-                available.TryGetValue(blob.Compound, out float amount);
-                cell.Amount = amount;
-            }
-        }
-
-        cloudBlobs.Where(c => c.Empty).ToList().ForEach(blob =>
-        {
-            blob.DestroyDetachAndQueueFree();
-            cloudBlobs.Remove(blob);
-        });
     }
 
     private void SpawnInSpot(SpawnSpot spot, ref float spawnsLeftThisFrame)

@@ -12,6 +12,12 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     /// </summary>
     public const int COMPOUND_PLANE_SIZE_MAGIC_NUMBER = 667;
 
+    /// <summary>
+    ///   Specifies how long the "round" end screen (scoreboard) be displayed before the game exits.
+    ///   NOTE: 32 syncs nicely with the music.
+    /// </summary>
+    public const int GAME_OVER_SCREEN_DURATION = 32;
+
     private Control guiRoot = null!;
     private MicrobialArenaSpawnSystem spawner = null!;
     private MicrobeSystem microbeSystem = null!;
@@ -92,11 +98,13 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
                 if (gameOverExitTimer <= 0)
                 {
                     PauseManager.Instance.Resume("ArenaGameOver");
-                    NetworkManager.Instance.EndGame();
+                    NetworkManager.Instance.Exit();
                 }
             }
         }
 
+        // We need these to be run on the client also since both systems run some logic that's better be handled
+        // client-side.
         microbeSystem.Process(delta);
         floatingChunkSystem.Process(delta, null);
 
@@ -105,11 +113,11 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         if (HasPlayer)
             Camera.ObjectToFollow = Player?.IsInsideTree() == false ? null : Player;
 
-        foreach (var player in MultiplayerGameWorld.Players)
+        // Apply species
+        foreach (var player in MultiplayerGameWorld.PlayerVars)
         {
-            var entity = MultiplayerGameWorld.GetEntity(player.Value.EntityID);
-            if (entity == null)
-                continue;
+            if (!MultiplayerGameWorld.TryGetNetworkEntity(player.Value.EntityId, out INetworkEntity entity))
+                return;
 
             var microbe = (Microbe)entity;
             if (!microbe.IsInsideTree() || !MultiplayerGameWorld.Species.ContainsKey((uint)player.Key))
@@ -118,11 +126,6 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
             var species = MultiplayerGameWorld.GetSpecies((uint)player.Key);
             if (microbe.Species != species)
                 microbe.ApplySpecies(species);
-        }
-
-        if (!gameOver && IsGameOver())
-        {
-            GameOver();
         }
     }
 
@@ -142,13 +145,17 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         Camera = world.GetNode<MicrobeCamera>("PrimaryCamera");
         Clouds = world.GetNode<CompoundCloudSystem>("CompoundClouds");
 
-        TimedLifeSystem = new TimedLifeSystem(rootOfDynamicallySpawned);
-        ProcessSystem = new ProcessSystem(rootOfDynamicallySpawned);
+        if (NetworkManager.Instance.IsAuthoritative)
+        {
+            TimedLifeSystem = new TimedLifeSystem(rootOfDynamicallySpawned);
+            ProcessSystem = new ProcessSystem(rootOfDynamicallySpawned);
+            spawner = new MicrobialArenaSpawnSystem(
+                rootOfDynamicallySpawned, MultiplayerGameWorld, Clouds, Settings.ArenaRadius);
+        }
+
         microbeSystem = new MicrobeSystem(rootOfDynamicallySpawned);
         floatingChunkSystem = new FloatingChunkSystem(rootOfDynamicallySpawned, Clouds);
         FluidSystem = new FluidSystem(rootOfDynamicallySpawned);
-        spawner = new MicrobialArenaSpawnSystem(
-            rootOfDynamicallySpawned, MultiplayerGameWorld, Clouds, Settings.ArenaRadius);
     }
 
     public override void StartMusic()
@@ -206,11 +213,6 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerNotifyMovingToEditor));
     }
 
-    public override bool IsGameOver()
-    {
-        return NetworkManager.Instance.ElapsedGameTimeMinutes >= Settings.TimeLimit;
-    }
-
     public override void OnReturnFromEditor()
     {
         Visible = true;
@@ -220,9 +222,9 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         StartMusic();
 
-        RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerNotifyReturningFromEditor),
-            ThriveJsonConverter.Instance.SerializeObject(
-                MultiplayerGameWorld.GetSpecies((uint)NetworkManager.Instance.PeerId!.Value)));
+        var buffer = new PackedBytesBuffer();
+        MultiplayerGameWorld.GetSpecies((uint)NetworkManager.Instance.PeerId!.Value).NetworkSerialize(buffer);
+        RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerNotifyReturningFromEditor), buffer.Data);
     }
 
     public override void OnSuicide()
@@ -240,6 +242,8 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         // Disable clouds simulation as it's currently too chaotic to synchronize
         Clouds.RunSimulation = false;
+
+        Clouds.SetProcess(false);
 
         if (NetworkManager.Instance.IsAuthoritative)
         {
@@ -259,6 +263,20 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         UpdatePatchSettings(false);
     }
 
+    protected override void GameOver()
+    {
+        base.GameOver();
+
+        gameOverExitTimer = GAME_OVER_SCREEN_DURATION;
+
+        if (NetworkManager.Instance.IsAuthoritative)
+            PauseManager.Instance.AddPause("ArenaGameOver");
+
+        HUD.ToggleInfoScreen();
+
+        Jukebox.Instance.PlayCategory("MicrobialArenaEnd");
+    }
+
     protected override void NetworkTick(float delta)
     {
     }
@@ -271,29 +289,13 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
             RpcId(peerId, nameof(SyncSpawnCoordinates), SpawnCoordinates);
 
         var species = (MicrobeSpecies)MultiplayerGameWorld.GetSpecies((uint)peerId);
-        NetworkManager.Instance.ServerSetFloats(peerId, "base_size", species.BaseHexSize);
+        NetworkManager.Instance.SetVar(peerId, "base_size", species.BaseHexSize);
         NotifyScoreUpdate(peerId);
     }
 
-    protected override void OnNetEntityReplicated(uint id, INetEntity entity, int serverEntityCount)
+    protected override void OnLocalPlayerSpawned(Microbe player)
     {
-        base.OnNetEntityReplicated(id, entity, serverEntityCount);
-
-        // Only add the clouds if we're still joining i.e. client is in non-ready state to avoid double cloud
-        // additions (normal cloud spawn synchronization is in CompoundCloudSystem.SyncCloudAddition)
-        if (NetworkManager.Instance.LocalPlayer?.Status == NetPlayerStatus.Joining && entity is CloudBlob cloudBlob)
-        {
-            foreach (var cell in cloudBlob.Content)
-            {
-                Clouds.AddCloud(
-                    cloudBlob.Compound, cell.Amount, new Vector3(cell.Position.x, 0, cell.Position.y));
-            }
-        }
-    }
-
-    protected override void OnOwnPlayerSpawned(Microbe player)
-    {
-        base.OnOwnPlayerSpawned(player);
+        base.OnLocalPlayerSpawned(player);
 
         player.AddToGroup(Constants.PLAYER_GROUP);
 
@@ -305,9 +307,9 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         Camera.ObjectToFollow = player;
     }
 
-    protected override void OnOwnPlayerDespawn()
+    protected override void OnLocalPlayerDespawn()
     {
-        base.OnOwnPlayerDespawn();
+        base.OnLocalPlayerDespawn();
 
         Camera.ObjectToFollow = null;
     }
@@ -316,22 +318,21 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     {
         spawned = null;
 
-        if (!MultiplayerGameWorld.Players.TryGetValue(peerId, out NetPlayerState state))
+        if (!MultiplayerGameWorld.PlayerVars.TryGetValue(peerId, out NetworkPlayerVars vars))
             return false;
 
         spawned = SpawnHelpers.SpawnNetworkedMicrobe(peerId, MultiplayerGameWorld.GetSpecies((uint)peerId),
             new Vector3(0, 0, 0), rootOfDynamicallySpawned, Clouds, spawner, CurrentGame!);
 
         spawned.OnDeath = OnPlayerDied;
-        spawned.OnNetworkedDeathCompletes = OnPlayerDestroyed;
-        spawned.OnKilledByPeer = OnPlayerKilled;
+        spawned.OnNetworkDeathFinished = OnPlayerDestroyed;
+        spawned.OnKilledByAnotherPlayer = OnPlayerKilled;
 
-        state.EntityID = spawned.NetEntityId;
-        state.RespawnTimer = Constants.PLAYER_RESPAWN_TIME;
-        state.IsDead = false;
-        MultiplayerGameWorld.Players[peerId] = state;
-
-        SyncPlayerStateToAllPeers(peerId, state);
+        vars.EntityId = spawned.NetworkEntityId;
+        vars.SetVar("respawn", Constants.PLAYER_RESPAWN_TIME);
+        vars.SetVar("editor", false);
+        vars.SetVar("dead", false);
+        ServerSyncPlayerVars(peerId);
 
         return true;
     }
@@ -344,13 +345,35 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         return true;
     }
 
+    protected override Species CreateNewSpeciesForPlayer(int peerId)
+    {
+        // Pretend that each separate Species instance across players are LUCA
+        var species = new MicrobeSpecies((uint)peerId, "Primum", "thrivium");
+        GameWorld.SetInitialSpeciesProperties(species);
+        return species;
+    }
+
+    [Puppet]
+    protected override void SyncSpecies(int peerId, byte[] serialized)
+    {
+        var buffer = new PackedBytesBuffer(serialized);
+        var species = new MicrobeSpecies();
+        species.NetworkDeserialize(buffer);
+
+        MultiplayerGameWorld.UpdateSpecies(peerId, species);
+        LocalPlayerSpeciesReceived?.Invoke();
+    }
+
     protected override void UpdatePatchSettings(bool promptPatchNameChange = true)
     {
         Camera.SetBackground(SimulationParameters.Instance.GetBackground(
             MultiplayerGameWorld.Map.CurrentPatch!.BiomeTemplate.Background));
 
-        // Update environment for process system
-        ProcessSystem.SetBiome(MultiplayerGameWorld.Map.CurrentPatch.Biome);
+        if (NetworkManager.Instance.IsAuthoritative)
+        {
+            // Update environment for process system
+            ProcessSystem.SetBiome(MultiplayerGameWorld.Map.CurrentPatch.Biome);
+        }
 
         HUD.UpdateEnvironmentalBars(GameWorld.Map.CurrentPatch!.Biome);
     }
@@ -364,40 +387,27 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         if (info == null)
             return 0;
 
-        info.Ints.TryGetValue("kills", out int kills);
-        info.Floats.TryGetValue("base_size", out float size);
+        info.TryGetVar("kills", out int kills);
+        info.TryGetVar("base_size", out float size);
 
         return kills + (int)size;
     }
 
-    protected override void GameOver()
-    {
-        gameOver = true;
-        gameOverExitTimer = 32;
-
-        if (NetworkManager.Instance.IsAuthoritative)
-            PauseManager.Instance.AddPause("ArenaGameOver");
-
-        HUD.ToggleInfoScreen();
-
-        Jukebox.Instance.PlayCategory("MicrobialArenaEnd");
-    }
-
     private void HandlePlayersVisibility()
     {
-        foreach (var player in MultiplayerGameWorld.Players)
+        foreach (var player in MultiplayerGameWorld.PlayerVars)
         {
             var info = NetworkManager.Instance.GetPlayerInfo(player.Key);
             if (info == null)
                 continue;
 
-            var state = player.Value;
-            var entity = MultiplayerGameWorld.GetEntity(state.EntityID);
+            var vars = player.Value;
 
-            if (entity == null)
-                continue;
-
-            SetEntityAsAttached(entity, info.Status == NetPlayerStatus.Active && !state.InEditor);
+            if (MultiplayerGameWorld.TryGetNetworkEntity(vars.EntityId, out INetworkEntity entity))
+            {
+                bool toAttach = info.Status == NetworkPlayerStatus.Active && !vars.GetVar<bool>("editor");
+                SetEntityAsAttached(entity, toAttach);
+            }
         }
     }
 
@@ -408,20 +418,24 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
-            if (player.Value.Status != NetPlayerStatus.Active)
+            if (player.Value.Status != NetworkPlayerStatus.Active)
                 continue;
 
-            if (!MultiplayerGameWorld.Players.TryGetValue(player.Key, out NetPlayerState state))
+            if (!MultiplayerGameWorld.PlayerVars.TryGetValue(player.Key, out NetworkPlayerVars vars))
                 continue;
 
-            if (!state.IsDead)
+            if (!vars.TryGetVar("dead", out bool dead) || !vars.TryGetVar("respawn", out float timer))
                 continue;
 
-            state.RespawnTimer -= delta;
-            MultiplayerGameWorld.Players[player.Key] = state;
+            if (!dead)
+                continue;
+
+            var diff = timer - delta;
+            vars.SetVar("respawn", diff);
+            MultiplayerGameWorld.PlayerVars[player.Key] = vars;
 
             // Respawn the player once the timer is up
-            if (state.RespawnTimer <= 0)
+            if (diff <= 0)
             {
                 SpawnPlayer(player.Key);
             }
@@ -438,18 +452,14 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         if (NetworkManager.Instance.IsAuthoritative)
         {
-            MultiplayerGameWorld.Players.TryGetValue(player.PeerId!.Value, out NetPlayerState state);
-            state.IsDead = true;
-            MultiplayerGameWorld.Players[player.PeerId!.Value] = state;
-
-            SyncPlayerStateToAllPeers(player.PeerId!.Value, state);
+            ServerSetPlayerVar(player.PeerId!.Value, "dead", true);
 
             var info = NetworkManager.Instance.GetPlayerInfo(player.PeerId.Value);
             if (info == null)
                 return;
 
-            info.Ints.TryGetValue("deaths", out int deaths);
-            NetworkManager.Instance.ServerSetInts(player.PeerId.Value, "deaths", deaths + 1);
+            info.TryGetVar("deaths", out int deaths);
+            NetworkManager.Instance.SetVar(player.PeerId.Value, "deaths", deaths + 1);
         }
     }
 
@@ -459,8 +469,8 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         if (attackerInfo == null)
             return;
 
-        attackerInfo.Ints.TryGetValue("kills", out int kills);
-        NetworkManager.Instance.ServerSetInts(attackerId, "kills", kills + 1);
+        attackerInfo.TryGetVar("kills", out int kills);
+        NetworkManager.Instance.SetVar(attackerId, "kills", kills + 1);
         NotifyScoreUpdate(attackerId);
 
         Rpc(nameof(NotifyKill), attackerId, victimId, source);
@@ -489,20 +499,6 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     private void SyncSpawnCoordinates(List<Vector2> coordinates)
     {
         SpawnCoordinates = coordinates;
-    }
-
-    [PuppetSync]
-    private void SyncSpecies(string serialized)
-    {
-        var deserialized = ThriveJsonConverter.Instance.DeserializeObject<MicrobeSpecies>(serialized);
-        if (deserialized == null)
-        {
-            NetworkManager.Instance.Print("Error while trying to deserialize incoming MicrobeSpecies");
-            return;
-        }
-
-        MultiplayerGameWorld.UpdateSpecies(deserialized.ID, deserialized);
-        LocalPlayerSpeciesReceived?.Invoke();
     }
 
     [PuppetSync]
@@ -561,41 +557,40 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         var sender = GetTree().GetRpcSenderId();
 
-        MultiplayerGameWorld.Players.TryGetValue(sender, out NetPlayerState state);
-        state.InEditor = true;
-        MultiplayerGameWorld.Players[sender] = state;
-        SyncPlayerStateToAllPeers(sender, state);
+        ServerSetPlayerVar(sender, "editor", true);
 
-        if (sender == GetTree().GetNetworkUniqueId())
+        if (sender == NetworkManager.Instance.PeerId)
         {
+            // We're the server, no need to sync stuff
             LocalPlayerSpeciesReceived?.Invoke();
             return;
         }
 
-        RpcId(sender, nameof(SyncSpecies),
-            ThriveJsonConverter.Instance.SerializeObject(MultiplayerGameWorld.Species[(uint)sender]));
+        var buffer = new PackedBytesBuffer();
+        MultiplayerGameWorld.Species[(uint)sender].NetworkSerialize(buffer);
+        RpcId(sender, nameof(SyncSpecies), sender, buffer.Data);
     }
 
     [RemoteSync]
-    private void ServerNotifyReturningFromEditor(string editedSpecies)
+    private void ServerNotifyReturningFromEditor(byte[] editedSpecies)
     {
         if (NetworkManager.Instance.IsClient)
             return;
 
         var sender = GetTree().GetRpcSenderId();
 
-        MultiplayerGameWorld.Players.TryGetValue(sender, out NetPlayerState state);
-        state.InEditor = false;
-        MultiplayerGameWorld.Players[sender] = state;
-        SyncPlayerStateToAllPeers(sender, state);
+        ServerSetPlayerVar(sender, "editor", false);
 
         // TODO: server-side check to make sure client aren't sending unnaturally edited species
-        Rpc(nameof(SyncSpecies), editedSpecies);
+        Rpc(nameof(SyncSpecies), sender, editedSpecies);
 
-        // Get the species's base hex size
-        var deserialized = ThriveJsonConverter.Instance.DeserializeObject<MicrobeSpecies>(editedSpecies);
-        if (deserialized != null)
-            NetworkManager.Instance.ServerSetFloats(sender, "base_size", deserialized.BaseHexSize);
+        // Need to access the base hex size
+        var buffer = new PackedBytesBuffer(editedSpecies);
+        var species = new MicrobeSpecies();
+        species.NetworkDeserialize(buffer);
+
+        MultiplayerGameWorld.UpdateSpecies(species.ID, species);
+        NetworkManager.Instance.SetVar(sender, "base_size", species.BaseHexSize);
 
         NotifyScoreUpdate(sender);
 
@@ -608,12 +603,11 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         if (NetworkManager.Instance.IsClient)
             return;
 
-        if (MultiplayerGameWorld.Players.TryGetValue(peerId, out NetPlayerState state))
+        if (MultiplayerGameWorld.PlayerVars.TryGetValue(peerId, out NetworkPlayerVars vars) &&
+            MultiplayerGameWorld.TryGetNetworkEntity(vars.EntityId, out INetworkEntity entity) &&
+            entity is Microbe microbe && !microbe.Dead)
         {
-            var entity = MultiplayerGameWorld.GetEntity(state.EntityID);
-            var microbe = (Microbe?)entity;
-            microbe?.Damage(9999.0f, "suicide");
-
+            microbe.Damage(9999.0f, "suicide");
             Rpc(nameof(ClientNotifyMicrobeSuicide), peerId);
         }
     }

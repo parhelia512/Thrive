@@ -51,7 +51,7 @@
 [ext_resource path="res://src/gui_common/fonts/EmptyFont.tres" type="DynamicFont" id=49]
 [ext_resource path="res://src/microbe_stage/multiplayer/microbial_arena/PlayerMicrobialArenaInput.cs" type="Script" id=50]
 [ext_resource path="res://src/gui_common/ActionButton.tscn" type="PackedScene" id=51]
-[ext_resource path="res://src/gui_common/NetPlayerList.tscn" type="PackedScene" id=52]
+[ext_resource path="res://src/gui_common/NetworkPlayerList.tscn" type="PackedScene" id=52]
 [ext_resource path="res://src/networking/ChatBox.tscn" type="PackedScene" id=53]
 [ext_resource path="res://src/microbe_stage/HUDBottomBar.tscn" type="PackedScene" id=54]
 [ext_resource path="res://src/microbe_stage/ProcessPanel.tscn" type="PackedScene" id=55]
@@ -2488,7 +2488,6 @@ __meta__ = {
 }
 
 [node name="PauseMenu" parent="GUI" instance=ExtResource( 72 )]
-visible = true
 MultiplayerMode = true
 
 [connection signal="Clicked" from="GUI/MicrobialArenaHUD" to="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/ChatBox" method="OnClickedOffTextBox"]

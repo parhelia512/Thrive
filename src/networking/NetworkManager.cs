@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
-using Newtonsoft.Json;
 using Nito.Collections;
 using Array = Godot.Collections.Array;
 
@@ -13,18 +12,19 @@ using Array = Godot.Collections.Array;
 public class NetworkManager : Node
 {
     public const int DEFAULT_SERVER_ID = 1;
-    public const int MAX_CHAT_HISTORY_RANGE = 200;
+    public const int MAX_CHAT_HISTORY_COUNT = 200;
 
     private static NetworkManager? instance;
 
-    private readonly Dictionary<int, NetPlayerInfo> connectedPlayers = new();
+    private readonly Dictionary<int, NetworkPlayerInfo> connectedPlayers = new();
 
     private Deque<string> chatHistory = new();
 
     private NetworkedMultiplayerENet? peer;
     private UPNP? upnp;
 
-    private float networkTickTimer;
+    private float timeStep;
+    private float updateTimer;
     private float elapsedGameTime;
 
     private NetworkManager()
@@ -60,10 +60,7 @@ public class NetworkManager : Node
     public delegate void ReadyForSessionReceived(int peerId, bool ready);
 
     [Signal]
-    public delegate void PlayerStatusChanged(int peerId, NetPlayerStatus status);
-
-    [Signal]
-    public delegate void PlayerWorldReady(int peerId);
+    public delegate void PlayerStatusChanged(int peerId, NetworkPlayerStatus status);
 
     public event EventHandler<float>? NetworkTick;
 
@@ -87,18 +84,41 @@ public class NetworkManager : Node
     public NetworkedMultiplayerPeer.ConnectionStatus Status => peer?.GetConnectionStatus() ??
         NetworkedMultiplayerPeer.ConnectionStatus.Disconnected;
 
-    public float UpdateInterval { get; set; } = Constants.MULTIPLAYER_DEFAULT_UPDATE_INTERVAL_SECONDS;
+    /// <summary>
+    ///   The delay between every update, i.e. how many times per second the server/client sends data but not receive.
+    /// </summary>
+    public float TimeStep
+    {
+        get => timeStep;
+        set
+        {
+            if (timeStep == value)
+                return;
+
+            timeStep = value;
+
+            var message = IsAuthoritative ?
+                TranslationServer.Translate("SERVER_TIME_STEP_CHANGED") :
+                TranslationServer.Translate("CLIENT_TIME_STEP_CHANGED");
+            SystemChatNotification(message);
+        }
+    }
 
     public float TimePassedConnecting { get; private set; }
 
     public int? PeerId { get; private set; }
 
     /// <summary>
+    ///   Returns true if we are a peer in a network.
+    /// </summary>
+    public bool IsNetworked => PeerId.HasValue && Status == NetworkedMultiplayerPeer.ConnectionStatus.Connected;
+
+    /// <summary>
     ///   All peers connected in the network (INCLUDING SELF), stored by network ID.
     /// </summary>
-    public IReadOnlyDictionary<int, NetPlayerInfo> ConnectedPlayers => connectedPlayers;
+    public IReadOnlyDictionary<int, NetworkPlayerInfo> ConnectedPlayers => connectedPlayers;
 
-    public NetPlayerInfo? LocalPlayer => PeerId.HasValue ? GetPlayerInfo(PeerId.Value) : null;
+    public NetworkPlayerInfo? LocalPlayer => PeerId.HasValue ? GetPlayerInfo(PeerId.Value) : null;
 
     public IReadOnlyList<string> ChatHistory => chatHistory;
 
@@ -135,7 +155,7 @@ public class NetworkManager : Node
         GetTree().Connect("server_disconnected", this, nameof(OnServerDisconnected));
         GetTree().Connect("connection_failed", this, nameof(OnConnectionFailed));
 
-        Connect(nameof(UpnpCallResultReceived), this, nameof(OnUPNPCallResultReceived));
+        Connect(nameof(UpnpCallResultReceived), this, nameof(OnUpnpCallResultReceived));
 
         ProcessPriority = 100;
         PauseMode = PauseModeEnum.Process;
@@ -156,18 +176,20 @@ public class NetworkManager : Node
             if (IsAuthoritative)
             {
                 elapsedGameTime += delta;
+
+                // TODO: Do clock sync properly and don't send this every frame...
                 RpcUnreliable(nameof(SyncElapsedGameTime), elapsedGameTime);
             }
 
             ElapsedGameTimeMinutes = Mathf.FloorToInt(elapsedGameTime / 60);
             ElapsedGameTimeSeconds = Mathf.FloorToInt(elapsedGameTime % 60);
 
-            networkTickTimer += delta;
+            updateTimer += delta;
 
-            if (networkTickTimer > UpdateInterval)
+            if (updateTimer > TimeStep)
             {
-                NetworkTick?.Invoke(this, delta + networkTickTimer);
-                networkTickTimer = 0;
+                NetworkTick?.Invoke(this, delta + updateTimer);
+                updateTimer = 0;
             }
         }
     }
@@ -178,6 +200,7 @@ public class NetworkManager : Node
     public Error CreateServer(ServerSettings settings)
     {
         TimePassedConnecting = 0;
+        timeStep = Constants.DEFAULT_SERVER_TIME_STEP_SECONDS;
 
         peer = new NetworkedMultiplayerENet();
         peer.SetBindIp(settings.Address);
@@ -228,6 +251,7 @@ public class NetworkManager : Node
     public Error ConnectToServer(string address, int port, string playerName)
     {
         TimePassedConnecting = 0;
+        timeStep = Constants.DEFAULT_CLIENT_TIME_STEP_SECONDS;
 
         peer = new NetworkedMultiplayerENet();
 
@@ -263,6 +287,7 @@ public class NetworkManager : Node
         GameInSession = false;
         elapsedGameTime = 0;
         PeerId = null;
+        Settings = null;
 
         ClearChatHistory();
     }
@@ -272,38 +297,27 @@ public class NetworkManager : Node
         return connectedPlayers.ContainsKey(peerId);
     }
 
-    public NetPlayerInfo? GetPlayerInfo(int peerId)
+    public NetworkPlayerInfo? GetPlayerInfo(int peerId)
     {
-        connectedPlayers.TryGetValue(peerId, out NetPlayerInfo result);
+        connectedPlayers.TryGetValue(peerId, out NetworkPlayerInfo result);
         return result;
     }
 
-    public void ServerSetInts(int playerId, string key, int value)
+    /// <summary>
+    ///   Sets a player's server-wide variable.
+    /// </summary>
+    public void SetVar(int peerId, string what, object variant)
     {
         if (IsClient)
             return;
 
-        Rpc(nameof(SyncInts), playerId, key, value);
+        Rpc(nameof(SyncVars), peerId, what, variant);
     }
 
-    public void ServerSetFloats(int playerId, string key, float value)
+    public void Join()
     {
-        if (IsClient)
+        if (!IsDedicated && LocalPlayer!.Status == NetworkPlayerStatus.Active)
             return;
-
-        Rpc(nameof(SyncFloats), playerId, key, value);
-    }
-
-    public void StartGame()
-    {
-        if (IsClient && !GameInSession)
-            return;
-
-        if (!IsDedicated && LocalPlayer!.Status == NetPlayerStatus.Active)
-            return;
-
-        if (IsAuthoritative && !GameInSession)
-            Rset(nameof(GameInSession), true);
 
         NotifyGameLoad();
 
@@ -314,15 +328,15 @@ public class NetworkManager : Node
                 if (player.Key == DEFAULT_SERVER_ID)
                     continue;
 
-                if (player.Value.Status == NetPlayerStatus.Lobby)
+                if (player.Value.Status == NetworkPlayerStatus.Lobby)
                     RpcId(player.Key, nameof(NotifyGameLoad));
             }
         }
     }
 
-    public void EndGame()
+    public void Exit()
     {
-        if (!IsDedicated && LocalPlayer!.Status == NetPlayerStatus.Lobby)
+        if (!IsDedicated && LocalPlayer!.Status == NetworkPlayerStatus.Lobby)
             return;
 
         if (IsAuthoritative && GameInSession)
@@ -337,7 +351,7 @@ public class NetworkManager : Node
                 if (player.Key == DEFAULT_SERVER_ID)
                     continue;
 
-                if (player.Value.Status == NetPlayerStatus.Active)
+                if (player.Value.Status == NetworkPlayerStatus.Active)
                     RpcId(player.Key, nameof(NotifyGameExit));
             }
         }
@@ -348,7 +362,7 @@ public class NetworkManager : Node
         if (IsAuthoritative)
             return;
 
-        RpcId(1, nameof(NotifyReadyForSessionStatusChange), GetTree().GetNetworkUniqueId(), ready);
+        RpcId(DEFAULT_SERVER_ID, nameof(NotifyReadyForSessionStatusChange), PeerId, ready);
     }
 
     public void Kick(int id, string reason)
@@ -357,12 +371,18 @@ public class NetworkManager : Node
     }
 
     /// <summary>
-    ///   Sends a chat message to all peers.
+    ///   Parses a message and if appropriate sends that message to all peers.
     /// </summary>
-    public void BroadcastChat(string message)
+    public void Chat(string message)
     {
-        if (Status != NetworkedMultiplayerPeer.ConnectionStatus.Connected)
+        if (!IsNetworked)
             return;
+
+        if (message.BeginsWith("/") && ParseCommand(message.TrimStart('/')))
+        {
+            // Is a valid command, don't send this
+            return;
+        }
 
         Rpc(nameof(SendChat), message);
     }
@@ -420,7 +440,9 @@ public class NetworkManager : Node
 
         if (upnp.GetGateway()?.IsValidGateway() == true)
         {
-            // TODO: not tested and not sure if this really works since I can't seem to get my router's UPnP to work?
+            // May not work in some cases even if the gateway supports UPNP/port forwarding. The player's network
+            // might be on CGNAT or double NAT, preventing this from working succesfully
+            // I can't test this because of the aforementioned issue - kasterisk
             var pmResult = (UPNP.UPNPResult)upnp.AddPortMapping(port, 0, "ThriveGame");
 
             // TODO: error handling
@@ -432,9 +454,49 @@ public class NetworkManager : Node
         EmitSignal(nameof(UpnpCallResultReceived), UPNP.UPNPResult.Success, UpnpJobStep.PortMapping);
     }
 
+    private bool ParseCommand(string command)
+    {
+        var args = System.Array.Empty<string>();
+        var name = command;
+
+        if (command.Contains(' '))
+        {
+            args = command.Split(' ');
+            name = args[0];
+        }
+
+        if (name == "clear")
+        {
+            ClearChatHistory();
+
+            // Update chatboxes
+            EmitSignal(nameof(ChatReceived));
+
+            return true;
+        }
+        else if (name == "timestep")
+        {
+            if (args.Length > 1 && float.TryParse(args[1], out float result))
+            {
+                TimeStep = result;
+                return true;
+            }
+        }
+        else if (name == "end")
+        {
+            if (Settings != null)
+            {
+                elapsedGameTime = Settings.SessionLength * 60;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private void SendChatInternal(string message)
     {
-        if (chatHistory.Count > MAX_CHAT_HISTORY_RANGE)
+        if (chatHistory.Count > MAX_CHAT_HISTORY_COUNT)
             chatHistory.RemoveFromFront();
 
         chatHistory.AddToBack(message);
@@ -454,7 +516,7 @@ public class NetworkManager : Node
         if (!HasPlayer(id))
             return;
 
-        Print("User ", GetPlayerInfo(id)!.Name, " (", id, ") has disconnected");
+        Print("User \"", GetPlayerInfo(id)!.Name, "\" ID: ", id, " has disconnected");
 
         SystemChatNotification(
             TranslationServer.Translate("PLAYER_HAS_DISCONNECTED").FormatSafe(GetPlayerInfo(id)!.Name));
@@ -466,10 +528,12 @@ public class NetworkManager : Node
     {
         PeerId = GetTree().GetNetworkUniqueId();
 
-        var info = new NetPlayerInfo { Name = playerName };
+        var packed = new PackedBytesBuffer();
+        var info = new NetworkPlayerInfo { Name = playerName };
+        info.NetworkSerialize(packed);
 
         // TODO: some kind of authentication
-        RpcId(1, nameof(NotifyPlayerConnected), PeerId.Value, JsonConvert.SerializeObject(info));
+        RpcId(DEFAULT_SERVER_ID, nameof(NotifyPlayerConnected), PeerId.Value, packed.Data);
 
         TimePassedConnecting = 0;
     }
@@ -478,10 +542,14 @@ public class NetworkManager : Node
     {
         Print("Disconnected from server");
 
+        if (upnp?.GetDeviceCount() > 0)
+            upnp?.DeletePortMapping(Settings!.Port);
+
         connectedPlayers.Clear();
         GameInSession = false;
         elapsedGameTime = 0;
         PeerId = null;
+        Settings = null!;
 
         ClearChatHistory();
 
@@ -501,36 +569,40 @@ public class NetworkManager : Node
         TimePassedConnecting = 0;
     }
 
-    private void OnUPNPCallResultReceived(UPNP.UPNPResult result, UpnpJobStep step)
+    private void OnUpnpCallResultReceived(UPNP.UPNPResult result, UpnpJobStep step)
     {
         switch (step)
         {
             case UpnpJobStep.Setup:
-            {
-                if (result == UPNP.UPNPResult.Success)
-                    TaskExecutor.Instance.AddTask(new Task(() => AddPortMapping(Settings!.Port)));
+                {
+                    if (result == UPNP.UPNPResult.Success)
+                        TaskExecutor.Instance.AddTask(new Task(() => AddPortMapping(Settings!.Port)));
 
-                break;
-            }
+                    break;
+                }
         }
     }
 
     private void OnGameReady(object sender, EventArgs args)
     {
-        Rpc(nameof(NotifyWorldReady), PeerId!.Value);
+        if (IsAuthoritative && !GameInSession)
+            Rset(nameof(GameInSession), true);
+
+        RpcId(DEFAULT_SERVER_ID, nameof(NotifyWorldReady), PeerId!.Value);
     }
 
     /// <summary>
-    ///   How this works: a client send their info to the server (in this case when they're connected), the server then
-    ///   do some validity checks, registers the sender, gives them the current server state and tell all other players
-    ///   about their arrival.
+    ///   How this works: a client send their information to the server (in this case when they're just connected),
+    ///   the server then do validity checks and if valid, registers this client which in turn gives them the
+    ///   server's and everyone's information. All the other players are also notified about their arrival in
+    ///   parallel.
     /// </summary>
     [RemoteSync]
-    private void NotifyPlayerConnected(int id, string info)
+    private void NotifyPlayerConnected(int id, byte[] data)
     {
-        var deserializedInfo = JsonConvert.DeserializeObject<NetPlayerInfo>(info);
-        if (deserializedInfo == null)
-            return;
+        var packed = new PackedBytesBuffer(data);
+        var info = new NetworkPlayerInfo();
+        info.NetworkDeserialize(packed);
 
         if (IsAuthoritative)
         {
@@ -543,7 +615,7 @@ public class NetworkManager : Node
                 return;
             }
 
-            if (connectedPlayers.Values.Any(p => p.Name == deserializedInfo.Name))
+            if (connectedPlayers.Values.Any(p => p.Name == info.Name))
             {
                 // No need to notify everyone about this
                 RpcId(id, nameof(NotifyRegistrationResult), id, RegistrationResult.DuplicateName);
@@ -560,35 +632,39 @@ public class NetworkManager : Node
                 if (player.Key != DEFAULT_SERVER_ID)
                 {
                     // Forward newly connected player info to the other players
-                    RpcId(player.Key, nameof(NotifyPlayerConnected), id, info);
+                    RpcId(player.Key, nameof(NotifyPlayerConnected), id, data);
                 }
 
                 // Forward other players' info to the newly connected player, including us if we're a listen-server
-                RpcId(id, nameof(NotifyPlayerConnected), player.Key, JsonConvert.SerializeObject(player.Value));
+                var otherPlayerBuffer = new PackedBytesBuffer();
+                player.Value.NetworkSerialize(otherPlayerBuffer);
+                RpcId(id, nameof(NotifyPlayerConnected), player.Key, otherPlayerBuffer.Data);
                 RpcId(id, nameof(NotifyPlayerStatusChange), player.Key, player.Value.Status);
             }
 
             if (id != DEFAULT_SERVER_ID)
             {
                 // Return sender client's own info so they have themselves registered locally
-                RpcId(id, nameof(NotifyPlayerConnected), id, info);
+                RpcId(id, nameof(NotifyPlayerConnected), id, data);
 
                 // And finally give the client our server configurations
-                RpcId(id, nameof(NotifyServerConfigs), ThriveJsonConverter.Instance.SerializeObject(Settings));
+                var buffer = new PackedBytesBuffer();
+                Settings.NetworkSerialize(buffer);
+                RpcId(id, nameof(NotifyServerConfigs), buffer.Data);
             }
 
             // TODO: might not be true...
-            Print("User ", deserializedInfo.Name, " (", id, ") has connected");
+            Print("User \"", info.Name, "\" ID: ", id, " has connected");
         }
 
         if (HasPlayer(id))
             return;
 
-        connectedPlayers.Add(id, deserializedInfo);
+        connectedPlayers.Add(id, info);
         EmitSignal(nameof(ServerStateUpdated));
 
         SystemChatNotification(
-            TranslationServer.Translate("PLAYER_HAS_CONNECTED").FormatSafe(deserializedInfo.Name));
+            TranslationServer.Translate("PLAYER_HAS_CONNECTED").FormatSafe(info.Name));
 
         if (IsAuthoritative)
         {
@@ -609,16 +685,11 @@ public class NetworkManager : Node
     }
 
     [Remote]
-    private void NotifyServerConfigs(string settings)
+    private void NotifyServerConfigs(byte[] settings)
     {
-        try
-        {
-            Settings = ThriveJsonConverter.Instance.DeserializeObject<ServerSettings>(settings);
-        }
-        catch (Exception e)
-        {
-            PrintError("Error occured while trying to read server configurations: ", e);
-        }
+        var buffer = new PackedBytesBuffer(settings);
+        Settings = new ServerSettings();
+        Settings.NetworkDeserialize(buffer);
     }
 
     [RemoteSync]
@@ -637,7 +708,7 @@ public class NetworkManager : Node
     }
 
     [RemoteSync]
-    private void NotifyPlayerStatusChange(int id, NetPlayerStatus environment)
+    private void NotifyPlayerStatusChange(int id, NetworkPlayerStatus environment)
     {
         if (IsAuthoritative)
         {
@@ -694,16 +765,18 @@ public class NetworkManager : Node
     [Remote]
     private void NotifyGameLoad()
     {
+        if (Settings == null)
+            return;
+
         Rpc(nameof(NotifyWorldPreLoad), PeerId!.Value);
 
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.4f, () =>
         {
-            var scene = SceneManager.Instance.LoadScene(Settings!.SelectedGameMode!.MainScene);
+            var scene = SceneManager.Instance.LoadScene(Settings.SelectedGameMode!.MainScene);
             var stage = (IMultiplayerStage)scene.Instance();
 
             stage.GameReady += OnGameReady;
             SceneManager.Instance.SwitchToScene(stage.GameStateRoot);
-            Rpc(nameof(NotifyWorldPostLoad), PeerId!.Value);
         });
     }
 
@@ -730,19 +803,42 @@ public class NetworkManager : Node
         if (playerInfo == null)
             return;
 
-        playerInfo.Status = NetPlayerStatus.Joining;
+        playerInfo.Status = NetworkPlayerStatus.Joining;
         EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
     }
 
     [RemoteSync]
-    private void NotifyWorldPostLoad(int peerId)
+    private void NotifyWorldReady(int peerId)
     {
-        var playerInfo = GetPlayerInfo(peerId);
+        var sender = GetTree().GetRpcSenderId();
 
+        if (IsAuthoritative && sender != DEFAULT_SERVER_ID &&
+            LocalPlayer?.Status != NetworkPlayerStatus.Active)
+        {
+            Print("Host isn't ready. \"World ready\" notification from ", sender, " is rejected");
+            return;
+        }
+
+        if (IsClient && sender != DEFAULT_SERVER_ID)
+            return;
+
+        var playerInfo = GetPlayerInfo(peerId);
         if (playerInfo == null)
             return;
 
+        if (IsAuthoritative)
+        {
+            foreach (var player in ConnectedPlayers)
+            {
+                if (player.Key != DEFAULT_SERVER_ID)
+                    RpcId(player.Key, nameof(NotifyWorldReady), peerId);
+            }
+        }
+
+        playerInfo.Status = NetworkPlayerStatus.Active;
         EmitSignal(nameof(PlayerJoined), peerId);
+        EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
+
         SystemChatNotification(TranslationServer.Translate("PLAYER_HAS_JOINED").FormatSafe(playerInfo.Name));
     }
 
@@ -754,7 +850,7 @@ public class NetworkManager : Node
         if (playerInfo == null)
             return;
 
-        playerInfo.Status = NetPlayerStatus.Leaving;
+        playerInfo.Status = NetworkPlayerStatus.Leaving;
         EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
         EmitSignal(nameof(PlayerLeft), peerId);
     }
@@ -767,25 +863,12 @@ public class NetworkManager : Node
         if (playerInfo == null)
             return;
 
-        playerInfo.Status = NetPlayerStatus.Lobby;
+        playerInfo.Status = NetworkPlayerStatus.Lobby;
         EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
         EmitSignal(nameof(ReadyForSessionReceived), peerId, playerInfo.ReadyForSession);
         EmitSignal(nameof(ServerStateUpdated));
 
         SystemChatNotification(TranslationServer.Translate("PLAYER_HAS_LEFT").FormatSafe(playerInfo.Name));
-    }
-
-    [RemoteSync]
-    private void NotifyWorldReady(int peerId)
-    {
-        var playerInfo = GetPlayerInfo(peerId);
-
-        if (playerInfo == null)
-            return;
-
-        playerInfo.Status = NetPlayerStatus.Active;
-        EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
-        EmitSignal(nameof(PlayerWorldReady), peer);
     }
 
     [RemoteSync]
@@ -806,7 +889,7 @@ public class NetworkManager : Node
     }
 
     [PuppetSync]
-    private void SyncInts(int peerId, string key, int value)
+    private void SyncVars(int peerId, string what, object variant)
     {
         var sender = GetTree().GetRpcSenderId();
         if (sender != DEFAULT_SERVER_ID)
@@ -816,20 +899,6 @@ public class NetworkManager : Node
         if (info == null)
             return;
 
-        info.Ints[key] = value;
-    }
-
-    [PuppetSync]
-    private void SyncFloats(int peerId, string key, float value)
-    {
-        var sender = GetTree().GetRpcSenderId();
-        if (sender != DEFAULT_SERVER_ID)
-            return;
-
-        var info = GetPlayerInfo(peerId);
-        if (info == null)
-            return;
-
-        info.Floats[key] = value;
+        info.SetVar(what, variant);
     }
 }

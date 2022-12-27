@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class MultiplayerGameWorld : GameWorld
 {
-    private readonly Dictionary<uint, EntityReference<INetEntity>> entities = new();
+    private readonly Dictionary<uint, EntityReference<INetworkEntity>> entities = new();
 
     private readonly List<uint> entityIds = new();
 
@@ -27,26 +27,29 @@ public class MultiplayerGameWorld : GameWorld
     }
 
     /// <summary>
-    ///   Dictionary of players that has joined the game.
+    ///   Stores variables of registered players relating to the current game world.
     /// </summary>
-    public Dictionary<int, NetPlayerState> Players { get; } = new();
+    public Dictionary<int, NetworkPlayerVars> PlayerVars { get; set; } = new();
 
-    public IReadOnlyDictionary<uint, EntityReference<INetEntity>> Entities => entities;
+    /// <summary>
+    ///   Stores references to all networked entities.
+    /// </summary>
+    public IReadOnlyDictionary<uint, EntityReference<INetworkEntity>> Entities => entities;
 
     public IReadOnlyList<uint> EntityIDs => entityIds;
 
     public int EntityCount => entities.Count;
 
-    public void Clear()
+    public void ClearMultiplayer()
     {
-        Players.Clear();
+        PlayerVars.Clear();
         entities.Clear();
     }
 
-    public void RegisterEntity(uint id, INetEntity entity)
+    public void RegisterNetworkEntity(uint id, INetworkEntity entity)
     {
-        entity.NetEntityId = id;
-        entities[id] = new EntityReference<INetEntity>(entity);
+        entity.NetworkEntityId = id;
+        entities[id] = new EntityReference<INetworkEntity>(entity);
 
         if (!entityIds.Contains(id))
             entityIds.Add(id);
@@ -56,26 +59,38 @@ public class MultiplayerGameWorld : GameWorld
     ///   Registers the given entity to the game world.
     /// </summary>
     /// <returns>The entity's assigned ID.</returns>
-    public uint RegisterEntity(INetEntity entity)
+    public uint RegisterNetworkEntity(INetworkEntity entity)
     {
-        RegisterEntity(++entityIdCounter, entity);
+        RegisterNetworkEntity(++entityIdCounter, entity);
         return entityIdCounter;
     }
 
-    public void UnregisterEntity(uint id)
+    public void UnregisterNetworkEntity(uint id)
     {
         entities.Remove(id);
         entityIds.Remove(id);
     }
 
-    public INetEntity? GetEntity(uint id)
+    public bool TryGetNetworkEntity(uint id, out INetworkEntity entity)
     {
-        entities.TryGetValue(id, out EntityReference<INetEntity> entity);
-        return entity?.Value;
+        if (entities.TryGetValue(id, out EntityReference<INetworkEntity> entityReference) &&
+            entityReference.Value != null)
+        {
+            entity = entityReference.Value;
+            return true;
+        }
+
+        entity = null!;
+        return false;
     }
 
-    public void UpdateSpecies(uint id, Species species)
+    public void UpdateSpecies(uint peerId, Species species)
     {
-        worldSpecies[id] = species;
+        worldSpecies[peerId] = species;
+    }
+
+    public void UpdateSpecies(int peerId, Species species)
+    {
+        UpdateSpecies((uint)peerId, species);
     }
 }

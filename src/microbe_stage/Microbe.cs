@@ -14,8 +14,8 @@ using Environment = System.Environment;
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/Microbe.tscn", UsesEarlyResolve = false)]
 [DeserializedCallbackTarget]
-public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable,
-    INetPlayer
+public partial class Microbe : NetworkRigidBody, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable,
+    INetworkPlayer
 {
     /// <summary>
     ///   The point towards which the microbe will move to point to
@@ -226,9 +226,6 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
     public bool IsForPreviewOnly { get; set; }
 
     [JsonIgnore]
-    public Spatial EntityNode => this;
-
-    [JsonIgnore]
     public GeometryInstance EntityGraphics => Membrane;
 
     [JsonIgnore]
@@ -337,8 +334,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
 
     public override void _Ready()
     {
-        if (cloudSystem == null && !IsForPreviewOnly && NetworkManager.Instance.Status !=
-            NetworkedMultiplayerPeer.ConnectionStatus.Connected)
+        if (cloudSystem == null && !IsForPreviewOnly && !NetworkManager.Instance.IsNetworked)
         {
             throw new InvalidOperationException("Microbe not initialized");
         }
@@ -360,6 +356,9 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         glucose = SimulationParameters.Instance.GetCompound("glucose");
         mucilage = SimulationParameters.Instance.GetCompound("mucilage");
         lipase = SimulationParameters.Instance.GetEnzyme("lipase");
+        ammonia = SimulationParameters.Instance.GetCompound("ammonia");
+        phosphates = SimulationParameters.Instance.GetCompound("phosphates");
+        oxytoxy = SimulationParameters.Instance.GetCompound("oxytoxy");
 
         engulfAudio = GetNode<HybridAudioPlayer>("EngulfAudio");
         bindingAudio = GetNode<HybridAudioPlayer>("BindingAudio");
@@ -368,7 +367,9 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         cellBurstEffectScene = GD.Load<PackedScene>("res://src/microbe_stage/particles/CellBurstEffect.tscn");
         endosomeScene = GD.Load<PackedScene>("res://src/microbe_stage/Endosome.tscn");
 
-        engulfAudio.Positional = movementAudio.Positional = bindingAudio.Positional = !IsPlayerMicrobe;
+        bool localPlayer = PeerId == NetworkManager.Instance.PeerId || !PeerId.HasValue;
+
+        engulfAudio.Positional = movementAudio.Positional = bindingAudio.Positional = !IsPlayerMicrobe && localPlayer;
 
         // You may notice that there are two separate ways that an audio is played in this class:
         // using pre-existing audio node e.g "bindingAudio", "movementAudio" and through method e.g "PlaySoundEffect",
@@ -376,7 +377,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         // to the audio player while the latter is more convenient for dynamic and various short one-time sound effects
         // in expense of lesser audio player control.
 
-        if (IsPlayerMicrobe && (PeerId == NetworkManager.Instance.PeerId || !PeerId.HasValue))
+        if (IsPlayerMicrobe && localPlayer)
         {
             // Creates and activates the audio listener for the player microbe. Positional sound will be
             // received by it instead of the main camera.
@@ -719,7 +720,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         CheckEngulfShape();
 
         // Fire queued agents
-        if (queuedToxinToEmit != null && !NetworkManager.Instance.IsClient)
+        if (queuedToxinToEmit != null)
         {
             EmitToxin(queuedToxinToEmit);
             queuedToxinToEmit = null;

@@ -1,8 +1,8 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 using Godot;
 
-public class NetPlayerLog : PanelContainer
+public class NetworkPlayerLog : PanelContainer
 {
     [Export]
     public NodePath NamePath = null!;
@@ -88,9 +88,9 @@ public class NetPlayerLog : PanelContainer
         if (info == null)
             return;
 
-        info.Ints.TryGetValue("score", out int score);
-        info.Ints.TryGetValue("kills", out int kills);
-        info.Ints.TryGetValue("deaths", out int deaths);
+        info.TryGetVar("score", out int score);
+        info.TryGetVar("kills", out int kills);
+        info.TryGetVar("deaths", out int deaths);
 
         scoreLabel.Text = score.ToString(CultureInfo.CurrentCulture);
         killsLabel.Text = kills.ToString(CultureInfo.CurrentCulture);
@@ -137,7 +137,7 @@ public class NetPlayerLog : PanelContainer
         AddStyleboxOverride("panel", stylebox);
     }
 
-    private void OnPlayerStatusChanged(int peerId, NetPlayerStatus status)
+    private void OnPlayerStatusChanged(int peerId, NetworkPlayerStatus status)
     {
         _ = peerId;
         _ = status;

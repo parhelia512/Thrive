@@ -56,9 +56,6 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
     [JsonProperty]
     public int Size { get; private set; }
 
-    public Action<Compound, float, Vector3>? OnCloudAdded { get; set; }
-    public Action<Compound, Vector3, float>? OnCompoundTaken { get; set; }
-
     public bool IsLoadedFromSave { get; set; }
 
     public void UpdatePosition(Int2 newPosition)
@@ -399,8 +396,6 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
         {
             Density[x, y] += cloudToAdd;
         }
-
-        OnCloudAdded?.Invoke(compound, density, ConvertToWorld(x, y));
     }
 
     /// <summary>
@@ -420,8 +415,6 @@ public class CompoundCloudPlane : CSGMesh, ISaveLoadedTracked
         {
             Density[x, y] += CalculateCloudToAdd(compound, -amountToGive);
         }
-
-        OnCompoundTaken?.Invoke(compound, ConvertToWorld(x, y), fraction);
 
         return amountToGive;
     }

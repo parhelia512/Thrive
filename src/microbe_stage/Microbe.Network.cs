@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Godot;
@@ -10,10 +9,11 @@ using Newtonsoft.Json;
 /// </summary>
 public partial class Microbe
 {
-    [JsonProperty]
-    private Tween? networkTweener;
-
     private MeshInstance? tagBox;
+
+    private float lastHitpoints;
+
+    private string? cloudSystemPath;
 
     /// <summary>
     ///   If set, will assume <see cref="SceneTree.HasNetworkPeer"/> is true and subsequently do network
@@ -22,272 +22,182 @@ public partial class Microbe
     [JsonProperty]
     public int? PeerId { get; private set; }
 
-    public string ResourcePath => "res://src/microbe_stage/Microbe.tscn";
+    public MultiplayerGameWorld? MultiplayerGameWorld => GameWorld as MultiplayerGameWorld;
 
-    public uint NetEntityId { get; set; }
+    public override string ResourcePath => "res://src/microbe_stage/Microbe.tscn";
 
-    public bool Synchronize { get; set; } = true;
+    public Action<int>? OnNetworkDeathFinished { get; set; }
 
-    public Action<int>? OnNetworkedDeathCompletes { get; set; }
+    public Action<int, int, string>? OnKilledByAnotherPlayer { get; set; }
 
-    public Action<int, int, string>? OnKilledByPeer { get; set; }
-
-    public void NetworkTick(float delta)
+    public override void NetworkTick(float delta)
     {
-        if (tagBox != null)
-            tagBox.Visible = PhagocytosisStep == PhagocytosisPhase.None;
+        // TODO: Tag visibility handling
     }
 
-    public void OnNetworkSync(Dictionary<string, string> data)
+    public override void NetworkSerialize(PackedBytesBuffer buffer)
     {
-        // TODO: these badly needs optimizing
+        // TODO: Find a way to compress this further, look into delta encoding
 
-        if (int.TryParse(data[nameof(randomSeed)], out int parsedRandomSeed) && parsedRandomSeed != randomSeed)
+        base.NetworkSerialize(buffer);
+
+        buffer.Write((byte)Compounds.UsefulCompounds.Count());
+        foreach (var compound in Compounds.UsefulCompounds)
+            buffer.Write((byte)SimulationParameters.Instance.CompoundToIndex(compound));
+
+        buffer.Write(Compounds.Capacity);
+
+        buffer.Write((byte)Compounds.Compounds.Count);
+        foreach (var compound in compounds.Compounds)
         {
-            randomSeed = parsedRandomSeed;
-            random = new Random(parsedRandomSeed);
+            buffer.Write((byte)SimulationParameters.Instance.CompoundToIndex(compound.Key));
+            buffer.Write(compound.Value);
         }
 
-        var rotation = (Vector3)GD.Str2Var(data[nameof(GlobalRotation)]);
-        var position = (Vector3)GD.Str2Var(data[nameof(GlobalTranslation)]);
+        requiredCompoundsForBaseReproduction.TryGetValue(ammonia, out float ammoniaAmount);
+        requiredCompoundsForBaseReproduction.TryGetValue(phosphates, out float phosphatesAmount);
+        buffer.Write(ammoniaAmount);
+        buffer.Write(phosphatesAmount);
 
-        var parsedUsefulCompounds = JsonConvert.DeserializeObject<List<string>>(
-            data[nameof(Compounds.UsefulCompounds)]);
+        buffer.Write(Hitpoints);
+        buffer.Write((byte)State);
+        buffer.Write(DigestedAmount);
 
-        var parsedCompounds = JsonConvert.DeserializeObject<Dictionary<string, float>>(
-            data[nameof(Compounds.Compounds)]);
-
-        var parsedRequiredCompoundsForBaseReproduction = JsonConvert.DeserializeObject<Dictionary<string, float>>(
-            data[nameof(requiredCompoundsForBaseReproduction)]);
-
-        Rotation = rotation;
-        networkTweener?.InterpolateProperty(this, "global_translation", null, position, 0.1f);
-        networkTweener?.Start();
-
-        Compounds.ClearUseful();
-        foreach (var useful in parsedUsefulCompounds!)
-        {
-            Compounds.SetUseful(SimulationParameters.Instance.GetCompound(useful));
-        }
-
-        if (float.TryParse(data[nameof(Compounds.Capacity)], out float parsedCompoundsCap))
-        {
-            Compounds.Capacity = parsedCompoundsCap;
-        }
-
-        foreach (var entry in parsedCompounds!)
-        {
-            var compound = SimulationParameters.Instance.GetCompound(entry.Key);
-            Compounds.Compounds[compound] = entry.Value;
-        }
-
-        foreach (var entry in parsedRequiredCompoundsForBaseReproduction!)
-        {
-            var compound = SimulationParameters.Instance.GetCompound(entry.Key);
-            requiredCompoundsForBaseReproduction[compound] = entry.Value;
-        }
-
-        if (Enum.TryParse(data[nameof(State)], out MicrobeState parsedMicrobeState))
-            State = parsedMicrobeState;
-
-        if (Enum.TryParse(data[nameof(PhagocytosisStep)], out PhagocytosisPhase parsedEngulfStep))
-        {
-            if (data.TryGetValue(nameof(HostileEngulfer), out string engulferPath))
-            {
-                var engulfer = GetNode<Microbe>(engulferPath);
-
-                switch (parsedEngulfStep)
-                {
-                    case PhagocytosisPhase.Ingestion:
-                        engulfer.IngestEngulfable(this);
-                        break;
-                    case PhagocytosisPhase.Exocytosis:
-                        engulfer.EjectEngulfable(this);
-                        break;
-                }
-            }
-            else
-            {
-                HostileEngulfer.Value?.EjectEngulfable(this);
-            }
-
-            PhagocytosisStep = parsedEngulfStep;
-        }
-
-        if (bool.TryParse(data[nameof(Dead)], out bool parsedDead) && parsedDead)
-            Kill();
-
-        if (float.TryParse(data[nameof(Hitpoints)], out float parsedHealth))
-            Hitpoints = parsedHealth;
-
-        if (float.TryParse(data[nameof(DigestedAmount)], out float parsedDigestedAmount))
-            DigestedAmount = parsedDigestedAmount;
-
-        Membrane.Tint = (Color)GD.Str2Var(data[nameof(Membrane.Tint)]);
-    }
-
-    public void OnNetworkInput(Dictionary<string, string> data)
-    {
-        MovementDirection = (Vector3)GD.Str2Var(data[nameof(MovementDirection)]);
-        LookAtPoint = (Vector3)GD.Str2Var(data[nameof(LookAtPoint)]);
-
-        data.TryGetValue(nameof(WantsToEngulf), out string wantsToEngulf);
-        data.TryGetValue(nameof(queuedSlimeSecretionTime), out string queuedSlimeSecretionTimeInput);
-        data.TryGetValue(nameof(queuedToxinToEmit), out string queuedToxinToEmitInput);
-
-        if (bool.TryParse(wantsToEngulf, out bool parsedEngulf))
-            WantsToEngulf = parsedEngulf;
-
-        if (float.TryParse(queuedSlimeSecretionTimeInput, out float parsedQueuedSlimeSecretionTime))
-            queuedSlimeSecretionTime = parsedQueuedSlimeSecretionTime;
-
-        queuedToxinToEmit = !string.IsNullOrEmpty(queuedToxinToEmitInput) ?
-            SimulationParameters.Instance.GetCompound(queuedToxinToEmitInput) :
-            null;
-    }
-
-    public Dictionary<string, string> PackStates()
-    {
-        // TODO: Optimize.
-
-        var states = new Dictionary<string, string>
-        {
-            { nameof(randomSeed), randomSeed.ToString(CultureInfo.InvariantCulture) },
-            { nameof(GlobalTranslation), GD.Var2Str(GlobalTranslation) },
-            { nameof(GlobalRotation), GD.Var2Str(GlobalRotation) },
-            {
-                nameof(Compounds.UsefulCompounds), JsonConvert.SerializeObject(
-                    Compounds.UsefulCompounds.Select(c => c.InternalName).ToList())
-            },
-            { nameof(Compounds.Capacity), Compounds.Capacity.ToString(CultureInfo.InvariantCulture) },
-            {
-                nameof(Compounds.Compounds), JsonConvert.SerializeObject(
-                    Compounds.Compounds.ToDictionary(c => c.Key.InternalName, c => c.Value))
-            },
-            {
-                nameof(requiredCompoundsForBaseReproduction), JsonConvert.SerializeObject(
-                    requiredCompoundsForBaseReproduction.ToDictionary(c => c.Key.InternalName, c => c.Value))
-            },
-            { nameof(Hitpoints), Hitpoints.ToString(CultureInfo.InvariantCulture) },
-            { nameof(Dead), Dead.ToString(CultureInfo.InvariantCulture) },
-            { nameof(State), State.ToString() },
-            { nameof(PhagocytosisStep), PhagocytosisStep.ToString() },
-            { nameof(Membrane.Tint), GD.Var2Str(Membrane.Tint) },
-            { nameof(DigestedAmount), DigestedAmount.ToString(CultureInfo.InvariantCulture) },
-        };
+        var bools = new bool[2] { HostileEngulfer.Value != null, Dead };
+        buffer.Write(bools.ToByte());
 
         if (HostileEngulfer.Value != null)
-            states.Add(nameof(HostileEngulfer), HostileEngulfer.Value.GetPath());
-
-        return states;
+            buffer.Write(HostileEngulfer.Value.NetworkEntityId);
     }
 
-    public Dictionary<string, string> PackReplicableVars()
+    public override void NetworkDeserialize(PackedBytesBuffer buffer)
     {
-        var vars = new Dictionary<string, string>
-        {
-            { nameof(PeerId), PeerId.ToString() },
-            { nameof(Species), ThriveJsonConverter.Instance.SerializeObject(Species) },
-        };
+        base.NetworkDeserialize(buffer);
 
-        if (organelles != null)
+        Compounds.ClearUseful();
+        var usefulCompoundsCount = buffer.ReadByte();
+        for (int i = 0; i < usefulCompoundsCount; ++i)
+            Compounds.SetUseful(SimulationParameters.Instance.IndexToCompound(buffer.ReadByte()));
+
+        Compounds.Capacity = buffer.ReadSingle();
+
+        var compoundsCount = buffer.ReadByte();
+        for (int i = 0; i < compoundsCount; ++i)
         {
-            foreach (var organelle in organelles)
-            {
-                vars.Add($"organelle_def_{organelle.Name}", organelle.Definition.InternalName);
-                vars.Add($"organelle_hex_{organelle.Name}", ThriveJsonConverter.Instance.SerializeObject(
-                    organelle.Position));
-                vars.Add($"organelle_orientation_{organelle.Name}", organelle.Orientation.ToString(
-                    CultureInfo.CurrentCulture));
-                vars.Add($"organelle_compounds_{organelle.Name}", JsonConvert.SerializeObject(
-                    organelle.CompoundsLeft.ToDictionary(c => c.Key.InternalName, c => c.Value)));
-            }
+            var compound = SimulationParameters.Instance.IndexToCompound(buffer.ReadByte());
+            Compounds.Compounds[compound] = buffer.ReadSingle();
         }
 
-        return vars;
-    }
+        requiredCompoundsForBaseReproduction[ammonia] = buffer.ReadSingle();
+        requiredCompoundsForBaseReproduction[phosphates] = buffer.ReadSingle();
 
-    public Dictionary<string, string> PackInputs()
-    {
-        var vars = new Dictionary<string, string>
+        Hitpoints = buffer.ReadSingle();
+        State = (MicrobeState)buffer.ReadByte();
+        DigestedAmount = buffer.ReadSingle();
+
+        var bools = buffer.ReadByte();
+
+        if (bools.ToBoolean(0) && MultiplayerGameWorld!.TryGetNetworkEntity(
+            buffer.ReadUInt32(), out INetworkEntity entity) && entity is Microbe engulfer)
         {
-            { nameof(MovementDirection), GD.Var2Str(MovementDirection) },
-            { nameof(LookAtPoint), GD.Var2Str(LookAtPoint) },
-            { nameof(WantsToEngulf), WantsToEngulf.ToString(CultureInfo.CurrentCulture) },
-            { nameof(queuedSlimeSecretionTime), queuedSlimeSecretionTime.ToString(CultureInfo.CurrentCulture) },
-        };
+            // TODO: Very broken
+            engulfer.IngestEngulfable(this);
+        }
+        else
+        {
+            HostileEngulfer.Value?.EjectEngulfable(this);
+        }
 
-        vars.Add(nameof(queuedToxinToEmit), queuedToxinToEmit?.InternalName ?? string.Empty);
+        // TODO: Dead won't sync properly again -_-
+        Dead = bools.ToBoolean(1);
 
-        return vars;
+        if (Hitpoints < lastHitpoints)
+            Flash(1.0f, new Color(1, 0, 0, 0.5f), 1);
+
+        lastHitpoints = Hitpoints;
+
+        // Kind of hackish I guess??
+        if (cloudSystemPath != null)
+            cloudSystem ??= GetNode<CompoundCloudSystem>(cloudSystemPath);
     }
 
-    public void OnReplicated(Dictionary<string, string> data, GameProperties currentGame)
+    public override void PackSpawnState(PackedBytesBuffer buffer)
     {
+        base.PackSpawnState(buffer);
+
+        buffer.Write(randomSeed);
+        buffer.Write(PeerId!.Value);
+        buffer.Write(cloudSystem!.GetPath());
+
+        // Sending 2-byte unsigned int... means our max deserialized organelle count is 65535
+        buffer.Write((ushort)organelles!.Count);
+        foreach (var organelle in organelles!)
+        {
+            var packed = new PackedBytesBuffer();
+            organelle.NetworkSerialize(packed);
+            buffer.Write(packed);
+        }
+
+        buffer.Write(allOrganellesDivided);
+    }
+
+    public override void OnNetworkSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
+    {
+        base.OnNetworkSpawn(buffer, currentGame);
+
+        randomSeed = buffer.ReadInt32();
+        PeerId = buffer.ReadInt32();
+        cloudSystemPath = buffer.ReadString();
+
         AddToGroup(Constants.AI_TAG_MICROBE);
         AddToGroup(Constants.PROCESS_GROUP);
         AddToGroup(Constants.RUNNABLE_MICROBE_GROUP);
 
-        if (int.TryParse(data[nameof(PeerId)], out int peerId))
-            Init(null!, null!, currentGame, true, peerId);
+        Init(null!, null!, currentGame, true, PeerId);
 
-        if (data.TryGetValue(nameof(Species), out string serializedSpecies))
-        {
-            var species = ThriveJsonConverter.Instance.DeserializeObject<MicrobeSpecies>(serializedSpecies);
-
-            if (species != null)
-            {
-                var world = (MultiplayerGameWorld)currentGame.GameWorld;
-                world.UpdateSpecies(species.ID, species);
-                ApplySpecies(species);
-            }
-        }
-
-        var organellesNodeName = data
-            .Where(o => o.Key.StartsWith("organelle_def_", true, CultureInfo.CurrentCulture))
-            .Select(o => o.Key.Split("_")[2]);
+        var world = (MultiplayerGameWorld)currentGame.GameWorld;
+        ApplySpecies(world.GetSpecies((uint)PeerId));
 
         organelles?.Clear();
-
-        foreach (var name in organellesNodeName)
+        var organellesCount = buffer.ReadUInt16();
+        for (int i = 0; i < organellesCount; ++i)
         {
-            if (!data.TryGetValue($"organelle_def_{name}", out string definition))
-                continue;
+            if (organelles == null)
+                break;
 
-            if (!data.TryGetValue($"organelle_hex_{name}", out string position))
-                continue;
-
-            if (!data.TryGetValue($"organelle_orientation_{name}", out string orientation))
-                continue;
-
-            if (!data.TryGetValue($"organelle_compounds_{name}", out string compoundsLeft))
-                continue;
-
-            if (!int.TryParse(orientation, out int orientationResult))
-                continue;
-
-            var deserializedPos = ThriveJsonConverter.Instance.DeserializeObject<Hex>(position);
-            var deserializedCompounds = JsonConvert.DeserializeObject<Dictionary<string, float>>(compoundsLeft);
-
-            if (deserializedCompounds != null)
-            {
-                var organelle = SimulationParameters.Instance.GetOrganelleType(definition);
-                var parsedCompounds = deserializedCompounds.ToDictionary(
-                    c => SimulationParameters.Instance.GetCompound(c.Key), c => c.Value);
-
-                var replicatedOrganelle = new PlacedOrganelle(organelle, deserializedPos, orientationResult);
-
-                if (organelles != null)
-                {
-                    organelles.Add(replicatedOrganelle);
-                    replicatedOrganelle.ForceSetCompoundsLeft(parsedCompounds);
-                }
-                else
-                {
-                    replicatedOrganelle.DetachAndQueueFree();
-                }
-            }
+            var packed = buffer.ReadBuffer();
+            var organelle = new PlacedOrganelle();
+            organelle.NetworkDeserialize(packed);
+            organelles.Add(organelle);
         }
+
+        allOrganellesDivided = buffer.ReadBoolean();
+    }
+
+    public void PackInputs(PackedBytesBuffer buffer)
+    {
+        buffer.Write(MovementDirection.x);
+        buffer.Write(MovementDirection.z);
+        buffer.Write(LookAtPoint.x);
+        buffer.Write(LookAtPoint.z);
+        buffer.Write(queuedSlimeSecretionTime);
+
+        var bools = new bool[1] { WantsToEngulf };
+        buffer.Write(bools.ToByte());
+
+        // TODO: Agent projectile shooting, preferably after proper client-to-server input implementation
+    }
+
+    public void OnNetworkInput(PackedBytesBuffer buffer)
+    {
+        MovementDirection.x = buffer.ReadSingle();
+        MovementDirection.z = buffer.ReadSingle();
+        LookAtPoint.x = buffer.ReadSingle();
+        LookAtPoint.z = buffer.ReadSingle();
+        queuedSlimeSecretionTime = buffer.ReadSingle();
+
+        var bools = buffer.ReadByte();
+        WantsToEngulf = bools.ToBoolean(0);
     }
 
     private void SetupNetworking()
@@ -297,15 +207,13 @@ public partial class Microbe
 
         Name = PeerId.Value.ToString(CultureInfo.CurrentCulture);
 
-        networkTweener?.DetachAndQueueFree();
-        networkTweener = new Tween();
-        AddChild(networkTweener);
-
         if (PeerId.Value != NetworkManager.Instance.PeerId!.Value)
-            UpdateNameTag();
+            InitNameTag();
+
+        Compounds.LockInputAndOutput = NetworkManager.Instance.IsClient;
     }
 
-    private void UpdateNameTag()
+    private void InitNameTag()
     {
         if (!PeerId.HasValue)
             return;

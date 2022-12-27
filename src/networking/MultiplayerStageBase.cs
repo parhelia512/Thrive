@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Godot;
-using Newtonsoft.Json;
 
 /// <summary>
 ///   Base stage for the stages where the player controls a single creature, supports online gameplay.
@@ -19,14 +16,23 @@ using Newtonsoft.Json;
 ///   </para>
 /// </remarks>
 public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMultiplayerStage
-    where TPlayer : class, INetPlayer
+    where TPlayer : class, INetworkPlayer
 {
     public event EventHandler? GameReady;
 
-    public NetPlayerState PlayerState => GetPlayerState(NetworkManager.Instance.PeerId!.Value) ??
-        throw new InvalidOperationException("Player has not been set");
-
     public MultiplayerGameWorld MultiplayerGameWorld => (MultiplayerGameWorld)GameWorld;
+
+    public NetworkPlayerVars LocalPlayerVars
+    {
+        get
+        {
+            var id = NetworkManager.Instance.PeerId!.Value;
+            if (MultiplayerGameWorld.PlayerVars.TryGetValue(id, out NetworkPlayerVars vars))
+                return vars;
+
+            throw new InvalidOperationException("Player hasn't been set");
+        }
+    }
 
     protected abstract string StageLoadingMessage { get; }
 
@@ -66,9 +72,14 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     public override void _Process(float delta)
     {
         if (NetworkManager.Instance.Status == NetworkedMultiplayerPeer.ConnectionStatus.Disconnected &&
-            NetworkManager.Instance.LocalPlayer?.Status == NetPlayerStatus.Joining && LoadingScreen.Instance.Visible)
+            NetworkManager.Instance.LocalPlayer?.Status == NetworkPlayerStatus.Joining && LoadingScreen.Instance.Visible)
         {
             OnServerDisconnected();
+        }
+
+        if (!gameOver && IsGameOver())
+        {
+            GameOver();
         }
     }
 
@@ -76,34 +87,64 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     {
     }
 
-    public NetPlayerState? GetPlayerState(int peerId)
+    /// <summary>
+    ///   Sets a single game-wide variable and syncs to all.
+    /// </summary>
+    public void ServerSetPlayerVar(int peerId, string key, object value)
     {
-        MultiplayerGameWorld.Players.TryGetValue(peerId, out NetPlayerState result);
-        return result;
-    }
-
-    public void SyncPlayerStateToAllPeers(int peerId, NetPlayerState? state)
-    {
-        if (NetworkManager.Instance.IsClient)
+        if (!NetworkManager.Instance.IsAuthoritative)
             return;
 
-        var serialized = state == null ? string.Empty : JsonConvert.SerializeObject(state);
-        Rpc(nameof(SyncPlayerState), peerId, serialized);
+        Rpc(nameof(SyncPlayerVar), peerId, key, value);
+    }
+
+    /// <summary>
+    ///   Syncs the whole game-wide player vars.
+    /// </summary>
+    public void ServerSyncPlayerVars(int peerId, NetworkPlayerVars vars)
+    {
+        if (!NetworkManager.Instance.IsAuthoritative)
+            return;
+
+        var packed = new PackedBytesBuffer();
+        vars.NetworkSerialize(packed);
+        Rpc(nameof(SyncPlayerVars), peerId, packed.Data);
+    }
+
+    public void ServerSyncPlayerVars(int peerId)
+    {
+        if (!NetworkManager.Instance.IsAuthoritative)
+            return;
+
+        if (MultiplayerGameWorld.PlayerVars.TryGetValue(peerId, out NetworkPlayerVars vars))
+            ServerSyncPlayerVars(peerId, vars);
+    }
+
+    public override bool IsGameOver()
+    {
+        return NetworkManager.Instance.ElapsedGameTimeMinutes >= NetworkManager.Instance.Settings?.SessionLength;
     }
 
     protected override void SetupStage()
     {
-        LoadingScreen.Instance.Show(StageLoadingMessage, MainGameState.Invalid, TranslationServer.Translate(
-            "PREPARING_DOT_DOT_DOT"));
-        TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeIn, 0.5f, null, false, false);
-
         pauseMenu.GameProperties = CurrentGame ?? throw new InvalidOperationException("current game is not set");
     }
 
     protected override void OnGameStarted()
     {
-        if (NetworkManager.Instance.IsAuthoritative)
-            OnReady();
+        if (NetworkManager.Instance.IsClient && !NetworkManager.Instance.GameInSession)
+        {
+            LoadingScreen.Instance.Show(TranslationServer.Translate("WAITING_FOR_HOST"), MainGameState.Invalid);
+            TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeIn, 0.5f, null, false, false);
+            return;
+        }
+
+        OnReady();
+    }
+
+    protected override void GameOver()
+    {
+        gameOver = true;
     }
 
     /// <summary>
@@ -111,59 +152,78 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     /// </summary>
     protected abstract void NetworkTick(float delta);
 
-    protected virtual void UpdateEntityState(float delta, int targetPeerId, INetEntity entity)
+    protected virtual void UpdateEntityState(float delta, int targetPeerId, INetworkEntity entity)
     {
         if (!entity.EntityNode.IsInsideTree() || NetworkManager.Instance.IsClient)
             return;
 
-        entity.NetworkTick(delta);
+        var buffer = new PackedBytesBuffer();
+        entity.NetworkSerialize(buffer);
 
-        var states = entity.PackStates();
-
-        if (states != null)
-            RpcUnreliableId(targetPeerId, nameof(NotifyEntityStateUpdate), delta, entity.NetEntityId, states);
+        if (buffer.Length > 0)
+            RpcUnreliableId(targetPeerId, nameof(NotifyEntityStateUpdate), delta, entity.NetworkEntityId, buffer.Data);
     }
 
     protected virtual void SendPlayerInputs()
     {
-        if (Player?.EntityNode.IsInsideTree() == false || NetworkManager.Instance.IsAuthoritative)
+        if (Player?.EntityNode.IsInsideTree() == false || NetworkManager.Instance.IsAuthoritative ||
+            !NetworkManager.Instance.GameInSession)
+        {
             return;
+        }
 
-        var inputs = Player?.PackInputs();
+        PackedBytesBuffer? inputs = null;
+        if (Player != null)
+        {
+            inputs = new PackedBytesBuffer();
+            Player.PackInputs(inputs);
+        }
 
         if (inputs != null)
         {
             RpcUnreliableId(NetworkManager.DEFAULT_SERVER_ID, nameof(PlayerInputsReceived),
-                NetworkManager.Instance.PeerId, inputs);
+                NetworkManager.Instance.PeerId, inputs.Data);
         }
     }
 
     protected virtual void RegisterPlayer(int peerId)
     {
-        if (MultiplayerGameWorld.Players.ContainsKey(peerId) || NetworkManager.Instance.IsClient)
+        if (MultiplayerGameWorld.PlayerVars.ContainsKey(peerId) || NetworkManager.Instance.IsClient)
             return;
 
-        // Pretend that each separate Species instance across players are LUCA
-        var species = new MicrobeSpecies((uint)peerId, "Primum", "thrivium");
-        GameWorld.SetInitialSpeciesProperties(species);
-        MultiplayerGameWorld.UpdateSpecies(species.ID, species);
+        // Register to the game world
+        MultiplayerGameWorld.PlayerVars.Add(peerId, new NetworkPlayerVars());
 
-        MultiplayerGameWorld.Players.Add(peerId, default);
-        SyncPlayerStateToAllPeers(peerId, MultiplayerGameWorld.Players[peerId]);
+        var species = CreateNewSpeciesForPlayer(peerId);
+        MultiplayerGameWorld.UpdateSpecies(peerId, species);
 
-        SpawnPlayer(peerId);
-
-        if (peerId != NetworkManager.Instance.PeerId)
+        foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
-            foreach (var entry in MultiplayerGameWorld.Entities)
-            {
-                var entity = entry.Value.Value;
-                if (entity == null)
-                    continue;
+            if (player.Key == peerId || player.Value.Status != NetworkPlayerStatus.Active)
+                continue;
 
-                ReplicateEntity(peerId, entity, MultiplayerGameWorld.EntityCount);
+            if (MultiplayerGameWorld.Species.TryGetValue((uint)player.Key, out Species otherSpecies))
+            {
+                // Send other players' species to the incoming player
+                var otherSpeciesBuffer = new PackedBytesBuffer();
+                otherSpecies.NetworkSerialize(otherSpeciesBuffer);
+                RpcId(peerId, nameof(SyncSpecies), player.Key, otherSpeciesBuffer.Data);
             }
         }
+
+        // Send the incoming player's species to all others
+        var speciesBuffer = new PackedBytesBuffer();
+        species.NetworkSerialize(speciesBuffer);
+        Rpc(nameof(SyncSpecies), peerId, speciesBuffer.Data);
+
+        // TODO: clean this up
+        foreach (var entity in MultiplayerGameWorld.Entities.Values)
+        {
+            if (entity.Value != null)
+                SpawnEntity(peerId, entity.Value);
+        }
+
+        SpawnPlayer(peerId);
     }
 
     protected virtual void UnregisterPlayer(int peerId)
@@ -173,33 +233,20 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
         DespawnPlayer(peerId);
 
-        MultiplayerGameWorld.Players.Remove(peerId);
-        SyncPlayerStateToAllPeers(peerId, null);
+        foreach (var player in NetworkManager.Instance.ConnectedPlayers)
+        {
+            if (player.Value.Status == NetworkPlayerStatus.Active)
+                RpcId(player.Key, nameof(DestroyPlayerVars), peerId);
+        }
     }
 
     /// <summary>
-    ///   Called client-side when entity with the given id has been replicated.
+    ///   Called client-side when entity with the given id has been spawned.
     /// </summary>
-    protected virtual void OnNetEntityReplicated(uint id, INetEntity entity, int serverEntityCount)
+    protected virtual void OnNetEntitySpawned(uint id, INetworkEntity entity)
     {
-        rootOfDynamicallySpawned.AddChild(entity.EntityNode);
-
-        if (entity is INetPlayer player && player.PeerId == NetworkManager.Instance.PeerId)
-            OnOwnPlayerSpawned((TPlayer)entity);
-
-        if (NetworkManager.Instance.LocalPlayer?.Status == NetPlayerStatus.Joining)
-        {
-            LoadingScreen.Instance.Show(StageLoadingMessage,
-                MainGameState.Invalid, TranslationServer.Translate("LOADING_ENTITIES").FormatSafe(
-                    MultiplayerGameWorld.EntityCount, serverEntityCount));
-
-            if (serverEntityCount > -1 && MultiplayerGameWorld.EntityCount == serverEntityCount)
-            {
-                RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(RequestExcessEntitiesRemoval));
-                RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(RequestServerSidePlayerStates));
-                OnReady();
-            }
-        }
+        if (entity is INetworkPlayer player && player.PeerId == NetworkManager.Instance.PeerId)
+            OnLocalPlayerSpawned((TPlayer)entity);
     }
 
     /// <summary>
@@ -207,12 +254,11 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     /// </summary>
     protected virtual void OnNetEntityDestroy(uint entityId)
     {
-        var entity = MultiplayerGameWorld.GetEntity(entityId);
-        if (entity == null)
+        if (!MultiplayerGameWorld.TryGetNetworkEntity(entityId, out INetworkEntity entity))
             return;
 
-        if (entityId == PlayerState.EntityID)
-            OnOwnPlayerDespawn();
+        if (entityId == LocalPlayerVars.EntityId)
+            OnLocalPlayerDespawn();
 
         entity.DestroyDetachAndQueueFree();
     }
@@ -220,7 +266,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     /// <summary>
     ///   If the the local entity we're controlling has been spawned.
     /// </summary>
-    protected virtual void OnOwnPlayerSpawned(TPlayer player)
+    protected virtual void OnLocalPlayerSpawned(TPlayer player)
     {
         Player = player;
         spawnedPlayer = true;
@@ -229,7 +275,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     /// <summary>
     ///   If the local entity we're controlling has been despawned.
     /// </summary>
-    protected virtual void OnOwnPlayerDespawn()
+    protected virtual void OnLocalPlayerDespawn()
     {
         Player = null;
     }
@@ -242,8 +288,8 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (!HandlePlayerSpawn(peerId, out TPlayer? spawned))
             return;
 
-        if (peerId == GetTree().GetNetworkUniqueId())
-            OnOwnPlayerSpawned(spawned!);
+        if (peerId == NetworkManager.Instance.PeerId)
+            OnLocalPlayerSpawned(spawned!);
     }
 
     protected void DespawnPlayer(int peerId)
@@ -251,18 +297,17 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (NetworkManager.Instance.IsClient)
             return;
 
-        if (!MultiplayerGameWorld.Players.TryGetValue(peerId, out NetPlayerState state))
+        if (!MultiplayerGameWorld.PlayerVars.TryGetValue(peerId, out NetworkPlayerVars vars))
             return;
 
-        var entity = MultiplayerGameWorld.GetEntity(state.EntityID);
-        if (entity == null)
+        if (!MultiplayerGameWorld.TryGetNetworkEntity(vars.EntityId, out INetworkEntity entity))
             return;
 
         if (!HandlePlayerDespawn((TPlayer)entity))
             return;
 
         if (peerId == GetTree().GetNetworkUniqueId())
-            OnOwnPlayerDespawn();
+            OnLocalPlayerDespawn();
     }
 
     /// <summary>
@@ -292,7 +337,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     {
     }
 
-    protected virtual void SetEntityAsAttached(INetEntity entity, bool attached)
+    protected virtual void SetEntityAsAttached(INetworkEntity entity, bool attached)
     {
         if (attached && !entity.EntityNode.IsInsideTree())
         {
@@ -303,6 +348,11 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
             rootOfDynamicallySpawned.RemoveChild(entity.EntityNode);
         }
     }
+
+    protected abstract Species CreateNewSpeciesForPlayer(int peerId);
+
+    [PuppetSync]
+    protected abstract void SyncSpecies(int peerId, byte[] serialized);
 
     /// <summary>
     ///   Game-mode specific score calculation.
@@ -315,40 +365,22 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     /// <param name="peerId">The player's peer id.</param>
     protected void NotifyScoreUpdate(int peerId)
     {
-        NetworkManager.Instance.ServerSetInts(peerId, "score", CalculateScore(peerId));
+        NetworkManager.Instance.SetVar(peerId, "score", CalculateScore(peerId));
     }
 
-    private void ReplicateEntity(int targetPeerId, INetEntity entity, int serverEntityCount = -1)
+    private void SpawnEntity(int targetPeerId, INetworkEntity entity)
     {
-        var replicableVars = entity.PackReplicableVars();
-        var states = entity.PackStates();
-
-        var data = new Dictionary<string, string>
-        {
-            { nameof(INetEntity.ResourcePath), entity.ResourcePath },
-            { nameof(IEntity.EntityNode.Name), entity.EntityNode.Name },
-        };
-
-        if (replicableVars != null)
-            data.Add("Vars", JsonConvert.SerializeObject(replicableVars));
-
-        if (states != null)
-            data.Add("States", JsonConvert.SerializeObject(states));
-
-        RpcId(targetPeerId, nameof(NotifyEntityReplication), entity.NetEntityId, data, serverEntityCount);
+        var spawnData = new PackedBytesBuffer();
+        entity.PackSpawnState(spawnData);
+        RpcId(targetPeerId, nameof(NotifyEntitySpawn), entity.NetworkEntityId, entity.ResourcePath, spawnData?.Data);
     }
 
     private void OnNetworkTick(object sender, float delta)
     {
-        if (NetworkManager.Instance.IsAuthoritative)
-        {
-            NetworkUpdateGameState(delta);
-        }
-        else if (NetworkManager.Instance.IsClient)
-        {
+        if (NetworkManager.Instance.IsClient)
             SendPlayerInputs();
-        }
 
+        NetworkUpdateGameState(delta);
         NetworkTick(delta);
     }
 
@@ -359,15 +391,17 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
             var id = MultiplayerGameWorld.EntityIDs[i];
 
             var entity = MultiplayerGameWorld.Entities[id].Value;
-            if (entity == null)
+            if (entity == null || !entity.EntityNode.IsInsideTree())
                 continue;
 
-            if (!entity.Synchronize || !entity.EntityNode.IsInsideTree())
+            entity.NetworkTick(delta);
+
+            if (NetworkManager.Instance.IsClient)
                 continue;
 
             foreach (var player in NetworkManager.Instance.ConnectedPlayers)
             {
-                if (player.Value.Status != NetPlayerStatus.Active || player.Key == NetworkManager.DEFAULT_SERVER_ID)
+                if (player.Value.Status != NetworkPlayerStatus.Active || player.Key == NetworkManager.DEFAULT_SERVER_ID)
                     continue;
 
                 UpdateEntityState(delta, player.Key, entity);
@@ -375,19 +409,19 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         }
     }
 
-    private void OnNetEntitySpawned(INetEntity spawned)
+    private void OnNetEntitySpawned(INetworkEntity spawned)
     {
         if (NetworkManager.Instance.IsClient)
             return;
 
-        MultiplayerGameWorld.RegisterEntity(spawned);
+        MultiplayerGameWorld.RegisterNetworkEntity(spawned);
 
         foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
-            if (player.Key == GetTree().GetNetworkUniqueId() || player.Value.Status != NetPlayerStatus.Active)
+            if (player.Key == GetTree().GetNetworkUniqueId() || player.Value.Status != NetworkPlayerStatus.Active)
                 continue;
 
-            ReplicateEntity(player.Key, spawned);
+            SpawnEntity(player.Key, spawned);
         }
     }
 
@@ -396,11 +430,11 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (NetworkManager.Instance.IsClient)
             return;
 
-        MultiplayerGameWorld.UnregisterEntity(id);
+        MultiplayerGameWorld.UnregisterNetworkEntity(id);
 
         foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
-            if (player.Key == NetworkManager.DEFAULT_SERVER_ID || player.Value.Status != NetPlayerStatus.Active)
+            if (player.Key == NetworkManager.DEFAULT_SERVER_ID || player.Value.Status != NetworkPlayerStatus.Active)
                 continue;
 
             RpcId(player.Key, nameof(DestroySpawnedEntity), id);
@@ -430,133 +464,148 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
     private void OnReady()
     {
+        GameReady?.Invoke(this, EventArgs.Empty);
+        BaseHUD.OnEnterStageTransition(true, false);
+
+        if (NetworkManager.Instance.IsAuthoritative)
+        {
+            RegisterPlayer(NetworkManager.Instance.PeerId!.Value);
+            Rpc(nameof(NotifyServerReady));
+        }
+        else if (NetworkManager.Instance.IsClient)
+        {
+            RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerRequestPlayerStates));
+            RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerRequestRegistration));
+        }
+    }
+
+    [Puppet]
+    private void NotifyServerReady()
+    {
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.5f, () =>
         {
-            if (NetworkManager.Instance.IsAuthoritative)
-                RegisterPlayer(NetworkManager.Instance.PeerId!.Value);
-
-            GameReady?.Invoke(this, EventArgs.Empty);
             LoadingScreen.Instance.Hide();
-            BaseHUD.OnEnterStageTransition(true, false);
-        }, false, false);
+            OnReady();
+        });
+    }
+
+    [PuppetSync]
+    private void SyncPlayerVar(int peerId, string key, object value)
+    {
+        if (!MultiplayerGameWorld.PlayerVars.ContainsKey(peerId))
+            MultiplayerGameWorld.PlayerVars[peerId] = new NetworkPlayerVars();
+
+        MultiplayerGameWorld.PlayerVars[peerId].SetVar(key, value);
     }
 
     [Puppet]
-    private void SyncPlayerState(int peerId, string data)
+    private void SyncPlayerVars(int peerId, byte[] packedData)
     {
-        if (string.IsNullOrEmpty(data))
-        {
-            MultiplayerGameWorld.Players.Remove(peerId);
+        var buffer = new PackedBytesBuffer(packedData);
+        var vars = new NetworkPlayerVars();
+        vars.NetworkDeserialize(buffer);
+        MultiplayerGameWorld.PlayerVars[peerId] = vars;
+    }
+
+    [PuppetSync]
+    private void DestroyPlayerVars(int peerId)
+    {
+        MultiplayerGameWorld.PlayerVars.Remove(peerId);
+    }
+
+    [Puppet]
+    private void NotifyEntitySpawn(uint id, string resourcePath, byte[]? data)
+    {
+        if (MultiplayerGameWorld.Entities.ContainsKey(id))
             return;
-        }
-
-        MultiplayerGameWorld.Players[peerId] = JsonConvert.DeserializeObject<NetPlayerState>(data);
-    }
-
-    [Puppet]
-    private void NotifyEntityReplication(uint id, Dictionary<string, string> data, int serverEntityCount = -1)
-    {
-        data.TryGetValue(nameof(INetEntity.ResourcePath), out string resourcePath);
-        data.TryGetValue(nameof(IEntity.EntityNode.Name), out string name);
-
-        data.TryGetValue("Vars", out string vars);
-        data.TryGetValue("States", out string states);
-
-        Dictionary<string, string>? parsedVars = null;
-        Dictionary<string, string>? parsedStates = null;
-
-        if (!string.IsNullOrEmpty(vars))
-            parsedVars = JsonConvert.DeserializeObject<Dictionary<string, string>>(vars);
-
-        if (!string.IsNullOrEmpty(states))
-            parsedStates = JsonConvert.DeserializeObject<Dictionary<string, string>>(states);
 
         var scene = GD.Load<PackedScene>(resourcePath);
-        var replicated = scene.Instance<INetEntity>();
+        var spawned = scene.Instance<INetworkEntity>();
 
-        replicated.EntityNode.Name = name;
-
-        if (parsedVars != null)
+        if (data != null)
         {
-            replicated.OnReplicated(
-                parsedVars, CurrentGame ?? throw new InvalidOperationException("current game is not set"));
+            spawned.OnNetworkSpawn(new PackedBytesBuffer(data), CurrentGame ??
+                throw new InvalidOperationException("current game is not set"));
         }
 
-        MultiplayerGameWorld.RegisterEntity(id, replicated);
-        OnNetEntityReplicated(id, replicated, serverEntityCount);
-
-        if (parsedStates != null)
-            replicated.OnNetworkSync(parsedStates);
+        rootOfDynamicallySpawned.AddChild(spawned.EntityNode);
+        MultiplayerGameWorld.RegisterNetworkEntity(id, spawned);
+        OnNetEntitySpawned(id, spawned);
     }
 
     [Puppet]
     private void DestroySpawnedEntity(uint entityId)
     {
         OnNetEntityDestroy(entityId);
-        MultiplayerGameWorld.UnregisterEntity(entityId);
+        MultiplayerGameWorld.UnregisterNetworkEntity(entityId);
     }
 
     [Puppet]
-    private void NotifyEntityStateUpdate(float delta, uint id, Dictionary<string, string> data)
+    private void NotifyEntityStateUpdate(float delta, uint id, byte[] data)
     {
-        var entity = MultiplayerGameWorld.GetEntity(id);
-        if (entity == null)
+        if (!MultiplayerGameWorld.TryGetNetworkEntity(id, out INetworkEntity entity))
         {
-            // TODO: recreate entity
+            RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(RequestEntitySpawn), id);
             return;
         }
 
         if (!entity.EntityNode.IsInsideTree())
             return;
 
-        entity.NetworkTick(delta);
-        entity.OnNetworkSync(data);
-    }
-
-    [Puppet]
-    private void ReceivedExcessEntitiesRemoval(string ids)
-    {
-        var deserialized = JsonConvert.DeserializeObject<List<uint>>(ids);
-        if (deserialized == null)
-            return;
-
-        var excess = MultiplayerGameWorld.Entities.Select(e => e.Key).Except(deserialized).ToList();
-
-        foreach (var id in excess)
-            DestroySpawnedEntity(id);
+        entity.NetworkDeserialize(new PackedBytesBuffer(data));
     }
 
     [Remote]
-    private void PlayerInputsReceived(int peerId, Dictionary<string, string> data)
+    private void PlayerInputsReceived(int peerId, byte[] data)
     {
         if (peerId == NetworkManager.DEFAULT_SERVER_ID)
             return;
 
-        var state = GetPlayerState(peerId);
-        if (state == null)
+        if (!MultiplayerGameWorld.PlayerVars.TryGetValue(peerId, out NetworkPlayerVars vars))
             return;
 
-        var entity = MultiplayerGameWorld.GetEntity(state.Value.EntityID);
-
-        if (entity is INetPlayer player)
-            player.OnNetworkInput(data);
+        if (MultiplayerGameWorld.TryGetNetworkEntity(vars.EntityId, out INetworkEntity entity) &&
+            entity is INetworkPlayer player)
+        {
+            player.OnNetworkInput(new PackedBytesBuffer(data));
+        }
     }
 
     [Remote]
-    private void RequestServerSidePlayerStates()
+    private void ServerRequestPlayerStates()
     {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
         var sender = GetTree().GetRpcSenderId();
 
-        foreach (var state in MultiplayerGameWorld.Players)
-            RpcId(sender, nameof(SyncPlayerState), state.Key, JsonConvert.SerializeObject(state.Value));
+        foreach (var state in MultiplayerGameWorld.PlayerVars)
+        {
+            var packed = new PackedBytesBuffer();
+            state.Value.NetworkSerialize(packed);
+            RpcId(sender, nameof(SyncPlayerVars), state.Key, packed.Data);
+        }
     }
 
     [Remote]
-    private void RequestExcessEntitiesRemoval()
+    private void ServerRequestRegistration()
     {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
+        var sender = GetTree().GetRpcSenderId();
+        RegisterPlayer(sender);
+    }
+
+    [Remote]
+    private void RequestEntitySpawn(uint entityId)
+    {
+        if (NetworkManager.Instance.IsClient)
+            return;
+
         var sender = GetTree().GetRpcSenderId();
 
-        RpcId(sender, nameof(ReceivedExcessEntitiesRemoval),
-            JsonConvert.SerializeObject(MultiplayerGameWorld.EntityIDs));
+        if (MultiplayerGameWorld.TryGetNetworkEntity(entityId, out INetworkEntity entity))
+            SpawnEntity(sender, entity);
     }
 }

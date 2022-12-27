@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 [SceneLoadedClass("res://src/microbe_stage/MicrobeStage.tscn")]
 [DeserializedCallbackTarget]
 [UseThriveSerializer]
-public partial class MicrobeStage : StageBase<Microbe>
+public class MicrobeStage : StageBase<Microbe>
 {
     [Export]
     public NodePath GuidanceLinePath = null!;
@@ -552,9 +552,6 @@ public partial class MicrobeStage : StageBase<Microbe>
         {
             UpdatePatchSettings();
         }
-
-        // spawner.Enabled = !MultiplayerRunning;
-        // pauseMenu.MultiplayerMode = MultiplayerRunning;
     }
 
     protected override void OnGameStarted()

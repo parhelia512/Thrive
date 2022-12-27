@@ -61,7 +61,7 @@ public class MultiplayerGUI : CenterContainer
     private CustomConfirmationDialog generalDialog = null!;
     private CustomConfirmationDialog loadingDialog = null!;
     private Button connectButton = null!;
-    private NetPlayerList list = null!;
+    private NetworkPlayerList list = null!;
     private ServerSetup serverSetup = null!;
     private Button startButton = null!;
     private CustomConfirmationDialog kickedDialog = null!;
@@ -119,7 +119,7 @@ public class MultiplayerGUI : CenterContainer
         addressBox = GetNode<LineEdit>(AddressBoxPath);
         portBox = GetNode<LineEdit>(PortBoxPath);
         connectButton = GetNode<Button>(ConnectButtonPath);
-        list = GetNode<NetPlayerList>(LobbyPlayerListPath);
+        list = GetNode<NetworkPlayerList>(LobbyPlayerListPath);
         startButton = GetNode<Button>(StartButtonPath);
         kickedDialog = GetNode<CustomConfirmationDialog>(KickedDialogPath);
         serverName = GetNode<Label>(ServerNamePath);
@@ -166,7 +166,8 @@ public class MultiplayerGUI : CenterContainer
         var builder = new StringBuilder(100);
         builder.Append(" - ");
         builder.Append(network.GameInSession ?
-            TranslationServer.Translate("LOBBY_ATTRIBUTE_IN_PROGRESS").FormatSafe(network.GameTimeHumanized) :
+            TranslationServer.Translate("LOBBY_ATTRIBUTE_IN_PROGRESS").FormatSafe(network.GameTimeHumanized,
+            network.Settings!.SessionLength) :
             TranslationServer.Translate("LOBBY_ATTRIBUTE_PENDING"));
 
         serverAttributes.Text = builder.ToString();
@@ -194,7 +195,7 @@ public class MultiplayerGUI : CenterContainer
     private void UpdateLobby()
     {
         var network = NetworkManager.Instance;
-        if (network.Status != NetworkedMultiplayerPeer.ConnectionStatus.Connected)
+        if (!network.IsNetworked)
             return;
 
         list.RefreshPlayers();
@@ -475,7 +476,7 @@ public class MultiplayerGUI : CenterContainer
         SetSubMenu(SubMenu.Lobby);
 
         NetworkManager.Instance.Print(
-            "Connection to ", addressBox.Text, ":", portBox.Text, " succeeded," +
+            "Connection to ", addressBox.Text, ":", portBox.Text, " established," +
             " using network ID (", GetTree().GetNetworkUniqueId(), ")");
     }
 
@@ -527,7 +528,11 @@ public class MultiplayerGUI : CenterContainer
 
     private void OnStartPressed()
     {
-        NetworkManager.Instance.StartGame();
+        // Client shouldn't join before the host/before the server even starts the game session
+        if (NetworkManager.Instance.IsClient && !NetworkManager.Instance.GameInSession)
+            return;
+
+        NetworkManager.Instance.Join();
         startButton.Disabled = true;
     }
 

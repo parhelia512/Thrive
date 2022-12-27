@@ -18,12 +18,15 @@
 [sub_resource type="StyleBoxEmpty" id=5]
 
 [node name="ServerSetup" type="Popup"]
+margin_right = 398.0
+margin_bottom = 280.0
 theme = ExtResource( 5 )
 popup_exclusive = true
 script = ExtResource( 6 )
 WindowTitle = "SERVER_SETUP"
 NamePath = NodePath("VBoxContainer/HBoxContainer/LineEdit")
 MaxPlayerPath = NodePath("VBoxContainer/HBoxContainer2/SpinBox")
+SessionLengthPath = NodePath("VBoxContainer/HBoxContainer6/SpinBox")
 GameModePath = NodePath("VBoxContainer/HBoxContainer3/OptionButton")
 UseUpnpPath = NodePath("VBoxContainer/HBoxContainer4/CheckBox")
 UseUpnpHintPath = NodePath("VBoxContainer/HBoxContainer4/Hint")
@@ -85,12 +88,42 @@ margin_right = 368.0
 margin_bottom = 31.0
 rect_min_size = Vector2( 200, 0 )
 min_value = 1.0
-value = 32.0
+max_value = 60.0
+value = 20.0
 
-[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HBoxContainer6" type="HBoxContainer" parent="VBoxContainer"]
 margin_top = 82.0
 margin_right = 368.0
-margin_bottom = 102.0
+margin_bottom = 113.0
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer6"]
+margin_top = 5.0
+margin_right = 86.0
+margin_bottom = 25.0
+custom_fonts/font = ExtResource( 9 )
+text = "TIME_LIMIT"
+
+[node name="Separator" type="Control" parent="VBoxContainer/HBoxContainer6"]
+margin_left = 90.0
+margin_right = 164.0
+margin_bottom = 31.0
+rect_min_size = Vector2( 50, 0 )
+size_flags_horizontal = 3
+
+[node name="SpinBox" type="SpinBox" parent="VBoxContainer/HBoxContainer6"]
+margin_left = 168.0
+margin_right = 368.0
+margin_bottom = 31.0
+rect_min_size = Vector2( 200, 0 )
+min_value = 30.0
+max_value = 240.0
+value = 60.0
+suffix = "MINUTES_LOWERCASE"
+
+[node name="HBoxContainer4" type="HBoxContainer" parent="VBoxContainer"]
+margin_top = 123.0
+margin_right = 368.0
+margin_bottom = 143.0
 
 [node name="CheckBox" parent="VBoxContainer/HBoxContainer4" instance=ExtResource( 4 )]
 margin_right = 99.0
@@ -115,14 +148,14 @@ texture_hover = ExtResource( 1 )
 expand = true
 
 [node name="Spacer" type="Control" parent="VBoxContainer"]
-margin_top = 112.0
+margin_top = 153.0
 margin_right = 368.0
-margin_bottom = 112.0
+margin_bottom = 153.0
 
 [node name="HBoxContainer3" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 122.0
+margin_top = 163.0
 margin_right = 368.0
-margin_bottom = 142.0
+margin_bottom = 183.0
 
 [node name="Label" type="Label" parent="VBoxContainer/HBoxContainer3"]
 margin_right = 102.0
@@ -145,19 +178,19 @@ rect_min_size = Vector2( 200, 0 )
 size_flags_horizontal = 3
 
 [node name="GameModeSpecificOptions" type="PanelContainer" parent="VBoxContainer"]
-margin_top = 152.0
+margin_top = 193.0
 margin_right = 368.0
-margin_bottom = 174.0
+margin_bottom = 195.0
 
 [node name="Spacer2" type="Control" parent="VBoxContainer"]
-margin_top = 184.0
+margin_top = 205.0
 margin_right = 368.0
-margin_bottom = 184.0
+margin_bottom = 205.0
 
 [node name="HBoxContainer5" type="HBoxContainer" parent="VBoxContainer"]
-margin_top = 194.0
+margin_top = 215.0
 margin_right = 368.0
-margin_bottom = 229.0
+margin_bottom = 250.0
 alignment = 1
 
 [node name="Confirm" type="Button" parent="VBoxContainer/HBoxContainer5"]

@@ -1,10 +1,10 @@
 [gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=1]
-[ext_resource path="res://src/gui_common/NetPlayerList.cs" type="Script" id=2]
-[ext_resource path="res://src/gui_common/NetPlayerLog.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/gui_common/NetworkPlayerList.cs" type="Script" id=2]
+[ext_resource path="res://src/gui_common/NetworkPlayerLog.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Small.tres" type="DynamicFont" id=4]
-[ext_resource path="res://src/networking/KickPlayerDialog.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/gui_common/KickPlayerDialog.tscn" type="PackedScene" id=5]
 [ext_resource path="res://assets/textures/gui/bevel/extinctionLocal.png" type="Texture" id=6]
 [ext_resource path="res://assets/textures/gui/bevel/SuicideIcon.png" type="Texture" id=7]
 [ext_resource path="res://assets/textures/gui/bevel/popUp.png" type="Texture" id=8]
@@ -30,7 +30,7 @@ expand_margin_right = 2.0
 expand_margin_top = 2.0
 expand_margin_bottom = 2.0
 
-[node name="NetPlayerList" type="VBoxContainer"]
+[node name="NetworkPlayerList" type="VBoxContainer"]
 margin_right = 256.0
 margin_bottom = 32.0
 mouse_filter = 2

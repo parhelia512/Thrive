@@ -26,7 +26,7 @@ public partial class Microbe
 
     private bool destroyed;
 
-    private bool networkedDeathInvoked;
+    private bool networkDeathInvoked;
 
     [JsonProperty]
     private float escapeInterval;
@@ -171,9 +171,6 @@ public partial class Microbe
 
     [JsonProperty]
     public EntityReference<Microbe> HostileEngulfer { get; private set; } = new();
-
-    [JsonIgnore]
-    public AliveMarker AliveMarker { get; } = new();
 
     /// <summary>
     ///   The current state of the microbe. Shared across the colony
@@ -414,7 +411,7 @@ public partial class Microbe
             Kill();
 
             if (Dead && attackerPeerId.HasValue && PeerId.HasValue)
-                OnKilledByPeer?.Invoke(attackerPeerId.Value, PeerId.Value, source);
+                OnKilledByAnotherPlayer?.Invoke(attackerPeerId.Value, PeerId.Value, source);
         }
     }
 
@@ -794,17 +791,17 @@ public partial class Microbe
         return OnKilled();
     }
 
-    public void OnDestroyed()
+    public override void OnDestroyed()
     {
         if (destroyed)
             return;
+
+        base.OnDestroyed();
 
         destroyed = true;
 
         // TODO: find out a way to cleanly despawn colonies without having to run the reproduction progress lost logic
         Colony?.RemoveFromColony(this);
-
-        AliveMarker.Alive = false;
     }
 
     /// <summary>
@@ -1294,6 +1291,7 @@ public partial class Microbe
         if (NetworkManager.Instance.IsClient)
         {
             ProcessEngulfedObjects(delta);
+            HandleEngulfFeedback(delta);
             return;
         }
 
@@ -1321,36 +1319,7 @@ public partial class Microbe
             attemptingToEngulf.Clear();
         }
 
-        // Play sound
-        if (State == MicrobeState.Engulf)
-        {
-            if (!engulfAudio.Playing)
-                engulfAudio.Play();
-
-            // To balance loudness, here the engulfment audio's max volume is reduced to 0.6 in linear volume
-
-            if (engulfAudio.Volume < 0.6f)
-            {
-                engulfAudio.Volume += delta;
-            }
-            else if (engulfAudio.Volume >= 0.6f)
-            {
-                engulfAudio.Volume = 0.6f;
-            }
-
-            // Flash the membrane blue.
-            Flash(1, new Color(0.2f, 0.5f, 1.0f, 0.5f));
-        }
-        else
-        {
-            if (engulfAudio.Playing && engulfAudio.Volume > 0)
-            {
-                engulfAudio.Volume -= delta;
-
-                if (engulfAudio.Volume <= 0)
-                    engulfAudio.Stop();
-            }
-        }
+        HandleEngulfFeedback(delta);
 
         // Movement modifier
         if (State == MicrobeState.Engulf)
@@ -1435,12 +1404,13 @@ public partial class Microbe
 
         if (Membrane.DissolveEffectValue >= 1)
         {
-            if (PeerId.HasValue && !networkedDeathInvoked && OnNetworkedDeathCompletes != null)
+            if (PeerId.HasValue && !networkDeathInvoked && OnNetworkDeathFinished != null)
             {
-                OnNetworkedDeathCompletes.Invoke(PeerId.Value);
+                OnNetworkDeathFinished.Invoke(PeerId.Value);
 
-                // TODO: RPCs don't work well for immediate loop breaks like this
-                networkedDeathInvoked = true;
+                // I assumed RPCs don't work very well as a loop breaker
+                // TODO: Check if it still breaks without this
+                networkDeathInvoked = true;
             }
             else
             {
@@ -1876,6 +1846,40 @@ public partial class Microbe
             expelled.TimeElapsedSinceEjection += delta;
 
         expelledObjects.RemoveAll(e => e.TimeElapsedSinceEjection >= Constants.ENGULF_EJECTED_COOLDOWN);
+    }
+
+    private void HandleEngulfFeedback(float delta)
+    {
+        // Play sound
+        if (State == MicrobeState.Engulf)
+        {
+            if (!engulfAudio.Playing)
+                engulfAudio.Play();
+
+            // To balance loudness, here the engulfment audio's max volume is reduced to 0.6 in linear volume
+
+            if (engulfAudio.Volume < 0.6f)
+            {
+                engulfAudio.Volume += delta;
+            }
+            else if (engulfAudio.Volume >= 0.6f)
+            {
+                engulfAudio.Volume = 0.6f;
+            }
+
+            // Flash the membrane blue.
+            Flash(1, new Color(0.2f, 0.5f, 1.0f, 0.5f));
+        }
+        else
+        {
+            if (engulfAudio.Playing && engulfAudio.Volume > 0)
+            {
+                engulfAudio.Volume -= delta;
+
+                if (engulfAudio.Volume <= 0)
+                    engulfAudio.Stop();
+            }
+        }
     }
 
     private void CompleteIngestion(EngulfedObject engulfed)
