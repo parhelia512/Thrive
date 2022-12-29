@@ -509,6 +509,8 @@
     <Compile Include="src\gui_common\KickPlayerDialog.cs" />
     <Compile Include="src\networking\NetworkPlayerStatus.cs" />
     <Compile Include="src\networking\NetworkPlayerVars.cs" />
+    <Compile Include="src\networking\PingBar.cs" />
+    <Compile Include="src\networking\RawPacketFlag.cs" />
     <Compile Include="src\networking\ServerSettings.cs" />
     <Compile Include="src\gui_common\NetworkPlayerLog.cs" />
     <Compile Include="src\networking\MultiplayerGUI.cs" />

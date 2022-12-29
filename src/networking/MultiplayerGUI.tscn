@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=1]
 [ext_resource path="res://src/networking/MultiplayerGUI.cs" type="Script" id=2]
@@ -13,6 +13,7 @@
 [ext_resource path="res://src/gui_common/fonts/Lato-Bold-Smaller.tres" type="DynamicFont" id=11]
 [ext_resource path="res://src/gui_common/fonts/Jura-Regular-Small.tres" type="DynamicFont" id=12]
 [ext_resource path="res://src/gui_common/CustomRichTextLabel.tscn" type="PackedScene" id=13]
+[ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Small.tres" type="DynamicFont" id=14]
 
 [sub_resource type="ButtonGroup" id=1]
 
@@ -34,8 +35,9 @@ GameModeTitlePath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContaine
 GameModeDescriptionPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context/MarginContainer/VBoxContainer/GameModeDescription")
 PlayerListTabPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/NetPlayerList")
 GameInfoTabPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Context")
-PlayerListTabButtonPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs/PlayerList")
-GameInfoTabButtonPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs/GameInfo")
+PlayerListTabButtonPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/Toolbox/PlayerList")
+GameInfoTabButtonPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/Toolbox/GameInfo")
+LatencyLabelPath = NodePath("Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/Toolbox/Latency")
 NetworkedPlayerLabelScene = ExtResource( 6 )
 
 [node name="PrimaryMenu" type="VBoxContainer" parent="."]
@@ -224,11 +226,16 @@ margin_top = 5.0
 margin_right = 543.0
 margin_bottom = 443.0
 
-[node name="Tabs" type="HBoxContainer" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer"]
 margin_right = 538.0
 margin_bottom = 28.0
+custom_constants/margin_right = 5
 
-[node name="PlayerList" type="Button" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs"]
+[node name="Toolbox" type="HBoxContainer" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/MarginContainer"]
+margin_right = 533.0
+margin_bottom = 28.0
+
+[node name="PlayerList" type="Button" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/Toolbox"]
 margin_right = 91.0
 margin_bottom = 28.0
 custom_fonts/font = ExtResource( 12 )
@@ -238,7 +245,7 @@ action_mode = 0
 group = SubResource( 1 )
 text = "PLAYER_LIST"
 
-[node name="GameInfo" type="Button" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs"]
+[node name="GameInfo" type="Button" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/Toolbox"]
 margin_left = 95.0
 margin_right = 178.0
 margin_bottom = 28.0
@@ -247,6 +254,23 @@ toggle_mode = true
 action_mode = 0
 group = SubResource( 1 )
 text = "GAME_INFO"
+
+[node name="Spacer" type="Control" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/Toolbox"]
+margin_left = 182.0
+margin_right = 467.0
+margin_bottom = 28.0
+size_flags_horizontal = 3
+
+[node name="Latency" type="Label" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/Toolbox"]
+margin_left = 471.0
+margin_top = 5.0
+margin_right = 533.0
+margin_bottom = 23.0
+custom_fonts/font = ExtResource( 14 )
+text = "PING_N/A"
+__meta__ = {
+"_editor_description_": "PLACEHOLDER"
+}
 
 [node name="NetPlayerList" parent="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer" instance=ExtResource( 5 )]
 margin_top = 32.0
@@ -405,8 +429,8 @@ margin_bottom = 360.0
 [connection signal="pressed" from="PrimaryMenu/HBoxContainer2/Back" to="." method="OnBackPressed"]
 [connection signal="pressed" from="PrimaryMenu/HBoxContainer2/Host" to="." method="OnCreatePressed"]
 [connection signal="pressed" from="PrimaryMenu/HBoxContainer2/Connect" to="." method="OnConnectPressed"]
-[connection signal="pressed" from="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs/PlayerList" to="." method="OnLobbyTabPressed" binds= [ "PlayerList" ]]
-[connection signal="pressed" from="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/Tabs/GameInfo" to="." method="OnLobbyTabPressed" binds= [ "GameInfo" ]]
+[connection signal="pressed" from="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/Toolbox/PlayerList" to="." method="OnLobbyTabPressed" binds= [ "PlayerList" ]]
+[connection signal="pressed" from="Lobby/HBoxContainer2/PanelContainer/MarginContainer/VBoxContainer/MarginContainer/Toolbox/GameInfo" to="." method="OnLobbyTabPressed" binds= [ "GameInfo" ]]
 [connection signal="pressed" from="Lobby/HBoxContainer/Disconnect" to="." method="OnDisconnectPressed"]
 [connection signal="pressed" from="Lobby/HBoxContainer/Start" to="." method="OnStartPressed"]
 [connection signal="toggled" from="Lobby/HBoxContainer/Start" to="." method="OnReadyToggled"]

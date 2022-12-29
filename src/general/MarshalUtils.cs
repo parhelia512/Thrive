@@ -3,6 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+/// <summary>
+///   Helper functions for marshalling types and byte encodings.
+/// </summary>
 public static class MarshalUtils
 {
     [StructLayout(LayoutKind.Explicit)]

@@ -51,6 +51,9 @@ public class MultiplayerGUI : CenterContainer
     public NodePath GameInfoTabButtonPath = null!;
 
     [Export]
+    public NodePath LatencyLabelPath = null!;
+
+    [Export]
     public PackedScene NetworkedPlayerLabelScene = null!;
 
     private readonly string[] ellipsisAnimationSequence = { " ", " .", " ..", " ..." };
@@ -69,6 +72,7 @@ public class MultiplayerGUI : CenterContainer
     private Label serverAttributes = null!;
     private Label gameModeTitle = null!;
     private CustomRichTextLabel gameModeDescription = null!;
+    private Label latency = null!;
 
     private Control primaryMenu = null!;
     private Control lobbyMenu = null!;
@@ -130,6 +134,7 @@ public class MultiplayerGUI : CenterContainer
         gameInfoTab = GetNode<Control>(GameInfoTabPath);
         playerListTabButton = GetNode<Button>(PlayerListTabButtonPath);
         gameInfoTabButton = GetNode<Button>(GameInfoTabButtonPath);
+        latency = GetNode<Label>(LatencyLabelPath);
 
         generalDialog = GetNode<CustomConfirmationDialog>("GeneralDialog");
         loadingDialog = GetNode<CustomConfirmationDialog>("LoadingDialog");
@@ -148,11 +153,13 @@ public class MultiplayerGUI : CenterContainer
             nameof(NetworkManager.ReadyForSessionReceived), this, nameof(UpdateReadyStatus));
         NetworkManager.Instance.Connect(
             nameof(NetworkManager.UpnpCallResultReceived), this, nameof(OnUPNPCallResultReceived));
+        NetworkManager.Instance.Connect(nameof(NetworkManager.LatencyUpdated), this, nameof(OnLatencyUpdated));
 
         ApplySubMenu();
         ApplyLobbyTab();
         ResetFields();
         ValidateFields();
+        OnLatencyUpdated(NetworkManager.Instance.LocalPlayer?.Latency ?? 0);
     }
 
     public override void _Process(float delta)
@@ -545,7 +552,7 @@ public class MultiplayerGUI : CenterContainer
     {
         switch (step)
         {
-            case NetworkManager.UpnpJobStep.Setup:
+            case NetworkManager.UpnpJobStep.Discovery:
             {
                 if (result != UPNP.UPNPResult.Success)
                 {
@@ -586,5 +593,10 @@ public class MultiplayerGUI : CenterContainer
                 break;
             }
         }
+    }
+
+    private void OnLatencyUpdated(int miliseconds)
+    {
+        latency.Text = TranslationServer.Translate("PING_VALUE_MILISECONDS").FormatSafe(miliseconds);
     }
 }

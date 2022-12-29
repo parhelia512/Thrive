@@ -18,6 +18,11 @@ public class PackedBytesBuffer
         buffer = new();
     }
 
+    public PackedBytesBuffer(int size)
+    {
+        buffer = new(size);
+    }
+
     public PackedBytesBuffer(byte[] buffer)
     {
         this.buffer = new(buffer);
@@ -44,7 +49,7 @@ public class PackedBytesBuffer
     }
 
     /// <summary>
-    ///   Returns the internal buffer's size.
+    ///   Returns the internal buffer's byte count.
     /// </summary>
     public int Length => buffer.Count;
 

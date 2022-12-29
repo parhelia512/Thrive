@@ -1,5 +1,8 @@
 using System.Collections.Generic;
 
+/// <summary>
+///   Network serializable variables.
+/// </summary>
 public class Vars : INetworkSerializable
 {
     /// <summary>

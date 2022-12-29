@@ -1,5 +1,8 @@
 ﻿using Godot;
 
+/// <summary>
+///   The visually barebones version of <see cref="ChatBox"/> containing only texts without panels.
+/// </summary>
 public class ChatBoxUndecorated : ChatBox
 {
     private Label namePrefix = null!;

@@ -1,7 +1,7 @@
 ﻿using Godot;
 
 /// <summary>
-///   Describes player information in relation to the connected server.
+///   Describes player information in relation to the connected server (and should be shared to other peers).
 /// </summary>
 public class NetworkPlayerInfo : Vars
 {
@@ -10,6 +10,12 @@ public class NetworkPlayerInfo : Vars
     public NetworkPlayerStatus Status { get; set; } = NetworkPlayerStatus.Lobby;
 
     public bool ReadyForSession { get; set; }
+
+    /// <summary>
+    ///   The average approximate round trip time it takes for a packet transmitted from the server (in this case a
+    ///   ping/pong packet) to get to the client and back.
+    /// </summary>
+    public int Latency { get; set; }
 
     public override void NetworkSerialize(PackedBytesBuffer buffer)
     {

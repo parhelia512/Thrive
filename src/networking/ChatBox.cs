@@ -1,6 +1,9 @@
 ﻿using System.Text;
 using Godot;
 
+/// <summary>
+///   A simple chatting control for multiplayer, fully decorated (with panels).
+/// </summary>
 public class ChatBox : VBoxContainer
 {
     [Export]

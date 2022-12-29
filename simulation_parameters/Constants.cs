@@ -1121,6 +1121,9 @@ public static class Constants
     public const float DEFAULT_SERVER_TIME_STEP_SECONDS = 0.1f;
     public const float DEFAULT_CLIENT_TIME_STEP_SECONDS = 0.1f;
 
+    public const ulong NETWORK_PING_INTERVAL_MILISECONDS = 3000;
+    public const ulong NETWORK_PING_TIMEOUT_MILISECONDS = 5000;
+
     public const float MICROBIAL_ARENA_CLOUD_SPAWN_AMOUNT_SCALE_FACTOR = 0.003f;
 
     /// <summary>
