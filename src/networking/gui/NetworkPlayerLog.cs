@@ -25,12 +25,16 @@ public class NetworkPlayerLog : PanelContainer
     [Export]
     public NodePath SpacerPath = null!;
 
+    [Export]
+    public NodePath PingBarPath = null!;
+
     private CustomRichTextLabel? nameLabel;
     private Label scoreLabel = null!;
     private Label killsLabel = null!;
     private Label deathsLabel = null!;
     private Button kickButton = null!;
     private Control spacer = null!;
+    private PingBar pingBar = null!;
 
     private string playerName = string.Empty;
     private bool highlight;
@@ -38,7 +42,7 @@ public class NetworkPlayerLog : PanelContainer
     [Signal]
     public delegate void KickRequested(int id);
 
-    public int ID { get; set; } = -1;
+    public int PeerID { get; set; } = -1;
 
     public string PlayerName
     {
@@ -73,9 +77,12 @@ public class NetworkPlayerLog : PanelContainer
         deathsLabel = GetNode<Label>(DeathsPath);
         kickButton = GetNode<Button>(KickButtonPath);
         spacer = GetNode<Control>(SpacerPath);
+        pingBar = GetNode<PingBar>(PingBarPath);
 
         NetworkManager.Instance.Connect(
             nameof(NetworkManager.PlayerStatusChanged), this, nameof(OnPlayerStatusChanged));
+
+        pingBar.PeerId = PeerID;
 
         UpdateName();
         UpdateKickButton();
@@ -84,7 +91,7 @@ public class NetworkPlayerLog : PanelContainer
 
     public override void _Process(float delta)
     {
-        var info = NetworkManager.Instance.GetPlayerInfo(ID);
+        var info = NetworkManager.Instance.GetPlayerInfo(PeerID);
         if (info == null)
             return;
 
@@ -104,9 +111,16 @@ public class NetworkPlayerLog : PanelContainer
 
         var builder = new StringBuilder(50);
 
-        builder.Append(PlayerName);
+        if (PeerID == NetworkManager.DEFAULT_SERVER_ID)
+        {
+            builder.Append($"[color=#fe82ff]{PlayerName}[/color]");
+        }
+        else
+        {
+            builder.Append(PlayerName);
+        }
 
-        if (ID == NetworkManager.DEFAULT_SERVER_ID)
+        if (PeerID == NetworkManager.DEFAULT_SERVER_ID)
         {
             builder.Append(' ');
             builder.Append(TranslationServer.Translate("PLAYER_LOG_HOST_ATTRIBUTE"));
@@ -114,7 +128,7 @@ public class NetworkPlayerLog : PanelContainer
 
         var network = NetworkManager.Instance;
 
-        var player = network.GetPlayerInfo(ID);
+        var player = network.GetPlayerInfo(PeerID);
         if (player != null && player.Status != network.LocalPlayer?.Status)
         {
             builder.Append(' ');
@@ -126,7 +140,7 @@ public class NetworkPlayerLog : PanelContainer
 
     private void UpdateKickButton()
     {
-        kickButton.Visible = NetworkManager.Instance.IsAuthoritative && ID != NetworkManager.Instance.PeerId;
+        kickButton.Visible = NetworkManager.Instance.IsAuthoritative && PeerID != NetworkManager.Instance.PeerId;
         spacer.Visible = !kickButton.Visible;
     }
 
@@ -147,6 +161,6 @@ public class NetworkPlayerLog : PanelContainer
     private void OnKickPressed()
     {
         GUICommon.Instance.PlayButtonPressSound();
-        EmitSignal(nameof(KickRequested), ID);
+        EmitSignal(nameof(KickRequested), PeerID);
     }
 }

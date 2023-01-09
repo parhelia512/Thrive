@@ -1,9 +1,10 @@
+using System.Collections.Generic;
 using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
 ///   Wraps a boilerplate implementation for syncing the position and rotation of a Rigidbody, with the option
-///   of choosing which axes to sync to maximize bandwidth usage.
+///   of choosing which axes to sync to minimize bandwidth usage.
 /// </summary>
 public abstract class NetworkRigidBody : RigidBody, INetworkEntity
 {
@@ -25,7 +26,10 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
     [Export]
     public bool SyncAngularZAxis = true;
 
-    private Tween? tween;
+    protected Queue<StateSnapshot> stateBuffer = new();
+    protected float lerpTimer;
+
+    private StateSnapshot? fromState;
 
     [JsonIgnore]
     public Spatial EntityNode => this;
@@ -37,8 +41,12 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
 
     public uint NetworkEntityId { get; set; }
 
-    public virtual void NetworkTick(float delta)
+    public override void _PhysicsProcess(float delta)
     {
+        if (!NetworkManager.Instance.IsClient)
+            return;
+
+        ProcessBufferedStates(delta);
     }
 
     public virtual void NetworkSerialize(PackedBytesBuffer buffer)
@@ -98,34 +106,67 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
         if (bools.ToBoolean(5))
             zRot = buffer.ReadSingle();
 
-        var position = new Vector3(xPos, yPos, zPos);
-        var rotation = new Vector3(xRot, yRot, zRot);
-
-        if (tween == null)
+        stateBuffer.Enqueue(new StateSnapshot
         {
-            tween = new Tween();
-            AddChild(tween);
-        }
-
-        tween.InterpolateProperty(this, "global_translation", null, position, 0.1f);
-        tween.Start();
-
-        // Tweening rotation results in a very weird rotation
-        GlobalRotation = rotation;
+            Position = new Vector3(xPos, yPos, zPos),
+            Rotation = new Quat(new Vector3(xRot, yRot, zRot)),
+        });
     }
 
     public virtual void PackSpawnState(PackedBytesBuffer buffer)
     {
-        buffer.WriteVariant(GlobalTranslation);
+        buffer.Write(GlobalTranslation.x);
+        buffer.Write(GlobalTranslation.y);
+        buffer.Write(GlobalTranslation.z);
     }
 
-    public virtual void OnNetworkSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
+    public virtual void OnRemoteSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
     {
-        Translation = (Vector3)buffer.ReadVariant();
+        Translation = new Vector3(buffer.ReadSingle(), buffer.ReadSingle(), buffer.ReadSingle());
     }
 
     public virtual void OnDestroyed()
     {
         AliveMarker.Alive = false;
+    }
+
+    protected virtual void ProcessBufferedStates(float delta)
+    {
+        lerpTimer += delta;
+
+        var timestep = NetworkManager.Instance.Settings!.TimeStep;
+
+        if (lerpTimer > timestep)
+        {
+            lerpTimer -= timestep;
+
+            if (stateBuffer.Count > 1)
+                fromState = stateBuffer.Dequeue();
+        }
+
+        if (stateBuffer.Count <= 0 || !fromState.HasValue)
+            return;
+
+        var toState = stateBuffer.Peek();
+
+        if (timestep <= 0)
+        {
+            GlobalTransform = new Transform(toState.Rotation, toState.Position);
+        }
+        else
+        {
+            var weight = lerpTimer / timestep;
+
+            var position = fromState.Value.Position.LinearInterpolate(toState.Position, weight);
+            var rotation = fromState.Value.Rotation.Slerp(toState.Rotation, weight);
+
+            GlobalTransform = new Transform(rotation, position);
+        }
+    }
+
+    public struct StateSnapshot
+    {
+        public Vector3 Position;
+        public Quat Rotation;
     }
 }

@@ -1,10 +1,10 @@
 [gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=1]
-[ext_resource path="res://src/gui_common/NetworkPlayerList.cs" type="Script" id=2]
-[ext_resource path="res://src/gui_common/NetworkPlayerLog.tscn" type="PackedScene" id=3]
+[ext_resource path="res://src/networking/gui/NetworkPlayerList.cs" type="Script" id=2]
+[ext_resource path="res://src/networking/gui/NetworkPlayerLog.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Small.tres" type="DynamicFont" id=4]
-[ext_resource path="res://src/gui_common/KickPlayerDialog.tscn" type="PackedScene" id=5]
+[ext_resource path="res://src/networking/gui/KickPlayerDialog.tscn" type="PackedScene" id=5]
 [ext_resource path="res://assets/textures/gui/bevel/extinctionLocal.png" type="Texture" id=6]
 [ext_resource path="res://assets/textures/gui/bevel/SuicideIcon.png" type="Texture" id=7]
 [ext_resource path="res://assets/textures/gui/bevel/popUp.png" type="Texture" id=8]

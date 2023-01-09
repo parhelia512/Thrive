@@ -12,8 +12,8 @@ public class NetworkPlayerInfo : Vars
     public bool ReadyForSession { get; set; }
 
     /// <summary>
-    ///   The average approximate round trip time it takes for a packet transmitted from the server (in this case a
-    ///   ping/pong packet) to get to the client and back.
+    ///   The average approximate round trip time it takes for a packet to be transmitted from the server (in this case
+    ///   a ping/pong packet) to the client and back in miliseconds.
     /// </summary>
     public int Latency { get; set; }
 
@@ -24,6 +24,7 @@ public class NetworkPlayerInfo : Vars
         buffer.Write(Name);
         buffer.Write((byte)Status);
         buffer.Write(ReadyForSession);
+        buffer.Write((ushort)Latency);
     }
 
     public override void NetworkDeserialize(PackedBytesBuffer buffer)
@@ -33,6 +34,7 @@ public class NetworkPlayerInfo : Vars
         Name = buffer.ReadString();
         Status = (NetworkPlayerStatus)buffer.ReadByte();
         ReadyForSession = buffer.ReadBoolean();
+        Latency = buffer.ReadUInt16();
     }
 
     public string GetStatusReadable()

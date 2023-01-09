@@ -59,7 +59,7 @@ public class AgentProjectile : NetworkRigidBody, ITimedLife
         buffer.Write(Properties!.Species.ID);
     }
 
-    public override void OnNetworkSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
+    public override void OnRemoteSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
     {
         TimeToLiveRemaining = buffer.ReadSingle();
         Amount = buffer.ReadSingle();
@@ -90,7 +90,7 @@ public class AgentProjectile : NetworkRigidBody, ITimedLife
             return;
 
         int? peerId = null;
-        if (Emitter.Value is INetworkPlayer netPlayer)
+        if (Emitter.Value is NetworkCharacter netPlayer)
             peerId = netPlayer.PeerId;
 
         Invoke.Instance.Perform(

@@ -318,7 +318,7 @@ public abstract class Species : ICloneable, INetworkSerializable
 
         buffer.Write(Genus);
         buffer.Write(Epithet);
-        buffer.WriteVariant(Colour);
+        buffer.Write(Colour.ToRgba32());
         buffer.Write(Population);
         buffer.Write(Generation);
         buffer.Write(ID);
@@ -335,7 +335,7 @@ public abstract class Species : ICloneable, INetworkSerializable
 
         Genus = buffer.ReadString();
         Epithet = buffer.ReadString();
-        Colour = (Color)buffer.ReadVariant();
+        Colour = new Color(buffer.ReadInt32());
         Population = buffer.ReadInt64();
         Generation = buffer.ReadInt32();
         ID = buffer.ReadUInt32();

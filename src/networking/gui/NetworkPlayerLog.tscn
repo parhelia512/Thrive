@@ -1,12 +1,12 @@
 [gd_scene load_steps=13 format=2]
 
-[ext_resource path="res://src/gui_common/NetworkPlayerLog.cs" type="Script" id=1]
+[ext_resource path="res://src/networking/gui/NetworkPlayerLog.cs" type="Script" id=1]
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=2]
 [ext_resource path="res://assets/textures/gui/bevel/graphMarkerCross.png" type="Texture" id=3]
 [ext_resource path="res://src/gui_common/CustomRichTextLabel.tscn" type="PackedScene" id=4]
 [ext_resource path="res://src/gui_common/fonts/EmptyFont.tres" type="DynamicFont" id=5]
 [ext_resource path="res://src/gui_common/fonts/Lato-Regular-AlmostTiny.tres" type="DynamicFont" id=6]
-[ext_resource path="res://src/networking/PingBar.tscn" type="PackedScene" id=7]
+[ext_resource path="res://src/networking/gui/PingBar.tscn" type="PackedScene" id=7]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0, 0, 0, 0.392157 )
@@ -48,6 +48,7 @@ DeathsPath = NodePath("HBoxContainer/Deaths")
 KickButtonPath = NodePath("HBoxContainer/KickButton")
 CrossPath = NodePath("HBoxContainer/KickButton/Cross")
 SpacerPath = NodePath("HBoxContainer/Spacer")
+PingBarPath = NodePath("HBoxContainer/MarginContainer2/PingBar")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
 margin_right = 417.0
@@ -125,6 +126,7 @@ margin_left = 355.0
 margin_right = 388.0
 margin_bottom = 29.0
 rect_min_size = Vector2( 33, 0 )
+hint_tooltip = "KICK"
 focus_mode = 0
 size_flags_horizontal = 0
 size_flags_vertical = 3

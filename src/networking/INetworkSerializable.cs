@@ -1,7 +1,7 @@
 /// <summary>
 ///   Specifies objects whose values can be transmitted across the network.
 /// </summary>
-public interface INetworkSerializable 
+public interface INetworkSerializable
 {
     /// <summary>
     ///   Packs informations/properties about the object as bytes to be sent across the network.
@@ -9,7 +9,7 @@ public interface INetworkSerializable
     public void NetworkSerialize(PackedBytesBuffer buffer);
 
     /// <summary>
-    ///   Unpacks informations/properties about the object sent from the network.
+    ///   Unpacks incoming informations/properties about the object.
     /// </summary>
     public void NetworkDeserialize(PackedBytesBuffer buffer);
 }

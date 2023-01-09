@@ -12,8 +12,6 @@ using Array = Godot.Collections.Array;
 /// </summary>
 public partial class Microbe
 {
-    public bool WantsToEngulf;
-
     // private SphereShape pseudopodRangeSphereShape = null!;
 
     /// <summary>
@@ -410,8 +408,8 @@ public partial class Microbe
             Hitpoints = 0.0f;
             Kill();
 
-            if (Dead && attackerPeerId.HasValue && PeerId.HasValue)
-                OnKilledByAnotherPlayer?.Invoke(attackerPeerId.Value, PeerId.Value, source);
+            if (Dead && attackerPeerId.HasValue && NetworkManager.Instance.IsNetworked)
+                OnKilledByAnotherPlayer?.Invoke(attackerPeerId.Value, PeerId, source);
         }
     }
 
@@ -1295,15 +1293,6 @@ public partial class Microbe
             return;
         }
 
-        if (Membrane.Type.CellWall || !WantsToEngulf)
-        {
-            State = MicrobeState.Normal;
-        }
-        else if (WantsToEngulf)
-        {
-            state = MicrobeState.Engulf;
-        }
-
         if (State == MicrobeState.Engulf)
         {
             // Drain atp
@@ -1404,9 +1393,9 @@ public partial class Microbe
 
         if (Membrane.DissolveEffectValue >= 1)
         {
-            if (PeerId.HasValue && !networkDeathInvoked && OnNetworkDeathFinished != null)
+            if (NetworkManager.Instance.IsNetworked && !networkDeathInvoked && OnNetworkDeathFinished != null)
             {
-                OnNetworkDeathFinished.Invoke(PeerId.Value);
+                OnNetworkDeathFinished.Invoke(PeerId);
 
                 // I assumed RPCs don't work very well as a loop breaker
                 // TODO: Check if it still breaks without this

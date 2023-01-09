@@ -401,7 +401,7 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
         {
             !string.IsNullOrEmpty(Name),
             !string.IsNullOrEmpty(ModelNodePath),
-            !string.IsNullOrEmpty(AnimationPath)
+            !string.IsNullOrEmpty(AnimationPath),
         };
         buffer.Write(bools.ToByte());
 
@@ -422,9 +422,9 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
         }
     }
 
-    public override void OnNetworkSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
+    public override void OnRemoteSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
     {
-        base.OnNetworkSpawn(buffer, currentGame);
+        base.OnRemoteSpawn(buffer, currentGame);
 
         GraphicsScene = GD.Load<PackedScene>(buffer.ReadString());
 

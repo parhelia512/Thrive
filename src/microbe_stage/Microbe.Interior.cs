@@ -1576,8 +1576,8 @@ public partial class Microbe
                 // Microbe is beyond repair, might as well consider it as dead
                 Kill();
 
-                if (PeerId.HasValue)
-                    OnNetworkDeathFinished?.Invoke(PeerId.Value);
+                if (NetworkManager.Instance.IsNetworked)
+                    OnNetworkDeathFinished?.Invoke(PeerId);
 
                 if (IsPlayerMicrobe)
                 {
@@ -1590,8 +1590,8 @@ public partial class Microbe
                 if (hostile == null)
                     return;
 
-                if (PeerId.HasValue && hostile.PeerId.HasValue)
-                    OnKilledByAnotherPlayer?.Invoke(hostile.PeerId.Value, PeerId.Value, "engulf");
+                if (NetworkManager.Instance.IsNetworked)
+                    OnKilledByAnotherPlayer?.Invoke(hostile.PeerId, PeerId, "engulf");
 
                 // Transfer ownership of all the objects we engulfed to our engulfer
                 foreach (var other in engulfedObjects.ToList())

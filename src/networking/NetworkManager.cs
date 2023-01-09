@@ -7,7 +7,7 @@ using Nito.Collections;
 using Array = Godot.Collections.Array;
 
 /// <summary>
-///   Manages online game sessions.
+///   Manages high-level multiplayer mechanisms and provides support for online game sessions.
 /// </summary>
 public class NetworkManager : Node
 {
@@ -64,7 +64,7 @@ public class NetworkManager : Node
     public delegate void PlayerStatusChanged(int peerId, NetworkPlayerStatus status);
 
     [Signal]
-    public delegate void LatencyUpdated(int miliseconds);
+    public delegate void LatencyUpdated(int peerId, int miliseconds);
 
     public event EventHandler<float>? NetworkTick;
 
@@ -89,7 +89,8 @@ public class NetworkManager : Node
         NetworkedMultiplayerPeer.ConnectionStatus.Disconnected;
 
     /// <summary>
-    ///   The delay between every update, i.e. how many times per second the server/client sends data but not receive.
+    ///   The delay between every update, i.e. how many times per second the server's game state data is sent if we are
+    ///   the server or the input data if we are the client.
     /// </summary>
     public float TimeStep
     {
@@ -101,38 +102,45 @@ public class NetworkManager : Node
 
             timeStep = value;
 
-            var message = IsAuthoritative ?
-                TranslationServer.Translate("SERVER_TIME_STEP_CHANGED") :
-                TranslationServer.Translate("CLIENT_TIME_STEP_CHANGED");
-            SystemChatNotification(message);
+            if (IsAuthoritative)
+            {
+                Rpc(nameof(NotifyServerTimeStepChange), timeStep);
+            }
+            else if (IsClient)
+            {
+                SystemChatNotification(TranslationServer.Translate("CLIENT_TIME_STEP_CHANGED"));
+            }
         }
     }
 
     public float TimePassedConnecting { get; private set; }
 
-    public int? PeerId { get; private set; }
+    public int PeerId { get; private set; }
 
     /// <summary>
-    ///   Returns true if we are a peer in a network.
+    ///   Returns true if we are a peer in a network (in multiplayer mode).
     /// </summary>
-    public bool IsNetworked => PeerId.HasValue && Status == NetworkedMultiplayerPeer.ConnectionStatus.Connected;
+    public bool IsNetworked => peer != null;
 
     /// <summary>
     ///   All peers connected in the network (INCLUDING SELF), stored by network ID.
     /// </summary>
     public IReadOnlyDictionary<int, NetworkPlayerInfo> ConnectedPlayers => connectedPlayers;
 
-    public NetworkPlayerInfo? LocalPlayer => PeerId.HasValue ? GetPlayerInfo(PeerId.Value) : null;
+    public NetworkPlayerInfo? LocalPlayer => IsNetworked ? GetPlayerInfo(PeerId) : null;
 
     public IReadOnlyList<string> ChatHistory => chatHistory;
 
-    public bool IsServer { get; private set; }
+    public bool IsServer => PeerId == DEFAULT_SERVER_ID;
 
-    public bool IsDedicated => IsServer && !HasPlayer(1);
+    /// <summary>
+    ///   Dedicated server has no player set.
+    /// </summary>
+    public bool IsDedicated => IsServer && !HasPlayer(DEFAULT_SERVER_ID);
 
-    public bool IsAuthoritative => PeerId.HasValue && IsServer && IsNetworkMaster();
+    public bool IsAuthoritative => IsNetworked && IsServer && IsNetworkMaster();
 
-    public bool IsClient => PeerId.HasValue && !IsServer && !IsNetworkMaster();
+    public bool IsClient => IsNetworked && !IsServer && !IsNetworkMaster();
 
     [PuppetSync]
     public bool GameInSession { get; private set; }
@@ -169,10 +177,10 @@ public class NetworkManager : Node
 
     public override void _Process(float delta)
     {
-        if (peer == null)
+        if (!IsNetworked)
             return;
 
-        if (peer.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connecting)
+        if (peer!.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connecting)
         {
             TimePassedConnecting += delta;
         }
@@ -221,9 +229,10 @@ public class NetworkManager : Node
 
         Settings = settings;
 
-        GetTree().NetworkPeer = peer;
+        // Could have just set this to 1 but juuust in case
+        PeerId = peer.GetUniqueId();
 
-        IsServer = true;
+        GetTree().NetworkPeer = peer;
 
         Print("Created server with the following settings ", settings);
 
@@ -275,8 +284,6 @@ public class NetworkManager : Node
 
         GetTree().NetworkPeer = peer;
 
-        IsServer = false;
-
         return result;
     }
 
@@ -291,7 +298,6 @@ public class NetworkManager : Node
         connectedPlayers.Clear();
         GameInSession = false;
         elapsedGameTime = 0;
-        PeerId = null;
         Settings = null;
 
         ClearChatHistory();
@@ -393,7 +399,7 @@ public class NetworkManager : Node
     }
 
     /// <summary>
-    ///   Outputs a chat with the sender marked as system to the chat history.
+    ///   Outputs a chat with the sender marked as "system" to the chat history.
     /// </summary>
     public void SystemChatNotification(string message)
     {
@@ -592,7 +598,7 @@ public class NetworkManager : Node
             roundTripTime :
             (ulong)((ping.AverageRoundTripTime * 0.7f) + (roundTripTime * 0.3f));
 
-        Rpc(nameof(NotifyLatencyUpdate), fromId, (ushort)ping.AverageRoundTripTime);
+        Rpc(nameof(NotifyLatencyUpdate), fromId, (ushort)ping.AverageRoundTripTime / 2);
     }
 
     private void OnPeerConnected(int id)
@@ -645,7 +651,7 @@ public class NetworkManager : Node
         info.NetworkSerialize(packed);
 
         // TODO: some kind of authentication
-        RpcId(DEFAULT_SERVER_ID, nameof(NotifyPlayerConnected), PeerId.Value, packed.Data);
+        RpcId(DEFAULT_SERVER_ID, nameof(NotifyPlayerConnected), PeerId, packed.Data);
 
         TimePassedConnecting = 0;
     }
@@ -660,7 +666,6 @@ public class NetworkManager : Node
         connectedPlayers.Clear();
         GameInSession = false;
         elapsedGameTime = 0;
-        PeerId = null;
         Settings = null!;
 
         ClearChatHistory();
@@ -700,7 +705,7 @@ public class NetworkManager : Node
         if (IsAuthoritative && !GameInSession)
             Rset(nameof(GameInSession), true);
 
-        RpcId(DEFAULT_SERVER_ID, nameof(NotifyWorldReady), PeerId!.Value);
+        RpcId(DEFAULT_SERVER_ID, nameof(NotifyWorldReady), PeerId);
     }
 
     /// <summary>
@@ -878,6 +883,13 @@ public class NetworkManager : Node
     }
 
     [RemoteSync]
+    private void NotifyServerTimeStepChange(float timestep)
+    {
+        Settings!.TimeStep = timestep;
+        SystemChatNotification(TranslationServer.Translate("SERVER_TIME_STEP_CHANGED"));
+    }
+
+    [RemoteSync]
     private void NotifyLatencyUpdate(int peerId, ushort latency)
     {
         var info = GetPlayerInfo(peerId);
@@ -885,7 +897,7 @@ public class NetworkManager : Node
         if (info != null)
         {
             info.Latency = latency;
-            EmitSignal(nameof(LatencyUpdated), latency);
+            EmitSignal(nameof(LatencyUpdated), peerId, latency);
         }
     }
 
@@ -895,7 +907,7 @@ public class NetworkManager : Node
         if (Settings == null)
             return;
 
-        Rpc(nameof(NotifyWorldPreLoad), PeerId!.Value);
+        Rpc(nameof(NotifyWorldPreLoad), PeerId);
 
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.4f, () =>
         {
@@ -910,13 +922,13 @@ public class NetworkManager : Node
     [Remote]
     private void NotifyGameExit()
     {
-        Rpc(nameof(NotifyWorldPreExit), PeerId!.Value);
+        Rpc(nameof(NotifyWorldPreExit), PeerId);
 
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.3f, () =>
         {
             var menu = SceneManager.Instance.ReturnToMenu();
             menu.OpenMultiplayerMenu(MultiplayerGUI.SubMenu.Lobby);
-            Rpc(nameof(NotifyWorldPostExit), PeerId!.Value);
+            Rpc(nameof(NotifyWorldPostExit), PeerId);
         });
 
         elapsedGameTime = 0;

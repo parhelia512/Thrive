@@ -1,11 +1,12 @@
 [gd_scene load_steps=7 format=2]
 
-[ext_resource path="res://src/networking/ChatBox.cs" type="Script" id=1]
+[ext_resource path="res://src/networking/gui/ChatBox.cs" type="Script" id=1]
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=2]
 [ext_resource path="res://src/gui_common/CustomRichTextLabel.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/gui_common/fonts/Lato-Regular-AlmostTiny.tres" type="DynamicFont" id=5]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Tiny.tres" type="DynamicFont" id=6]
 [ext_resource path="res://src/gui_common/fonts/Lato-Bold-AlmostTiny.tres" type="DynamicFont" id=7]
+
 
 [node name="ChatBox" type="VBoxContainer"]
 anchor_top = 1.0

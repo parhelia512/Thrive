@@ -14,8 +14,7 @@ using Environment = System.Environment;
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/Microbe.tscn", UsesEarlyResolve = false)]
 [DeserializedCallbackTarget]
-public partial class Microbe : NetworkRigidBody, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable,
-    INetworkPlayer
+public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable
 {
     /// <summary>
     ///   The point towards which the microbe will move to point to
@@ -314,7 +313,7 @@ public partial class Microbe : NetworkRigidBody, ISpawned, IProcessable, IMicrob
     ///   Must be called when spawned to provide access to the needed systems
     /// </summary>
     public void Init(CompoundCloudSystem cloudSystem, ISpawnSystem spawnSystem, GameProperties currentGame,
-        bool isPlayer, int? peerId = null)
+        bool isPlayer)
     {
         this.cloudSystem = cloudSystem;
         this.spawnSystem = spawnSystem;
@@ -324,8 +323,6 @@ public partial class Microbe : NetworkRigidBody, ISpawned, IProcessable, IMicrob
         if (!isPlayer)
             ai = new MicrobeAI(this);
 
-        PeerId = peerId;
-
         random = new Random(randomSeed);
 
         // Needed for immediately applying the species
@@ -334,6 +331,8 @@ public partial class Microbe : NetworkRigidBody, ISpawned, IProcessable, IMicrob
 
     public override void _Ready()
     {
+        base._Ready();
+
         if (cloudSystem == null && !IsForPreviewOnly && !NetworkManager.Instance.IsNetworked)
         {
             throw new InvalidOperationException("Microbe not initialized");
@@ -367,7 +366,7 @@ public partial class Microbe : NetworkRigidBody, ISpawned, IProcessable, IMicrob
         cellBurstEffectScene = GD.Load<PackedScene>("res://src/microbe_stage/particles/CellBurstEffect.tscn");
         endosomeScene = GD.Load<PackedScene>("res://src/microbe_stage/Endosome.tscn");
 
-        bool localPlayer = PeerId == NetworkManager.Instance.PeerId || !PeerId.HasValue;
+        bool localPlayer = PeerId == NetworkManager.Instance.PeerId || !NetworkManager.Instance.IsNetworked;
 
         engulfAudio.Positional = movementAudio.Positional = bindingAudio.Positional = !IsPlayerMicrobe && localPlayer;
 
@@ -390,8 +389,6 @@ public partial class Microbe : NetworkRigidBody, ISpawned, IProcessable, IMicrob
 
             GD.Print("Player Microbe spawned");
         }
-
-        SetupNetworking();
 
         // pseudopodTarget = GetNode<MeshInstance>("PseudopodTarget");
         // var pseudopodRange = GetNode<Area>("PseudopodRange");
@@ -810,6 +807,8 @@ public partial class Microbe : NetworkRigidBody, ISpawned, IProcessable, IMicrob
 
     public override void _PhysicsProcess(float delta)
     {
+        base._PhysicsProcess(delta);
+
         linearAcceleration = (LinearVelocity - lastLinearVelocity) / delta;
 
         // Movement

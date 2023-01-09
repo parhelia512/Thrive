@@ -1,9 +1,28 @@
 ﻿using System;
+using System.Collections.Generic;
 using Godot;
 
-public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
+public class PlayerMicrobialArenaInput : MultiplayerInputBase<MicrobialArena, NetworkMicrobeInput>
 {
     private Random random = new();
+
+    private NetworkMicrobeInput cachedInput;
+
+    private Dictionary<int, NetworkMicrobeInput> serverInputs = new();
+
+    public override void _Process(float delta)
+    {
+        if (stage == null)
+            return;
+
+        foreach (var input in serverInputs)
+        {
+            if (!stage.TryGetPlayer(input.Key, out Microbe player))
+                continue;
+
+            RunInput(player, input.Value, delta);
+        }
+    }
 
     // TODO: when using controller movement this should be screen relative movement by default
     [RunOnAxis(new[] { "g_move_forward", "g_move_backwards" }, new[] { -1.0f, 1.0f })]
@@ -34,30 +53,34 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
             // work
             var direction = autoMove ? new Vector3(0, 0, -1) : movement.Normalized();
 
-            stage.Player.MovementDirection = direction;
-            stage.Player.LookAtPoint = stage.Camera.CursorWorldPos;
+            cachedInput.MovementDirection = direction;
+            cachedInput.LookAtPoint = stage.Camera.CursorWorldPos;
         }
     }
 
     [RunOnKeyDown("g_fire_toxin")]
     public void EmitToxin()
     {
-        stage!.Player?.QueueEmitToxin(SimulationParameters.Instance.GetCompound("oxytoxy"));
+        cachedInput.EmitToxin = true;
     }
 
-    [RunOnKey("g_secrete_slime")]
-    public void SecreteSlime(float delta)
+    [RunOnKeyDown("g_secrete_slime")]
+    public bool SecreteSlime()
     {
-        stage!.Player?.QueueSecreteSlime(delta);
+        cachedInput.SecreteSlime = true;
+        return false;
+    }
+
+    [RunOnKeyUp("g_secrete_slime")]
+    public void StopSecretingSlime()
+    {
+        cachedInput.SecreteSlime = false;
     }
 
     [RunOnKeyDown("g_toggle_engulf")]
     public void ToggleEngulf()
     {
-        if (stage!.Player == null)
-            return;
-
-        stage.Player.WantsToEngulf = !stage.Player.WantsToEngulf;
+        cachedInput.Engulf = !cachedInput.Engulf;
     }
 
     [RunOnKeyChange("g_toggle_scoreboard")]
@@ -108,9 +131,45 @@ public class PlayerMicrobialArenaInput : PlayerInputBase<MicrobialArena>
         }
     }
 
+    protected override NetworkMicrobeInput SampleInput()
+    {
+        var cached = cachedInput;
+
+        // Immediately reset the states for one-press inputs
+        cachedInput.EmitToxin = false;
+
+        return cached;
+    }
+
+    protected override void ApplyInput(int peerId, NetworkMicrobeInput input)
+    {
+        serverInputs[peerId] = input;
+    }
+
     private void SpawnCheatCloud(string name, float delta)
     {
         SpawnHelpers.SpawnCloud(stage!.Clouds, stage.Camera.CursorWorldPos,
             SimulationParameters.Instance.GetCompound(name), Constants.CLOUD_CHEAT_DENSITY * delta, random);
+    }
+
+    private void RunInput(Microbe player, NetworkMicrobeInput input, float delta)
+    {
+        player.LookAtPoint = input.LookAtPoint;
+        player.MovementDirection = input.MovementDirection;
+
+        if (input.EmitToxin)
+            player.QueueEmitToxin(SimulationParameters.Instance.GetCompound("oxytoxy"));
+
+        if (input.SecreteSlime)
+            player.QueueSecreteSlime(delta);
+
+        if (input.Engulf && !player.Membrane.Type.CellWall)
+        {
+            player.State = Microbe.MicrobeState.Engulf;
+        }
+        else if (!input.Engulf && player.State == Microbe.MicrobeState.Engulf)
+        {
+            player.State = Microbe.MicrobeState.Normal;
+        }
     }
 }

@@ -51,13 +51,13 @@ public static class SpawnHelpers
     public static Microbe SpawnMicrobe(Species species, Vector3 location,
         Node worldRoot, PackedScene microbeScene, bool aiControlled,
         CompoundCloudSystem cloudSystem, ISpawnSystem spawnSystem, GameProperties currentGame,
-        CellType? multicellularCellType = null, int? peerId = null)
+        CellType? multicellularCellType = null)
     {
         var microbe = (Microbe)microbeScene.Instance();
 
         // The second parameter is (isPlayer), and we assume that if the
         // cell is not AI controlled it is the player's cell
-        microbe.Init(cloudSystem, spawnSystem, currentGame, !aiControlled, peerId);
+        microbe.Init(cloudSystem, spawnSystem, currentGame, !aiControlled);
 
         worldRoot.AddChild(microbe);
         microbe.Translation = location;
@@ -86,9 +86,10 @@ public static class SpawnHelpers
     public static Microbe SpawnNetworkedMicrobe(int peerId, Species species, Vector3 location,
         Node worldRoot, CompoundCloudSystem cloudSystem, ISpawnSystem spawnSystem, GameProperties currentGame)
     {
-        var microbe = SpawnMicrobe(
-            species, location, worldRoot, LoadMicrobeScene(), false, cloudSystem, spawnSystem, currentGame,
-            null, peerId);
+        var microbe = SpawnMicrobe(species, location, worldRoot, LoadMicrobeScene(), false, cloudSystem, spawnSystem,
+            currentGame, null);
+
+        microbe.SetupNetworkCharacter(peerId);
 
         OnNetEntitySpawned?.Invoke(microbe);
 

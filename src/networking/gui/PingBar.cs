@@ -1,7 +1,7 @@
 using Godot;
 
 /// <summary>
-///   A UI element for displaying a peer's network delay (lag).
+///   A UI element displaying a peer's network delay (lag) in 4 levels from lowest to highest.
 /// </summary>
 public class PingBar : TextureRect
 {
@@ -10,6 +10,18 @@ public class PingBar : TextureRect
     private Texture level3 = null!;
     private Texture level4 = null!;
 
+    private int peerId;
+
+    public int PeerId
+    {
+        get => peerId;
+        set
+        {
+            peerId = value;
+            UpdateLevel();
+        }
+    }
+
     public override void _Ready()
     {
         level1 = GD.Load<Texture>("res://assets/textures/gui/bevel/pingBar1.png");
@@ -17,13 +29,16 @@ public class PingBar : TextureRect
         level3 = GD.Load<Texture>("res://assets/textures/gui/bevel/pingBar3.png");
         level4 = GD.Load<Texture>("res://assets/textures/gui/bevel/pingBar4.png");
 
-        NetworkManager.Instance.Connect(nameof(NetworkManager.LatencyUpdated), this, nameof(UpdateLevel));
+        NetworkManager.Instance.Connect(nameof(NetworkManager.LatencyUpdated), this, nameof(OnLatencyUpdated));
 
-        UpdateLevel(NetworkManager.Instance.LocalPlayer?.Latency ?? 0);
+        UpdateLevel();
     }
 
-    private void UpdateLevel(int miliseconds)
+    private void UpdateLevel(int? miliseconds = null)
     {
+        var player = NetworkManager.Instance.GetPlayerInfo(PeerId);
+        miliseconds ??= player?.Latency;
+
         if (miliseconds >= 0 && miliseconds <= 100)
         {
             Texture = level4;
@@ -42,5 +57,13 @@ public class PingBar : TextureRect
         }
 
         HintTooltip = TranslationServer.Translate("PING_VALUE_MILISECONDS").FormatSafe(miliseconds);
+    }
+
+    private void OnLatencyUpdated(int peerId, int miliseconds)
+    {
+        if (peerId != PeerId)
+            return;
+
+        UpdateLevel(miliseconds);
     }
 }

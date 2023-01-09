@@ -19,6 +19,9 @@ public class ServerSettings : INetworkSerializable
 
     public float SessionLength { get; set; } = Constants.MULTIPLAYER_DEFAULT_SESSION_LENGTH;
 
+    /// <inheritdoc cref="NetworkManager.TimeStep"/>
+    public float TimeStep { get; set; } = Constants.DEFAULT_SERVER_TIME_STEP_SECONDS;
+
     public bool UseUpnp { get; set; }
 
     public MultiplayerGameMode? SelectedGameMode { get; set; }
@@ -32,6 +35,7 @@ public class ServerSettings : INetworkSerializable
         buffer.Write(Port);
         buffer.Write(MaxPlayers);
         buffer.Write(SessionLength);
+        buffer.Write(TimeStep);
         buffer.Write(UseUpnp);
 
         var bools = new bool[2] { SelectedGameMode != null, GameModeSettings != null };
@@ -56,6 +60,7 @@ public class ServerSettings : INetworkSerializable
         Port = buffer.ReadInt32();
         MaxPlayers = buffer.ReadInt32();
         SessionLength = buffer.ReadSingle();
+        TimeStep = buffer.ReadSingle();
         UseUpnp = buffer.ReadBoolean();
 
         var bools = buffer.ReadByte();

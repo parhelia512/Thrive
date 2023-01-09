@@ -5,5 +5,8 @@
 /// </summary>
 public interface IMultiplayerStage : IStage
 {
+    /// <summary>
+    ///   Should be emitted when the multiplayer stage is done setting up.
+    /// </summary>
     public event EventHandler? GameReady;
 }

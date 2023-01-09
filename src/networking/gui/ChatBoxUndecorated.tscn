@@ -3,8 +3,9 @@
 [ext_resource path="res://src/gui_common/CustomRichTextLabel.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/gui_common/fonts/Lato-Bold-AlmostTiny.tres" type="DynamicFont" id=2]
 [ext_resource path="res://src/gui_common/fonts/Lato-Regular-AlmostTiny.tres" type="DynamicFont" id=3]
-[ext_resource path="res://src/networking/ChatBoxUndecorated.cs" type="Script" id=4]
+[ext_resource path="res://src/networking/gui/ChatBoxUndecorated.cs" type="Script" id=4]
 [ext_resource path="res://src/gui_common/fonts/Jura-DemiBold-Tiny.tres" type="DynamicFont" id=5]
+
 
 [sub_resource type="StyleBoxEmpty" id=1]
 

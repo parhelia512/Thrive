@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Linq;
 using Godot;
-using Newtonsoft.Json;
 
 /// <summary>
 ///   The networking part of Microbe class for state synchronizations.
@@ -15,13 +14,6 @@ public partial class Microbe
 
     private string? cloudSystemPath;
 
-    /// <summary>
-    ///   If set, will assume <see cref="SceneTree.HasNetworkPeer"/> is true and subsequently do network
-    ///   operations with the given value.
-    /// </summary>
-    [JsonProperty]
-    public int? PeerId { get; private set; }
-
     public MultiplayerGameWorld? MultiplayerGameWorld => GameWorld as MultiplayerGameWorld;
 
     public override string ResourcePath => "res://src/microbe_stage/Microbe.tscn";
@@ -30,9 +22,20 @@ public partial class Microbe
 
     public Action<int, int, string>? OnKilledByAnotherPlayer { get; set; }
 
-    public override void NetworkTick(float delta)
+    public override void SetupNetworkCharacter(int peerId)
     {
-        // TODO: Tag visibility handling
+        base.SetupNetworkCharacter(peerId);
+
+        Name = PeerId.ToString(CultureInfo.CurrentCulture);
+
+        if (PeerId != NetworkManager.Instance.PeerId)
+            InitNameTag();
+
+        Compounds.LockInputAndOutput = NetworkManager.Instance.IsClient;
+
+        // Kind of hackish I guess??
+        if (cloudSystemPath != null)
+            cloudSystem ??= GetNode<CompoundCloudSystem>(cloudSystemPath);
     }
 
     public override void NetworkSerialize(PackedBytesBuffer buffer)
@@ -61,6 +64,7 @@ public partial class Microbe
 
         buffer.Write(Hitpoints);
         buffer.Write((byte)State);
+        buffer.Write((byte)PhagocytosisStep);
         buffer.Write(DigestedAmount);
 
         var bools = new bool[2] { HostileEngulfer.Value != null, Dead };
@@ -93,6 +97,7 @@ public partial class Microbe
 
         Hitpoints = buffer.ReadSingle();
         State = (MicrobeState)buffer.ReadByte();
+        PhagocytosisStep = (PhagocytosisPhase)buffer.ReadByte();
         DigestedAmount = buffer.ReadSingle();
 
         var bools = buffer.ReadByte();
@@ -115,10 +120,6 @@ public partial class Microbe
             Flash(1.0f, new Color(1, 0, 0, 0.5f), 1);
 
         lastHitpoints = Hitpoints;
-
-        // Kind of hackish I guess??
-        if (cloudSystemPath != null)
-            cloudSystem ??= GetNode<CompoundCloudSystem>(cloudSystemPath);
     }
 
     public override void PackSpawnState(PackedBytesBuffer buffer)
@@ -126,10 +127,9 @@ public partial class Microbe
         base.PackSpawnState(buffer);
 
         buffer.Write(randomSeed);
-        buffer.Write(PeerId!.Value);
         buffer.Write(cloudSystem!.GetPath());
 
-        // Sending 2-byte unsigned int... means our max deserialized organelle count is 65535
+        // Sending 2-byte unsigned int... means our max deserialized organelle count will be 65535
         buffer.Write((ushort)organelles!.Count);
         foreach (var organelle in organelles!)
         {
@@ -141,19 +141,18 @@ public partial class Microbe
         buffer.Write(allOrganellesDivided);
     }
 
-    public override void OnNetworkSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
+    public override void OnRemoteSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
     {
-        base.OnNetworkSpawn(buffer, currentGame);
+        base.OnRemoteSpawn(buffer, currentGame);
 
         randomSeed = buffer.ReadInt32();
-        PeerId = buffer.ReadInt32();
         cloudSystemPath = buffer.ReadString();
 
         AddToGroup(Constants.AI_TAG_MICROBE);
         AddToGroup(Constants.PROCESS_GROUP);
         AddToGroup(Constants.RUNNABLE_MICROBE_GROUP);
 
-        Init(null!, null!, currentGame, true, PeerId);
+        Init(null!, null!, currentGame, true);
 
         var world = (MultiplayerGameWorld)currentGame.GameWorld;
         ApplySpecies(world.GetSpecies((uint)PeerId));
@@ -174,48 +173,9 @@ public partial class Microbe
         allOrganellesDivided = buffer.ReadBoolean();
     }
 
-    public void PackInputs(PackedBytesBuffer buffer)
-    {
-        buffer.Write(MovementDirection.x);
-        buffer.Write(MovementDirection.z);
-        buffer.Write(LookAtPoint.x);
-        buffer.Write(LookAtPoint.z);
-        buffer.Write(queuedSlimeSecretionTime);
-
-        var bools = new bool[1] { WantsToEngulf };
-        buffer.Write(bools.ToByte());
-
-        // TODO: Agent projectile shooting, preferably after proper client-to-server input implementation
-    }
-
-    public void OnNetworkInput(PackedBytesBuffer buffer)
-    {
-        MovementDirection.x = buffer.ReadSingle();
-        MovementDirection.z = buffer.ReadSingle();
-        LookAtPoint.x = buffer.ReadSingle();
-        LookAtPoint.z = buffer.ReadSingle();
-        queuedSlimeSecretionTime = buffer.ReadSingle();
-
-        var bools = buffer.ReadByte();
-        WantsToEngulf = bools.ToBoolean(0);
-    }
-
-    private void SetupNetworking()
-    {
-        if (!PeerId.HasValue)
-            return;
-
-        Name = PeerId.Value.ToString(CultureInfo.CurrentCulture);
-
-        if (PeerId.Value != NetworkManager.Instance.PeerId!.Value)
-            InitNameTag();
-
-        Compounds.LockInputAndOutput = NetworkManager.Instance.IsClient;
-    }
-
     private void InitNameTag()
     {
-        if (!PeerId.HasValue)
+        if (!NetworkManager.Instance.IsNetworked)
             return;
 
         tagBox = GetNode<MeshInstance>("TagBox");
@@ -226,7 +186,7 @@ public partial class Microbe
         var tag = tagBox.GetChild<Label3D>(0);
 
         tagBox.Visible = true;
-        tag.Text = NetworkManager.Instance.ConnectedPlayers[PeerId.Value].Name;
+        tag.Text = NetworkManager.Instance.ConnectedPlayers[PeerId].Name;
 
         tagBoxMesh.Size = tag.Font.GetStringSize(tag.Text) * tag.PixelSize * 1.2f;
         tagBoxMaterial.RenderPriority = RenderPriority + 1;

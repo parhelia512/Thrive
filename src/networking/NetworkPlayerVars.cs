@@ -4,6 +4,9 @@
 /// </summary>
 public class NetworkPlayerVars : Vars
 {
+    /// <summary>
+    ///   The network entity id for this player's character.
+    /// </summary>
     public uint EntityId { get; set; }
 
     public override void NetworkSerialize(PackedBytesBuffer buffer)

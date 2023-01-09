@@ -8,16 +8,6 @@ using System.Runtime.InteropServices;
 /// </summary>
 public static class MarshalUtils
 {
-    [StructLayout(LayoutKind.Explicit)]
-    public struct MarshalFloat
-    {
-        [FieldOffset(0)]
-        public uint Int;
-
-        [FieldOffset(0)]
-        public float Float;
-    }
-
     /// <summary>
     ///   Encodes a boolean into a byte with 1 representing true and 0 representing false.
     /// </summary>
@@ -134,7 +124,7 @@ public static class MarshalUtils
         for (int i = 0; i < 2; ++i)
         {
             ushort bit = buffer[i];
-            bit <<= (i * 8);
+            bit <<= i * 8;
             result |= bit;
         }
 
@@ -148,7 +138,7 @@ public static class MarshalUtils
         for (int i = 0; i < 4; ++i)
         {
             uint bit = buffer[i];
-            bit <<= (i * 8);
+            bit <<= i * 8;
             result |= bit;
         }
 
@@ -162,7 +152,7 @@ public static class MarshalUtils
         for (int i = 0; i < 8; ++i)
         {
             ulong bit = (ulong)(buffer[i] & 0xFF);
-            bit <<= (i * 8);
+            bit <<= i * 8;
             result |= bit;
         }
 
@@ -177,5 +167,15 @@ public static class MarshalUtils
         };
 
         return marshal.Float;
+    }
+
+    [StructLayout(LayoutKind.Explicit)]
+    public struct MarshalFloat
+    {
+        [FieldOffset(0)]
+        public uint Int;
+
+        [FieldOffset(0)]
+        public float Float;
     }
 }

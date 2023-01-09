@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://assets/textures/gui/bevel/pingBar4.png" type="Texture" id=1]
-[ext_resource path="res://src/networking/PingBar.cs" type="Script" id=2]
+[ext_resource path="res://src/networking/gui/PingBar.cs" type="Script" id=2]
 
 [node name="PingBar" type="TextureRect"]
 margin_right = 25.0

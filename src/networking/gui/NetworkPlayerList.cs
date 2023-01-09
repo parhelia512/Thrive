@@ -91,7 +91,7 @@ public class NetworkPlayerList : VBoxContainer
             return;
 
         var log = (NetworkPlayerLog)NetPlayerLogScene.Instance();
-        log.ID = id;
+        log.PeerID = id;
         log.PlayerName = name;
 
         log.Connect(nameof(NetworkPlayerLog.KickRequested), this, nameof(OnKickButtonPressed));

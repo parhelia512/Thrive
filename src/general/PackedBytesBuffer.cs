@@ -81,7 +81,7 @@ public class PackedBytesBuffer
     /// </summary>
     public void Write(byte value)
     {
-        this.buffer.Add(value);
+        buffer.Add(value);
         position += 1;
     }
 
@@ -179,9 +179,13 @@ public class PackedBytesBuffer
     }
 
     /// <summary>
-    ///   Writes a Godot Variant-type encoded as a byte array to the buffer and advances the current position by that
-    ///   array's length + 4-byte header.
+    ///   Writes a Godot Variant encoded as a byte array to the buffer and advances the current position by that
+    ///   array's length + 8-byte header.
     /// </summary>
+    /// <remarks>
+    ///   Use this method sparingly, reserve this for when you don't know the exact length of bytes and or the type
+    ///   of the object to write.
+    /// </remarks>
     public void WriteVariant(object variant)
     {
         var data = GD.Var2Bytes(variant);
@@ -337,7 +341,7 @@ public class PackedBytesBuffer
 
     /// <summary>
     ///   Reads a Variant encoded as a byte array from the buffer and advances the current position by that
-    ///   array's length + 4-byte header.
+    ///   array's length + 8-byte header.
     /// </summary>
     public object ReadVariant()
     {

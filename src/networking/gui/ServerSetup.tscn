@@ -4,8 +4,9 @@
 [ext_resource path="res://assets/textures/gui/bevel/helpButton.png" type="Texture" id=3]
 [ext_resource path="res://src/gui_common/CustomCheckBox.tscn" type="PackedScene" id=4]
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=5]
-[ext_resource path="res://src/networking/ServerSetup.cs" type="Script" id=6]
+[ext_resource path="res://src/networking/gui/ServerSetup.cs" type="Script" id=6]
 [ext_resource path="res://src/gui_common/fonts/Lato-Regular-Smaller.tres" type="DynamicFont" id=9]
+
 
 [sub_resource type="StyleBoxEmpty" id=1]
 

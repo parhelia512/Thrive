@@ -2,7 +2,7 @@
 using Godot;
 
 /// <summary>
-///   Represents a networkable version of the compound cloud with a predefined form and is static.
+///   Represents a networkable version of the compound cloud with a predefined form and is deterministic.
 /// </summary>
 public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
 {
@@ -73,10 +73,6 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
         }
     }
 
-    public void NetworkTick(float delta)
-    {
-    }
-
     public void NetworkSerialize(PackedBytesBuffer buffer)
     {
         // For now just hope everything sync nicely by themselves on the client side.
@@ -101,11 +97,13 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
             buffer.Write(packed);
         }
 
-        buffer.WriteVariant(GlobalTranslation);
+        buffer.Write(GlobalTranslation.x);
+        buffer.Write(GlobalTranslation.y);
+        buffer.Write(GlobalTranslation.z);
         buffer.Write(cloudsPath!);
     }
 
-    public void OnNetworkSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
+    public void OnRemoteSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
     {
         Compound = SimulationParameters.Instance.IndexToCompound(buffer.ReadByte());
 
@@ -116,7 +114,7 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
             chunks.Add(new Chunk(packed));
         }
 
-        Translation = (Vector3)buffer.ReadVariant();
+        Translation = new Vector3(buffer.ReadSingle(), buffer.ReadSingle(), buffer.ReadSingle());
         cloudsPath = buffer.ReadString();
     }
 

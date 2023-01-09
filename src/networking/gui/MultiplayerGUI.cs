@@ -159,7 +159,7 @@ public class MultiplayerGUI : CenterContainer
         ApplyLobbyTab();
         ResetFields();
         ValidateFields();
-        OnLatencyUpdated(NetworkManager.Instance.LocalPlayer?.Latency ?? 0);
+        UpdateLatencyIndicator();
     }
 
     public override void _Process(float delta)
@@ -174,7 +174,7 @@ public class MultiplayerGUI : CenterContainer
         builder.Append(" - ");
         builder.Append(network.GameInSession ?
             TranslationServer.Translate("LOBBY_ATTRIBUTE_IN_PROGRESS").FormatSafe(network.GameTimeHumanized,
-            network.Settings!.SessionLength) :
+            network.Settings?.SessionLength) :
             TranslationServer.Translate("LOBBY_ATTRIBUTE_PENDING"));
 
         serverAttributes.Text = builder.ToString();
@@ -304,6 +304,13 @@ public class MultiplayerGUI : CenterContainer
         {
             loadingDialog.WindowTitle += " (" + Mathf.RoundToInt(NetworkManager.Instance.TimePassedConnecting) + "s)";
         }
+    }
+
+    private void UpdateLatencyIndicator(int? miliseconds = null)
+    {
+        var player = NetworkManager.Instance.GetPlayerInfo(NetworkManager.Instance.PeerId);
+        miliseconds ??= player?.Latency;
+        latency.Text = TranslationServer.Translate("PING_VALUE_MILISECONDS").FormatSafe(miliseconds);
     }
 
     private void ApplySubMenu()
@@ -461,7 +468,7 @@ public class MultiplayerGUI : CenterContainer
                 NetworkManager.Instance.Disconnect();
                 break;
 
-            // TODO: handle upnp work cancellations, currently you can't cancel these
+                // TODO: handle upnp work cancellations, currently you can't cancel these
         }
 
         currentJobStatus = ConnectionJob.None;
@@ -553,50 +560,53 @@ public class MultiplayerGUI : CenterContainer
         switch (step)
         {
             case NetworkManager.UpnpJobStep.Discovery:
-            {
-                if (result != UPNP.UPNPResult.Success)
+                {
+                    if (result != UPNP.UPNPResult.Success)
+                    {
+                        loadingDialog.Hide();
+
+                        ShowGeneralDialog(TranslationServer.Translate("UPNP_SETUP"), TranslationServer.Translate(
+                            "UPNP_ERROR_WHILE_SETTING_UP").FormatSafe(result.ToString()));
+
+                        currentJobStatus = ConnectionJob.None;
+
+                        NetworkManager.Instance.Disconnect();
+                    }
+                    else
+                    {
+                        ShowLoadingDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
+                            "UPNP_ATTEMPTING_TO_FORWARD_PORT").FormatSafe(portBox.Text), false);
+
+                        currentJobStatus = ConnectionJob.PortForwarding;
+                    }
+
+                    break;
+                }
+
+            case NetworkManager.UpnpJobStep.PortMapping:
                 {
                     loadingDialog.Hide();
 
-                    ShowGeneralDialog(TranslationServer.Translate("UPNP_SETUP"), TranslationServer.Translate(
-                        "UPNP_ERROR_WHILE_SETTING_UP").FormatSafe(result.ToString()));
+                    if (result != UPNP.UPNPResult.Success)
+                    {
+                        ShowGeneralDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
+                            "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED").FormatSafe(result.ToString()));
+                    }
 
                     currentJobStatus = ConnectionJob.None;
 
                     NetworkManager.Instance.Disconnect();
+
+                    break;
                 }
-                else
-                {
-                    ShowLoadingDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
-                        "UPNP_ATTEMPTING_TO_FORWARD_PORT").FormatSafe(portBox.Text), false);
-
-                    currentJobStatus = ConnectionJob.PortForwarding;
-                }
-
-                break;
-            }
-
-            case NetworkManager.UpnpJobStep.PortMapping:
-            {
-                loadingDialog.Hide();
-
-                if (result != UPNP.UPNPResult.Success)
-                {
-                    ShowGeneralDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
-                        "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED").FormatSafe(result.ToString()));
-                }
-
-                currentJobStatus = ConnectionJob.None;
-
-                NetworkManager.Instance.Disconnect();
-
-                break;
-            }
         }
     }
 
-    private void OnLatencyUpdated(int miliseconds)
+    private void OnLatencyUpdated(int peerId, int miliseconds)
     {
-        latency.Text = TranslationServer.Translate("PING_VALUE_MILISECONDS").FormatSafe(miliseconds);
+        if (peerId != NetworkManager.Instance.PeerId)
+            return;
+
+        UpdateLatencyIndicator(miliseconds);
     }
 }

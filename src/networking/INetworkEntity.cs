@@ -14,26 +14,22 @@ public interface INetworkEntity : IEntity, INetworkSerializable
     public uint NetworkEntityId { get; set; }
 
     /// <summary>
-    ///   Called every network tick <see cref="NetworkManager.TimeStep"/>.
-    /// </summary>
-    public void NetworkTick(float delta);
-
-    /// <summary>
-    ///   Called client-side BEFORE this entity is added to the scene tree.
+    ///   Called client-side BEFORE the replicated entity is added to the scene tree.
     /// </summary>
     /// <remarks>
     ///   <para>
-    ///     TODO: do away with this once delta encoding is added.
+    ///     TODO: do away with this if delta encoding is added.
     ///   </para>
     /// </remarks>
-    public void OnNetworkSpawn(PackedBytesBuffer buffer, GameProperties currentGame);
+    public void OnRemoteSpawn(PackedBytesBuffer buffer, GameProperties currentGame);
 
     /// <summary>
-    ///   <inheritdoc cref="INetSerializable.NetSerialize"/> Only sent once on spawn BEFORE entering the scene tree.
+    ///   <inheritdoc cref="INetworkSerializable.NetworkSerialize"/> Only sent once on spawn BEFORE the replicated
+    ///   entity is added to the the scene tree.
     /// </summary>
     /// <remarks>
     ///   <para>
-    ///     TODO: do away with this once delta encoding is added.
+    ///     TODO: do away with this if delta encoding is added.
     ///   </para>
     /// </remarks>
     public void PackSpawnState(PackedBytesBuffer buffer);
