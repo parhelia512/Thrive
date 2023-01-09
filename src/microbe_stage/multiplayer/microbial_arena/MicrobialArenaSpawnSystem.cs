@@ -60,7 +60,7 @@ public class MicrobialArenaSpawnSystem : SpawnSystem
             var density = entry.Value.Density * Constants.CLOUD_SPAWN_DENSITY_SCALE_FACTOR;
             var amount = entry.Value.Amount * Constants.MICROBIAL_ARENA_CLOUD_SPAWN_AMOUNT_SCALE_FACTOR;
 
-            AddSpawnType(Spawners.MakeCompoundBlobSpawner(entry.Key, clouds, amount, 40), density, 0);
+            AddSpawnType(Spawners.MakeCompoundBlobSpawner(entry.Key, clouds, amount, 70), density, 0);
         }
     }
 

@@ -1,5 +1,5 @@
 /// <summary>
-///   A single byte header in raw packets (non-RPC) to differentiate their type.
+///   A single byte header to differentiate raw packets (non-RPC).
 /// </summary>
 public enum RawPacketFlag
 {

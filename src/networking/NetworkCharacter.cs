@@ -13,22 +13,18 @@ public abstract class NetworkCharacter : NetworkRigidBody
     ///   The unique network ID self-assigned by the client. In gameplay context, this is used to differentiate
     ///   between player-character entities versus normal in-game entities.
     /// </summary>
-    public int PeerId { get; private set; }
+    public int PeerId { get; set; }
 
     public override void _Ready()
     {
         base._Ready();
 
-        SetupNetworkCharacter(PeerId);
+        if (!setup && PeerId > 0)
+            SetupNetworkCharacter();
     }
 
-    public virtual void SetupNetworkCharacter(int peerId)
+    public virtual void SetupNetworkCharacter()
     {
-        if (setup)
-            return;
-
-        PeerId = peerId;
-
         tween = new Tween();
         AddChild(tween);
 

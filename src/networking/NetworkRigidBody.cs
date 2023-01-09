@@ -132,6 +132,8 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
 
     protected virtual void ProcessBufferedStates(float delta)
     {
+        // TODO: Fix jitter
+
         lerpTimer += delta;
 
         var timestep = NetworkManager.Instance.Settings!.TimeStep;

@@ -295,6 +295,7 @@ public class NetworkManager : Node
         if (upnp?.GetDeviceCount() > 0)
             upnp?.DeletePortMapping(Settings!.Port);
 
+        peer = null;
         connectedPlayers.Clear();
         GameInSession = false;
         elapsedGameTime = 0;
@@ -598,7 +599,7 @@ public class NetworkManager : Node
             roundTripTime :
             (ulong)((ping.AverageRoundTripTime * 0.7f) + (roundTripTime * 0.3f));
 
-        Rpc(nameof(NotifyLatencyUpdate), fromId, (ushort)ping.AverageRoundTripTime / 2);
+        Rpc(nameof(NotifyLatencyUpdate), fromId, (ushort)ping.AverageRoundTripTime);
     }
 
     private void OnPeerConnected(int id)
@@ -663,6 +664,7 @@ public class NetworkManager : Node
         if (upnp?.GetDeviceCount() > 0)
             upnp?.DeletePortMapping(Settings!.Port);
 
+        peer = null;
         connectedPlayers.Clear();
         GameInSession = false;
         elapsedGameTime = 0;

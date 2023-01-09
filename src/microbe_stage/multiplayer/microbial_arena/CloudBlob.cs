@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Godot;
+using Environment = System.Environment;
 
 /// <summary>
 ///   Represents a networkable version of the compound cloud with a predefined form and is deterministic.
@@ -37,15 +38,17 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
 
         int resolution = Settings.Instance.CloudResolution;
 
-        // Circle drawing algorithm from https://www.redblobgames.com/grids/circle-drawing/
-        // TODO: make the shape more "noisy" instead of a perfect circle
-
         var center = new Int2((int)position.x, (int)position.z);
-
         var top = Mathf.CeilToInt(center.y - radius);
         var bottom = Mathf.FloorToInt(center.y + radius);
         var left = Mathf.CeilToInt(center.x - radius);
         var right = Mathf.FloorToInt(center.x + radius);
+
+        var noise = new FastNoiseLite(Environment.TickCount);
+        noise.SetFractalType(FastNoiseLite.FractalType.FBm);
+        noise.SetFrequency(0.015f);
+        noise.SetFractalOctaves(5);
+        noise.SetDomainWarpAmp(50.0f);
 
         for (int y = top; y <= bottom; ++y)
         {
@@ -55,8 +58,9 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
                 var dy = center.y - y;
                 var distanceSqr = dx * dx + dy * dy;
 
-                if (distanceSqr <= radius * radius)
-                    chunks.Add(new Chunk(new Vector3(x + resolution, 0, y + resolution), amount));
+                var weight = Mathf.InverseLerp(radius, radius * 0.8f, Mathf.Sqrt(distanceSqr));
+                var noisePos = Mathf.Clamp(noise.GetNoise(x, y), 0, 1);
+                chunks.Add(new Chunk(new Vector3(x + resolution, 0, y + resolution), amount * weight * noisePos));
             }
         }
     }
@@ -69,7 +73,7 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
 
         foreach (var chunk in Chunks)
         {
-            clouds.AddCloud(Compound, chunk.Amount, chunk.Position);
+            clouds.AddCloud(Compound, chunk.InitialAmount, chunk.Position);
         }
     }
 
@@ -90,7 +94,7 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
         buffer.Write((short)Chunks.Count);
         foreach (var chunk in Chunks)
         {
-            chunk.Amount = clouds!.AmountAvailable(Compound, chunk.Position, 1.0f);
+            chunk.InitialAmount = clouds!.AmountAvailable(Compound, chunk.Position, 1.0f);
 
             var packed = new PackedBytesBuffer();
             chunk.NetworkSerialize(packed);
@@ -139,7 +143,7 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
     public class Chunk : INetworkSerializable
     {
         public Vector3 Position;
-        public float Amount;
+        public float InitialAmount;
 
         public Chunk(PackedBytesBuffer buffer)
         {
@@ -149,20 +153,20 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
         public Chunk(Vector3 position, float amount)
         {
             Position = position;
-            Amount = amount;
+            InitialAmount = amount;
         }
 
         public void NetworkSerialize(PackedBytesBuffer buffer)
         {
             buffer.Write(Position.x);
             buffer.Write(Position.z);
-            buffer.Write(Amount);
+            buffer.Write(InitialAmount);
         }
 
         public void NetworkDeserialize(PackedBytesBuffer buffer)
         {
             Position = new Vector3(buffer.ReadSingle(), Position.y, buffer.ReadSingle());
-            Amount = buffer.ReadSingle();
+            InitialAmount = buffer.ReadSingle();
         }
     }
 }

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 
+/// <summary>
+///   <inheritdoc />. Contains the necessary informations for a multiplayer game mode.
+/// </summary>
 public class MultiplayerGameWorld : GameWorld
 {
     private readonly Dictionary<uint, EntityReference<INetworkEntity>> entities = new();

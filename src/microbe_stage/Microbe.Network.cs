@@ -22,9 +22,9 @@ public partial class Microbe
 
     public Action<int, int, string>? OnKilledByAnotherPlayer { get; set; }
 
-    public override void SetupNetworkCharacter(int peerId)
+    public override void SetupNetworkCharacter()
     {
-        base.SetupNetworkCharacter(peerId);
+        base.SetupNetworkCharacter();
 
         Name = PeerId.ToString(CultureInfo.CurrentCulture);
 

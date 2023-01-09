@@ -32,7 +32,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     public MicrobeCamera Camera { get; private set; } = null!;
     public MicrobialArenaHUD HUD { get; private set; } = null!;
     public PlayerHoverInfo HoverInfo { get; private set; } = null!;
-    public PlayerMicrobialArenaInput PlayerInput { get; private set; } = null!;
+    public MultiplayerMicrobeStageInput PlayerInput { get; private set; } = null!;
 
     public Action? LocalPlayerSpeciesReceived { get; set; }
 
@@ -141,7 +141,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         guiRoot = GetNode<Control>("GUI");
         HUD = guiRoot.GetNode<MicrobialArenaHUD>("MicrobialArenaHUD");
         HoverInfo = GetNode<PlayerHoverInfo>("PlayerHoverInfo");
-        PlayerInput = GetNode<PlayerMicrobialArenaInput>("PlayerMicrobialArenaInput");
+        PlayerInput = GetNode<MultiplayerMicrobeStageInput>("PlayerMicrobialArenaInput");
         Camera = world.GetNode<MicrobeCamera>("PrimaryCamera");
         Clouds = world.GetNode<CompoundCloudSystem>("CompoundClouds");
 
@@ -242,8 +242,6 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         // Disable clouds simulation as it's currently too chaotic to synchronize
         Clouds.RunSimulation = false;
 
-        Clouds.SetProcess(false);
-
         if (NetworkManager.Instance.IsAuthoritative)
         {
             spawner.OnSpawnCoordinatesChanged = OnSpawnCoordinatesChanged;
@@ -320,8 +318,9 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         if (!MultiplayerGameWorld.PlayerVars.TryGetValue(peerId, out NetworkPlayerVars vars))
             return false;
 
-        spawned = SpawnHelpers.SpawnNetworkedMicrobe(peerId, MultiplayerGameWorld.GetSpecies((uint)peerId),
-            Vector3.Zero, rootOfDynamicallySpawned, Clouds, spawner, CurrentGame!);
+        spawned = SpawnHelpers.SpawnMicrobe(MultiplayerGameWorld.GetSpecies((uint)peerId), Vector3.Zero,
+            rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), false, Clouds, spawner, CurrentGame!, null,
+            peerId);
 
         spawned.OnDeath = OnPlayerDied;
         spawned.OnNetworkDeathFinished = OnPlayerDestroyed;

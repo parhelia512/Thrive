@@ -1,5 +1,8 @@
 using Godot;
 
+/// <summary>
+///   A collection of a Microbe input states.
+/// </summary>
 public struct NetworkMicrobeInput : INetworkInputBatch
 {
     public Vector3 LookAtPoint { get; set; }
@@ -10,7 +13,7 @@ public struct NetworkMicrobeInput : INetworkInputBatch
 
     public void NetworkSerialize(PackedBytesBuffer buffer)
     {
-        // 21 bytes
+        // 17 bytes
 
         buffer.Write(LookAtPoint.x);
         buffer.Write(LookAtPoint.z);

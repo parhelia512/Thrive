@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using Godot;
 
-public class PlayerMicrobialArenaInput : MultiplayerInputBase<MicrobialArena, NetworkMicrobeInput>
+/// <summary>
+///   Handles key input in a multiplayer microbe stage.
+/// </summary>
+public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena, NetworkMicrobeInput>
 {
     private Random random = new();
 

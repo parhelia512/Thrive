@@ -560,45 +560,45 @@ public class MultiplayerGUI : CenterContainer
         switch (step)
         {
             case NetworkManager.UpnpJobStep.Discovery:
-                {
-                    if (result != UPNP.UPNPResult.Success)
-                    {
-                        loadingDialog.Hide();
-
-                        ShowGeneralDialog(TranslationServer.Translate("UPNP_SETUP"), TranslationServer.Translate(
-                            "UPNP_ERROR_WHILE_SETTING_UP").FormatSafe(result.ToString()));
-
-                        currentJobStatus = ConnectionJob.None;
-
-                        NetworkManager.Instance.Disconnect();
-                    }
-                    else
-                    {
-                        ShowLoadingDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
-                            "UPNP_ATTEMPTING_TO_FORWARD_PORT").FormatSafe(portBox.Text), false);
-
-                        currentJobStatus = ConnectionJob.PortForwarding;
-                    }
-
-                    break;
-                }
-
-            case NetworkManager.UpnpJobStep.PortMapping:
+            {
+                if (result != UPNP.UPNPResult.Success)
                 {
                     loadingDialog.Hide();
 
-                    if (result != UPNP.UPNPResult.Success)
-                    {
-                        ShowGeneralDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
-                            "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED").FormatSafe(result.ToString()));
-                    }
+                    ShowGeneralDialog(TranslationServer.Translate("UPNP_SETUP"), TranslationServer.Translate(
+                        "UPNP_ERROR_WHILE_SETTING_UP").FormatSafe(result.ToString()));
 
                     currentJobStatus = ConnectionJob.None;
 
                     NetworkManager.Instance.Disconnect();
-
-                    break;
                 }
+                else
+                {
+                    ShowLoadingDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
+                        "UPNP_ATTEMPTING_TO_FORWARD_PORT").FormatSafe(portBox.Text), false);
+
+                    currentJobStatus = ConnectionJob.PortForwarding;
+                }
+
+                break;
+            }
+
+            case NetworkManager.UpnpJobStep.PortMapping:
+            {
+                loadingDialog.Hide();
+
+                if (result != UPNP.UPNPResult.Success)
+                {
+                    ShowGeneralDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
+                        "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED").FormatSafe(result.ToString()));
+                }
+
+                currentJobStatus = ConnectionJob.None;
+
+                NetworkManager.Instance.Disconnect();
+
+                break;
+            }
         }
     }
 

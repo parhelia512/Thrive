@@ -1,5 +1,8 @@
 using Godot;
 
+/// <summary>
+///   Multiplayer version of <see cref="PlayerInputBase"/>. Handles sending client inputs to the server.
+/// </summary>
 public abstract class MultiplayerInputBase<TStage, TInput> : PlayerInputBase<TStage>
     where TStage : Object, IMultiplayerStage
     where TInput : INetworkInputBatch, new()
