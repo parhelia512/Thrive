@@ -42,7 +42,6 @@ public class MicrobeSpecies : Species, ICellProperties, IPhotographable
         IsBacteria = withCellProperties.IsBacteria;
     }
 
-    /// <inheritdoc cref="Species.Species()"/>
     public MicrobeSpecies()
     {
         Organelles = new OrganelleLayout<OrganelleTemplate>();
