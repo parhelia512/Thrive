@@ -932,8 +932,6 @@ public partial class Microbe
 
         if (AgentVacuoleCount > 0)
         {
-            var oxytoxy = SimulationParameters.Instance.GetCompound("oxytoxy");
-
             var amount = Compounds.GetCompoundAmount(oxytoxy);
 
             var props = new AgentProperties(Species, oxytoxy);

@@ -13,8 +13,10 @@ public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena,
 
     private Dictionary<int, NetworkMicrobeInput> serverInputs = new();
 
-    public override void _Process(float delta)
+    public override void _PhysicsProcess(float delta)
     {
+        base._PhysicsProcess(delta);
+
         if (stage == null)
             return;
 
@@ -62,9 +64,16 @@ public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena,
     }
 
     [RunOnKeyDown("g_fire_toxin")]
-    public void EmitToxin()
+    public bool EmitToxin()
     {
         cachedInput.EmitToxin = true;
+        return false;
+    }
+
+    [RunOnKeyUp("g_fire_toxin")]
+    public void StopEmittingToxin()
+    {
+        cachedInput.EmitToxin = false;
     }
 
     [RunOnKeyDown("g_secrete_slime")]
@@ -137,10 +146,6 @@ public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena,
     protected override NetworkMicrobeInput SampleInput()
     {
         var cached = cachedInput;
-
-        // Immediately reset the states for one-press inputs
-        cachedInput.EmitToxin = false;
-
         return cached;
     }
 

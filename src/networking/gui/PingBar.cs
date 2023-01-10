@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 
 /// <summary>
 ///   A UI element displaying a peer's network delay (lag) in 4 levels from lowest to highest.

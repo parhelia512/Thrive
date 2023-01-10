@@ -31,8 +31,6 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
     /// </summary>
     public string? AnimationPath;
 
-    private int selectedMeshIndex;
-
     private bool initPhysics = true;
 
     /// <summary>
@@ -41,6 +39,9 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
     private HashSet<Microbe> touchingMicrobes = new();
 
     private MeshInstance? chunkMesh;
+    private Particles? particles;
+
+    private bool tryingToDespawn;
 
     [JsonProperty]
     private bool isDissolving;
@@ -202,7 +203,6 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
         Radius = chunkType.Radius;
         ChunkScale = chunkType.ChunkScale;
 
-        this.selectedMeshIndex = selectedMeshIndex;
         ModelNodePath = chunkType.Meshes[selectedMeshIndex].SceneModelPath;
         AnimationPath = chunkType.Meshes[selectedMeshIndex].SceneAnimationPath;
         ConvexPhysicsMesh = chunkType.Meshes[selectedMeshIndex].LoadedConvexShape;
@@ -382,13 +382,20 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
     public override void NetworkSerialize(PackedBytesBuffer buffer)
     {
         base.NetworkSerialize(buffer);
+
         buffer.Write((byte)PhagocytosisStep);
+        buffer.Write(tryingToDespawn.ToByte());
     }
 
     public override void NetworkDeserialize(PackedBytesBuffer buffer)
     {
         base.NetworkDeserialize(buffer);
+
         PhagocytosisStep = (PhagocytosisPhase)buffer.ReadByte();
+        tryingToDespawn = buffer.ReadByte().ToBoolean();
+
+        if (tryingToDespawn)
+            DissolveOrRemove();
     }
 
     public override void PackSpawnState(PackedBytesBuffer buffer)
@@ -570,6 +577,7 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
         else if (graphicsNode.IsClass("Particles"))
         {
             isParticles = true;
+            particles = GetNode("NodeToScale").GetChild<Particles>(0);
         }
         else
         {
@@ -652,6 +660,8 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
 
     private void DissolveOrRemove()
     {
+        tryingToDespawn = true;
+
         if (Dissolves)
         {
             isDissolving = true;
@@ -660,13 +670,11 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
         {
             isFadingParticles = true;
 
-            var particles = GetNode("NodeToScale").GetChild<Particles>(0);
-
             // Disable collisions
             CollisionLayer = 0;
             CollisionMask = 0;
 
-            particles.Emitting = false;
+            particles!.Emitting = false;
             particleFadeTimer = particles.Lifetime;
         }
         else if (!isParticles)

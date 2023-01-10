@@ -185,7 +185,7 @@ public class NetworkManager : Node
             TimePassedConnecting += delta;
         }
 
-        HandlePing(delta);
+        HandlePing();
 
         if (GameInSession)
         {
@@ -516,7 +516,7 @@ public class NetworkManager : Node
         EmitSignal(nameof(ChatReceived));
     }
 
-    private void HandlePing(float delta)
+    private void HandlePing()
     {
         // Must be server-initiated
         if (!IsAuthoritative)
@@ -549,7 +549,8 @@ public class NetworkManager : Node
         if (!IsAuthoritative || targetId == DEFAULT_SERVER_ID)
             return;
 
-        pings.TryGetValue(targetId, out PingData ping);
+        if (!pings.TryGetValue(targetId, out PingData ping))
+            return;
 
         ++ping.Id;
         ping.TimeSent = Time.GetTicksMsec();
@@ -562,7 +563,7 @@ public class NetworkManager : Node
         Multiplayer.SendBytes(packet.Data, targetId, NetworkedMultiplayerPeer.TransferModeEnum.Unreliable);
     }
 
-    private void ProcessReceivedPing(ulong timeReceived, PackedBytesBuffer buffer)
+    private void ProcessReceivedPing(PackedBytesBuffer buffer)
     {
         var pingId = buffer.ReadUInt16();
 
@@ -580,7 +581,8 @@ public class NetworkManager : Node
         if (!IsAuthoritative)
             return;
 
-        pings.TryGetValue(fromId, out PingData ping);
+        if (!pings.TryGetValue(fromId, out PingData ping))
+            return;
 
         var receivedId = buffer.ReadUInt16();
 
@@ -635,7 +637,7 @@ public class NetworkManager : Node
         switch (packetType)
         {
             case RawPacketFlag.Ping:
-                ProcessReceivedPing(timeReceived, buffer);
+                ProcessReceivedPing(buffer);
                 break;
             case RawPacketFlag.Pong:
                 ProcessReceivedPong(fromId, timeReceived, buffer);
@@ -693,12 +695,12 @@ public class NetworkManager : Node
         switch (step)
         {
             case UpnpJobStep.Discovery:
-                {
-                    if (result == UPNP.UPNPResult.Success)
-                        TaskExecutor.Instance.AddTask(new Task(() => AddPortMapping(Settings!.Port)));
+            {
+                if (result == UPNP.UPNPResult.Success)
+                    TaskExecutor.Instance.AddTask(new Task(() => AddPortMapping(Settings!.Port)));
 
-                    break;
-                }
+                break;
+            }
         }
     }
 
@@ -1031,10 +1033,7 @@ public class NetworkManager : Node
             return;
 
         var info = GetPlayerInfo(peerId);
-        if (info == null)
-            return;
-
-        info.SetVar(what, variant);
+        info?.SetVar(what, variant);
     }
 
     public class PingData

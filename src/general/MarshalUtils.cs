@@ -22,7 +22,10 @@ public static class MarshalUtils
     public static byte ToByte(this bool[] booleans)
     {
         if (booleans.Length > 8)
-            throw new ArgumentOutOfRangeException("Array length must be less or equal to 8 (1 byte)");
+        {
+            throw new ArgumentOutOfRangeException(nameof(booleans),
+                "Array length must be less or equal to 8 (1 byte)");
+        }
 
         byte result = 0;
 

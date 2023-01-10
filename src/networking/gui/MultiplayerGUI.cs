@@ -174,7 +174,7 @@ public class MultiplayerGUI : CenterContainer
         builder.Append(" - ");
         builder.Append(network.GameInSession ?
             TranslationServer.Translate("LOBBY_ATTRIBUTE_IN_PROGRESS").FormatSafe(network.GameTimeHumanized,
-            network.Settings?.SessionLength) :
+                network.Settings?.SessionLength) :
             TranslationServer.Translate("LOBBY_ATTRIBUTE_PENDING"));
 
         serverAttributes.Text = builder.ToString();

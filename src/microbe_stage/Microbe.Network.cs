@@ -24,6 +24,9 @@ public partial class Microbe
 
     public override void SetupNetworkCharacter()
     {
+        if (!IsInsideTree())
+            return;
+
         base.SetupNetworkCharacter();
 
         Name = PeerId.ToString(CultureInfo.CurrentCulture);
@@ -103,7 +106,7 @@ public partial class Microbe
         var bools = buffer.ReadByte();
 
         if (bools.ToBoolean(0) && MultiplayerGameWorld!.TryGetNetworkEntity(
-            buffer.ReadUInt32(), out INetworkEntity entity) && entity is Microbe engulfer)
+                buffer.ReadUInt32(), out INetworkEntity entity) && entity is Microbe engulfer)
         {
             // TODO: Very broken
             engulfer.IngestEngulfable(this);
@@ -120,6 +123,9 @@ public partial class Microbe
             Flash(1.0f, new Color(1, 0, 0, 0.5f), 1);
 
         lastHitpoints = Hitpoints;
+
+        if (tagBox != null)
+            tagBox.Visible = !Dead;
     }
 
     public override void PackSpawnState(PackedBytesBuffer buffer)

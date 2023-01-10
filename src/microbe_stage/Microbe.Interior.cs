@@ -263,7 +263,7 @@ public partial class Microbe
     /// </summary>
     public void EmitToxin(Compound? agentType = null)
     {
-        if (PhagocytosisStep != PhagocytosisPhase.None || NetworkManager.Instance.IsClient)
+        if (PhagocytosisStep != PhagocytosisPhase.None)
             return;
 
         agentType ??= SimulationParameters.Instance.GetCompound("oxytoxy");
@@ -1433,7 +1433,6 @@ public partial class Microbe
             return;
 
         var compoundTypes = SimulationParameters.Instance.GetAllCompounds();
-        var oxytoxy = SimulationParameters.Instance.GetCompound("oxytoxy");
 
         float usedCapacity = 0.0f;
 

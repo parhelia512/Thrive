@@ -1,4 +1,4 @@
-/// <summary>
+﻿/// <summary>
 ///   A very tiny wrapper around <see cref="Vars"/> containing the <see cref="INetworkEntity.NetworkEntityId"/>
 ///   for a player.
 /// </summary>

@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 /// </summary>
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/AgentProjectile.tscn", UsesEarlyResolve = false)]
-public class AgentProjectile : NetworkRigidBody, ITimedLife
+public class AgentProjectile : RigidBody, ITimedLife, IEntity
 {
     private Particles particles = null!;
 
@@ -16,7 +16,9 @@ public class AgentProjectile : NetworkRigidBody, ITimedLife
     public AgentProperties? Properties { get; set; }
     public EntityReference<IEntity> Emitter { get; set; } = new();
 
-    public override string ResourcePath => "res://src/microbe_stage/AgentProjectile.tscn";
+    public Spatial EntityNode => this;
+
+    public AliveMarker AliveMarker { get; } = new();
 
     [JsonProperty]
     private float? FadeTimeRemaining { get; set; }
@@ -52,24 +54,9 @@ public class AgentProjectile : NetworkRigidBody, ITimedLife
             this.DestroyDetachAndQueueFree();
     }
 
-    public override void PackSpawnState(PackedBytesBuffer buffer)
+    public void OnDestroyed()
     {
-        buffer.Write(TimeToLiveRemaining);
-        buffer.Write(Amount);
-        buffer.Write(Properties!.Species.ID);
-    }
-
-    public override void OnRemoteSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
-    {
-        TimeToLiveRemaining = buffer.ReadSingle();
-        Amount = buffer.ReadSingle();
-
-        var speciesId = buffer.ReadUInt32();
-
-        // Only toxin agent expected
-        var compound = SimulationParameters.Instance.GetCompound("oxytoxy");
-
-        Properties = new AgentProperties(currentGame.GameWorld.GetSpecies(speciesId), compound);
+        AliveMarker.Alive = false;
     }
 
     private void OnContactBegin(int bodyID, Node body, int bodyShape, int localShape)

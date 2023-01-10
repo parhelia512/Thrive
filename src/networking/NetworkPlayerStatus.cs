@@ -1,4 +1,4 @@
-/// <summary>
+﻿/// <summary>
 ///   Status of a networked player in relation to the current game instance.
 /// </summary>
 public enum NetworkPlayerStatus

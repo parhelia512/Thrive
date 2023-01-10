@@ -73,8 +73,8 @@ public class ServerSettings : INetworkSerializable
             var type = Type.GetType($"{buffer.ReadString()}, Thrive");
             var packed = buffer.ReadBuffer();
 
-            var settings = (IGameModeSettings)Activator.CreateInstance(type);
-            settings.NetworkDeserialize(packed);
+            var settings = Activator.CreateInstance(type) as IGameModeSettings;
+            settings?.NetworkDeserialize(packed);
             GameModeSettings = settings;
         }
     }

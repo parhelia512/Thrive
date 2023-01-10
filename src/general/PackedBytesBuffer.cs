@@ -15,17 +15,17 @@ public class PackedBytesBuffer
 
     public PackedBytesBuffer()
     {
-        buffer = new();
+        buffer = new List<byte>();
     }
 
     public PackedBytesBuffer(int size)
     {
-        buffer = new(size);
+        buffer = new List<byte>(size);
     }
 
     public PackedBytesBuffer(byte[] buffer)
     {
-        this.buffer = new(buffer);
+        this.buffer = new List<byte>(buffer);
     }
 
     /// <summary>
@@ -202,17 +202,14 @@ public class PackedBytesBuffer
         if (buffer.Count <= 0)
             throw new InvalidOperationException("Can't read bytes on an empty buffer");
 
-        var received = 0;
+        int received;
 
         if (position + count > buffer.Count)
         {
             received = buffer.Count - position;
 
             if (received <= 0)
-            {
-                received = 0;
                 return Array.Empty<byte>();
-            }
         }
         else
         {

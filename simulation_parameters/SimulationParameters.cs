@@ -250,6 +250,10 @@ public class SimulationParameters : Node
         {
             return 6;
         }
+        else if (compound == GetCompound("oxytoxy"))
+        {
+            return 7;
+        }
 
         return -1;
     }
@@ -284,6 +288,10 @@ public class SimulationParameters : Node
         else if (code == 6)
         {
             return GetCompound("mucilage");
+        }
+        else if (code == 7)
+        {
+            return GetCompound("oxytoxy");
         }
 
         return GetCompound("glucose");

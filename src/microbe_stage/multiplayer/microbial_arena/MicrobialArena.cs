@@ -360,6 +360,8 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         MultiplayerGameWorld.UpdateSpecies(peerId, species);
         LocalPlayerSpeciesReceived?.Invoke();
+
+        NetworkManager.Instance.Print("Received species: ", species.FormattedName, ", id: ", species.ID);
     }
 
     protected override void UpdatePatchSettings(bool promptPatchNameChange = true)
@@ -564,9 +566,13 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
             return;
         }
 
+        var species = MultiplayerGameWorld.Species[(uint)sender];
+
         var buffer = new PackedBytesBuffer();
-        MultiplayerGameWorld.Species[(uint)sender].NetworkSerialize(buffer);
+        species.NetworkSerialize(buffer);
         RpcId(sender, nameof(SyncSpecies), sender, buffer.Data);
+
+        NetworkManager.Instance.Print(sender, ": Requested species: ", species.FormattedName);
     }
 
     [RemoteSync]

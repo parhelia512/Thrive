@@ -38,6 +38,8 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
 
         int resolution = Settings.Instance.CloudResolution;
 
+        // Circle drawing algorithm borrowed from https://www.redblobgames.com/grids/circle-drawing/
+
         var center = new Int2((int)position.x, (int)position.z);
         var top = Mathf.CeilToInt(center.y - radius);
         var bottom = Mathf.FloorToInt(center.y + radius);

@@ -1,4 +1,4 @@
-/// <summary>
+﻿/// <summary>
 ///   Interface for networkable entities.
 /// </summary>
 public interface INetworkEntity : IEntity, INetworkSerializable

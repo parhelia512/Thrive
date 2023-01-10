@@ -1,4 +1,4 @@
-/// <summary>
+﻿/// <summary>
 ///   Specifies objects whose values can be transmitted across the network.
 /// </summary>
 public interface INetworkSerializable

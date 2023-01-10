@@ -249,8 +249,6 @@ public static class SpawnHelpers
 
         agent.AddToGroup(Constants.TIMED_GROUP);
 
-        OnNetEntitySpawned?.Invoke(agent);
-
         return agent;
     }
 

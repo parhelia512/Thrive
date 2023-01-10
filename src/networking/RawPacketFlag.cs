@@ -1,4 +1,4 @@
-/// <summary>
+﻿/// <summary>
 ///   A single byte header to differentiate raw packets (non-RPC).
 /// </summary>
 public enum RawPacketFlag

@@ -377,7 +377,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
         var spawnData = new PackedBytesBuffer();
         entity.PackSpawnState(spawnData);
-        RpcId(targetPeerId, nameof(NotifyEntitySpawn), entity.NetworkEntityId, entity.ResourcePath, spawnData?.Data);
+        RpcId(targetPeerId, nameof(NotifyEntitySpawn), entity.NetworkEntityId, entity.ResourcePath, spawnData.Data);
     }
 
     private void OnNetworkTick(object sender, float delta)
