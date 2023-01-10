@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-18 11:31+0700\n"
+"POT-Creation-Date: 2023-01-10 14:15+0700\n"
 "PO-Revision-Date: 2022-09-23 11:38+0000\n"
 "Last-Translator: aleixcoma <aleixcoma@gmail.com>\n"
 "Language-Team: Catalan <https://translate.revolutionarygamesstudio.com/projects/thrive/thrive-game/ca/>\n"
@@ -43,7 +43,7 @@ msgstr "Art Conceptual"
 #: ../simulation_parameters/common/gallery.json:6
 #: ../simulation_parameters/common/gallery.json:141
 #: ../simulation_parameters/common/gallery.json:291
-#: ../src/networking/ServerSetup.cs:117
+#: ../src/networking/gui/ServerSetup.cs:124
 msgid "MICROBE_STAGE"
 msgstr "Estadi de Microbi"
 
@@ -377,21 +377,21 @@ msgstr "Habilitats"
 
 #: ../simulation_parameters/common/input_options.json:40
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2068
-#: ../src/microbe_stage/MicrobeStage.tscn:2303
+#: ../src/microbe_stage/MicrobeStage.tscn:2304
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2303
 msgid "FIRE_TOXIN"
 msgstr "Llançar les toxines"
 
 #: ../simulation_parameters/common/input_options.json:44
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2092
-#: ../src/microbe_stage/MicrobeStage.tscn:2349
+#: ../src/microbe_stage/MicrobeStage.tscn:2350
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2352
 msgid "SECRETE_SLIME"
 msgstr "Secretar mucílag"
 
 #: ../simulation_parameters/common/input_options.json:48
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2054
-#: ../src/microbe_stage/MicrobeStage.tscn:2290
+#: ../src/microbe_stage/MicrobeStage.tscn:2291
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2289
 msgid "TOGGLE_ENGULF"
 msgstr "Activar el mode d'engolir"
@@ -401,7 +401,7 @@ msgid "HOLD_PACK_COMMANDS_MENU"
 msgstr "Mantenir clicat per mostrar el menú d'ordres de la bandada"
 
 #: ../simulation_parameters/common/input_options.json:56
-#: ../src/microbe_stage/MicrobeStage.tscn:2314
+#: ../src/microbe_stage/MicrobeStage.tscn:2315
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2315
 msgid "TOGGLE_BINDING"
 msgstr "Activar el mode d'unió"
@@ -411,7 +411,7 @@ msgid "TOGGLE_UNBINDING"
 msgstr "Desactivar el mode d'unió"
 
 #: ../simulation_parameters/common/input_options.json:64
-#: ../src/microbe_stage/MicrobeStage.tscn:2326
+#: ../src/microbe_stage/MicrobeStage.tscn:2327
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2328
 msgid "UNBIND_ALL"
 msgstr "Desunir totes les cèl·lules"
@@ -779,7 +779,7 @@ msgstr "ATP"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:17
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1306
-#: ../src/microbe_stage/MicrobeStage.tscn:1504
+#: ../src/microbe_stage/MicrobeStage.tscn:1505
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:678
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1507
 msgid "AMMONIA"
@@ -787,7 +787,7 @@ msgstr "Amoníac"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:32
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1358
-#: ../src/microbe_stage/MicrobeStage.tscn:1553
+#: ../src/microbe_stage/MicrobeStage.tscn:1554
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:749
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1556
 msgid "PHOSPHATE"
@@ -795,7 +795,7 @@ msgstr "Fosfat"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:47
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1410
-#: ../src/microbe_stage/MicrobeStage.tscn:1605
+#: ../src/microbe_stage/MicrobeStage.tscn:1606
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:643
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1608
 msgid "HYDROGEN_SULFIDE"
@@ -803,7 +803,7 @@ msgstr "Àcid Sulfhídric"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:62
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1254
-#: ../src/microbe_stage/MicrobeStage.tscn:1458
+#: ../src/microbe_stage/MicrobeStage.tscn:1459
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:713
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1461
 msgid "GLUCOSE"
@@ -811,21 +811,21 @@ msgstr "Glucosa"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:77
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1589
-#: ../src/microbe_stage/MicrobeStage.tscn:1819
+#: ../src/microbe_stage/MicrobeStage.tscn:1820
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1822
 msgid "OXYTOXY_NT"
 msgstr "OxyToxy NT"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:92
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1640
-#: ../src/microbe_stage/MicrobeStage.tscn:1867
+#: ../src/microbe_stage/MicrobeStage.tscn:1868
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1870
 msgid "MUCILAGE"
 msgstr "Mucílag"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:109
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1462
-#: ../src/microbe_stage/MicrobeStage.tscn:1651
+#: ../src/microbe_stage/MicrobeStage.tscn:1652
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:784
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1654
 msgid "IRON"
@@ -1035,190 +1035,196 @@ msgstr "Cilis"
 msgid "LYSOSOME"
 msgstr "Lisosoma"
 
-#: ../src/auto-evo/AutoEvoExploringTool.cs:580
+#: ../src/auto-evo/AutoEvoExploringTool.cs:588
 msgid "FINISH_X_GENERATIONS"
 msgstr "Acaba {0} Generacions"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:104
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:105
 msgid "CONFIG"
 msgstr "Configuració"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:112
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:113
 msgid "MAP"
 msgstr "Mapa"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:120
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:121
 #: ../src/microbe_stage/editor/MicrobeEditorTabButtons.tscn:113
 msgid "REPORT"
 msgstr "Informe"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:128
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:129
 msgid "VIEWER"
 msgstr "Visor"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:176
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:177
 #, fuzzy
 msgid "ALLOW_SPECIES_TO_NOT_MUTATE"
 msgstr "ha mutat"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:183
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:184
 #, fuzzy
 msgid "ALLOW_SPECIES_TO_NOT_MIGRATE"
 msgstr "Part de [b][u]{0}[/u][/b] població ha migrat a {1}"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:196
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:197
 msgid "BIODIVERSITY_ATTEMPT_FILL_CHANCE"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:216
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:217
 msgid "BIODIVERSITY_FROM_NEIGHBOUR_PATCH_CHANCE"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:230
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:231
 msgid "BIODIVERSITY_NEARBY_PATCH_IS_FREE_POPULATION"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:237
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:238
 msgid "BIODIVERSITY_SPLIT_IS_MUTATED"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:250
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:251
 msgid "LOW_BIODIVERSITY_LIMIT"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:268
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:269
 #, fuzzy
 msgid "MAXIMUM_SPECIES_IN_PATCH"
 msgstr "s'ha extingit de l'ecosistema"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:286
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:287
 msgid "MOVE_ATTEMPTS_PER_SPECIES"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:304
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:305
 #, fuzzy
 msgid "MUTATIONS_PER_SPECIES"
 msgstr "Punts de Mutació"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:322
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:323
 msgid "NEW_BIODIVERSITY_INCREASING_SPECIES_POPULATION"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:336
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:337
 msgid "PROTECT_MIGRATIONS_FROM_SPECIES_CAP"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:343
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:344
 msgid "PROTECT_NEW_CELLS_FROM_SPECIES_CAP"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:350
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:351
 msgid "REFUND_MIGRATIONS_IN_EXTINCTIONS"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:357
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:358
 msgid "STRICT_NICHE_COMPETITION"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:370
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:371
 msgid "SPECIES_SPLIT_BY_MUTATION_THRESHOLD_POPULATION_AMOUNT"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:390
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:391
 msgid "SPECIES_SPLIT_BY_MUTATION_THRESHOLD_POPULATION_FRACTION"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:402
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:403
 msgid "USE_BIODIVERSITY_FORCE_SPLIT"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:424
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:425
 #, fuzzy
 msgid "CURRENT_GENERATION_COLON"
 msgstr "Generació:"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:441
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:442
+#, fuzzy
+msgid "TOTAL_TIME_USED_COLON"
+msgstr "Artista:"
+
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:459
 #, fuzzy
 msgid "STATUS_COLON"
 msgstr "Artista:"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:448
-#: ../src/networking/MultiplayerGUI.cs:248
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:466
+#: ../src/networking/gui/MultiplayerGUI.cs:255
 #, fuzzy
 msgid "READY"
 msgstr "Fils:"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:479
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:497
 #, fuzzy
 msgid "FINISH_ONE_GENERATION"
 msgstr "amb la concentració de"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:485
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:503
 msgid "RUN_ONE_STEP"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:491
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:509
 #, fuzzy
 msgid "ABORT"
 msgstr "Avortat."
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:497
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:515
 msgid "PLAY_WITH_CURRENT_SETTING"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:539
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:557
 #, fuzzy
 msgid "GENERATIONS"
 msgstr "Generació:"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:546
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:564
 #, fuzzy
 msgid "SELECT_A_GENERATION"
 msgstr "Seleccionar Una Opció"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:580
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:598
 #, fuzzy
 msgid "SPECIES"
 msgstr "Espècies presents"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:587
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:605
 #, fuzzy
 msgid "SELECT_A_SPECIES"
 msgstr "Selecciona un Indret per a veure'n els detalls"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:688
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:706
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:282
 msgid "AUTO_EVO_RESULTS"
 msgstr "Resultats de l'algorisme Auto-Evo:"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:736
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:754
 #, fuzzy
 msgid "EVOLUTIONARY_TREE"
 msgstr "Per Revolutionary Games Studio"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:773
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:791
 #, fuzzy
 msgid "SPECIES_DETAILS"
 msgstr "Espècies presents"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:830
-#: ../src/general/MainMenu.tscn:413 ../src/general/MainMenu.tscn:519
-#: ../src/general/MainMenu.tscn:780 ../src/general/NewGameSettings.tscn:1183
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:848
+#: ../src/general/MainMenu.tscn:414 ../src/general/MainMenu.tscn:520
+#: ../src/general/MainMenu.tscn:781 ../src/general/NewGameSettings.tscn:1183
 #: ../src/general/OptionsMenu.tscn:1686 ../src/general/PauseMenu.tscn:268
 #: ../src/microbe_stage/gui/ExtinctionBox.tscn:76
-#: ../src/modding/ModManager.tscn:81 ../src/networking/MultiplayerGUI.tscn:138
+#: ../src/modding/ModManager.tscn:81
+#: ../src/networking/gui/MultiplayerGUI.tscn:138
 #: ../src/saving/NewSaveMenu.tscn:110 ../src/saving/SaveManagerGUI.tscn:120
 msgid "BACK"
 msgstr "Enrere"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:834
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:852
 #: ../src/general/PauseMenu.tscn:296
 #: ../src/thriveopedia/pages/ThriveopediaMuseumPage.tscn:176
 msgid "CONFIRM_EXIT"
 msgstr "Confirmar Sortida"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:835
-#: ../src/general/PauseMenu.cs:438
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:853
+#: ../src/general/PauseMenu.cs:440
 msgid "RETURN_TO_MENU_WARNING"
 msgstr ""
 "Estàs segur que vols sortir al menú principal?\n"
@@ -2127,7 +2133,7 @@ msgstr "Tancar"
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.cs:371
 #: ../src/microbe_stage/editor/tooltips/SelectionMenuToolTip.cs:264
 #: ../src/microbe_stage/gui/PatchDetailsPanel.cs:263
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:212
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:213
 msgid "PERCENTAGE_VALUE"
 msgstr "{0}%"
 
@@ -2139,7 +2145,7 @@ msgstr "{0} concentrations han disminuït per {1}"
 msgid "GLUCOSE_CONCENTRATIONS_DRASTICALLY_DROPPED"
 msgstr "Les concentracions de Glucosa han disminuït dràsticament!"
 
-#: ../src/general/MainMenu.cs:202 ../src/general/MainMenu.tscn:872
+#: ../src/general/MainMenu.cs:202 ../src/general/MainMenu.tscn:873
 #, fuzzy
 msgid "THANKS_FOR_BUYING_THRIVE"
 msgstr ""
@@ -2151,227 +2157,227 @@ msgstr ""
 msgid "STORE_LOGGED_IN_AS"
 msgstr "Registrat com a: {0}"
 
-#: ../src/general/MainMenu.tscn:246
+#: ../src/general/MainMenu.tscn:247
 msgid "NEW_GAME_BUTTON_TOOLTIP"
 msgstr "Començar un nou joc"
 
-#: ../src/general/MainMenu.tscn:249
+#: ../src/general/MainMenu.tscn:250
 msgid "NEW_GAME"
 msgstr "Nova partida"
 
-#: ../src/general/MainMenu.tscn:259 ../src/general/PauseMenu.tscn:201
+#: ../src/general/MainMenu.tscn:260 ../src/general/PauseMenu.tscn:201
 msgid "LOAD_GAME_BUTTON_TOOLTIP"
 msgstr "Carregar arxius de guardat previs"
 
-#: ../src/general/MainMenu.tscn:262 ../src/general/PauseMenu.tscn:202
+#: ../src/general/MainMenu.tscn:263 ../src/general/PauseMenu.tscn:202
 #: ../src/microbe_stage/gui/ExtinctionBox.tscn:146
 msgid "LOAD_GAME"
 msgstr "Carregar una partida"
 
-#: ../src/general/MainMenu.tscn:269 ../src/general/PauseMenu.tscn:225
+#: ../src/general/MainMenu.tscn:270 ../src/general/PauseMenu.tscn:225
 msgid "OPTIONS_BUTTON_TOOLTIP"
 msgstr "Canviar la configuració"
 
-#: ../src/general/MainMenu.tscn:273 ../src/general/PauseMenu.tscn:226
+#: ../src/general/MainMenu.tscn:274 ../src/general/PauseMenu.tscn:226
 msgid "OPTIONS"
 msgstr "Opcions"
 
-#: ../src/general/MainMenu.tscn:283
+#: ../src/general/MainMenu.tscn:284
 msgid "TOOLS"
 msgstr "Eines"
 
-#: ../src/general/MainMenu.tscn:293
+#: ../src/general/MainMenu.tscn:294
 msgid "VIEW_SOURCE_CODE"
 msgstr "Veure Codi Font"
 
-#: ../src/general/MainMenu.tscn:303
+#: ../src/general/MainMenu.tscn:304
 msgid "EXTRAS"
 msgstr "Extres"
 
-#: ../src/general/MainMenu.tscn:313
+#: ../src/general/MainMenu.tscn:314
 msgid "CREDITS"
 msgstr "Crèdits"
 
-#: ../src/general/MainMenu.tscn:320 ../src/general/MainMenu.tscn:330
+#: ../src/general/MainMenu.tscn:321 ../src/general/MainMenu.tscn:331
 #: ../src/general/PauseMenu.tscn:241
 msgid "QUIT_BUTTON_TOOLTIP"
 msgstr "Sortir del joc"
 
-#: ../src/general/MainMenu.tscn:323
+#: ../src/general/MainMenu.tscn:324
 #, fuzzy
 msgid "EXIT_TO_LAUNCHER"
 msgstr "Llançar E"
 
-#: ../src/general/MainMenu.tscn:334
+#: ../src/general/MainMenu.tscn:335
 msgid "QUIT"
 msgstr "Sortir"
 
-#: ../src/general/MainMenu.tscn:355
+#: ../src/general/MainMenu.tscn:356
 msgid "MICROBE_FREEBUILD_EDITOR"
 msgstr "Editor Lliure de Microbi"
 
-#: ../src/general/MainMenu.tscn:366
+#: ../src/general/MainMenu.tscn:367
 #, fuzzy
 msgid "AUTO_EVO_EXPLORING_TOOL"
 msgstr "estat d'execució:"
 
-#: ../src/general/MainMenu.tscn:435 ../src/general/PauseMenu.tscn:210
+#: ../src/general/MainMenu.tscn:436 ../src/general/PauseMenu.tscn:210
 msgid "THRIVEOPEDIA"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:450
+#: ../src/general/MainMenu.tscn:451
 msgid "MODS"
 msgstr "Mods"
 
-#: ../src/general/MainMenu.tscn:464
+#: ../src/general/MainMenu.tscn:465
 #, fuzzy
 msgid "MULTIPLAYER"
 msgstr "Num *"
 
-#: ../src/general/MainMenu.tscn:479
+#: ../src/general/MainMenu.tscn:480
 msgid "ART_GALLERY"
 msgstr "Galeria d'art"
 
-#: ../src/general/MainMenu.tscn:491
+#: ../src/general/MainMenu.tscn:492
 msgid "LICENSES"
 msgstr "Llicències"
 
-#: ../src/general/MainMenu.tscn:505 ../src/general/MainMenu.tscn:609
+#: ../src/general/MainMenu.tscn:506 ../src/general/MainMenu.tscn:610
 msgid "VISIT_SUGGESTIONS_SITE"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:546
+#: ../src/general/MainMenu.tscn:547
 #, fuzzy
 msgid "OFFICIAL_WEBSITE_BUTTON_TOOLTIP"
 msgstr "Suicidi"
 
-#: ../src/general/MainMenu.tscn:549
+#: ../src/general/MainMenu.tscn:550
 msgid "OFFICIAL_WEBSITE"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:558
+#: ../src/general/MainMenu.tscn:559
 #, fuzzy
 msgid "COMMUNITY_FORUM_BUTTON_TOOLTIP"
 msgstr "Entrar a l'editor i modificar la teva espècie"
 
-#: ../src/general/MainMenu.tscn:561
+#: ../src/general/MainMenu.tscn:562
 msgid "COMMUNITY_FORUM"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:570
+#: ../src/general/MainMenu.tscn:571
 #, fuzzy
 msgid "DEVELOPMENT_FORUM_BUTTON_TOOLTIP"
 msgstr "Entrar a l'editor i modificar la teva espècie"
 
-#: ../src/general/MainMenu.tscn:573
+#: ../src/general/MainMenu.tscn:574
 #, fuzzy
 msgid "DEVELOPMENT_FORUM"
 msgstr "Desenvolupament a càrred de Revolutionary Games Studio ry"
 
-#: ../src/general/MainMenu.tscn:582
+#: ../src/general/MainMenu.tscn:583
 #, fuzzy
 msgid "DEVELOPMENT_WIKI_BUTTON_TOOLTIP"
 msgstr "Ajuda"
 
-#: ../src/general/MainMenu.tscn:585
+#: ../src/general/MainMenu.tscn:586
 #, fuzzy
 msgid "DEVELOPMENT_WIKI"
 msgstr "Desenvolupadors"
 
-#: ../src/general/MainMenu.tscn:594
+#: ../src/general/MainMenu.tscn:595
 #, fuzzy
 msgid "COMMUNITY_WIKI_BUTTON_TOOLTIP"
 msgstr "Sortir del joc"
 
-#: ../src/general/MainMenu.tscn:597
+#: ../src/general/MainMenu.tscn:598
 #, fuzzy
 msgid "COMMUNITY_WIKI"
 msgstr "la nostra Wiki"
 
-#: ../src/general/MainMenu.tscn:628
+#: ../src/general/MainMenu.tscn:629
 #, fuzzy
 msgid "REVOLUTIONARY_GAMES_SOCIAL_TOOLTIP"
 msgstr "Per Revolutionary Games Studio"
 
-#: ../src/general/MainMenu.tscn:639
+#: ../src/general/MainMenu.tscn:640
 #, fuzzy
 msgid "STEAM_TOOLTIP"
 msgstr "Pausar el joc"
 
-#: ../src/general/MainMenu.tscn:650
+#: ../src/general/MainMenu.tscn:651
 #, fuzzy
 msgid "ITCH_TOOLTIP"
 msgstr "Sortir del joc"
 
-#: ../src/general/MainMenu.tscn:661
+#: ../src/general/MainMenu.tscn:662
 #, fuzzy
 msgid "PATREON_TOOLTIP"
 msgstr "Pausar el joc"
 
-#: ../src/general/MainMenu.tscn:672
+#: ../src/general/MainMenu.tscn:673
 #, fuzzy
 msgid "GITHUB_TOOLTIP"
 msgstr "Sortir del joc"
 
-#: ../src/general/MainMenu.tscn:683
+#: ../src/general/MainMenu.tscn:684
 #, fuzzy
 msgid "YOUTUBE_TOOLTIP"
 msgstr "Pausar el joc"
 
-#: ../src/general/MainMenu.tscn:694
+#: ../src/general/MainMenu.tscn:695
 #, fuzzy
 msgid "REDDIT_TOOLTIP"
 msgstr "Reprendre el joc"
 
-#: ../src/general/MainMenu.tscn:705
+#: ../src/general/MainMenu.tscn:706
 #, fuzzy
 msgid "DISCORD_TOOLTIP"
 msgstr "Han passat: {0:#,#} anys"
 
-#: ../src/general/MainMenu.tscn:716
+#: ../src/general/MainMenu.tscn:717
 #, fuzzy
 msgid "FACEBOOK_TOOLTIP"
 msgstr "Pausar el joc"
 
-#: ../src/general/MainMenu.tscn:727
+#: ../src/general/MainMenu.tscn:728
 #, fuzzy
 msgid "TWITTER_TOOLTIP"
 msgstr "Han passat: {0:#,#} anys"
 
-#: ../src/general/MainMenu.tscn:797
+#: ../src/general/MainMenu.tscn:798
 msgid "GLES2_MODE_WARNING"
 msgstr "Mode d'Alerta GLES2"
 
-#: ../src/general/MainMenu.tscn:799
+#: ../src/general/MainMenu.tscn:800
 msgid "GLES2_MODE_WARNING_TEXT"
 msgstr "Esteu executant el programa Thrive amb GLES2. Aquesta tecnologia encara no ha estat del tot validada i, per tant, pot originar alguns problemes. Intenteu actualitzar els vostres drivers de vídeo i/o forçar l'ús de gràfics AMD o Nvidia per executar Thrive."
 
-#: ../src/general/MainMenu.tscn:802
+#: ../src/general/MainMenu.tscn:803
 #, fuzzy
 msgid "NO_MODS_ENABLED"
 msgstr "Inhabilitat"
 
-#: ../src/general/MainMenu.tscn:815
+#: ../src/general/MainMenu.tscn:816
 msgid "MODS_INSTALLED_BUT_NOT_ENABLED"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:831
+#: ../src/general/MainMenu.tscn:832
 msgid "DO_NOT_SHOW_AGAIN"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:845 ../src/general/MainMenu.tscn:902
+#: ../src/general/MainMenu.tscn:846 ../src/general/MainMenu.tscn:903
 #: ../src/gui_common/dialogs/CustomConfirmationDialog.tscn:64
 #: ../src/gui_common/dialogs/ErrorDialog.tscn:118
 #: ../src/modding/ModUploader.tscn:357
 msgid "OK"
 msgstr "D'acord"
 
-#: ../src/general/MainMenu.tscn:849
+#: ../src/general/MainMenu.tscn:850
 #, fuzzy
 msgid "SAFE_MODE_TITLE"
 msgstr "Eliminar Dades Locals"
 
-#: ../src/general/MainMenu.tscn:851
+#: ../src/general/MainMenu.tscn:852
 #, fuzzy
 msgid "SAFE_MODE_EXPLANATION"
 msgstr ""
@@ -2380,20 +2386,20 @@ msgstr ""
 "Els microbis valents no se senten intimidats per depredadors propers\n"
 "i és més probable que contraataquin si són agredits."
 
-#: ../src/general/MainMenu.tscn:855
+#: ../src/general/MainMenu.tscn:856
 msgid "MOD_LOAD_ERRORS"
 msgstr "Errors en Carregar el Mod"
 
-#: ../src/general/MainMenu.tscn:856
+#: ../src/general/MainMenu.tscn:857
 msgid "MOD_LOAD_ERRORS_OCCURRED"
 msgstr "Hi han hagut errors en carregar un o més mods. Els logs poden tenir més informació."
 
-#: ../src/general/MainMenu.tscn:862
+#: ../src/general/MainMenu.tscn:863
 #, fuzzy
 msgid "THANK_YOU_TITLE"
 msgstr "HAS ACONSEGUIT PROSPERAR!"
 
-#: ../src/general/MainMenu.tscn:888
+#: ../src/general/MainMenu.tscn:889
 msgid "DISMISS_PERMANENTLY"
 msgstr ""
 
@@ -3121,7 +3127,7 @@ msgstr "Descartar i continuar"
 
 #: ../src/general/OptionsMenu.tscn:1826
 #: ../src/gui_common/dialogs/CustomConfirmationDialog.tscn:51
-#: ../src/modding/NewModGUI.tscn:472 ../src/networking/ServerSetup.tscn:173
+#: ../src/modding/NewModGUI.tscn:472 ../src/networking/gui/ServerSetup.tscn:207
 #: ../src/thriveopedia/fossilisation/FossilisationDialog.tscn:207
 msgid "CANCEL"
 msgstr "Cancel·lar"
@@ -3147,20 +3153,20 @@ msgstr "Intenta fer algunes captures de pantalla!"
 msgid "BACK_TO_GAME"
 msgstr "Nom d'usuari propi:"
 
-#: ../src/general/PauseMenu.cs:403 ../src/general/PauseMenu.tscn:186
+#: ../src/general/PauseMenu.cs:404 ../src/general/PauseMenu.tscn:186
 msgid "RESUME"
 msgstr "Reprendre"
 
-#: ../src/general/PauseMenu.cs:415
+#: ../src/general/PauseMenu.cs:416
 msgid "LEAVE"
 msgstr ""
 
-#: ../src/general/PauseMenu.cs:415 ../src/general/PauseMenu.tscn:234
+#: ../src/general/PauseMenu.cs:417 ../src/general/PauseMenu.tscn:234
 #: ../src/microbe_stage/gui/ExtinctionBox.tscn:155
 msgid "RETURN_TO_MENU"
 msgstr "Tornar al Menú"
 
-#: ../src/general/PauseMenu.cs:457
+#: ../src/general/PauseMenu.cs:459
 msgid "QUIT_GAME_WARNING"
 msgstr ""
 "Estàs segur que vols sortir del joc?\n"
@@ -3198,7 +3204,7 @@ msgstr "Tornar al menú principal"
 msgid "EXIT"
 msgstr "Sortir"
 
-#: ../src/general/Species.cs:281
+#: ../src/general/Species.cs:290
 msgid "SPECIES_DETAIL_TEXT"
 msgstr ""
 "[b]Espècies[/b]\n"
@@ -3530,42 +3536,6 @@ msgstr "Desenvolupament a càrred de Revolutionary Games Studio ry"
 msgid "DEVELOPERS"
 msgstr "Desenvolupadors"
 
-#: ../src/gui_common/NetPlayerList.tscn:87
-#, fuzzy
-msgid "PLAYER_NAME"
-msgstr "el jugador ha mort"
-
-#: ../src/gui_common/NetPlayerList.tscn:99
-msgid "SCORE"
-msgstr ""
-
-#: ../src/gui_common/NetPlayerList.tscn:109
-msgid "KILLS"
-msgstr ""
-
-#: ../src/gui_common/NetPlayerList.tscn:119
-#, fuzzy
-msgid "DEATHS"
-msgstr "mort"
-
-#: ../src/gui_common/NetPlayerLog.cs:112
-msgid "PLAYER_LOG_HOST_ATTRIBUTE"
-msgstr ""
-
-#: ../src/gui_common/NetPlayerLog.tscn:84
-#: ../src/gui_common/NetPlayerLog.tscn:99
-#: ../src/gui_common/NetPlayerLog.tscn:114
-#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:24
-#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:34
-#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:44
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2228
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2238
-#: ../src/microbe_stage/editor/MicrobePartSelection.tscn:140
-#: ../src/networking/NetPlayerInfo.cs:34 ../src/networking/NetPlayerInfo.cs:47
-#: ../src/networking/ServerSettings.cs:8
-msgid "N_A"
-msgstr "N/A"
-
 #: ../src/gui_common/PlaybackControls.tscn:107
 msgid "STOP"
 msgstr "Aturar"
@@ -3653,6 +3623,21 @@ msgstr "\"Raw\""
 #, fuzzy
 msgid "DEVBUILD_VERSION_INFO"
 msgstr "Partidaris Devbuilds"
+
+#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:24
+#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:34
+#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:44
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2228
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2238
+#: ../src/microbe_stage/editor/MicrobePartSelection.tscn:140
+#: ../src/networking/NetworkPlayerInfo.cs:53
+#: ../src/networking/NetworkPlayerInfo.cs:66
+#: ../src/networking/ServerSettings.cs:12
+#: ../src/networking/gui/NetworkPlayerLog.tscn:86
+#: ../src/networking/gui/NetworkPlayerLog.tscn:101
+#: ../src/networking/gui/NetworkPlayerLog.tscn:116
+msgid "N_A"
+msgstr "N/A"
 
 #: ../src/gui_common/art_gallery/GalleryDetailsTooltip.tscn:54
 msgid "DOUBLE_CLICK_TO_VIEW_IN_FULLSCREEN"
@@ -4228,19 +4213,19 @@ msgid "LOOKING_AT"
 msgstr "Mirant a:"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:543
-#: ../src/microbe_stage/MicrobeStage.tscn:752
+#: ../src/microbe_stage/MicrobeStage.tscn:753
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:760
 msgid "NOTHING_HERE"
 msgstr "No hi ha res a sota del Cursor"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:568
-#: ../src/microbe_stage/MicrobeStage.tscn:777
+#: ../src/microbe_stage/MicrobeStage.tscn:778
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:785
 msgid "COMPOUNDS_COLON"
 msgstr "Compostos:"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:608
-#: ../src/microbe_stage/MicrobeStage.tscn:817
+#: ../src/microbe_stage/MicrobeStage.tscn:818
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:825
 msgid "SPECIES_COLON"
 msgstr "Espècies:"
@@ -4250,31 +4235,31 @@ msgid "HOLD_TO_SHOW_CURSOR_ADVICE_TEXT"
 msgstr ""
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:690
-#: ../src/microbe_stage/MicrobeStage.tscn:897
+#: ../src/microbe_stage/MicrobeStage.tscn:898
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:903
 msgid "ENVIRONMENT"
 msgstr "Entorn"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:958
-#: ../src/microbe_stage/MicrobeStage.tscn:1165
+#: ../src/microbe_stage/MicrobeStage.tscn:1166
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1169
 msgid "TEMPERATURE_SHORT"
 msgstr "Temperatura"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1014
-#: ../src/microbe_stage/MicrobeStage.tscn:1221
+#: ../src/microbe_stage/MicrobeStage.tscn:1222
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1225
 msgid "LIGHT"
 msgstr "Llum"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1069
-#: ../src/microbe_stage/MicrobeStage.tscn:1276
+#: ../src/microbe_stage/MicrobeStage.tscn:1277
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1280
 msgid "PRESSURE_SHORT"
 msgstr "Pressió"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1156
-#: ../src/microbe_stage/MicrobeStage.tscn:1360
+#: ../src/microbe_stage/MicrobeStage.tscn:1361
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.cs:399
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:681
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:715
@@ -4284,7 +4269,7 @@ msgid "COMPOUNDS"
 msgstr "Compostos"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1529
-#: ../src/microbe_stage/MicrobeStage.tscn:1762
+#: ../src/microbe_stage/MicrobeStage.tscn:1763
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1765
 msgid "AGENTS"
 msgstr "Agents"
@@ -4303,7 +4288,7 @@ msgid "AWAKEN"
 msgstr "Despertar"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1750
-#: ../src/microbe_stage/MicrobeStage.tscn:1988
+#: ../src/microbe_stage/MicrobeStage.tscn:1989
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1966
 msgid "POPULATION_CAPITAL"
 msgstr "POBLACIÓ:"
@@ -4418,23 +4403,23 @@ msgstr "Estadístiques"
 msgid "SUICIDE_BUTTON_TOOLTIP"
 msgstr "Suicidi"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:902
+#: ../src/microbe_stage/Microbe.Contact.cs:897
 msgid "SUCCESSFUL_SCAVENGE"
 msgstr "acció carronyaire exitosa"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:909
+#: ../src/microbe_stage/Microbe.Contact.cs:904
 msgid "SUCCESSFUL_KILL"
 msgstr "acció de caça exitosa"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:1097
+#: ../src/microbe_stage/Microbe.Contact.cs:1090
 msgid "DEATH"
 msgstr "mort"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:1372
+#: ../src/microbe_stage/Microbe.Contact.cs:1328
 msgid "ESCAPE_ENGULFING"
 msgstr "evasió d'un intent d'engolició"
 
-#: ../src/microbe_stage/Microbe.Interior.cs:1126
+#: ../src/microbe_stage/Microbe.Interior.cs:1129
 msgid "REPRODUCED"
 msgstr "reproducció"
 
@@ -4514,26 +4499,26 @@ msgid "FOSSILISATION_HINT"
 msgstr ""
 
 #: ../src/microbe_stage/MicrobeHUD.cs:223
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:206
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:207
 msgid "DEVOURED"
 msgstr "Devorat"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:322
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:305
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:306
 msgid "STUFF_AT"
 msgstr "Matèria a les coordenades {0:F1}, {1:F1}:"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:414
-#: ../src/microbe_stage/MicrobeStage.tscn:1957
+#: ../src/microbe_stage/MicrobeStage.tscn:1958
 msgid "BECOME_MULTICELLULAR"
 msgstr "Esdevenir un Organisme Multicel·lular ({0}/{1})"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:450
-#: ../src/microbe_stage/MicrobeStage.tscn:1968
+#: ../src/microbe_stage/MicrobeStage.tscn:1969
 msgid "BECOME_MACROSCOPIC"
 msgstr "Esdevenir un Organisme Macroscòpic ({0}/{1})"
 
-#: ../src/microbe_stage/MicrobeSpecies.cs:182
+#: ../src/microbe_stage/MicrobeSpecies.cs:188
 msgid "MICROBE_SPECIES_DETAIL_TEXT"
 msgstr ""
 "[b]Estadi[/b]\n"
@@ -4549,34 +4534,34 @@ msgstr ""
 "[b]Mida d'Hexàgon Base[/b]\n"
 "  {4}"
 
-#: ../src/microbe_stage/MicrobeStage.cs:741
+#: ../src/microbe_stage/MicrobeStage.cs:749
 msgid "SPAWN_ENEMY_CHEAT_FAIL"
 msgstr "No es pot fer servir el truc de generar un enemic ja que aquest medi no conté cap espècie enemiga"
 
-#: ../src/microbe_stage/MicrobeStage.tscn:726
+#: ../src/microbe_stage/MicrobeStage.tscn:727
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:734
 msgid "AT_CURSOR"
 msgstr "A sota del Cursor:"
 
-#: ../src/microbe_stage/MicrobeStage.tscn:1701
+#: ../src/microbe_stage/MicrobeStage.tscn:1702
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1704
 msgid "INGESTED_MATTER"
 msgstr "Matèria Ingerida"
 
-#: ../src/microbe_stage/MicrobeStage.tscn:1953
+#: ../src/microbe_stage/MicrobeStage.tscn:1954
 msgid "MOVE_TO_MULTICELLULAR_STAGE_TOOLTIP"
 msgstr "Accedeix al següent estadi del joc (Multicel·lular). Disponible un cop comptes amb una colònia cel·lular prou gran."
 
-#: ../src/microbe_stage/MicrobeStage.tscn:2136
+#: ../src/microbe_stage/MicrobeStage.tscn:2137
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2121
 msgid "EDITOR_BUTTON_TOOLTIP"
 msgstr "Entrar a l'editor i modificar la teva espècie"
 
-#: ../src/microbe_stage/PatchMapGenerator.cs:808
+#: ../src/microbe_stage/PatchMapGenerator.cs:809
 msgid "PANGONIAN_REGION_NAME"
 msgstr "Pangonià"
 
-#: ../src/microbe_stage/PatchMapGenerator.cs:879
+#: ../src/microbe_stage/PatchMapGenerator.cs:880
 msgid "PATCH_NAME"
 msgstr "{0} {1}"
 
@@ -5125,59 +5110,52 @@ msgstr "HAS ACONSEGUIT PROSPERAR!"
 msgid "WIN_TEXT"
 msgstr "Enhorabona, has guanyat en la versió actual del joc! Si ho vols, un cop aquesta finestreta es tanqui, pots continuar jugant i fent evolucionar la teva espècie, o bé començar una nova partida en un nou món."
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:51
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:57
 msgid "JOINING_MICROBIAL_ARENA"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:524
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:520
 msgid "KILL_FEED_RIPPED_APART"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:527
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:523
 msgid "KILL_FEED_ENGULFED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:531
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:527
 msgid "KILL_FEED_POISONED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:543
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:539
 msgid "KILL_FEED_EVOLVED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:552
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:548
 msgid "KILL_FEED_SUICIDE"
 msgstr ""
 
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1993
-#, fuzzy
 msgid "MICROBIAL_ARENA_MAP_HINT"
-msgstr "Estadi de Microbi"
+msgstr ""
 
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2454
 msgid "SCOREBOARD_UPPERCASE"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:363
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:365
 msgid "GAME_OVER"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.cs:47
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:51
-msgid "MINUTES_LOWERCASE"
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:366
+msgid "VALUE_SLASH_MAX_VALUE"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:34
-#, fuzzy
-msgid "TIME_LIMIT"
-msgstr "Cronologia"
-
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:63
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:33
 #, fuzzy
 msgid "ARENA_RADIUS"
 msgstr "Radi de cerca:"
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:95
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:65
 #, fuzzy
 msgid "BIOME"
 msgstr "Bioma: {0}"
@@ -5650,279 +5628,326 @@ msgstr "Utilitzar Càrrega Auto Harmony"
 msgid "CREATE"
 msgstr "Crear"
 
-#: ../src/networking/ChatBox.tscn:71
-#, fuzzy
-msgid "TYPE_MESSAGE"
-msgstr "A mode de curiositat, la relació entre les cèl·lules de l'espècie Didinium i les cèl·lules Paramecium és un exemple típic i clar, que ha estat estudiat durant dècades, d'una relació entre depredador i presa. Ara bé, la teva espècie, és l'equivalent de Didinium o de Paramecium? Ets un depredador, o bé la presa?"
-
-#: ../src/networking/ChatBox.tscn:79
-#: ../src/networking/ChatBoxUndecorated.tscn:70
-msgid "SEND"
-msgstr ""
-
-#: ../src/networking/KickPlayerDialog.tscn:17
-msgid "KICK_PLAYER"
-msgstr ""
-
-#: ../src/networking/KickPlayerDialog.tscn:28
-msgid "REASON_FOR_KICK"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:169
-msgid "LOBBY_ATTRIBUTE_IN_PROGRESS"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:171
-msgid "LOBBY_ATTRIBUTE_PENDING"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:178
-msgid "MULTIPLAYER_PLAYER_IS_KICKED"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:179
-msgid "UNSPECIFIED_LOWERCASE"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:233
-#: ../src/networking/MultiplayerGUI.tscn:373
-#, fuzzy
-msgid "START"
-msgstr "Començant"
-
-#: ../src/networking/MultiplayerGUI.cs:246
-msgid "JOIN"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:365
-msgid "CONNECTING"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:366
-msgid "ESTABLISHING_CONNECTION_TO"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:375
-#: ../src/networking/MultiplayerGUI.cs:490
-#, fuzzy
-msgid "CONNECTION_FAILED"
-msgstr "Creació de Mod Fallida"
-
-#: ../src/networking/MultiplayerGUI.cs:376
-#: ../src/networking/MultiplayerGUI.cs:491
-msgid "FAILED_TO_ESTABLISH_CONNECTION"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:403
-#: ../src/networking/MultiplayerGUI.cs:415
-#, fuzzy
-msgid "HOSTING_FAILED"
-msgstr "Acció de guardat fallida! Hi ha hagut un problema"
-
-#: ../src/networking/MultiplayerGUI.cs:404
-#: ../src/networking/MultiplayerGUI.cs:416
-msgid "FAILED_TO_CREATE_SERVER"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:423
-#: ../src/networking/MultiplayerGUI.cs:549
-msgid "UPNP_SETUP"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:424
-msgid "UPNP_DISCOVERING_DEVICES"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:507
-#: ../src/networking/MultiplayerGUI.cs:510
-#: ../src/networking/MultiplayerGUI.cs:514
-#, fuzzy
-msgid "SERVER_DISCONNECTED"
-msgstr "Cèl·lules Desconnectades"
-
-#: ../src/networking/MultiplayerGUI.cs:507
-msgid "SERVER_IS_FULL"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:511
-msgid "NAME_IS_ALREADY_TAKEN"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:515
-msgid "CLOSED_BY_REMOTE_HOST"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:550
-msgid "UPNP_ERROR_WHILE_SETTING_UP"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:558
-#: ../src/networking/MultiplayerGUI.cs:573
-#, fuzzy
-msgid "PORT_FORWARDING"
-msgstr "Moure cap endavant"
-
-#: ../src/networking/MultiplayerGUI.cs:559
-msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:574
-#, fuzzy
-msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED"
-msgstr "L'intent d'escriure aquest arxiu de guardat ha fallat. És possible que el nom de guardat sigui massa llarg, o pot ser que no tinguis accés a la carpeta de guardat."
-
-#: ../src/networking/MultiplayerGUI.tscn:63 ../src/saving/NewSaveMenu.tscn:49
-msgid "NAME"
-msgstr "Nom:"
-
-#: ../src/networking/MultiplayerGUI.tscn:82
-msgid "ADDRESS"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.tscn:106
-#, fuzzy
-msgid "PORT"
-msgstr "Informe"
-
-#: ../src/networking/MultiplayerGUI.tscn:147
-msgid "HOST"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.tscn:155
-msgid "CONNECT"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.tscn:241
-#, fuzzy
-msgid "PLAYER_LIST"
-msgstr "Jugador Duplicat"
-
-#: ../src/networking/MultiplayerGUI.tscn:251
-#, fuzzy
-msgid "GAME_INFO"
-msgstr "Mostrar Més Informació"
-
-#: ../src/networking/MultiplayerGUI.tscn:336
-msgid "CHAT_ROOM"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.tscn:359
-#, fuzzy
-msgid "DISCONNECT"
-msgstr "Cèl·lules Desconnectades"
-
-#: ../src/networking/MultiplayerGUI.tscn:389
-msgid "KICKED"
-msgstr ""
-
 #: ../src/networking/MultiplayerGameMode.cs:70
 #, fuzzy
 msgid "MICROBIAL_ARENA_DESCRIPTION"
-msgstr "Estadi de Microbi"
+msgstr "Els filaments de cilis són similars als flagels, però en comptes de proporcional una força d'impuls direccional, proporcional una força rotacional per ajudar les cèl·lules a rotar."
 
-#: ../src/networking/MultiplayerStageBase.cs:97
+#: ../src/networking/MultiplayerStageBase.cs:154
 #, fuzzy
-msgid "PREPARING_DOT_DOT_DOT"
-msgstr "Creant..."
+msgid "WAITING_FOR_HOST"
+msgstr "S'està esperant l'algorisme auto-evo:"
 
-#: ../src/networking/MultiplayerStageBase.cs:193
-#, fuzzy
-msgid "LOADING_ENTITIES"
-msgstr "Prem el botó de 'desfer' per tal de corregir qualsevol equivocació"
-
-#: ../src/networking/NetPlayerInfo.cs:26
-msgid "IN_GAME_LOWERCASE"
+#: ../src/networking/NetworkManager.cs:111
+msgid "CLIENT_TIME_STEP_CHANGED"
 msgstr ""
 
-#: ../src/networking/NetPlayerInfo.cs:28
-msgid "IN_LOBBY_LOWERCASE"
-msgstr ""
-
-#: ../src/networking/NetPlayerInfo.cs:30
-msgid "JOINING_LOWERCASE"
-msgstr ""
-
-#: ../src/networking/NetPlayerInfo.cs:32
-msgid "LEAVING_LOWERCASE"
-msgstr ""
-
-#: ../src/networking/NetPlayerInfo.cs:43
-msgid "G_LETTER"
-msgstr ""
-
-#: ../src/networking/NetPlayerInfo.cs:45
-msgid "L_LETTER"
-msgstr ""
-
-#: ../src/networking/NetworkManager.cs:127
+#: ../src/networking/NetworkManager.cs:160
 msgid "GAME_TIME_MINUTES_SECONDS"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:374
+#: ../src/networking/NetworkManager.cs:407
 msgid "CHAT_PREFIX_AS_SYSTEM"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:459
+#: ../src/networking/NetworkManager.cs:624
 #, fuzzy
 msgid "PLAYER_HAS_DISCONNECTED"
-msgstr "Cèl·lules Desconnectades"
+msgstr "el jugador ha mort"
 
-#: ../src/networking/NetworkManager.cs:492
+#: ../src/networking/NetworkManager.cs:682
 #, fuzzy
 msgid "BAD_CONNECTION"
 msgstr "Correcció per daltonisme:"
 
-#: ../src/networking/NetworkManager.cs:496
+#: ../src/networking/NetworkManager.cs:686
 msgid "TIMEOUT"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:590
+#: ../src/networking/NetworkManager.cs:791
 #, fuzzy
 msgid "PLAYER_HAS_CONNECTED"
 msgstr ""
 "Jugador\n"
 "Velocitat"
 
-#: ../src/networking/NetworkManager.cs:745
+#: ../src/networking/NetworkManager.cs:893
+msgid "SERVER_TIME_STEP_CHANGED"
+msgstr ""
+
+#: ../src/networking/NetworkManager.cs:985
 #, fuzzy
 msgid "PLAYER_HAS_JOINED"
 msgstr "el jugador ha mort"
 
-#: ../src/networking/NetworkManager.cs:774
+#: ../src/networking/NetworkManager.cs:1014
 #, fuzzy
 msgid "PLAYER_HAS_LEFT"
+msgstr ""
+"Jugador\n"
+"Velocitat"
+
+#: ../src/networking/NetworkPlayerInfo.cs:45
+msgid "IN_GAME_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetworkPlayerInfo.cs:47
+msgid "IN_LOBBY_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetworkPlayerInfo.cs:49
+msgid "JOINING_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetworkPlayerInfo.cs:51
+msgid "LEAVING_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetworkPlayerInfo.cs:62
+msgid "G_LETTER"
+msgstr ""
+
+#: ../src/networking/NetworkPlayerInfo.cs:64
+msgid "L_LETTER"
+msgstr ""
+
+#: ../src/networking/gui/ChatBox.tscn:72
+#, fuzzy
+msgid "TYPE_MESSAGE"
+msgstr "A mode de curiositat, la relació entre les cèl·lules de l'espècie Didinium i les cèl·lules Paramecium és un exemple típic i clar, que ha estat estudiat durant dècades, d'una relació entre depredador i presa. Ara bé, la teva espècie, és l'equivalent de Didinium o de Paramecium? Ets un depredador, o bé la presa?"
+
+#: ../src/networking/gui/ChatBox.tscn:80
+#: ../src/networking/gui/ChatBoxUndecorated.tscn:71
+msgid "SEND"
+msgstr ""
+
+#: ../src/networking/gui/KickPlayerDialog.tscn:19
+msgid "KICK_PLAYER"
+msgstr ""
+
+#: ../src/networking/gui/KickPlayerDialog.tscn:30
+msgid "REASON_FOR_KICK"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:176
+msgid "LOBBY_ATTRIBUTE_IN_PROGRESS"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:178
+msgid "LOBBY_ATTRIBUTE_PENDING"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:185
+msgid "MULTIPLAYER_PLAYER_IS_KICKED"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:186
+msgid "UNSPECIFIED_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:240
+#: ../src/networking/gui/MultiplayerGUI.tscn:395
+#, fuzzy
+msgid "START"
+msgstr "Començant"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:254
+msgid "JOIN"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:313
+#: ../src/networking/gui/PingBar.cs:59
+msgid "PING_VALUE_MILISECONDS"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:380
+msgid "CONNECTING"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:381
+msgid "ESTABLISHING_CONNECTION_TO"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:390
+#: ../src/networking/gui/MultiplayerGUI.cs:505
+#, fuzzy
+msgid "CONNECTION_FAILED"
+msgstr "Creació de Mod Fallida"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:391
+#: ../src/networking/gui/MultiplayerGUI.cs:506
+msgid "FAILED_TO_ESTABLISH_CONNECTION"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:418
+#: ../src/networking/gui/MultiplayerGUI.cs:430
+#, fuzzy
+msgid "HOSTING_FAILED"
+msgstr "Acció de guardat fallida! Hi ha hagut un problema"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:419
+#: ../src/networking/gui/MultiplayerGUI.cs:431
+msgid "FAILED_TO_CREATE_SERVER"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:438
+#: ../src/networking/gui/MultiplayerGUI.cs:568
+msgid "UPNP_SETUP"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:439
+msgid "UPNP_DISCOVERING_DEVICES"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:522
+#: ../src/networking/gui/MultiplayerGUI.cs:525
+#: ../src/networking/gui/MultiplayerGUI.cs:529
+#, fuzzy
+msgid "SERVER_DISCONNECTED"
+msgstr "Cèl·lules Desconnectades"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:522
+msgid "SERVER_IS_FULL"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:526
+msgid "NAME_IS_ALREADY_TAKEN"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:530
+msgid "CLOSED_BY_REMOTE_HOST"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:569
+msgid "UPNP_ERROR_WHILE_SETTING_UP"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:577
+#: ../src/networking/gui/MultiplayerGUI.cs:592
+#, fuzzy
+msgid "PORT_FORWARDING"
+msgstr "Moure cap endavant"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:578
+msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:593
+#, fuzzy
+msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED"
+msgstr "L'intent d'escriure aquest arxiu de guardat ha fallat. És possible que el nom de guardat sigui massa llarg, o pot ser que no tinguis accés a la carpeta de guardat."
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:63
+#: ../src/saving/NewSaveMenu.tscn:49
+msgid "NAME"
+msgstr "Nom:"
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:82
+msgid "ADDRESS"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:106
+#, fuzzy
+msgid "PORT"
+msgstr "Informe"
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:147
+msgid "HOST"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:155
+msgid "CONNECT"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:246
+#, fuzzy
+msgid "PLAYER_LIST"
 msgstr "Jugador Duplicat"
 
-#: ../src/networking/ServerSetup.cs:118
+#: ../src/networking/gui/MultiplayerGUI.tscn:256
+#, fuzzy
+msgid "GAME_INFO"
+msgstr "Mostrar Més Informació"
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:358
+msgid "CHAT_ROOM"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:381
+#, fuzzy
+msgid "DISCONNECT"
+msgstr "Cèl·lules Desconnectades"
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:411
+msgid "KICKED"
+msgstr ""
+
+#: ../src/networking/gui/NetworkPlayerList.tscn:87
+#, fuzzy
+msgid "PLAYER_NAME"
+msgstr "Mostrar noms de botons de selecció de parts"
+
+#: ../src/networking/gui/NetworkPlayerList.tscn:99
+msgid "SCORE"
+msgstr ""
+
+#: ../src/networking/gui/NetworkPlayerList.tscn:109
+msgid "KILLS"
+msgstr ""
+
+#: ../src/networking/gui/NetworkPlayerList.tscn:119
+#, fuzzy
+msgid "DEATHS"
+msgstr "mort"
+
+#: ../src/networking/gui/NetworkPlayerLog.cs:126
+msgid "PLAYER_LOG_HOST_ATTRIBUTE"
+msgstr ""
+
+#: ../src/networking/gui/NetworkPlayerLog.tscn:129
+msgid "KICK"
+msgstr ""
+
+#: ../src/networking/gui/ServerSetup.cs:125
 #, fuzzy
 msgid "OPEN_WORLD"
 msgstr "Obrir Carpeta"
 
-#: ../src/networking/ServerSetup.tscn:24
+#: ../src/networking/gui/ServerSetup.cs:134
+#: ../src/networking/gui/ServerSetup.tscn:122
+msgid "MINUTES_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/gui/ServerSetup.tscn:27
 msgid "SERVER_SETUP"
 msgstr ""
 
-#: ../src/networking/ServerSetup.tscn:46
+#: ../src/networking/gui/ServerSetup.tscn:50
 #, fuzzy
 msgid "SERVER_NAME"
 msgstr "Mostrar noms de botons de selecció de parts"
 
-#: ../src/networking/ServerSetup.tscn:73
+#: ../src/networking/gui/ServerSetup.tscn:77
 #, fuzzy
 msgid "MAX_PLAYERS"
 msgstr "Màxims FPS:"
 
-#: ../src/networking/ServerSetup.tscn:104
+#: ../src/networking/gui/ServerSetup.tscn:105
+#, fuzzy
+msgid "TIME_LIMIT"
+msgstr "Cronologia"
+
+#: ../src/networking/gui/ServerSetup.tscn:138
 #, fuzzy
 msgid "USE_UPNP"
 msgstr "[center]Prémer [thrive:input]g_pause[/thrive:input] per despausar [/center]"
 
-#: ../src/networking/ServerSetup.tscn:131
+#: ../src/networking/gui/ServerSetup.tscn:165
 #, fuzzy
 msgid "GAME_MODE"
 msgstr "Mode Déu"
 
-#: ../src/networking/ServerSetup.tscn:167
+#: ../src/networking/gui/ServerSetup.tscn:201
 #, fuzzy
 msgid "CONFIRM"
 msgstr "Configuració"
@@ -6393,7 +6418,7 @@ msgstr ""
 msgid "THRIVEOPEDIA_MUSEUM_PAGE_TITLE"
 msgstr ""
 
-#: ../src/thriveopedia/pages/ThriveopediaMuseumPage.cs:129
+#: ../src/thriveopedia/pages/ThriveopediaMuseumPage.cs:132
 msgid "OPEN_FOSSIL_IN_FREEBUILD_WARNING"
 msgstr ""
 

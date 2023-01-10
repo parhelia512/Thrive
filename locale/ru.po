@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2022-12-18 11:31+0700\n"
+"POT-Creation-Date: 2023-01-10 14:15+0700\n"
 "PO-Revision-Date: 2022-12-09 20:00+0000\n"
 "Last-Translator: tabat-dectocoder <aliks234066aliks@gmail.com>\n"
 "Language-Team: Russian <https://translate.revolutionarygamesstudio.com/projects/thrive/thrive-game/ru/>\n"
@@ -43,7 +43,7 @@ msgstr "Набросок клетки"
 #: ../simulation_parameters/common/gallery.json:6
 #: ../simulation_parameters/common/gallery.json:141
 #: ../simulation_parameters/common/gallery.json:291
-#: ../src/networking/ServerSetup.cs:117
+#: ../src/networking/gui/ServerSetup.cs:124
 msgid "MICROBE_STAGE"
 msgstr "Одноклеточная стадия"
 
@@ -190,13 +190,15 @@ msgid "MICROBE_EDITOR_HELP_MESSAGE_2"
 msgstr ""
 "Внешние органеллы\n"
 "\n"
-"Жгутик: Двигает вашу клетку быстрее потребляя [thrive:compound type=\"atp\"][/thrive:compound]\n"
+"Жгутик: ускоряет движение вашей клетки, потребляя [thrive:compound type=\"atp\"][/thrive:compound]\n"
 "\n"
-"Пили: Может использоваться для прокалывания других клеток или для защиты от их токсинов\n"
+"Пиль: может использоваться для нанесения ударов по другим клеткам или для защиты от их токсинов\n"
 "\n"
-"Хеморецептор: Позволяет обнаруживать соединения на большом расстоянии\n"
+"Хеморецептор: позволяет обнаруживать соединения издалека\n"
 "\n"
-"Реснички: Увеличивают скорость поворота клетки"
+"Струя слизи: позволяет выделять [thrive:compound type=\"mucilage\"][/thrive:compound] (производится из [thrive:compound type=\"glucose\"][/thrive:compound]), чтобы ускорить вашу клетку\n"
+"\n"
+"Реснички: Увеличивает скорость вращения клеток"
 
 #: ../simulation_parameters/common/help_texts.json:82
 msgid "MICROBE_EDITOR_HELP_MESSAGE_3"
@@ -377,21 +379,21 @@ msgstr "Способности"
 
 #: ../simulation_parameters/common/input_options.json:40
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2068
-#: ../src/microbe_stage/MicrobeStage.tscn:2303
+#: ../src/microbe_stage/MicrobeStage.tscn:2304
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2303
 msgid "FIRE_TOXIN"
 msgstr "Выстрелить токсином"
 
 #: ../simulation_parameters/common/input_options.json:44
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2092
-#: ../src/microbe_stage/MicrobeStage.tscn:2349
+#: ../src/microbe_stage/MicrobeStage.tscn:2350
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2352
 msgid "SECRETE_SLIME"
 msgstr "Выделить слизь"
 
 #: ../simulation_parameters/common/input_options.json:48
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2054
-#: ../src/microbe_stage/MicrobeStage.tscn:2290
+#: ../src/microbe_stage/MicrobeStage.tscn:2291
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2289
 msgid "TOGGLE_ENGULF"
 msgstr "Переключить поглощение"
@@ -401,7 +403,7 @@ msgid "HOLD_PACK_COMMANDS_MENU"
 msgstr "Удерживайте, чтобы отобразить меню команд"
 
 #: ../simulation_parameters/common/input_options.json:56
-#: ../src/microbe_stage/MicrobeStage.tscn:2314
+#: ../src/microbe_stage/MicrobeStage.tscn:2315
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2315
 msgid "TOGGLE_BINDING"
 msgstr "Переключить связку"
@@ -411,7 +413,7 @@ msgid "TOGGLE_UNBINDING"
 msgstr "Переключить развязку"
 
 #: ../simulation_parameters/common/input_options.json:64
-#: ../src/microbe_stage/MicrobeStage.tscn:2326
+#: ../src/microbe_stage/MicrobeStage.tscn:2327
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2328
 msgid "UNBIND_ALL"
 msgstr "Отвязать всех"
@@ -779,7 +781,7 @@ msgstr "АТФ"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:17
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1306
-#: ../src/microbe_stage/MicrobeStage.tscn:1504
+#: ../src/microbe_stage/MicrobeStage.tscn:1505
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:678
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1507
 msgid "AMMONIA"
@@ -787,7 +789,7 @@ msgstr "Аммиак"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:32
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1358
-#: ../src/microbe_stage/MicrobeStage.tscn:1553
+#: ../src/microbe_stage/MicrobeStage.tscn:1554
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:749
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1556
 msgid "PHOSPHATE"
@@ -795,7 +797,7 @@ msgstr "Фосфат"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:47
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1410
-#: ../src/microbe_stage/MicrobeStage.tscn:1605
+#: ../src/microbe_stage/MicrobeStage.tscn:1606
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:643
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1608
 msgid "HYDROGEN_SULFIDE"
@@ -803,7 +805,7 @@ msgstr "Сероводород"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:62
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1254
-#: ../src/microbe_stage/MicrobeStage.tscn:1458
+#: ../src/microbe_stage/MicrobeStage.tscn:1459
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:713
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1461
 msgid "GLUCOSE"
@@ -811,21 +813,21 @@ msgstr "Глюкоза"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:77
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1589
-#: ../src/microbe_stage/MicrobeStage.tscn:1819
+#: ../src/microbe_stage/MicrobeStage.tscn:1820
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1822
 msgid "OXYTOXY_NT"
 msgstr "ОксиТоксин НТ"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:92
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1640
-#: ../src/microbe_stage/MicrobeStage.tscn:1867
+#: ../src/microbe_stage/MicrobeStage.tscn:1868
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1870
 msgid "MUCILAGE"
 msgstr "Слизь"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:109
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1462
-#: ../src/microbe_stage/MicrobeStage.tscn:1651
+#: ../src/microbe_stage/MicrobeStage.tscn:1652
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:784
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1654
 msgid "IRON"
@@ -1035,182 +1037,188 @@ msgstr "Ресничка"
 msgid "LYSOSOME"
 msgstr "Лизосома"
 
-#: ../src/auto-evo/AutoEvoExploringTool.cs:580
+#: ../src/auto-evo/AutoEvoExploringTool.cs:588
 msgid "FINISH_X_GENERATIONS"
 msgstr "Симулировать {0} поколений"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:104
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:105
 msgid "CONFIG"
 msgstr "Конфигурация"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:112
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:113
 msgid "MAP"
 msgstr "Карта"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:120
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:121
 #: ../src/microbe_stage/editor/MicrobeEditorTabButtons.tscn:113
 msgid "REPORT"
 msgstr "Отчёт"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:128
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:129
 msgid "VIEWER"
 msgstr "Просмотр"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:176
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:177
 msgid "ALLOW_SPECIES_TO_NOT_MUTATE"
 msgstr "Разрешить видам не мутировать (если не найдена хорошая мутация)"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:183
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:184
 msgid "ALLOW_SPECIES_TO_NOT_MIGRATE"
 msgstr "Разрешить видам не мигрировать (если не найдена хорошая миграция)"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:196
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:197
 msgid "BIODIVERSITY_ATTEMPT_FILL_CHANCE"
 msgstr "Шанс в каждом биоме с небольшим количеством видов (низкое биоразнообразие) создать новый вид"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:216
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:217
 msgid "BIODIVERSITY_FROM_NEIGHBOUR_PATCH_CHANCE"
 msgstr "Шанс появления нового вида из соседнего биома для увеличения биоразнообразия"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:230
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:231
 msgid "BIODIVERSITY_NEARBY_PATCH_IS_FREE_POPULATION"
 msgstr "Дополнительная популяция для видов из соседнего биома, увеличивающих биоразнообразие"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:237
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:238
 msgid "BIODIVERSITY_SPLIT_IS_MUTATED"
 msgstr "Мутировать вид, увеличивающий биоразнообразие, при создании"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:250
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:251
 msgid "LOW_BIODIVERSITY_LIMIT"
 msgstr "Считать биомы с таким или меньшим количеством видов биомами с низким биоразнообразием"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:268
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:269
 msgid "MAXIMUM_SPECIES_IN_PATCH"
 msgstr "Максимум видов в биоме перед искусственным вымиранием"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:286
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:287
 msgid "MOVE_ATTEMPTS_PER_SPECIES"
 msgstr "Попыток миграции на вид"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:304
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:305
 msgid "MUTATIONS_PER_SPECIES"
 msgstr "Попыток мутации на вид"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:322
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:323
 msgid "NEW_BIODIVERSITY_INCREASING_SPECIES_POPULATION"
 msgstr "Начальная популяция увеличивающих биоразнообразие видов"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:336
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:337
 msgid "PROTECT_MIGRATIONS_FROM_SPECIES_CAP"
 msgstr "Защищать только что мигрировавшие популяции от ограничения на виды"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:343
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:344
 msgid "PROTECT_NEW_CELLS_FROM_SPECIES_CAP"
 msgstr "Защищать только что созданные виды от ограничения на виды"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:350
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:351
 msgid "REFUND_MIGRATIONS_IN_EXTINCTIONS"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:357
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:358
 msgid "STRICT_NICHE_COMPETITION"
-msgstr ""
+msgstr "Жесткая конкуренция за экологическую нишу (различия в приспособленности преувеличены)"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:370
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:371
 msgid "SPECIES_SPLIT_BY_MUTATION_THRESHOLD_POPULATION_AMOUNT"
-msgstr ""
+msgstr "Минимальная популяция вида для разделения на несколько видов с хорошими мутациями"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:390
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:391
 msgid "SPECIES_SPLIT_BY_MUTATION_THRESHOLD_POPULATION_FRACTION"
-msgstr ""
+msgstr "Минимальная доля популяции вида, допускающая разделение по мутациям"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:402
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:403
 msgid "USE_BIODIVERSITY_FORCE_SPLIT"
-msgstr ""
+msgstr "Создание вида для увеличения биоразнообразия забирает часть популяции существующего вида"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:424
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:425
 #, fuzzy
 msgid "CURRENT_GENERATION_COLON"
 msgstr "Поколение:"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:441
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:442
+#, fuzzy
+msgid "TOTAL_TIME_USED_COLON"
+msgstr "Создатель:"
+
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:459
 #, fuzzy
 msgid "STATUS_COLON"
 msgstr "Создатель:"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:448
-#: ../src/networking/MultiplayerGUI.cs:248
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:466
+#: ../src/networking/gui/MultiplayerGUI.cs:255
 msgid "READY"
 msgstr "Готово"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:479
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:497
 msgid "FINISH_ONE_GENERATION"
 msgstr "Симулировать одно поколение"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:485
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:503
 msgid "RUN_ONE_STEP"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:491
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:509
 msgid "ABORT"
 msgstr "Отмена"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:497
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:515
 msgid "PLAY_WITH_CURRENT_SETTING"
 msgstr ""
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:539
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:557
 msgid "GENERATIONS"
 msgstr "Поколения"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:546
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:564
 #, fuzzy
 msgid "SELECT_A_GENERATION"
 msgstr "Выберите вариант"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:580
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:598
 #, fuzzy
 msgid "SPECIES"
 msgstr "Список Видов"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:587
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:605
 #, fuzzy
 msgid "SELECT_A_SPECIES"
 msgstr "Выберите биом для просмотра деталей"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:688
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:706
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:282
 msgid "AUTO_EVO_RESULTS"
 msgstr "Результаты авто-эво:"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:736
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:754
 #, fuzzy
 msgid "EVOLUTIONARY_TREE"
 msgstr "Автор: Revolutionary Games Studio"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:773
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:791
 #, fuzzy
 msgid "SPECIES_DETAILS"
 msgstr "Список Видов"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:830
-#: ../src/general/MainMenu.tscn:413 ../src/general/MainMenu.tscn:519
-#: ../src/general/MainMenu.tscn:780 ../src/general/NewGameSettings.tscn:1183
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:848
+#: ../src/general/MainMenu.tscn:414 ../src/general/MainMenu.tscn:520
+#: ../src/general/MainMenu.tscn:781 ../src/general/NewGameSettings.tscn:1183
 #: ../src/general/OptionsMenu.tscn:1686 ../src/general/PauseMenu.tscn:268
 #: ../src/microbe_stage/gui/ExtinctionBox.tscn:76
-#: ../src/modding/ModManager.tscn:81 ../src/networking/MultiplayerGUI.tscn:138
+#: ../src/modding/ModManager.tscn:81
+#: ../src/networking/gui/MultiplayerGUI.tscn:138
 #: ../src/saving/NewSaveMenu.tscn:110 ../src/saving/SaveManagerGUI.tscn:120
 msgid "BACK"
 msgstr "Назад"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:834
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:852
 #: ../src/general/PauseMenu.tscn:296
 #: ../src/thriveopedia/pages/ThriveopediaMuseumPage.tscn:176
 msgid "CONFIRM_EXIT"
 msgstr "Подтвердить выход"
 
-#: ../src/auto-evo/AutoEvoExploringTool.tscn:835
-#: ../src/general/PauseMenu.cs:438
+#: ../src/auto-evo/AutoEvoExploringTool.tscn:853
+#: ../src/general/PauseMenu.cs:440
 msgid "RETURN_TO_MENU_WARNING"
 msgstr ""
 "Вы действительно хотите вернуться в главное меню?\n"
@@ -1249,7 +1257,7 @@ msgstr "Популяция {0} изменена на {1} к {2}, по причи
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.cs:164
 #: ../src/microbe_stage/editor/TimelineTab.cs:203
 msgid "MEGA_YEARS"
-msgstr "Миллион Лет"
+msgstr "млн. лет"
 
 #: ../src/auto-evo/RunResults.cs:622
 msgid "POPULATION_COLON"
@@ -1600,7 +1608,7 @@ msgstr ""
 
 #: ../src/engine/input/ControllerDeadzoneConfiguration.cs:152
 msgid "DEADZONE_CALIBRATION_INPROGRESS"
-msgstr "Идет настройка мёртвых зон. Пожалуйста, не трогайте кнопки и стики на контроллере и подождите несколько секунд"
+msgstr "Идет настройка мёртвых зон. Пожалуйста, не трогайте кнопки и стики на контроллере и подождите несколько секунд."
 
 #: ../src/engine/input/ControllerDeadzoneConfiguration.cs:173
 msgid "DEADZONE_CALIBRATION_IS_RESET"
@@ -1617,9 +1625,8 @@ msgstr "Настройка мёртвых зон"
 #: ../src/engine/input/ControllerDeadzoneConfiguration.tscn:49
 msgid "CONTROLLER_DEADZONE_CALIBRATION_EXPLANATION"
 msgstr ""
-"Этот инструмент позволяет настроить мёртвые зоны на контроллере. Мёртвая зона обозначает насколько надо сдвинуть аналоговый стик (или аналоговую кнопку) прежде чем это движение будет засчитано как ввод.\n"
-"\n"
-"Перед началом калибрации подвигайте все стики контроллера и отпустите из, а затем нажмите и отпустите аналоговые кнопки (например курки) на контроллере."
+"Этот инструмент позволяет настроить мертвые зоны оси контроллера. Размеры мертвой зоны показывают, насколько нужно переместить стик (или аналоговую кнопку), прежде чем это движение будет обнаружено как ввод.\n"
+"Перед началом калибровки переместите все стики контроллера и отпустите их, а также нажмите и отпустите любые аналоговые кнопки (например, триггеры) на вашем контроллере."
 
 #: ../src/engine/input/ControllerDeadzoneConfiguration.tscn:66
 msgid "START_CALIBRATION"
@@ -2115,7 +2122,7 @@ msgstr "Закрыть"
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.cs:371
 #: ../src/microbe_stage/editor/tooltips/SelectionMenuToolTip.cs:264
 #: ../src/microbe_stage/gui/PatchDetailsPanel.cs:263
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:212
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:213
 msgid "PERCENTAGE_VALUE"
 msgstr "{0}%"
 
@@ -2127,260 +2134,261 @@ msgstr "Концентрация {0} снизилась на {1}"
 msgid "GLUCOSE_CONCENTRATIONS_DRASTICALLY_DROPPED"
 msgstr "Концентрация глюкозы резко упала!"
 
-#: ../src/general/MainMenu.cs:202 ../src/general/MainMenu.tscn:872
-#, fuzzy
+#: ../src/general/MainMenu.cs:202 ../src/general/MainMenu.tscn:873
 msgid "THANKS_FOR_BUYING_THRIVE"
 msgstr ""
-"Спасибо за игру!\n"
+"Благодарим вас за поддержку развития Thrive, купив эту копию Thrive!\n"
 "\n"
-"Если вам понравилась игра, расскажите о нас своим друзьям."
+"Если вы не покупали эту копию, получите собственную копию [color=#3796e1][url={0}]здесь[/url][/color] или зайдите на наш [color=#3796e1][url=https://revolutionarygamesstudio.com/releases/]сайт[/url][/color].\n"
+"\n"
+"Если вы хотите увидеть панель запуска Thrive перед запуском Thrive, вы можете использовать кнопку в главном меню, чтобы выйти в панель запуска, а затем отключить бесшовный режим в меню параметров программы запуска."
 
 #: ../src/general/MainMenu.cs:436
 msgid "STORE_LOGGED_IN_AS"
 msgstr "Авторизован как: {0}"
 
-#: ../src/general/MainMenu.tscn:246
+#: ../src/general/MainMenu.tscn:247
 msgid "NEW_GAME_BUTTON_TOOLTIP"
 msgstr "Начать новую игру"
 
-#: ../src/general/MainMenu.tscn:249
+#: ../src/general/MainMenu.tscn:250
 msgid "NEW_GAME"
 msgstr "Новая игра"
 
-#: ../src/general/MainMenu.tscn:259 ../src/general/PauseMenu.tscn:201
+#: ../src/general/MainMenu.tscn:260 ../src/general/PauseMenu.tscn:201
 msgid "LOAD_GAME_BUTTON_TOOLTIP"
 msgstr "Загрузить сохраненные игры"
 
-#: ../src/general/MainMenu.tscn:262 ../src/general/PauseMenu.tscn:202
+#: ../src/general/MainMenu.tscn:263 ../src/general/PauseMenu.tscn:202
 #: ../src/microbe_stage/gui/ExtinctionBox.tscn:146
 msgid "LOAD_GAME"
 msgstr "Загрузить игру"
 
-#: ../src/general/MainMenu.tscn:269 ../src/general/PauseMenu.tscn:225
+#: ../src/general/MainMenu.tscn:270 ../src/general/PauseMenu.tscn:225
 msgid "OPTIONS_BUTTON_TOOLTIP"
 msgstr "Сменить настройки"
 
-#: ../src/general/MainMenu.tscn:273 ../src/general/PauseMenu.tscn:226
+#: ../src/general/MainMenu.tscn:274 ../src/general/PauseMenu.tscn:226
 msgid "OPTIONS"
 msgstr "Настройки"
 
-#: ../src/general/MainMenu.tscn:283
+#: ../src/general/MainMenu.tscn:284
 msgid "TOOLS"
 msgstr "Инструменты"
 
-#: ../src/general/MainMenu.tscn:293
+#: ../src/general/MainMenu.tscn:294
 msgid "VIEW_SOURCE_CODE"
 msgstr "Открыть исходный код"
 
-#: ../src/general/MainMenu.tscn:303
+#: ../src/general/MainMenu.tscn:304
 msgid "EXTRAS"
 msgstr "Дополнительное"
 
-#: ../src/general/MainMenu.tscn:313
+#: ../src/general/MainMenu.tscn:314
 msgid "CREDITS"
 msgstr "Титры"
 
-#: ../src/general/MainMenu.tscn:320 ../src/general/MainMenu.tscn:330
+#: ../src/general/MainMenu.tscn:321 ../src/general/MainMenu.tscn:331
 #: ../src/general/PauseMenu.tscn:241
 msgid "QUIT_BUTTON_TOOLTIP"
 msgstr "Выйти из игры"
 
-#: ../src/general/MainMenu.tscn:323
+#: ../src/general/MainMenu.tscn:324
 #, fuzzy
 msgid "EXIT_TO_LAUNCHER"
 msgstr "Запуск E"
 
-#: ../src/general/MainMenu.tscn:334
+#: ../src/general/MainMenu.tscn:335
 msgid "QUIT"
 msgstr "Выйти"
 
-#: ../src/general/MainMenu.tscn:355
+#: ../src/general/MainMenu.tscn:356
 msgid "MICROBE_FREEBUILD_EDITOR"
 msgstr "Свободный микробный редактор"
 
-#: ../src/general/MainMenu.tscn:366
+#: ../src/general/MainMenu.tscn:367
 msgid "AUTO_EVO_EXPLORING_TOOL"
 msgstr "Инструмент изучения авто-эво"
 
-#: ../src/general/MainMenu.tscn:435 ../src/general/PauseMenu.tscn:210
+#: ../src/general/MainMenu.tscn:436 ../src/general/PauseMenu.tscn:210
 msgid "THRIVEOPEDIA"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:450
+#: ../src/general/MainMenu.tscn:451
 msgid "MODS"
 msgstr "Моды"
 
-#: ../src/general/MainMenu.tscn:464
+#: ../src/general/MainMenu.tscn:465
 #, fuzzy
 msgid "MULTIPLAYER"
 msgstr "Num*"
 
-#: ../src/general/MainMenu.tscn:479
+#: ../src/general/MainMenu.tscn:480
 msgid "ART_GALLERY"
 msgstr "Галерея изображений"
 
-#: ../src/general/MainMenu.tscn:491
+#: ../src/general/MainMenu.tscn:492
 msgid "LICENSES"
 msgstr "Лицензии"
 
-#: ../src/general/MainMenu.tscn:505 ../src/general/MainMenu.tscn:609
+#: ../src/general/MainMenu.tscn:506 ../src/general/MainMenu.tscn:610
 msgid "VISIT_SUGGESTIONS_SITE"
 msgstr "Предложить идею"
 
-#: ../src/general/MainMenu.tscn:546
+#: ../src/general/MainMenu.tscn:547
 #, fuzzy
 msgid "OFFICIAL_WEBSITE_BUTTON_TOOLTIP"
 msgstr "Самоубийство"
 
-#: ../src/general/MainMenu.tscn:549
+#: ../src/general/MainMenu.tscn:550
 msgid "OFFICIAL_WEBSITE"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:558
+#: ../src/general/MainMenu.tscn:559
 #, fuzzy
 msgid "COMMUNITY_FORUM_BUTTON_TOOLTIP"
 msgstr "Войдите в редактор для модификации видов"
 
-#: ../src/general/MainMenu.tscn:561
+#: ../src/general/MainMenu.tscn:562
 msgid "COMMUNITY_FORUM"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:570
+#: ../src/general/MainMenu.tscn:571
 #, fuzzy
 msgid "DEVELOPMENT_FORUM_BUTTON_TOOLTIP"
 msgstr "Войдите в редактор для модификации видов"
 
-#: ../src/general/MainMenu.tscn:573
+#: ../src/general/MainMenu.tscn:574
 #, fuzzy
 msgid "DEVELOPMENT_FORUM"
 msgstr "Разработка поддержана командой Revolutionary Games Studio ry"
 
-#: ../src/general/MainMenu.tscn:582
+#: ../src/general/MainMenu.tscn:583
 #, fuzzy
 msgid "DEVELOPMENT_WIKI_BUTTON_TOOLTIP"
 msgstr "Как играть в эту игру"
 
-#: ../src/general/MainMenu.tscn:585
+#: ../src/general/MainMenu.tscn:586
 #, fuzzy
 msgid "DEVELOPMENT_WIKI"
 msgstr "Разработчики"
 
-#: ../src/general/MainMenu.tscn:594
+#: ../src/general/MainMenu.tscn:595
 #, fuzzy
 msgid "COMMUNITY_WIKI_BUTTON_TOOLTIP"
 msgstr "Выйти из игры"
 
-#: ../src/general/MainMenu.tscn:597
+#: ../src/general/MainMenu.tscn:598
 #, fuzzy
 msgid "COMMUNITY_WIKI"
 msgstr "наша Wiki"
 
-#: ../src/general/MainMenu.tscn:628
+#: ../src/general/MainMenu.tscn:629
 #, fuzzy
 msgid "REVOLUTIONARY_GAMES_SOCIAL_TOOLTIP"
 msgstr "Автор: Revolutionary Games Studio"
 
-#: ../src/general/MainMenu.tscn:639
+#: ../src/general/MainMenu.tscn:640
 #, fuzzy
 msgid "STEAM_TOOLTIP"
 msgstr "Приостановить игру"
 
-#: ../src/general/MainMenu.tscn:650
+#: ../src/general/MainMenu.tscn:651
 #, fuzzy
 msgid "ITCH_TOOLTIP"
 msgstr "Выйти из игры"
 
-#: ../src/general/MainMenu.tscn:661
+#: ../src/general/MainMenu.tscn:662
 #, fuzzy
 msgid "PATREON_TOOLTIP"
 msgstr "Приостановить игру"
 
-#: ../src/general/MainMenu.tscn:672
+#: ../src/general/MainMenu.tscn:673
 #, fuzzy
 msgid "GITHUB_TOOLTIP"
 msgstr "Выйти из игры"
 
-#: ../src/general/MainMenu.tscn:683
+#: ../src/general/MainMenu.tscn:684
 #, fuzzy
 msgid "YOUTUBE_TOOLTIP"
 msgstr "Приостановить игру"
 
-#: ../src/general/MainMenu.tscn:694
+#: ../src/general/MainMenu.tscn:695
 #, fuzzy
 msgid "REDDIT_TOOLTIP"
 msgstr "Продолжить игру"
 
-#: ../src/general/MainMenu.tscn:705
-#, fuzzy
+#: ../src/general/MainMenu.tscn:706
 msgid "DISCORD_TOOLTIP"
-msgstr "Времени прошло: {0:#,#} лет"
+msgstr "Присоединяйтесь к нашему Discord серверу"
 
-#: ../src/general/MainMenu.tscn:716
+#: ../src/general/MainMenu.tscn:717
 #, fuzzy
 msgid "FACEBOOK_TOOLTIP"
 msgstr "Приостановить игру"
 
-#: ../src/general/MainMenu.tscn:727
-#, fuzzy
+#: ../src/general/MainMenu.tscn:728
 msgid "TWITTER_TOOLTIP"
-msgstr "Времени прошло: {0:#,#} лет"
+msgstr "Посетите нашу ленту в Twitter"
 
-#: ../src/general/MainMenu.tscn:797
+#: ../src/general/MainMenu.tscn:798
 msgid "GLES2_MODE_WARNING"
 msgstr "Предупреждение режима GLES2"
 
-#: ../src/general/MainMenu.tscn:799
+#: ../src/general/MainMenu.tscn:800
 msgid "GLES2_MODE_WARNING_TEXT"
 msgstr "Ты запустил Thrive через GLES2. Этот режим ещё не проверен и может вызвать проблемы. Попробуй обновить свои видеодрайвера и/или вручную используй AMD или Nvidia видеокарты для запуска Thrive."
 
-#: ../src/general/MainMenu.tscn:802
+#: ../src/general/MainMenu.tscn:803
 #, fuzzy
 msgid "NO_MODS_ENABLED"
 msgstr "Отключено"
 
-#: ../src/general/MainMenu.tscn:815
+#: ../src/general/MainMenu.tscn:816
 msgid "MODS_INSTALLED_BUT_NOT_ENABLED"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:831
+#: ../src/general/MainMenu.tscn:832
 msgid "DO_NOT_SHOW_AGAIN"
 msgstr ""
 
-#: ../src/general/MainMenu.tscn:845 ../src/general/MainMenu.tscn:902
+#: ../src/general/MainMenu.tscn:846 ../src/general/MainMenu.tscn:903
 #: ../src/gui_common/dialogs/CustomConfirmationDialog.tscn:64
 #: ../src/gui_common/dialogs/ErrorDialog.tscn:118
 #: ../src/modding/ModUploader.tscn:357
 msgid "OK"
 msgstr "ОК"
 
-#: ../src/general/MainMenu.tscn:849
+#: ../src/general/MainMenu.tscn:850
 #, fuzzy
 msgid "SAFE_MODE_TITLE"
 msgstr "Удаление Локальных Данных"
 
-#: ../src/general/MainMenu.tscn:851
-#, fuzzy
+#: ../src/general/MainMenu.tscn:852
 msgid "SAFE_MODE_EXPLANATION"
 msgstr ""
-"Боязливые микроорганизмы будут дальше убегать\n"
-"и более склонны к побегу от хищников в общем.\n"
-"Храбрые микроорганизмы не будут напуганы хищниками поблизости\n"
-"и более склонны атаковать в ответ."
+"Thrive запущен в безопасном режиме из-за предыдущей ошибки запуска.\n"
+"\n"
+"Вероятно, это было вызвано либо модом, либо видеоплеером. В качестве меры предосторожности загрузка включенных модов могла быть пропущена и/или воспроизведение видео может быть отключено. Это будет действовать до тех пор, пока Thrive не будет перезапущен.\n"
+"\n"
+"Перед перезапуском отключите все моды, которые могут быть проблематичными или несовместимыми с этой версией Thrive (вы можете прочитать журналы предыдущих запусков, чтобы узнать, был ли мод вероятным виновником).\n"
+"При проблемах, связанных с видеоплеером, используйте параметр запуска, чтобы принудительно отключить видео.\n"
+"\n"
+"Если вы не устраните проблему, вызывающую сбой при запуске, вам потребуется перезапустить Thrive несколько раз, чтобы вернуться в безопасный режим."
 
-#: ../src/general/MainMenu.tscn:855
+#: ../src/general/MainMenu.tscn:856
 msgid "MOD_LOAD_ERRORS"
 msgstr "Ошибки при загрузке модов"
 
-#: ../src/general/MainMenu.tscn:856
+#: ../src/general/MainMenu.tscn:857
 msgid "MOD_LOAD_ERRORS_OCCURRED"
 msgstr "Возникли ошибки при загрузке одного или нескольких модов. Журналы могут содержать дополнительную информацию."
 
-#: ../src/general/MainMenu.tscn:862
-#, fuzzy
+#: ../src/general/MainMenu.tscn:863
 msgid "THANK_YOU_TITLE"
-msgstr "ВЫ РАСЦВЕЛИ!"
+msgstr "Спасибо"
 
-#: ../src/general/MainMenu.tscn:888
+#: ../src/general/MainMenu.tscn:889
 msgid "DISMISS_PERMANENTLY"
 msgstr ""
 
@@ -2636,9 +2644,8 @@ msgid "GLES3"
 msgstr ""
 
 #: ../src/general/OptionsMenu.cs:800
-#, fuzzy
 msgid "UNKNOWN_DISPLAY_DRIVER"
-msgstr "Показать название кнопок выбора частей:"
+msgstr "Неизвестно"
 
 #: ../src/general/OptionsMenu.cs:809 ../src/general/OptionsMenu.tscn:510
 msgid "VIDEO_MEMORY_MIB"
@@ -2661,16 +2668,12 @@ msgid "LANGUAGE_TRANSLATION_PROGRESS"
 msgstr "Этот язык на {0}% завершён"
 
 #: ../src/general/OptionsMenu.cs:1332
-#, fuzzy
 msgid "UNCERTAIN_VERSION_WARNING"
-msgstr ""
-"Это сохранение из новых версий Thrive и скорее всего несовместимо.\n"
-"Всё равно попробовать загрузить сохранение?"
+msgstr "Это отладочная сборка, где приведенная ниже информация, вероятно, не актуальна"
 
 #: ../src/general/OptionsMenu.cs:1339
-#, fuzzy
 msgid "UNKNOWN_VERSION"
-msgstr "Версия мода:"
+msgstr "Неизвестная версия"
 
 #: ../src/general/OptionsMenu.tscn:160
 msgid "GRAPHICS"
@@ -3012,12 +3015,10 @@ msgid "OPEN_LOGS_FOLDER"
 msgstr "Открыть папку с логами"
 
 #: ../src/general/OptionsMenu.tscn:1563 ../src/general/OptionsMenu.tscn:1572
-#, fuzzy
 msgid "DISMISSED_POPUPS_EXPLANATION"
 msgstr ""
-"Целенаправленные микробы будут искать добычу на большем растоянии\n"
-"и будут соперничать за куски с большим рвением.\n"
-"Бдительные микробы будут быстрее переключаться на новые цели."
+"Это показывает, сколько всплывающих окон было навсегда отклонено пользователем.\n"
+"Если некоторые всплывающие окна, которые действительно нужны, будут отклонены, можно использовать кнопку рядом с этим, чтобы все отклоненные всплывающие окна снова появились."
 
 #: ../src/general/OptionsMenu.tscn:1565
 #, fuzzy
@@ -3100,7 +3101,7 @@ msgstr "Отменить и продолжить"
 
 #: ../src/general/OptionsMenu.tscn:1826
 #: ../src/gui_common/dialogs/CustomConfirmationDialog.tscn:51
-#: ../src/modding/NewModGUI.tscn:472 ../src/networking/ServerSetup.tscn:173
+#: ../src/modding/NewModGUI.tscn:472 ../src/networking/gui/ServerSetup.tscn:207
 #: ../src/thriveopedia/fossilisation/FossilisationDialog.tscn:207
 msgid "CANCEL"
 msgstr "Отмена"
@@ -3126,20 +3127,20 @@ msgstr "Попробуйте сделать скриншоты!"
 msgid "BACK_TO_GAME"
 msgstr "Кастомное имя пользователя:"
 
-#: ../src/general/PauseMenu.cs:403 ../src/general/PauseMenu.tscn:186
+#: ../src/general/PauseMenu.cs:404 ../src/general/PauseMenu.tscn:186
 msgid "RESUME"
 msgstr "Продолжить"
 
-#: ../src/general/PauseMenu.cs:415
+#: ../src/general/PauseMenu.cs:416
 msgid "LEAVE"
 msgstr ""
 
-#: ../src/general/PauseMenu.cs:415 ../src/general/PauseMenu.tscn:234
+#: ../src/general/PauseMenu.cs:417 ../src/general/PauseMenu.tscn:234
 #: ../src/microbe_stage/gui/ExtinctionBox.tscn:155
 msgid "RETURN_TO_MENU"
 msgstr "Вернуться в меню"
 
-#: ../src/general/PauseMenu.cs:457
+#: ../src/general/PauseMenu.cs:459
 msgid "QUIT_GAME_WARNING"
 msgstr ""
 "Вы действительно хотите выйти из игры?\n"
@@ -3177,7 +3178,7 @@ msgstr "Вернуться в главное меню"
 msgid "EXIT"
 msgstr "Выход"
 
-#: ../src/general/Species.cs:281
+#: ../src/general/Species.cs:290
 msgid "SPECIES_DETAIL_TEXT"
 msgstr ""
 "[b]Виды[/b]\n"
@@ -3264,15 +3265,29 @@ msgstr "Отключено"
 
 #: ../src/general/WorldGenerationSettings.cs:171
 #: ../src/thriveopedia/pages/ThriveopediaCurrentWorldPage.tscn:50
-#, fuzzy
 msgid "DIFFICULTY_DETAILS_STRING"
-msgstr "Шаблон сложности"
+msgstr ""
+"Заданная сложность: {0}\n"
+"Множитель стоимости мутации: {1}\n"
+"Скорость мутации ИИ: {2}\n"
+"Сложная плотность облаков: {3}\n"
+"Штраф за смерть игрока: {4}\n"
+"Количество глюкозы в окружающей среде: {5}\n"
+"Множитель стоимости осморегуляции: {6}\n"
+"Бесплатное облако глюкозы при выходе из редактора: {7}\n"
+"Пассивно получить прогресс воспроизведения: {8}\n"
+"Ограничить использование соединений роста: {9}"
 
 #: ../src/general/WorldGenerationSettings.cs:189
 #: ../src/thriveopedia/pages/ThriveopediaCurrentWorldPage.tscn:78
-#, fuzzy
 msgid "PLANET_DETAILS_STRING"
-msgstr "Открыть Папку с Логами"
+msgstr ""
+"Тип карты исправления: {0}\n"
+"Только LAWK: {1}\n"
+"Происхождение жизни: {2}\n"
+"Цикл дня и ночи: {3}\n"
+"Продолжительность дня(в секундах): {4} \n"
+"Случайное начальное число планеты: {5}"
 
 #: ../src/general/WorldGenerationSettings.cs:203
 #: ../src/thriveopedia/pages/ThriveopediaCurrentWorldPage.tscn:106
@@ -3509,42 +3524,6 @@ msgstr "Разработка поддержана командой Revolutionary
 msgid "DEVELOPERS"
 msgstr "Разработчики"
 
-#: ../src/gui_common/NetPlayerList.tscn:87
-#, fuzzy
-msgid "PLAYER_NAME"
-msgstr "Показать название кнопок выбора частей:"
-
-#: ../src/gui_common/NetPlayerList.tscn:99
-msgid "SCORE"
-msgstr ""
-
-#: ../src/gui_common/NetPlayerList.tscn:109
-msgid "KILLS"
-msgstr ""
-
-#: ../src/gui_common/NetPlayerList.tscn:119
-#, fuzzy
-msgid "DEATHS"
-msgstr "смерть"
-
-#: ../src/gui_common/NetPlayerLog.cs:112
-msgid "PLAYER_LOG_HOST_ATTRIBUTE"
-msgstr ""
-
-#: ../src/gui_common/NetPlayerLog.tscn:84
-#: ../src/gui_common/NetPlayerLog.tscn:99
-#: ../src/gui_common/NetPlayerLog.tscn:114
-#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:24
-#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:34
-#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:44
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2228
-#: ../src/microbe_stage/editor/CellEditorComponent.cs:2238
-#: ../src/microbe_stage/editor/MicrobePartSelection.tscn:140
-#: ../src/networking/NetPlayerInfo.cs:34 ../src/networking/NetPlayerInfo.cs:47
-#: ../src/networking/ServerSettings.cs:8
-msgid "N_A"
-msgstr "Нет данных"
-
 #: ../src/gui_common/PlaybackControls.tscn:107
 msgid "STOP"
 msgstr "Cтоп"
@@ -3629,9 +3608,26 @@ msgid "RAW"
 msgstr "\"Raw\""
 
 #: ../src/gui_common/VersionNumber.cs:38
-#, fuzzy
 msgid "DEVBUILD_VERSION_INFO"
-msgstr "Devbuild-Спонсоры"
+msgstr ""
+"DevBuild {0}\n"
+"на ветке {1} по адресу {2}\n"
+"{3}"
+
+#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:24
+#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:34
+#: ../src/gui_common/art_gallery/GalleryDetailsTooltip.cs:44
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2228
+#: ../src/microbe_stage/editor/CellEditorComponent.cs:2238
+#: ../src/microbe_stage/editor/MicrobePartSelection.tscn:140
+#: ../src/networking/NetworkPlayerInfo.cs:53
+#: ../src/networking/NetworkPlayerInfo.cs:66
+#: ../src/networking/ServerSettings.cs:12
+#: ../src/networking/gui/NetworkPlayerLog.tscn:86
+#: ../src/networking/gui/NetworkPlayerLog.tscn:101
+#: ../src/networking/gui/NetworkPlayerLog.tscn:116
+msgid "N_A"
+msgstr "Нет данных"
 
 #: ../src/gui_common/art_gallery/GalleryDetailsTooltip.tscn:54
 msgid "DOUBLE_CLICK_TO_VIEW_IN_FULLSCREEN"
@@ -3838,7 +3834,7 @@ msgstr "Превращает [thrive:compound type=\"=glucose\"][/thrive:compoun
 
 #: ../src/gui_common/tooltip/ToolTipManager.tscn:287
 msgid "CYTOPLASM_DESCRIPTION"
-msgstr "Липкие внутренности клетки. Цитоплазма - это полужидкое содержимое клетки из смеси ионов, белков и других веществ, которые заполняют внутреннюю часть клетки. Одна из функций, которую она выполняет - это преобразование глюкозы в энергию АТФ. У клеток, в которых отсутствуют органеллы для более продвинутого метаболизма, цитоплазма является основным источником энергии. Она также используется для хранения молекул в клетке и увеличения размера клетки."
+msgstr "Липкие внутренности клетки. Цитоплазма представляет собой основную смесь растворенных в воде ионов, белков и других веществ, заполняющих внутреннюю часть клетки. Одной из функций, которые он выполняет, является [b]гликолиз[/b], превращение [thrive:compound type=\"glucose\"][/thrive:compound] в [thrive:compound type=\"atp\"][/thrive:compound]. Для клеток, которым не хватает органелл, чтобы иметь более продвинутый метаболизм, это то, на что они полагаются для получения энергии. Он также используется для хранения молекул в клетке и для увеличения размера клетки."
 
 #: ../src/gui_common/tooltip/ToolTipManager.tscn:304
 #: ../src/gui_common/tooltip/ToolTipManager.tscn:407
@@ -3963,7 +3959,7 @@ msgstr "Использует [thrive:compound type=\"atp\"][/thrive:compound] ч
 
 #: ../src/gui_common/tooltip/ToolTipManager.tscn:1104
 msgid "FLAGELLUM_DESCRIPTION"
-msgstr "Жгутик (множественное число: жгутики) представляет собой похожий на хлыст пучок белковых волокон, отходящих от клеточной мембраны, которые используют АТФ для волнообразного движения и продвижения клетки в определенном направлении. Положение жгутика определяет направление, в котором он обеспечивает тягу для движения клетки. Направление тяги противоположно направлению, в котором направлен жгутик, например, жгутик, расположенный на левой стороне клетки, обеспечивает тягу при движении вправо."
+msgstr "Жгутик представляет собой похожий на хлыст пучок белковых волокон, отходящих от клеточной мембраны, которые используют [thrive:compound type=\"atp\"][/thrive:compound] для волнообразного движения и продвижения клетки в определенном направлении. Положение жгутика определяет направление, в котором он обеспечивает тягу для движения клетки. Направление тяги противоположно направлению, в котором направлен жгутик. Например, жгутик, расположенный на левой стороне клетки, обеспечивает тягу при движении вправо."
 
 #: ../src/gui_common/tooltip/ToolTipManager.tscn:1121
 msgid "SPEED"
@@ -4023,7 +4019,7 @@ msgstr "Превращает [thrive:compound type=\"glucose\"][/thrive:compound
 
 #: ../src/gui_common/tooltip/ToolTipManager.tscn:1667
 msgid "MITOCHONDRION_DESCRIPTION"
-msgstr "Электростанция клетки. Митохондрия — двумембранная органелла, заполненная белками и ферментами. Это прокариота, которая была ассимилирована для использования её эукариотическим хозяином. Она способна превращать [thrive:compound type=\"glucose\"][/thrive:compound] в [thrive:compound type=\"atp\"][/thrive:compound] с гораздо более высокой эффективностью, чем это может быть сделано в цитоплазме, в процессе, называемом [b]аэробное дыхание[/b]. Однако для её функционирования требуется [thrive:compound type=\"oxygen\"][/thrive:compound], и более низкое содержание [thrive:compound type=\"oxygen\"][/thrive:compound] в атмосфере замедлят скорость её выработки [thrive:compound type=\"atp\"][/thrive:compound]."
+msgstr "Электростанция клетки. Митохондрия — двумембранная органелла, заполненная белками и ферментами. Это прокариота, которая была ассимилирована для использования её эукариотическим хозяином. Она способна превращать [thrive:compound type=\"glucose\"][/thrive:compound] в [thrive:compound type=\"atp\"][/thrive:compound] с гораздо более высокой эффективностью, чем это может быть сделано в цитоплазме, в процессе, называемом [b]аэробным дыханием[/b]. Однако для её функционирования требуется [thrive:compound type=\"oxygen\"][/thrive:compound], и более низкое содержание [thrive:compound type=\"oxygen\"][/thrive:compound] в атмосфере замедлят скорость её выработки [thrive:compound type=\"atp\"][/thrive:compound]."
 
 #: ../src/gui_common/tooltip/ToolTipManager.tscn:1751
 msgid "CHLOROPLAST_PROCESSES_DESCRIPTION"
@@ -4205,19 +4201,19 @@ msgid "LOOKING_AT"
 msgstr "Смотрите на:"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:543
-#: ../src/microbe_stage/MicrobeStage.tscn:752
+#: ../src/microbe_stage/MicrobeStage.tscn:753
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:760
 msgid "NOTHING_HERE"
 msgstr "Здесь ничего нет"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:568
-#: ../src/microbe_stage/MicrobeStage.tscn:777
+#: ../src/microbe_stage/MicrobeStage.tscn:778
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:785
 msgid "COMPOUNDS_COLON"
 msgstr "Соединения:"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:608
-#: ../src/microbe_stage/MicrobeStage.tscn:817
+#: ../src/microbe_stage/MicrobeStage.tscn:818
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:825
 msgid "SPECIES_COLON"
 msgstr "Виды:"
@@ -4227,31 +4223,31 @@ msgid "HOLD_TO_SHOW_CURSOR_ADVICE_TEXT"
 msgstr ""
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:690
-#: ../src/microbe_stage/MicrobeStage.tscn:897
+#: ../src/microbe_stage/MicrobeStage.tscn:898
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:903
 msgid "ENVIRONMENT"
 msgstr "Окружающая среда"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:958
-#: ../src/microbe_stage/MicrobeStage.tscn:1165
+#: ../src/microbe_stage/MicrobeStage.tscn:1166
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1169
 msgid "TEMPERATURE_SHORT"
 msgstr "Темп."
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1014
-#: ../src/microbe_stage/MicrobeStage.tscn:1221
+#: ../src/microbe_stage/MicrobeStage.tscn:1222
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1225
 msgid "LIGHT"
 msgstr "Свет"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1069
-#: ../src/microbe_stage/MicrobeStage.tscn:1276
+#: ../src/microbe_stage/MicrobeStage.tscn:1277
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1280
 msgid "PRESSURE_SHORT"
 msgstr "Давл."
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1156
-#: ../src/microbe_stage/MicrobeStage.tscn:1360
+#: ../src/microbe_stage/MicrobeStage.tscn:1361
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.cs:399
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:681
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:715
@@ -4261,7 +4257,7 @@ msgid "COMPOUNDS"
 msgstr "Соединения"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1529
-#: ../src/microbe_stage/MicrobeStage.tscn:1762
+#: ../src/microbe_stage/MicrobeStage.tscn:1763
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1765
 msgid "AGENTS"
 msgstr "Химические Агенты"
@@ -4279,7 +4275,7 @@ msgid "AWAKEN"
 msgstr "Пробудить"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1750
-#: ../src/microbe_stage/MicrobeStage.tscn:1988
+#: ../src/microbe_stage/MicrobeStage.tscn:1989
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1966
 msgid "POPULATION_CAPITAL"
 msgstr "ПОПУЛЯЦИЯ:"
@@ -4385,23 +4381,23 @@ msgstr "Статистика"
 msgid "SUICIDE_BUTTON_TOOLTIP"
 msgstr "Самоубийство"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:902
+#: ../src/microbe_stage/Microbe.Contact.cs:897
 msgid "SUCCESSFUL_SCAVENGE"
 msgstr "успешное ограбление"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:909
+#: ../src/microbe_stage/Microbe.Contact.cs:904
 msgid "SUCCESSFUL_KILL"
 msgstr "успешное убийство"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:1097
+#: ../src/microbe_stage/Microbe.Contact.cs:1090
 msgid "DEATH"
 msgstr "смерть"
 
-#: ../src/microbe_stage/Microbe.Contact.cs:1372
+#: ../src/microbe_stage/Microbe.Contact.cs:1328
 msgid "ESCAPE_ENGULFING"
 msgstr "избежали поглощение"
 
-#: ../src/microbe_stage/Microbe.Interior.cs:1126
+#: ../src/microbe_stage/Microbe.Interior.cs:1129
 msgid "REPRODUCED"
 msgstr "Воспроизведено"
 
@@ -4480,27 +4476,27 @@ msgid "FOSSILISATION_HINT"
 msgstr ""
 
 #: ../src/microbe_stage/MicrobeHUD.cs:223
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:206
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:207
 #, fuzzy
 msgid "DEVOURED"
 msgstr "Съеденный"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:322
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:305
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:306
 msgid "STUFF_AT"
 msgstr "Вещи в {0:F1}, {1:F1}:"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:414
-#: ../src/microbe_stage/MicrobeStage.tscn:1957
+#: ../src/microbe_stage/MicrobeStage.tscn:1958
 msgid "BECOME_MULTICELLULAR"
 msgstr "Стать многоклеточным ({0}/{1})"
 
 #: ../src/microbe_stage/MicrobeHUD.cs:450
-#: ../src/microbe_stage/MicrobeStage.tscn:1968
+#: ../src/microbe_stage/MicrobeStage.tscn:1969
 msgid "BECOME_MACROSCOPIC"
 msgstr "Стать макроскопическим ({0}/{1})"
 
-#: ../src/microbe_stage/MicrobeSpecies.cs:182
+#: ../src/microbe_stage/MicrobeSpecies.cs:188
 msgid "MICROBE_SPECIES_DETAIL_TEXT"
 msgstr ""
 "[b]Этап[/b]\n"
@@ -4516,34 +4512,34 @@ msgstr ""
 "[b]Базовый размер (в клетках)[/b]\n"
 "  {4}"
 
-#: ../src/microbe_stage/MicrobeStage.cs:741
+#: ../src/microbe_stage/MicrobeStage.cs:749
 msgid "SPAWN_ENEMY_CHEAT_FAIL"
 msgstr "Невозможно использовать чит Создать Противника, так как этот биом не содержит каких-либо видов противников"
 
-#: ../src/microbe_stage/MicrobeStage.tscn:726
+#: ../src/microbe_stage/MicrobeStage.tscn:727
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:734
 msgid "AT_CURSOR"
 msgstr "Вы смотрите на:"
 
-#: ../src/microbe_stage/MicrobeStage.tscn:1701
+#: ../src/microbe_stage/MicrobeStage.tscn:1702
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1704
 msgid "INGESTED_MATTER"
 msgstr "Поглощённая материя"
 
-#: ../src/microbe_stage/MicrobeStage.tscn:1953
+#: ../src/microbe_stage/MicrobeStage.tscn:1954
 msgid "MOVE_TO_MULTICELLULAR_STAGE_TOOLTIP"
 msgstr "Перейти к следующему этапу игры (многоклеточному). Доступно после сбора достаточно большой колонии."
 
-#: ../src/microbe_stage/MicrobeStage.tscn:2136
+#: ../src/microbe_stage/MicrobeStage.tscn:2137
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2121
 msgid "EDITOR_BUTTON_TOOLTIP"
 msgstr "Войдите в редактор для модификации видов"
 
-#: ../src/microbe_stage/PatchMapGenerator.cs:808
+#: ../src/microbe_stage/PatchMapGenerator.cs:809
 msgid "PANGONIAN_REGION_NAME"
 msgstr "Пангонский"
 
-#: ../src/microbe_stage/PatchMapGenerator.cs:879
+#: ../src/microbe_stage/PatchMapGenerator.cs:880
 msgid "PATCH_NAME"
 msgstr "{0} {1}"
 
@@ -4657,7 +4653,7 @@ msgstr "Энергия в {0} для {1}"
 
 #: ../src/microbe_stage/editor/CellEditorComponent.cs:2342
 msgid "ENERGY_SUMMARY_LINE"
-msgstr "Общая собранная энергия равна {0} с индивидуальными затратами {1}, что приводит к нескорректированному населению {2}"
+msgstr "Общая собранная энергия равна {0} с индивидуальными затратами {1}, результатом чего является нескорректированная популяция количеством в {2}"
 
 #: ../src/microbe_stage/editor/CellEditorComponent.cs:2349
 msgid "ENERGY_SOURCES"
@@ -5090,59 +5086,52 @@ msgstr "ВЫ РАСЦВЕЛИ!"
 msgid "WIN_TEXT"
 msgstr "Поздравляем, вы выиграли эту версию Thrive! Вы можете продолжить игру после закрытия этого экрана, если хотите, или начать новую игру в новом мире."
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:51
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:57
 msgid "JOINING_MICROBIAL_ARENA"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:524
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:520
 msgid "KILL_FEED_RIPPED_APART"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:527
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:523
 msgid "KILL_FEED_ENGULFED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:531
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:527
 msgid "KILL_FEED_POISONED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:543
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:539
 msgid "KILL_FEED_EVOLVED"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:552
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.cs:548
 msgid "KILL_FEED_SUICIDE"
 msgstr ""
 
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1993
-#, fuzzy
 msgid "MICROBIAL_ARENA_MAP_HINT"
-msgstr "Одноклеточная стадия"
+msgstr ""
 
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2454
 msgid "SCOREBOARD_UPPERCASE"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:363
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:365
 msgid "GAME_OVER"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.cs:47
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:51
-msgid "MINUTES_LOWERCASE"
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:366
+msgid "VALUE_SLASH_MAX_VALUE"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:34
-#, fuzzy
-msgid "TIME_LIMIT"
-msgstr "Временная Шкала"
-
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:63
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:33
 #, fuzzy
 msgid "ARENA_RADIUS"
 msgstr "Радиус Поиска:"
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:95
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaOptionsGUI.tscn:65
 #, fuzzy
 msgid "BIOME"
 msgstr "Биом: {0}"
@@ -5615,279 +5604,326 @@ msgstr "Использовать автозагрузку Harmony"
 msgid "CREATE"
 msgstr "Создать"
 
-#: ../src/networking/ChatBox.tscn:71
-#, fuzzy
-msgid "TYPE_MESSAGE"
-msgstr "Забавный Факт: Дидинии и Парамеции - наглядный пример взаимоотношений \"хищник - жертва\", которые изучали на протяжении десятилетий. А кто же вы - хищник или жертва?"
-
-#: ../src/networking/ChatBox.tscn:79
-#: ../src/networking/ChatBoxUndecorated.tscn:70
-msgid "SEND"
-msgstr ""
-
-#: ../src/networking/KickPlayerDialog.tscn:17
-msgid "KICK_PLAYER"
-msgstr ""
-
-#: ../src/networking/KickPlayerDialog.tscn:28
-msgid "REASON_FOR_KICK"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:169
-msgid "LOBBY_ATTRIBUTE_IN_PROGRESS"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:171
-msgid "LOBBY_ATTRIBUTE_PENDING"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:178
-msgid "MULTIPLAYER_PLAYER_IS_KICKED"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:179
-msgid "UNSPECIFIED_LOWERCASE"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:233
-#: ../src/networking/MultiplayerGUI.tscn:373
-#, fuzzy
-msgid "START"
-msgstr "Запуск"
-
-#: ../src/networking/MultiplayerGUI.cs:246
-msgid "JOIN"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:365
-msgid "CONNECTING"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:366
-msgid "ESTABLISHING_CONNECTION_TO"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:375
-#: ../src/networking/MultiplayerGUI.cs:490
-#, fuzzy
-msgid "CONNECTION_FAILED"
-msgstr "Не удалось создать мод"
-
-#: ../src/networking/MultiplayerGUI.cs:376
-#: ../src/networking/MultiplayerGUI.cs:491
-msgid "FAILED_TO_ESTABLISH_CONNECTION"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:403
-#: ../src/networking/MultiplayerGUI.cs:415
-#, fuzzy
-msgid "HOSTING_FAILED"
-msgstr "Сохранение не удалось! Бывает же"
-
-#: ../src/networking/MultiplayerGUI.cs:404
-#: ../src/networking/MultiplayerGUI.cs:416
-msgid "FAILED_TO_CREATE_SERVER"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:423
-#: ../src/networking/MultiplayerGUI.cs:549
-msgid "UPNP_SETUP"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:424
-msgid "UPNP_DISCOVERING_DEVICES"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:507
-#: ../src/networking/MultiplayerGUI.cs:510
-#: ../src/networking/MultiplayerGUI.cs:514
-#, fuzzy
-msgid "SERVER_DISCONNECTED"
-msgstr "Отсоединенные Клетки"
-
-#: ../src/networking/MultiplayerGUI.cs:507
-msgid "SERVER_IS_FULL"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:511
-msgid "NAME_IS_ALREADY_TAKEN"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:515
-msgid "CLOSED_BY_REMOTE_HOST"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:550
-msgid "UPNP_ERROR_WHILE_SETTING_UP"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:558
-#: ../src/networking/MultiplayerGUI.cs:573
-#, fuzzy
-msgid "PORT_FORWARDING"
-msgstr "Перемещение вперед"
-
-#: ../src/networking/MultiplayerGUI.cs:559
-msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.cs:574
-#, fuzzy
-msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED"
-msgstr "Не удалось сохранить файл. Возможно, имя файла сохранения слишком длинное или у вас нет разрешения на сохранение файла."
-
-#: ../src/networking/MultiplayerGUI.tscn:63 ../src/saving/NewSaveMenu.tscn:49
-msgid "NAME"
-msgstr "Имя:"
-
-#: ../src/networking/MultiplayerGUI.tscn:82
-msgid "ADDRESS"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.tscn:106
-#, fuzzy
-msgid "PORT"
-msgstr "Отчёт"
-
-#: ../src/networking/MultiplayerGUI.tscn:147
-msgid "HOST"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.tscn:155
-msgid "CONNECT"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.tscn:241
-#, fuzzy
-msgid "PLAYER_LIST"
-msgstr "Клонировать Игрока"
-
-#: ../src/networking/MultiplayerGUI.tscn:251
-#, fuzzy
-msgid "GAME_INFO"
-msgstr "Показать больше информации"
-
-#: ../src/networking/MultiplayerGUI.tscn:336
-msgid "CHAT_ROOM"
-msgstr ""
-
-#: ../src/networking/MultiplayerGUI.tscn:359
-#, fuzzy
-msgid "DISCONNECT"
-msgstr "Отсоединенные Клетки"
-
-#: ../src/networking/MultiplayerGUI.tscn:389
-msgid "KICKED"
-msgstr ""
-
 #: ../src/networking/MultiplayerGameMode.cs:70
 #, fuzzy
 msgid "MICROBIAL_ARENA_DESCRIPTION"
-msgstr "Одноклеточная стадия"
+msgstr "Реснички похожи на жгутики, но вместо однонаправленного ускорения они производят вращательное, помогая клеткам вращаться."
 
-#: ../src/networking/MultiplayerStageBase.cs:97
+#: ../src/networking/MultiplayerStageBase.cs:154
 #, fuzzy
-msgid "PREPARING_DOT_DOT_DOT"
-msgstr "Создание..."
+msgid "WAITING_FOR_HOST"
+msgstr "Ожидание авто-эво:"
 
-#: ../src/networking/MultiplayerStageBase.cs:193
-#, fuzzy
-msgid "LOADING_ENTITIES"
-msgstr "Нажмите кнопку отмены в редакторе для исправления ошибки"
-
-#: ../src/networking/NetPlayerInfo.cs:26
-msgid "IN_GAME_LOWERCASE"
+#: ../src/networking/NetworkManager.cs:111
+msgid "CLIENT_TIME_STEP_CHANGED"
 msgstr ""
 
-#: ../src/networking/NetPlayerInfo.cs:28
-msgid "IN_LOBBY_LOWERCASE"
-msgstr ""
-
-#: ../src/networking/NetPlayerInfo.cs:30
-msgid "JOINING_LOWERCASE"
-msgstr ""
-
-#: ../src/networking/NetPlayerInfo.cs:32
-msgid "LEAVING_LOWERCASE"
-msgstr ""
-
-#: ../src/networking/NetPlayerInfo.cs:43
-msgid "G_LETTER"
-msgstr ""
-
-#: ../src/networking/NetPlayerInfo.cs:45
-msgid "L_LETTER"
-msgstr ""
-
-#: ../src/networking/NetworkManager.cs:127
+#: ../src/networking/NetworkManager.cs:160
 msgid "GAME_TIME_MINUTES_SECONDS"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:374
+#: ../src/networking/NetworkManager.cs:407
 msgid "CHAT_PREFIX_AS_SYSTEM"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:459
+#: ../src/networking/NetworkManager.cs:624
 #, fuzzy
 msgid "PLAYER_HAS_DISCONNECTED"
-msgstr "Отсоединенные Клетки"
+msgstr "игрок умер"
 
-#: ../src/networking/NetworkManager.cs:492
+#: ../src/networking/NetworkManager.cs:682
 #, fuzzy
 msgid "BAD_CONNECTION"
 msgstr "Цветокоррекция для дальтоников:"
 
-#: ../src/networking/NetworkManager.cs:496
+#: ../src/networking/NetworkManager.cs:686
 msgid "TIMEOUT"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:590
+#: ../src/networking/NetworkManager.cs:791
 #, fuzzy
 msgid "PLAYER_HAS_CONNECTED"
 msgstr ""
 "Скорость\n"
 "Игрока"
 
-#: ../src/networking/NetworkManager.cs:745
+#: ../src/networking/NetworkManager.cs:893
+msgid "SERVER_TIME_STEP_CHANGED"
+msgstr ""
+
+#: ../src/networking/NetworkManager.cs:985
 #, fuzzy
 msgid "PLAYER_HAS_JOINED"
 msgstr "игрок умер"
 
-#: ../src/networking/NetworkManager.cs:774
+#: ../src/networking/NetworkManager.cs:1014
 #, fuzzy
 msgid "PLAYER_HAS_LEFT"
+msgstr ""
+"Скорость\n"
+"Игрока"
+
+#: ../src/networking/NetworkPlayerInfo.cs:45
+msgid "IN_GAME_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetworkPlayerInfo.cs:47
+msgid "IN_LOBBY_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetworkPlayerInfo.cs:49
+msgid "JOINING_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetworkPlayerInfo.cs:51
+msgid "LEAVING_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/NetworkPlayerInfo.cs:62
+msgid "G_LETTER"
+msgstr ""
+
+#: ../src/networking/NetworkPlayerInfo.cs:64
+msgid "L_LETTER"
+msgstr ""
+
+#: ../src/networking/gui/ChatBox.tscn:72
+#, fuzzy
+msgid "TYPE_MESSAGE"
+msgstr "Забавный Факт: Дидинии и Парамеции - наглядный пример взаимоотношений \"хищник - жертва\", которые изучали на протяжении десятилетий. А кто же вы - хищник или жертва?"
+
+#: ../src/networking/gui/ChatBox.tscn:80
+#: ../src/networking/gui/ChatBoxUndecorated.tscn:71
+msgid "SEND"
+msgstr ""
+
+#: ../src/networking/gui/KickPlayerDialog.tscn:19
+msgid "KICK_PLAYER"
+msgstr ""
+
+#: ../src/networking/gui/KickPlayerDialog.tscn:30
+msgid "REASON_FOR_KICK"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:176
+msgid "LOBBY_ATTRIBUTE_IN_PROGRESS"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:178
+msgid "LOBBY_ATTRIBUTE_PENDING"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:185
+msgid "MULTIPLAYER_PLAYER_IS_KICKED"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:186
+msgid "UNSPECIFIED_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:240
+#: ../src/networking/gui/MultiplayerGUI.tscn:395
+#, fuzzy
+msgid "START"
+msgstr "Запуск"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:254
+msgid "JOIN"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:313
+#: ../src/networking/gui/PingBar.cs:59
+msgid "PING_VALUE_MILISECONDS"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:380
+msgid "CONNECTING"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:381
+msgid "ESTABLISHING_CONNECTION_TO"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:390
+#: ../src/networking/gui/MultiplayerGUI.cs:505
+#, fuzzy
+msgid "CONNECTION_FAILED"
+msgstr "Не удалось создать мод"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:391
+#: ../src/networking/gui/MultiplayerGUI.cs:506
+msgid "FAILED_TO_ESTABLISH_CONNECTION"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:418
+#: ../src/networking/gui/MultiplayerGUI.cs:430
+#, fuzzy
+msgid "HOSTING_FAILED"
+msgstr "Сохранение не удалось! Бывает же"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:419
+#: ../src/networking/gui/MultiplayerGUI.cs:431
+msgid "FAILED_TO_CREATE_SERVER"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:438
+#: ../src/networking/gui/MultiplayerGUI.cs:568
+msgid "UPNP_SETUP"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:439
+msgid "UPNP_DISCOVERING_DEVICES"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:522
+#: ../src/networking/gui/MultiplayerGUI.cs:525
+#: ../src/networking/gui/MultiplayerGUI.cs:529
+#, fuzzy
+msgid "SERVER_DISCONNECTED"
+msgstr "Отсоединенные Клетки"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:522
+msgid "SERVER_IS_FULL"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:526
+msgid "NAME_IS_ALREADY_TAKEN"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:530
+msgid "CLOSED_BY_REMOTE_HOST"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:569
+msgid "UPNP_ERROR_WHILE_SETTING_UP"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:577
+#: ../src/networking/gui/MultiplayerGUI.cs:592
+#, fuzzy
+msgid "PORT_FORWARDING"
+msgstr "Перемещение вперед"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:578
+msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:593
+#, fuzzy
+msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED"
+msgstr "Не удалось сохранить файл. Возможно, имя файла сохранения слишком длинное или у вас нет разрешения на сохранение файла."
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:63
+#: ../src/saving/NewSaveMenu.tscn:49
+msgid "NAME"
+msgstr "Имя:"
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:82
+msgid "ADDRESS"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:106
+#, fuzzy
+msgid "PORT"
+msgstr "Отчёт"
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:147
+msgid "HOST"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:155
+msgid "CONNECT"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:246
+#, fuzzy
+msgid "PLAYER_LIST"
 msgstr "Клонировать Игрока"
 
-#: ../src/networking/ServerSetup.cs:118
+#: ../src/networking/gui/MultiplayerGUI.tscn:256
+#, fuzzy
+msgid "GAME_INFO"
+msgstr "Показать больше информации"
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:358
+msgid "CHAT_ROOM"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:381
+#, fuzzy
+msgid "DISCONNECT"
+msgstr "Отсоединенные Клетки"
+
+#: ../src/networking/gui/MultiplayerGUI.tscn:411
+msgid "KICKED"
+msgstr ""
+
+#: ../src/networking/gui/NetworkPlayerList.tscn:87
+#, fuzzy
+msgid "PLAYER_NAME"
+msgstr "Показать название кнопок выбора частей:"
+
+#: ../src/networking/gui/NetworkPlayerList.tscn:99
+msgid "SCORE"
+msgstr ""
+
+#: ../src/networking/gui/NetworkPlayerList.tscn:109
+msgid "KILLS"
+msgstr ""
+
+#: ../src/networking/gui/NetworkPlayerList.tscn:119
+#, fuzzy
+msgid "DEATHS"
+msgstr "смерть"
+
+#: ../src/networking/gui/NetworkPlayerLog.cs:126
+msgid "PLAYER_LOG_HOST_ATTRIBUTE"
+msgstr ""
+
+#: ../src/networking/gui/NetworkPlayerLog.tscn:129
+msgid "KICK"
+msgstr ""
+
+#: ../src/networking/gui/ServerSetup.cs:125
 #, fuzzy
 msgid "OPEN_WORLD"
 msgstr "Открыть папку"
 
-#: ../src/networking/ServerSetup.tscn:24
+#: ../src/networking/gui/ServerSetup.cs:134
+#: ../src/networking/gui/ServerSetup.tscn:122
+msgid "MINUTES_LOWERCASE"
+msgstr ""
+
+#: ../src/networking/gui/ServerSetup.tscn:27
 msgid "SERVER_SETUP"
 msgstr ""
 
-#: ../src/networking/ServerSetup.tscn:46
+#: ../src/networking/gui/ServerSetup.tscn:50
 #, fuzzy
 msgid "SERVER_NAME"
 msgstr "Движок отрисовки:"
 
-#: ../src/networking/ServerSetup.tscn:73
+#: ../src/networking/gui/ServerSetup.tscn:77
 #, fuzzy
 msgid "MAX_PLAYERS"
 msgstr "Макс. FPS:"
 
-#: ../src/networking/ServerSetup.tscn:104
+#: ../src/networking/gui/ServerSetup.tscn:105
+#, fuzzy
+msgid "TIME_LIMIT"
+msgstr "Временная Шкала"
+
+#: ../src/networking/gui/ServerSetup.tscn:138
 #, fuzzy
 msgid "USE_UPNP"
 msgstr "[center]Нажмите [thrive:input]g_pause[/thrive:input] чтобы продолжить[/center]"
 
-#: ../src/networking/ServerSetup.tscn:131
+#: ../src/networking/gui/ServerSetup.tscn:165
 #, fuzzy
 msgid "GAME_MODE"
 msgstr "Режим Бога"
 
-#: ../src/networking/ServerSetup.tscn:167
+#: ../src/networking/gui/ServerSetup.tscn:201
 #, fuzzy
 msgid "CONFIRM"
 msgstr "Конфигурация"
@@ -6284,37 +6320,30 @@ msgid "PAGE_TITLE"
 msgstr "Удаление Локальных Данных"
 
 #: ../src/thriveopedia/fossilisation/FossilisationDialog.cs:190
-#, fuzzy
 msgid "OVERWRITE_SPECIES_NAME_CONFIRMATION"
-msgstr "Удаление этого сохранение будет невозможно отменить, вы действительно хотите перманентно удалить это сохранение?"
+msgstr ""
+"Окаменелый вид с таким названием уже существует.\n"
+"Вы уверены, что хотите перезаписать его?"
 
 #: ../src/thriveopedia/fossilisation/FossilisationDialog.tscn:38
-#, fuzzy
 msgid "FOSSILISATION"
-msgstr "популяция:"
+msgstr "Окаменение"
 
 #: ../src/thriveopedia/fossilisation/FossilisationDialog.tscn:141
-#, fuzzy
 msgid "FOSSILISATION_EXPLANATION"
-msgstr ""
-"Агрессивные микроорганизмы будут преследовать свою добычу на большее расстояние\n"
-"и более склонны бороться с хищниками, когда атакованы.\n"
-"Мирные микроорганизмы не будут нападать на других на больших дистанциях\n"
-"и менее склонны использовать токсины против хищников."
+msgstr "Окамените этот вид, чтобы сохранить его в музее. Вы можете получить доступ к музею из Thriveopedia или загрузить ископаемые виды в бесплатном редакторе."
 
 #: ../src/thriveopedia/fossilisation/FossilisationDialog.tscn:222
-#, fuzzy
 msgid "FOSSILISE"
-msgstr "Оседлый"
+msgstr "Окаменеть"
 
 #: ../src/thriveopedia/fossilisation/FossilisationDialog.tscn:236
 msgid "CONFIRM_FOSSILISATION_OVERWRITE"
-msgstr ""
+msgstr "Подтвердите перезапись"
 
 #: ../src/thriveopedia/fossilisation/FossilisedSpeciesInformation.cs:20
-#, fuzzy
 msgid "MICROBE"
-msgstr "Одноклеточная стадия"
+msgstr "Стадия микроба"
 
 #: ../src/thriveopedia/fossilisation/FossilisedSpeciesInformation.cs:23
 #, fuzzy
@@ -6322,34 +6351,44 @@ msgid "EARLY_MULTICELLULAR"
 msgstr "Этап Многоклеточного микроба"
 
 #: ../src/thriveopedia/fossilisation/FossilisedSpeciesInformation.cs:26
-#, fuzzy
 msgid "LATE_MULTICELLULAR"
-msgstr "Этап Многоклеточного микроба"
+msgstr "Поздний Этап Многоклеточного микроба"
 
 #: ../src/thriveopedia/pages/ThriveopediaCurrentWorldPage.cs:22
 msgid "THRIVEOPEDIA_CURRENT_WORLD_PAGE_TITLE"
-msgstr ""
+msgstr "Текущий Мир"
 
 #: ../src/thriveopedia/pages/ThriveopediaEvolutionaryTreePage.cs:43
 msgid "THRIVEOPEDIA_EVOLUTIONARY_TREE_PAGE_TITLE"
-msgstr ""
+msgstr "Древо Эволюции"
 
 #: ../src/thriveopedia/pages/ThriveopediaEvolutionaryTreePage.tscn:75
-#, fuzzy
 msgid "EVOLUTIONARY_TREE_DISABLED_LABEL"
-msgstr "Автор: Revolutionary Games Studio"
+msgstr ""
+"Пока не отображается в режиме бесплатной сборки или в сохранениях, запущенных в версиях до 0.6.0.\n"
+"\n"
+"Если ни один из них не применим, произошла ошибка. Пожалуйста, сообщите об этом команде разработчиков и предоставьте журналы игры."
 
 #: ../src/thriveopedia/pages/ThriveopediaHomePage.cs:9
 msgid "THRIVEOPEDIA_HOME_PAGE_TITLE"
-msgstr ""
+msgstr "Home"
 
 #: ../src/thriveopedia/pages/ThriveopediaHomePage.tscn:21
 msgid "WELCOME_TO_THRIVEOPEDIA"
-msgstr ""
+msgstr "Добро пожаловать в Thriveopedia"
 
 #: ../src/thriveopedia/pages/ThriveopediaHomePage.tscn:39
 msgid "THRIVEOPEDIA_HOME_INFO"
 msgstr ""
+"Thriveopedia — это центральная библиотека и хранилище информации для контента Thrive. Здесь вы найдете ответы на любые вопросы об игре, вашем текущем мире или проекте разработки Thrive.\n"
+"\n"
+"На данный момент Thriveopedia пустовата, но вы все равно можете просматривать несколько страниц, используя дерево страниц и кнопки навигации. Обратите внимание, что страницы, относящиеся к конкретной текущей игре, будут отображаться только тогда, когда Thriveopedia открыта через меню паузы в игре.\n"
+"\n"
+"Вы можете найти больше информации об игре в местах ниже.\n"
+"\n"
+"[color=#3796e1][url=https://revolutionarygamesstudio.com/]Official Website[/url][/color]\n"
+"[color=#3796e1][url=https://wiki.revolutionarygamesstudio.com/wiki/Main_Page]Development Wiki[/url][/color]\n"
+"[color=#3796e1][url=https://thrive.fandom.com/wiki/Thrive_Wiki]Community Wiki[/url][/color]"
 
 #: ../src/thriveopedia/pages/ThriveopediaHomePage.tscn:46
 msgid "THE_DISTURBANCE"
@@ -6357,11 +6396,13 @@ msgstr ""
 
 #: ../src/thriveopedia/pages/ThriveopediaMuseumPage.cs:39
 msgid "THRIVEOPEDIA_MUSEUM_PAGE_TITLE"
-msgstr ""
+msgstr "Музей"
 
-#: ../src/thriveopedia/pages/ThriveopediaMuseumPage.cs:129
+#: ../src/thriveopedia/pages/ThriveopediaMuseumPage.cs:132
 msgid "OPEN_FOSSIL_IN_FREEBUILD_WARNING"
 msgstr ""
+"Вы уверены, что хотите начать новую игру за выбранный вид?\n"
+"Весь несохранённый прогресс будет утерян."
 
 #: ../src/thriveopedia/pages/ThriveopediaMuseumPage.tscn:151
 #, fuzzy
@@ -6371,6 +6412,9 @@ msgstr "Свободное Строительство"
 #: ../src/thriveopedia/pages/ThriveopediaMuseumPage.tscn:166
 msgid "MUSEUM_WELCOME_TEXT"
 msgstr ""
+"Добро пожаловать в музей! Здесь вы можете полюбоваться на виды, которых вы окаменели во время всех ваших прохождений. Вы даже можете играть за вид, открыв его в режиме свободного строительства.\n"
+"\n"
+"Чтобы окаменеть вид в игре, нажмите кнопку паузы. Затем выберите микроб на экране, чтобы окаменеть его виды."
 
 #: ../src/thriveopedia/pages/ThriveopediaPatchMapPage.cs:29
 msgid "THRIVEOPEDIA_PATCH_MAP_PAGE_TITLE"

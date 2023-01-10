@@ -309,7 +309,7 @@ public class MultiplayerGUI : CenterContainer
     private void UpdateLatencyIndicator(int? miliseconds = null)
     {
         var player = NetworkManager.Instance.GetPlayerInfo(NetworkManager.Instance.PeerId);
-        miliseconds ??= player?.Latency;
+        miliseconds ??= player?.Latency ?? 0;
         latency.Text = TranslationServer.Translate("PING_VALUE_MILISECONDS").FormatSafe(miliseconds);
     }
 

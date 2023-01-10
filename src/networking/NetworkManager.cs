@@ -189,10 +189,8 @@ public class NetworkManager : Node
 
         if (GameInSession)
         {
-            if (IsAuthoritative)
-            {
-                elapsedGameTime += delta;
-            }
+            // TODO: Synchronize clock
+            elapsedGameTime += delta;
 
             ElapsedGameTimeMinutes = Mathf.FloorToInt(elapsedGameTime / 60);
             ElapsedGameTimeSeconds = Mathf.FloorToInt(elapsedGameTime % 60);
