@@ -72,7 +72,8 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     public override void _Process(float delta)
     {
         if (NetworkManager.Instance.Status == NetworkedMultiplayerPeer.ConnectionStatus.Disconnected &&
-            NetworkManager.Instance.LocalPlayer?.Status == NetworkPlayerStatus.Joining && LoadingScreen.Instance.Visible)
+            NetworkManager.Instance.LocalPlayer?.Status == NetworkPlayerStatus.Joining &&
+            LoadingScreen.Instance.Visible)
         {
             OnServerDisconnected();
         }
