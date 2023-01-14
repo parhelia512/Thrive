@@ -481,27 +481,23 @@ public class NetworkManager : Node
 
             // Update chatboxes
             EmitSignal(nameof(ChatReceived));
-
-            return true;
         }
         else if (name == "timestep")
         {
-            if (args.Length > 1 && float.TryParse(args[1], out float result))
-            {
-                TimeStep = result;
-                return true;
-            }
+            if (args.Length <= 1 || !float.TryParse(args[1], out float result))
+                return false;
+
+            TimeStep = result;
         }
         else if (name == "end")
         {
-            if (Settings != null)
-            {
-                elapsedGameTime = Settings.SessionLength * 60;
-                return true;
-            }
+            if (Settings == null)
+                return false;
+
+            elapsedGameTime = Settings.SessionLength * 60;
         }
 
-        return false;
+        return true;
     }
 
     private void SendChatInternal(string message)

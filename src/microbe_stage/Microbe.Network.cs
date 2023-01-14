@@ -84,7 +84,9 @@ public partial class Microbe
         Compounds.ClearUseful();
         var usefulCompoundsCount = buffer.ReadByte();
         for (int i = 0; i < usefulCompoundsCount; ++i)
+        {
             Compounds.SetUseful(SimulationParameters.Instance.IndexToCompound(buffer.ReadByte()));
+        }
 
         Compounds.Capacity = buffer.ReadSingle();
 

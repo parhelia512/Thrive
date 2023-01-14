@@ -222,79 +222,83 @@ public class SimulationParameters : Node
     // TODO: Make this generalizable
     public int CompoundToIndex(Compound compound)
     {
+        int index = -1;
+
         if (compound == GetCompound("phosphates"))
         {
-            return 0;
+            index = 0;
         }
         else if (compound == GetCompound("ammonia"))
         {
-            return 1;
+            index = 1;
         }
         else if (compound == GetCompound("atp"))
         {
-            return 2;
+            index = 2;
         }
         else if (compound == GetCompound("glucose"))
         {
-            return 3;
+            index = 3;
         }
         else if (compound == GetCompound("iron"))
         {
-            return 4;
+            index = 4;
         }
         else if (compound == GetCompound("hydrogensulfide"))
         {
-            return 5;
+            index = 5;
         }
         else if (compound == GetCompound("mucilage"))
         {
-            return 6;
+            index = 6;
         }
         else if (compound == GetCompound("oxytoxy"))
         {
-            return 7;
+            index = 7;
         }
 
-        return -1;
+        return index;
     }
 
     // TODO: Make this generalizable
     public Compound IndexToCompound(int code)
     {
+        var compound = GetCompound("glucose");
+
         if (code == 0)
         {
-            return GetCompound("phosphates");
+            compound = GetCompound("phosphates");
         }
         else if (code == 1)
         {
-            return GetCompound("ammonia");
+            compound = GetCompound("ammonia");
         }
         else if (code == 2)
         {
-            return GetCompound("atp");
+            compound = GetCompound("atp");
         }
         else if (code == 3)
         {
-            return GetCompound("glucose");
+            compound = GetCompound("glucose");
         }
         else if (code == 4)
         {
-            return GetCompound("iron");
+            compound = GetCompound("iron");
         }
         else if (code == 5)
         {
-            return GetCompound("hydrogensulfide");
+            compound = GetCompound("hydrogensulfide");
         }
         else if (code == 6)
         {
-            return GetCompound("mucilage");
+            compound = GetCompound("mucilage");
         }
         else if (code == 7)
         {
-            return GetCompound("oxytoxy");
+            compound = GetCompound("oxytoxy");
         }
 
-        return GetCompound("glucose");
+        return compound;
     }
 
     public Enzyme GetEnzyme(string name)

@@ -30,7 +30,9 @@ public static class MarshalUtils
         byte result = 0;
 
         for (int i = 0; i < booleans.Length; ++i)
+        {
             result |= (byte)(booleans[i].ToByte() << i);
+        }
 
         return result;
     }
@@ -75,7 +77,9 @@ public static class MarshalUtils
             var batch = new bool[8];
 
             for (int j = 8; j > 0; --j)
+            {
                 batch[j] = value[i].ToBoolean(i);
+            }
 
             result.AddRange(batch);
         }

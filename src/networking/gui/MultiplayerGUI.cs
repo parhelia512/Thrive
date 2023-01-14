@@ -468,7 +468,7 @@ public class MultiplayerGUI : CenterContainer
                 NetworkManager.Instance.Disconnect();
                 break;
 
-                // TODO: handle upnp work cancellations, currently you can't cancel these
+             // TODO: handle upnp cancellations, currently you can't cancel these
         }
 
         currentJobStatus = ConnectionJob.None;
