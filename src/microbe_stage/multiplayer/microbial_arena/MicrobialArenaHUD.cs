@@ -364,7 +364,8 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
         gameTime.Text = stage!.IsGameOver() ?
             TranslationServer.Translate("GAME_OVER") :
             TranslationServer.Translate("VALUE_SLASH_MAX_VALUE").FormatSafe(
-                NetworkManager.Instance.GameTime, NetworkManager.Instance.Settings!.SessionLength);
+                NetworkManager.Instance.GameTime,
+                StringUtils.FormatShortMinutesSeconds(NetworkManager.Instance.Settings!.SessionLength, 0));
     }
 
     private void UpdateMinimap()

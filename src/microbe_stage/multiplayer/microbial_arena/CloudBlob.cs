@@ -104,7 +104,6 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
         }
 
         buffer.Write(GlobalTranslation.x);
-        buffer.Write(GlobalTranslation.y);
         buffer.Write(GlobalTranslation.z);
         buffer.Write(cloudsPath!);
     }
@@ -120,7 +119,7 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
             chunks.Add(new Chunk(packed));
         }
 
-        Translation = new Vector3(buffer.ReadSingle(), buffer.ReadSingle(), buffer.ReadSingle());
+        Translation = new Vector3(buffer.ReadSingle(), 0, buffer.ReadSingle());
         cloudsPath = buffer.ReadString();
     }
 

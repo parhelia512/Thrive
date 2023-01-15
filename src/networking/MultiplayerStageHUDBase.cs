@@ -12,11 +12,15 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
     [Export]
     public NodePath ScoreBoardPath = null!;
 
+    [Export]
+    public NodePath WelcomeDialogPath = null!;
+
     protected AnimationPlayer chatBoxAnimationPlayer = null!;
 
     protected ChatBox chatBox = null!;
     protected Control infoScreen = null!;
     protected NetworkPlayerList scoreBoard = null!;
+    protected CustomConfirmationDialog welcomeDialog = null!;
 
     // The values of the following variable is the opposite of the expected value.
     // I.e. its value is true when its respective panel is collapsed.
@@ -30,6 +34,7 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
         chatBox = GetNode<ChatBox>(ChatBoxPath);
         infoScreen = GetNode<Control>(InfoScreenPath);
         scoreBoard = GetNode<NetworkPlayerList>(ScoreBoardPath);
+        welcomeDialog = GetNode<CustomConfirmationDialog>(WelcomeDialogPath);
     }
 
     public override void Init(TStage containedInStage)
@@ -60,6 +65,14 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
         ChatButtonPressed(true);
     }
 
+    protected override void OnFinishTransitioning()
+    {
+        base.OnFinishTransitioning();
+
+        if (!Settings.Instance.IsNoticePermanentlyDismissed(DismissibleNotice.MultiplayerWelcome))
+            welcomeDialog.PopupCenteredShrink();
+    }
+
     private void ChatButtonPressed(bool wantedState)
     {
         if (chatBoxActive == !wantedState)
@@ -75,5 +88,10 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
             chatBoxActive = false;
             chatBoxAnimationPlayer.Play("Open");
         }
+    }
+
+    private void OnWelcomeDialogClosed()
+    {
+        Settings.Instance.PermanentlyDismissNotice(DismissibleNotice.MultiplayerWelcome);
     }
 }

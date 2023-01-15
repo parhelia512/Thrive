@@ -187,6 +187,25 @@ public class MultiplayerGUI : CenterContainer
         kickedDialog.PopupCenteredShrink();
     }
 
+    public void ShowDisconnectedDialog()
+    {
+        switch (registrationResult)
+        {
+            case NetworkManager.RegistrationResult.ServerFull:
+                ShowGeneralDialog(
+                    TranslationServer.Translate("SERVER_DISCONNECTED"), TranslationServer.Translate("SERVER_IS_FULL"));
+                return;
+            case NetworkManager.RegistrationResult.DuplicateName:
+                ShowGeneralDialog(TranslationServer.Translate("SERVER_DISCONNECTED"),
+                    TranslationServer.Translate("NAME_IS_ALREADY_TAKEN"));
+                return;
+            default:
+                ShowGeneralDialog(TranslationServer.Translate("SERVER_DISCONNECTED"),
+                    TranslationServer.Translate("CLOSED_BY_REMOTE_HOST"));
+                break;
+        }
+    }
+
     public void SetSubMenu(SubMenu menu)
     {
         currentSubMenu = menu;
@@ -491,7 +510,7 @@ public class MultiplayerGUI : CenterContainer
 
         NetworkManager.Instance.Print(
             "Connection to ", addressBox.Text, ":", portBox.Text, " established," +
-            " using network ID (", GetTree().GetNetworkUniqueId(), ")");
+            " using network ID (", NetworkManager.Instance.PeerId, ")");
     }
 
     private void OnConnectionFailed(string reason)
@@ -514,23 +533,7 @@ public class MultiplayerGUI : CenterContainer
     private void OnServerDisconnected()
     {
         loadingDialog.Hide();
-
-        switch (registrationResult)
-        {
-            case NetworkManager.RegistrationResult.ServerFull:
-                ShowGeneralDialog(
-                    TranslationServer.Translate("SERVER_DISCONNECTED"), TranslationServer.Translate("SERVER_IS_FULL"));
-                return;
-            case NetworkManager.RegistrationResult.DuplicateName:
-                ShowGeneralDialog(TranslationServer.Translate("SERVER_DISCONNECTED"),
-                    TranslationServer.Translate("NAME_IS_ALREADY_TAKEN"));
-                return;
-            default:
-                ShowGeneralDialog(TranslationServer.Translate("SERVER_DISCONNECTED"),
-                    TranslationServer.Translate("CLOSED_BY_REMOTE_HOST"));
-                break;
-        }
-
+        ShowDisconnectedDialog();
         SetSubMenu(SubMenu.Main);
     }
 

@@ -284,6 +284,11 @@ public class MainMenu : NodeWithInput
         multiplayerMenu.ShowKickedDialog(reason);
     }
 
+    public void ShowDisconnectedDialog()
+    {
+        multiplayerMenu.ShowDisconnectedDialog();
+    }
+
     /// <summary>
     ///   This is when ESC is pressed. Main menu priority is lower than Options Menu
     ///   to avoid capturing ESC presses in the Options Menu.

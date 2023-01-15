@@ -640,7 +640,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         if (stage.IsLoadedFromSave && !returningFromEditor)
         {
             // TODO: make it so that the below sequence can be added anyway to not have to have this special logic here
-            stage.OnFinishTransitioning();
+            OnFinishTransitioning();
             return;
         }
 
@@ -648,7 +648,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         stage.TransitionFinished = false;
 
         TransitionManager.Instance.AddSequence(
-            ScreenFade.FadeType.FadeIn, longerDuration ? 1.0f : 0.5f, stage.OnFinishTransitioning);
+            ScreenFade.FadeType.FadeIn, longerDuration ? 1.0f : 0.5f, OnFinishTransitioning);
     }
 
     public override void _Notification(int what)
@@ -790,6 +790,14 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         {
             throw new NotImplementedException("Saving non-microbe species is not yet implemented");
         }
+    }
+
+    protected virtual void OnFinishTransitioning()
+    {
+        if (stage == null)
+            throw new InvalidOperationException("Stage not setup for HUD");
+
+        stage.OnFinishTransitioning();
     }
 
     /// <summary>

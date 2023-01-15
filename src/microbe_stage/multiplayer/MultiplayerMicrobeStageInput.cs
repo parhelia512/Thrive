@@ -11,7 +11,7 @@ public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena,
 
     private NetworkMicrobeInput cachedInput;
 
-    private Dictionary<int, NetworkMicrobeInput> serverInputs = new();
+    private Dictionary<int, NetworkMicrobeInput> serverIncomingInputs = new();
 
     public override void _PhysicsProcess(float delta)
     {
@@ -20,12 +20,12 @@ public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena,
         if (stage == null)
             return;
 
-        foreach (var input in serverInputs)
+        foreach (var incomingInput in serverIncomingInputs)
         {
-            if (!stage.TryGetPlayer(input.Key, out Microbe player))
+            if (!stage.TryGetPlayer(incomingInput.Key, out Microbe player))
                 continue;
 
-            RunInput(player, input.Value, delta);
+            RunInput(player, incomingInput.Value, delta);
         }
     }
 
@@ -151,7 +151,7 @@ public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena,
 
     protected override void ApplyInput(int peerId, NetworkMicrobeInput input)
     {
-        serverInputs[peerId] = input;
+        serverIncomingInputs[peerId] = input;
     }
 
     private void SpawnCheatCloud(string name, float delta)

@@ -20,6 +20,11 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 {
     public event EventHandler? GameReady;
 
+    /// <summary>
+    ///   The number of entities being sent to the client when registering to the server.
+    /// </summary>
+    private int incomingEntitiesCount;
+
     public MultiplayerGameWorld MultiplayerGameWorld => (MultiplayerGameWorld)GameWorld;
 
     public NetworkPlayerVars LocalPlayerVars
@@ -76,6 +81,20 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
             LoadingScreen.Instance.Visible)
         {
             OnServerDisconnected();
+        }
+
+        if (NetworkManager.Instance.LocalPlayer?.Status == NetworkPlayerStatus.Joining && incomingEntitiesCount > 0)
+        {
+            LoadingScreen.Instance.Show(TranslationServer.Translate("LOADING_ENTITIES"), MainGameState.Invalid,
+                TranslationServer.Translate("VALUE_SLASH_MAX_VALUE").FormatSafe(
+                    MultiplayerGameWorld.EntityCount, incomingEntitiesCount));
+
+            if (MultiplayerGameWorld.EntityCount >= incomingEntitiesCount)
+            {
+                // All incoming entities replicated, now tell the server we're ready
+                incomingEntitiesCount = 0;
+                TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.5f, OnReady, false);
+            }
         }
 
         if (!gameOver && IsGameOver())
@@ -150,14 +169,23 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
     protected override void OnGameStarted()
     {
-        if (NetworkManager.Instance.IsClient && !NetworkManager.Instance.GameInSession)
+        if (NetworkManager.Instance.IsClient)
         {
-            LoadingScreen.Instance.Show(TranslationServer.Translate("WAITING_FOR_HOST"), MainGameState.Invalid);
             TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeIn, 0.5f, null, false, false);
-            return;
-        }
 
-        OnReady();
+            if (!NetworkManager.Instance.GameInSession)
+            {
+                LoadingScreen.Instance.Show(TranslationServer.Translate("WAITING_FOR_HOST"), MainGameState.Invalid);
+                return;
+            }
+
+            LoadingScreen.Instance.Show(TranslationServer.Translate("REGISTERING_TO_SERVER"), MainGameState.Invalid);
+            RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerRequestRegistration));
+        }
+        else if (NetworkManager.Instance.IsAuthoritative)
+        {
+            OnReady();
+        }
     }
 
     protected override void GameOver()
@@ -214,14 +242,6 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         var speciesBuffer = new PackedBytesBuffer();
         species.NetworkSerialize(speciesBuffer);
         Rpc(nameof(SyncSpecies), peerId, speciesBuffer.Data);
-
-        // Upload entities to the client
-        // TODO: clean this up
-        foreach (var entity in MultiplayerGameWorld.Entities.Values)
-        {
-            if (entity.Value != null)
-                SpawnEntity(peerId, entity.Value);
-        }
 
         SpawnPlayer(peerId);
     }
@@ -371,7 +391,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     /// <summary>
     ///   Replicates the given server-side entity to the specified target peer.
     /// </summary>
-    private void SpawnEntity(int targetPeerId, INetworkEntity entity)
+    private void RemoteSpawnEntity(int targetPeerId, INetworkEntity entity)
     {
         if (!NetworkManager.Instance.IsAuthoritative)
             return;
@@ -424,7 +444,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
             if (player.Key == GetTree().GetNetworkUniqueId() || player.Value.Status != NetworkPlayerStatus.Active)
                 continue;
 
-            SpawnEntity(player.Key, spawned);
+            RemoteSpawnEntity(player.Key, spawned);
         }
     }
 
@@ -456,6 +476,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
         var menu = SceneManager.Instance.ReturnToMenu();
         menu.OpenMultiplayerMenu(MultiplayerGUI.SubMenu.Main);
+        menu.ShowDisconnectedDialog();
     }
 
     private void OnKicked(string reason)
@@ -467,6 +488,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
     private void OnReady()
     {
+        LoadingScreen.Instance.Hide();
         GameReady?.Invoke(this, EventArgs.Empty);
         BaseHUD.OnEnterStageTransition(true, false);
 
@@ -475,21 +497,14 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
             RegisterPlayer(NetworkManager.Instance.PeerId);
             Rpc(nameof(NotifyServerReady));
         }
-        else if (NetworkManager.Instance.IsClient)
-        {
-            RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerRequestPlayerStates));
-            RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerRequestRegistration));
-        }
     }
 
     [Puppet]
     private void NotifyServerReady()
     {
-        TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.5f, () =>
-        {
-            LoadingScreen.Instance.Hide();
-            OnReady();
-        });
+        TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeIn, 0.5f, null, false, false);
+        LoadingScreen.Instance.Show(TranslationServer.Translate("REGISTERING_TO_SERVER"), MainGameState.Invalid);
+        RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerRequestRegistration));
     }
 
     [PuppetSync]
@@ -522,6 +537,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (MultiplayerGameWorld.Entities.ContainsKey(entityId))
             return;
 
+        // TODO: Cache resource path
         var scene = GD.Load<PackedScene>(resourcePath);
         var spawned = scene.Instance<INetworkEntity>();
 
@@ -558,20 +574,11 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         entity.NetworkDeserialize(new PackedBytesBuffer(data));
     }
 
-    [Remote]
-    private void ServerRequestPlayerStates()
+    [Puppet]
+    private void NotifyEntitiesDownload(int entitiesCount)
     {
-        if (NetworkManager.Instance.IsClient)
-            return;
-
-        var sender = GetTree().GetRpcSenderId();
-
-        foreach (var state in MultiplayerGameWorld.PlayerVars)
-        {
-            var packed = new PackedBytesBuffer();
-            state.Value.NetworkSerialize(packed);
-            RpcId(sender, nameof(SyncPlayerVars), state.Key, packed.Data);
-        }
+        incomingEntitiesCount = entitiesCount;
+        NetworkManager.Instance.Print("Downloading entities");
     }
 
     [Remote]
@@ -581,7 +588,25 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
             return;
 
         var sender = GetTree().GetRpcSenderId();
+
+        // Upload player states
+        foreach (var state in MultiplayerGameWorld.PlayerVars)
+        {
+            var packed = new PackedBytesBuffer();
+            state.Value.NetworkSerialize(packed);
+            RpcId(sender, nameof(SyncPlayerVars), state.Key, packed.Data);
+        }
+
         RegisterPlayer(sender);
+
+        RpcId(sender, nameof(NotifyEntitiesDownload), MultiplayerGameWorld.EntityCount);
+
+        // Upload entities to the client
+        foreach (var entity in MultiplayerGameWorld.Entities.Values)
+        {
+            if (entity.Value != null)
+                RemoteSpawnEntity(sender, entity.Value);
+        }
     }
 
     [Remote]
@@ -593,6 +618,6 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         var sender = GetTree().GetRpcSenderId();
 
         if (MultiplayerGameWorld.TryGetNetworkEntity(entityId, out INetworkEntity entity))
-            SpawnEntity(sender, entity);
+            RemoteSpawnEntity(sender, entity);
     }
 }

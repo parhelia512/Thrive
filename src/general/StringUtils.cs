@@ -78,6 +78,22 @@ public static class StringUtils
     }
 
     /// <summary>
+    ///   Formats minutes and seconds as "MM:SS".
+    /// </summary>
+    public static string FormatShortMinutesSeconds(float minutes, float seconds)
+    {
+        return $"{minutes:00}:{seconds:00}";
+    }
+
+    /// <summary>
+    ///   Formats minutes and seconds as "MM minutes SS seconds".
+    /// </summary>
+    public static string FormatLongMinutesSeconds(float minutes, float seconds)
+    {
+        return TranslationServer.Translate("MINUTES_SECONDS").FormatSafe(minutes, seconds);
+    }
+
+    /// <summary>
     ///   Splits string into different chunks by whitespace.
     /// </summary>
     /// <remarks>

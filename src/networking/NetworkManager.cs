@@ -108,7 +108,7 @@ public class NetworkManager : Node
             }
             else if (IsClient)
             {
-                SystemChatNotification(TranslationServer.Translate("CLIENT_TIME_STEP_CHANGED"));
+                SystemChatNotification(TranslationServer.Translate("CLIENT_TIME_STEP_CHANGED").FormatSafe(timeStep));
             }
         }
     }
@@ -152,12 +152,12 @@ public class NetworkManager : Node
     /// <summary>
     ///   Returns the current game time in a short format.
     /// </summary>
-    public string GameTime => $"{ElapsedGameTimeMinutes:00}:{ElapsedGameTimeSeconds:00}";
+    public string GameTime => StringUtils.FormatShortMinutesSeconds(ElapsedGameTimeMinutes, ElapsedGameTimeSeconds);
 
     /// <summary>
     ///   Returns the current game time in a more readable format (with explicit minutes and seconds).
     /// </summary>
-    public string GameTimeHumanized => TranslationServer.Translate("GAME_TIME_MINUTES_SECONDS").FormatSafe(
+    public string GameTimeHumanized => StringUtils.FormatLongMinutesSeconds(
         ElapsedGameTimeMinutes, ElapsedGameTimeSeconds);
 
     public override void _Ready()
@@ -682,6 +682,8 @@ public class NetworkManager : Node
         EmitSignal(nameof(ConnectionFailed), reason);
 
         TimePassedConnecting = 0;
+
+        Print("Connection failed");
     }
 
     private void OnUpnpCallResultReceived(UPNP.UPNPResult result, UpnpJobStep step)
@@ -702,6 +704,8 @@ public class NetworkManager : Node
     {
         if (IsAuthoritative && !GameInSession)
             Rset(nameof(GameInSession), true);
+
+        Print("Local game is now ready, notifying the host");
 
         RpcId(DEFAULT_SERVER_ID, nameof(NotifyWorldReady), PeerId);
     }
@@ -884,7 +888,7 @@ public class NetworkManager : Node
     private void NotifyServerTimeStepChange(float timestep)
     {
         Settings!.TimeStep = timestep;
-        SystemChatNotification(TranslationServer.Translate("SERVER_TIME_STEP_CHANGED"));
+        SystemChatNotification(TranslationServer.Translate("SERVER_TIME_STEP_CHANGED").FormatSafe(timestep));
     }
 
     [RemoteSync]
@@ -915,6 +919,8 @@ public class NetworkManager : Node
             stage.GameReady += OnGameReady;
             SceneManager.Instance.SwitchToScene(stage.GameStateRoot);
         });
+
+        Print("Starting the game");
     }
 
     [Remote]
@@ -930,6 +936,8 @@ public class NetworkManager : Node
         });
 
         elapsedGameTime = 0;
+
+        Print("Exiting current game session");
     }
 
     [RemoteSync]
@@ -952,7 +960,7 @@ public class NetworkManager : Node
         if (IsAuthoritative && sender != DEFAULT_SERVER_ID &&
             LocalPlayer?.Status != NetworkPlayerStatus.Active)
         {
-            Print("Host isn't ready. \"World ready\" notification from ", sender, " is rejected");
+            Print("Not yet ready. \"World ready\" notification from ", sender, " is rejected");
             return;
         }
 
@@ -965,6 +973,8 @@ public class NetworkManager : Node
 
         if (IsAuthoritative)
         {
+            Print("Received \"world ready\" notification from ", peerId, ", forwarding to others");
+
             foreach (var player in ConnectedPlayers)
             {
                 if (player.Key != DEFAULT_SERVER_ID)

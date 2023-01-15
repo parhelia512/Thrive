@@ -1,4 +1,4 @@
-[gd_scene load_steps=118 format=2]
+[gd_scene load_steps=119 format=2]
 
 [ext_resource path="res://src/microbe_stage/MicrobeCamera.tscn" type="PackedScene" id=1]
 [ext_resource path="res://src/microbe_stage/multiplayer/microbial_arena/ArenaMap.tscn" type="PackedScene" id=2]
@@ -77,6 +77,7 @@
 [ext_resource path="res://src/thriveopedia/fossilisation/FossilisationButton.tscn" type="PackedScene" id=75]
 [ext_resource path="res://src/thriveopedia/fossilisation/FossilisationDialog.tscn" type="PackedScene" id=76]
 [ext_resource path="res://src/networking/gui/ChatBoxUndecorated.tscn" type="PackedScene" id=77]
+[ext_resource path="res://src/gui_common/dialogs/CustomConfirmationDialog.tscn" type="PackedScene" id=78]
 
 [sub_resource type="Theme" id=3]
 default_font = ExtResource( 9 )
@@ -670,6 +671,7 @@ FossilisationDialogPath = NodePath("FossilisationDialog")
 ChatBoxPath = NodePath("BottomLeft/LeftPanels/ChatBox")
 InfoScreenPath = NodePath("../InfoScreen")
 ScoreBoardPath = NodePath("../InfoScreen/MarginContainer/VBoxContainer/NetPlayerList")
+WelcomeDialogPath = NodePath("../WelcomeDialog")
 IngestedMatterBarPath = NodePath("BottomLeft/LeftPanels/CompoundsGroup/CompoundsPanel/VBoxContainer/Body/BarContainer/ingested")
 WinBoxScene = ExtResource( 69 )
 BindingModeHotkeyPath = NodePath("ScrollContainer/HotBar/BindingMode")
@@ -2488,7 +2490,14 @@ __meta__ = {
 }
 
 [node name="PauseMenu" parent="GUI" instance=ExtResource( 72 )]
+visible = true
 MultiplayerMode = true
+
+[node name="WelcomeDialog" parent="GUI" instance=ExtResource( 78 )]
+rect_min_size = Vector2( 500, 0 )
+WindowTitle = "WELCOME_TO_MULTIPLAYER"
+HideCancelButton = true
+DialogText = "WELCOME_TO_MULTIPLAYER_CONTENT"
 
 [connection signal="Clicked" from="GUI/MicrobialArenaHUD" to="GUI/MicrobialArenaHUD/BottomLeft/LeftPanels/ChatBox" method="OnClickedOffTextBox"]
 [connection signal="OnOpenMenu" from="GUI/MicrobialArenaHUD" to="GUI/PauseMenu" method="Open"]
@@ -2510,6 +2519,8 @@ MultiplayerMode = true
 [connection signal="mouse_exited" from="GUI/MicrobialArenaHUD/BottomRight/EditorButton" to="GUI/MicrobialArenaHUD" method="OnEditorButtonMouseExit"]
 [connection signal="pressed" from="GUI/MicrobialArenaHUD/BottomRight/EditorButton" to="GUI/MicrobialArenaHUD" method="EditorButtonPressed"]
 [connection signal="OnClosed" from="GUI/MicrobialArenaHUD/ProcessPanel" to="GUI/MicrobialArenaHUD" method="OnProcessPanelClosed"]
+[connection signal="Closed" from="GUI/WelcomeDialog" to="GUI/MicrobialArenaHUD" method="OnWelcomeDialogClosed"]
+[connection signal="Confirmed" from="GUI/WelcomeDialog" to="GUI/MicrobialArenaHUD" method="OnWelcomeDialogClosed"]
 
 [editable path="GUI/MicrobialArenaHUD/PausePrompt"]
 [editable path="GUI/MicrobialArenaHUD/ArenaMap"]

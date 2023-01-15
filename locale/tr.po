@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2023-01-10 14:15+0700\n"
+"POT-Creation-Date: 2023-01-15 19:23+0700\n"
 "PO-Revision-Date: 2023-01-03 21:00+0000\n"
 "Last-Translator: punctdan <yunusemredilek@hotmail.com>\n"
 "Language-Team: Turkish <https://translate.revolutionarygamesstudio.com/projects/thrive/thrive-game/tr/>\n"
@@ -380,21 +380,21 @@ msgstr "Yetenekler"
 #: ../simulation_parameters/common/input_options.json:40
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2068
 #: ../src/microbe_stage/MicrobeStage.tscn:2304
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2303
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2305
 msgid "FIRE_TOXIN"
 msgstr "Toksini ateşle"
 
 #: ../simulation_parameters/common/input_options.json:44
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2092
 #: ../src/microbe_stage/MicrobeStage.tscn:2350
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2352
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2354
 msgid "SECRETE_SLIME"
 msgstr "Müsilaj salgıla"
 
 #: ../simulation_parameters/common/input_options.json:48
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:2054
 #: ../src/microbe_stage/MicrobeStage.tscn:2291
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2289
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2291
 msgid "TOGGLE_ENGULF"
 msgstr "Yutma moduna geç"
 
@@ -404,7 +404,7 @@ msgstr "Komut takımı menüsünü göstermek için basılı tut"
 
 #: ../simulation_parameters/common/input_options.json:56
 #: ../src/microbe_stage/MicrobeStage.tscn:2315
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2315
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2317
 msgid "TOGGLE_BINDING"
 msgstr "Bağ kurma moduna geç"
 
@@ -414,7 +414,7 @@ msgstr "Bağ koparma moduna geç"
 
 #: ../simulation_parameters/common/input_options.json:64
 #: ../src/microbe_stage/MicrobeStage.tscn:2327
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2328
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2330
 msgid "UNBIND_ALL"
 msgstr "Hepsinin bağını kopar"
 
@@ -609,7 +609,7 @@ msgstr "Oyun arayüzünü gizle"
 
 #: ../simulation_parameters/common/multiplayer_gamemodes.json:3
 #: ../src/general/GameProperties.cs:87
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2430
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2432
 #, fuzzy
 msgid "MICROBIAL_ARENA"
 msgstr "Mikrop Evresi"
@@ -783,7 +783,7 @@ msgstr "ATP"
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1306
 #: ../src/microbe_stage/MicrobeStage.tscn:1505
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:678
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1507
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1509
 msgid "AMMONIA"
 msgstr "Amonyak"
 
@@ -791,7 +791,7 @@ msgstr "Amonyak"
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1358
 #: ../src/microbe_stage/MicrobeStage.tscn:1554
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:749
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1556
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1558
 msgid "PHOSPHATE"
 msgstr "Fosfat"
 
@@ -799,7 +799,7 @@ msgstr "Fosfat"
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1410
 #: ../src/microbe_stage/MicrobeStage.tscn:1606
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:643
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1608
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1610
 msgid "HYDROGEN_SULFIDE"
 msgstr "Hidrojen Sülfür"
 
@@ -807,21 +807,21 @@ msgstr "Hidrojen Sülfür"
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1254
 #: ../src/microbe_stage/MicrobeStage.tscn:1459
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:713
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1461
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1463
 msgid "GLUCOSE"
 msgstr "Glukoz"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:77
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1589
 #: ../src/microbe_stage/MicrobeStage.tscn:1820
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1822
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1824
 msgid "OXYTOXY_NT"
 msgstr "OksiToksi NT"
 
 #: ../simulation_parameters/microbe_stage/compounds.json:92
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1640
 #: ../src/microbe_stage/MicrobeStage.tscn:1868
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1870
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1872
 msgid "MUCILAGE"
 msgstr "Müsilaj"
 
@@ -829,7 +829,7 @@ msgstr "Müsilaj"
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1462
 #: ../src/microbe_stage/MicrobeStage.tscn:1652
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:784
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1654
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1656
 msgid "IRON"
 msgstr "Demir"
 
@@ -1143,7 +1143,7 @@ msgid "STATUS_COLON"
 msgstr "Durum:"
 
 #: ../src/auto-evo/AutoEvoExploringTool.tscn:466
-#: ../src/networking/gui/MultiplayerGUI.cs:255
+#: ../src/networking/gui/MultiplayerGUI.cs:274
 msgid "READY"
 msgstr "Hazır"
 
@@ -2128,7 +2128,7 @@ msgstr ""
 "\n"
 "Eğer Thrive başlatılmadan önce Thrive Başlatıcı'yı görmek istersen, başlatıcıya dönmek için ana menüdeki butonu kullanabilir ve sonra başlatıcı ayarları menüsünden kesintisiz modu devre dışı bırakabilirsin."
 
-#: ../src/general/MainMenu.cs:436
+#: ../src/general/MainMenu.cs:441
 msgid "STORE_LOGGED_IN_AS"
 msgstr "{0} olarak giriş yapıldı"
 
@@ -3172,35 +3172,35 @@ msgstr "arazide nesli tükendi"
 msgid "VALUE_WITH_UNIT"
 msgstr "{0} {1}"
 
-#: ../src/general/StageHUDBase.cs:982
+#: ../src/general/StageHUDBase.cs:990
 msgid "CATEGORY_AN_ABUNDANCE"
 msgstr "bol miktarda"
 
-#: ../src/general/StageHUDBase.cs:984
+#: ../src/general/StageHUDBase.cs:992
 msgid "CATEGORY_QUITE_A_BIT"
 msgstr "oldukça fazla"
 
-#: ../src/general/StageHUDBase.cs:986
+#: ../src/general/StageHUDBase.cs:994
 msgid "CATEGORY_A_FAIR_AMOUNT"
 msgstr "makul miktarda"
 
-#: ../src/general/StageHUDBase.cs:988
+#: ../src/general/StageHUDBase.cs:996
 msgid "CATEGORY_SOME"
 msgstr "biraz"
 
-#: ../src/general/StageHUDBase.cs:990
+#: ../src/general/StageHUDBase.cs:998
 msgid "CATEGORY_LITTLE"
 msgstr "az miktarda"
 
-#: ../src/general/StageHUDBase.cs:992
+#: ../src/general/StageHUDBase.cs:1000
 msgid "CATEGORY_VERY_LITTLE"
 msgstr "çok az miktarda"
 
-#: ../src/general/StageHUDBase.cs:1202
+#: ../src/general/StageHUDBase.cs:1210
 msgid "PLAYER_CELL"
 msgstr "Oyuncu Hücresi"
 
-#: ../src/general/StageHUDBase.cs:1215
+#: ../src/general/StageHUDBase.cs:1223
 msgid "SPECIES_N_TIMES"
 msgstr "{0} (x{1})"
 
@@ -3215,6 +3215,10 @@ msgstr "{0} Mn"
 #: ../src/general/StringUtils.cs:37
 msgid "KILO_ABBREVIATION"
 msgstr "{0} B"
+
+#: ../src/general/StringUtils.cs:93
+msgid "MINUTES_SECONDS"
+msgstr ""
 
 #: ../src/general/TranslationHelper.cs:84
 msgid "FEATURE_ENABLED"
@@ -4165,19 +4169,19 @@ msgstr "Bakılan:"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:543
 #: ../src/microbe_stage/MicrobeStage.tscn:753
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:760
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:762
 msgid "NOTHING_HERE"
 msgstr "Burada bir şey yok"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:568
 #: ../src/microbe_stage/MicrobeStage.tscn:778
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:785
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:787
 msgid "COMPOUNDS_COLON"
 msgstr "Bileşikler:"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:608
 #: ../src/microbe_stage/MicrobeStage.tscn:818
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:825
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:827
 msgid "SPECIES_COLON"
 msgstr "Türler:"
 
@@ -4187,25 +4191,25 @@ msgstr "İmleci göstermek için [thrive:input]g_free_cursor[/thrive:input] tuş
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:690
 #: ../src/microbe_stage/MicrobeStage.tscn:898
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:903
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:905
 msgid "ENVIRONMENT"
 msgstr "Ortam"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:958
 #: ../src/microbe_stage/MicrobeStage.tscn:1166
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1169
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1171
 msgid "TEMPERATURE_SHORT"
 msgstr "Sıc."
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1014
 #: ../src/microbe_stage/MicrobeStage.tscn:1222
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1225
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1227
 msgid "LIGHT"
 msgstr "Işık"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1069
 #: ../src/microbe_stage/MicrobeStage.tscn:1277
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1280
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1282
 msgid "PRESSURE_SHORT"
 msgstr "Bsnç."
 
@@ -4215,13 +4219,13 @@ msgstr "Bsnç."
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:681
 #: ../src/microbe_stage/editor/MicrobeEditorReportComponent.tscn:715
 #: ../src/microbe_stage/gui/PatchDetailsPanel.tscn:603
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1365
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1367
 msgid "COMPOUNDS"
 msgstr "Bileşikler"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1529
 #: ../src/microbe_stage/MicrobeStage.tscn:1763
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1765
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1767
 msgid "AGENTS"
 msgstr "Ajanlar"
 
@@ -4239,7 +4243,7 @@ msgstr "Uyandır"
 
 #: ../src/late_multicellular_stage/MulticellularHUD.tscn:1750
 #: ../src/microbe_stage/MicrobeStage.tscn:1989
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1966
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1968
 msgid "POPULATION_CAPITAL"
 msgstr "POPÜLASYON:"
 
@@ -4456,7 +4460,7 @@ msgstr "Çok Hücreli Ol ({0}/{1})"
 msgid "BECOME_MACROSCOPIC"
 msgstr "Makroskopik Ol ({0}/{1})"
 
-#: ../src/microbe_stage/MicrobeSpecies.cs:188
+#: ../src/microbe_stage/MicrobeSpecies.cs:187
 msgid "MICROBE_SPECIES_DETAIL_TEXT"
 msgstr ""
 "[b]Evre[/b]\n"
@@ -4477,12 +4481,12 @@ msgid "SPAWN_ENEMY_CHEAT_FAIL"
 msgstr "Düşman oluşturma hilesi kullanılamaz çünkü bu arazi herhangi bir düşman tür içermemekte"
 
 #: ../src/microbe_stage/MicrobeStage.tscn:727
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:734
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:736
 msgid "AT_CURSOR"
 msgstr "İmleç Üzerinde:"
 
 #: ../src/microbe_stage/MicrobeStage.tscn:1702
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1704
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1706
 msgid "INGESTED_MATTER"
 msgstr "İçeri Alınmış Madde"
 
@@ -4491,7 +4495,7 @@ msgid "MOVE_TO_MULTICELLULAR_STAGE_TOOLTIP"
 msgstr "Oyunun sonraki evresine git (çok hücreli). Yeterince büyük bir hücre kolonin olduğunda açılır."
 
 #: ../src/microbe_stage/MicrobeStage.tscn:2137
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2121
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2123
 msgid "EDITOR_BUTTON_TOOLTIP"
 msgstr "Editöre gir ve türünde değişiklik yap"
 
@@ -5066,19 +5070,30 @@ msgstr ""
 msgid "KILL_FEED_SUICIDE"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1993
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:1995
 msgid "MICROBIAL_ARENA_MAP_HINT"
 msgstr ""
 
-#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2454
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2456
 msgid "SCOREBOARD_UPPERCASE"
 msgstr ""
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2498
+#, fuzzy
+msgid "WELCOME_TO_MULTIPLAYER"
+msgstr "Num *"
+
+#: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArena.tscn:2500
+#, fuzzy
+msgid "WELCOME_TO_MULTIPLAYER_CONTENT"
+msgstr "Thriveopedi'ye hoş geldin"
 
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:365
 msgid "GAME_OVER"
 msgstr ""
 
 #: ../src/microbe_stage/multiplayer/microbial_arena/MicrobialArenaHUD.cs:366
+#: ../src/networking/MultiplayerStageBase.cs:89
 msgid "VALUE_SLASH_MAX_VALUE"
 msgstr ""
 
@@ -5564,54 +5579,60 @@ msgstr "Oluştur"
 msgid "MICROBIAL_ARENA_DESCRIPTION"
 msgstr "Sil tüyleri kamçıya benzer ancak, yönlü itiş kuvveti sağlamak yerine, hücrelerin dönmesi için dönme kuvveti sağlar."
 
-#: ../src/networking/MultiplayerStageBase.cs:154
+#: ../src/networking/MultiplayerStageBase.cs:88
+#, fuzzy
+msgid "LOADING_ENTITIES"
+msgstr "Editördeyken yanlışlıkları düzeltmek için geri al butonuna bas"
+
+#: ../src/networking/MultiplayerStageBase.cs:178
 #, fuzzy
 msgid "WAITING_FOR_HOST"
 msgstr "Oto-evrim bekleniyor:"
+
+#: ../src/networking/MultiplayerStageBase.cs:182
+#: ../src/networking/MultiplayerStageBase.cs:506
+msgid "REGISTERING_TO_SERVER"
+msgstr ""
 
 #: ../src/networking/NetworkManager.cs:111
 msgid "CLIENT_TIME_STEP_CHANGED"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:160
-msgid "GAME_TIME_MINUTES_SECONDS"
-msgstr ""
-
-#: ../src/networking/NetworkManager.cs:407
+#: ../src/networking/NetworkManager.cs:405
 msgid "CHAT_PREFIX_AS_SYSTEM"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:624
+#: ../src/networking/NetworkManager.cs:618
 #, fuzzy
 msgid "PLAYER_HAS_DISCONNECTED"
 msgstr "oyuncu öldü"
 
-#: ../src/networking/NetworkManager.cs:682
+#: ../src/networking/NetworkManager.cs:676
 #, fuzzy
 msgid "BAD_CONNECTION"
 msgstr "Renk düzeltme:"
 
-#: ../src/networking/NetworkManager.cs:686
+#: ../src/networking/NetworkManager.cs:680
 msgid "TIMEOUT"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:791
+#: ../src/networking/NetworkManager.cs:789
 #, fuzzy
 msgid "PLAYER_HAS_CONNECTED"
 msgstr ""
 "Oyuncu\n"
 "Hızı"
 
-#: ../src/networking/NetworkManager.cs:893
+#: ../src/networking/NetworkManager.cs:891
 msgid "SERVER_TIME_STEP_CHANGED"
 msgstr ""
 
-#: ../src/networking/NetworkManager.cs:985
+#: ../src/networking/NetworkManager.cs:989
 #, fuzzy
 msgid "PLAYER_HAS_JOINED"
 msgstr "oyuncu öldü"
 
-#: ../src/networking/NetworkManager.cs:1014
+#: ../src/networking/NetworkManager.cs:1018
 #, fuzzy
 msgid "PLAYER_HAS_LEFT"
 msgstr ""
@@ -5676,94 +5697,94 @@ msgstr ""
 msgid "UNSPECIFIED_LOWERCASE"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:240
+#: ../src/networking/gui/MultiplayerGUI.cs:196
+#: ../src/networking/gui/MultiplayerGUI.cs:199
+#: ../src/networking/gui/MultiplayerGUI.cs:203
+#, fuzzy
+msgid "SERVER_DISCONNECTED"
+msgstr "Bağlı Olmayan Hücreler"
+
+#: ../src/networking/gui/MultiplayerGUI.cs:196
+msgid "SERVER_IS_FULL"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:200
+msgid "NAME_IS_ALREADY_TAKEN"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:204
+msgid "CLOSED_BY_REMOTE_HOST"
+msgstr ""
+
+#: ../src/networking/gui/MultiplayerGUI.cs:259
 #: ../src/networking/gui/MultiplayerGUI.tscn:395
 #, fuzzy
 msgid "START"
 msgstr "Başlıyor"
 
-#: ../src/networking/gui/MultiplayerGUI.cs:254
+#: ../src/networking/gui/MultiplayerGUI.cs:273
 msgid "JOIN"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:313
+#: ../src/networking/gui/MultiplayerGUI.cs:332
 #: ../src/networking/gui/PingBar.cs:59
 msgid "PING_VALUE_MILISECONDS"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:380
+#: ../src/networking/gui/MultiplayerGUI.cs:399
 msgid "CONNECTING"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:381
+#: ../src/networking/gui/MultiplayerGUI.cs:400
 msgid "ESTABLISHING_CONNECTION_TO"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:390
-#: ../src/networking/gui/MultiplayerGUI.cs:505
+#: ../src/networking/gui/MultiplayerGUI.cs:409
+#: ../src/networking/gui/MultiplayerGUI.cs:524
 #, fuzzy
 msgid "CONNECTION_FAILED"
 msgstr "Mod Oluşturma Başarısız"
 
-#: ../src/networking/gui/MultiplayerGUI.cs:391
-#: ../src/networking/gui/MultiplayerGUI.cs:506
+#: ../src/networking/gui/MultiplayerGUI.cs:410
+#: ../src/networking/gui/MultiplayerGUI.cs:525
 msgid "FAILED_TO_ESTABLISH_CONNECTION"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:418
-#: ../src/networking/gui/MultiplayerGUI.cs:430
+#: ../src/networking/gui/MultiplayerGUI.cs:437
+#: ../src/networking/gui/MultiplayerGUI.cs:449
 #, fuzzy
 msgid "HOSTING_FAILED"
 msgstr "Kaydetme başarısız! Bir sorun oluştu"
 
-#: ../src/networking/gui/MultiplayerGUI.cs:419
-#: ../src/networking/gui/MultiplayerGUI.cs:431
+#: ../src/networking/gui/MultiplayerGUI.cs:438
+#: ../src/networking/gui/MultiplayerGUI.cs:450
 msgid "FAILED_TO_CREATE_SERVER"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:438
-#: ../src/networking/gui/MultiplayerGUI.cs:568
+#: ../src/networking/gui/MultiplayerGUI.cs:457
+#: ../src/networking/gui/MultiplayerGUI.cs:571
 msgid "UPNP_SETUP"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:439
+#: ../src/networking/gui/MultiplayerGUI.cs:458
 msgid "UPNP_DISCOVERING_DEVICES"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:522
-#: ../src/networking/gui/MultiplayerGUI.cs:525
-#: ../src/networking/gui/MultiplayerGUI.cs:529
-#, fuzzy
-msgid "SERVER_DISCONNECTED"
-msgstr "Bağlı Olmayan Hücreler"
-
-#: ../src/networking/gui/MultiplayerGUI.cs:522
-msgid "SERVER_IS_FULL"
-msgstr ""
-
-#: ../src/networking/gui/MultiplayerGUI.cs:526
-msgid "NAME_IS_ALREADY_TAKEN"
-msgstr ""
-
-#: ../src/networking/gui/MultiplayerGUI.cs:530
-msgid "CLOSED_BY_REMOTE_HOST"
-msgstr ""
-
-#: ../src/networking/gui/MultiplayerGUI.cs:569
+#: ../src/networking/gui/MultiplayerGUI.cs:572
 msgid "UPNP_ERROR_WHILE_SETTING_UP"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:577
-#: ../src/networking/gui/MultiplayerGUI.cs:592
+#: ../src/networking/gui/MultiplayerGUI.cs:580
+#: ../src/networking/gui/MultiplayerGUI.cs:595
 #, fuzzy
 msgid "PORT_FORWARDING"
 msgstr "İleriye doğru git"
 
-#: ../src/networking/gui/MultiplayerGUI.cs:578
+#: ../src/networking/gui/MultiplayerGUI.cs:581
 msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT"
 msgstr ""
 
-#: ../src/networking/gui/MultiplayerGUI.cs:593
+#: ../src/networking/gui/MultiplayerGUI.cs:596
 #, fuzzy
 msgid "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED"
 msgstr "Kayıt dosyası yazma girişimi başarısız oldu. Girilen kayıt ismi çok uzun veya kayıt klasörüne yazma erişimin yok."
