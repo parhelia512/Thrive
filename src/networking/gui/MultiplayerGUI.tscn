@@ -67,6 +67,7 @@ margin_left = 97.0
 margin_right = 297.0
 margin_bottom = 31.0
 rect_min_size = Vector2( 200, 0 )
+max_length = 32
 caret_blink = true
 
 [node name="HBoxContainer2" type="HBoxContainer" parent="PrimaryMenu/VBoxContainer"]

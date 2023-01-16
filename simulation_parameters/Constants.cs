@@ -1117,7 +1117,7 @@ public static class Constants
     public const int MULTIPLAYER_DEFAULT_PORT = 4242;
     public const int MULTIPLAYER_DEFAULT_MAX_PLAYERS = 20;
     public const int MULTIPLAYER_DEFAULT_MAX_CLIENTS = 100;
-    public const float MULTIPLAYER_DEFAULT_SESSION_LENGTH = 60;
+    public const uint MULTIPLAYER_DEFAULT_SESSION_LENGTH = 60;
     public const int MULTIPLAYER_DEFAULT_TIMEOUT_LIMIT_SECONDS = 32;
 
     public const float DEFAULT_SERVER_TIME_STEP_SECONDS = 0.1f;

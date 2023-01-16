@@ -11,10 +11,7 @@ public class NetworkPlayerInfo : Vars
 
     public bool ReadyForSession { get; set; }
 
-    /// <summary>
-    ///   The average approximate round trip time it takes for a packet to be transmitted from the server (in this case
-    ///   a ping/pong packet) to the client and back in miliseconds.
-    /// </summary>
+    /// <inheritdoc cref="NetworkManager.PingData.AverageRoundTripTime"/>
     public int Latency { get; set; }
 
     public override void NetworkSerialize(PackedBytesBuffer buffer)

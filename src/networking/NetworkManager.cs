@@ -13,11 +13,13 @@ public class NetworkManager : Node
 {
     public const int DEFAULT_SERVER_ID = 1;
     public const int MAX_CHAT_HISTORY_COUNT = 200;
+    public const float RTT_WEIGHTING_FACTOR = 0.7f;
 
     private static NetworkManager? instance;
 
     private readonly Dictionary<int, NetworkPlayerInfo> connectedPlayers = new();
-    private readonly Dictionary<int, PingData> pings = new();
+
+    private PingData ping;
 
     private Deque<string> chatHistory = new();
 
@@ -26,7 +28,9 @@ public class NetworkManager : Node
 
     private float timeStep;
     private float updateTimer;
-    private float elapsedGameTime;
+    private float truncatedDecimals;
+
+    private ulong timeSessionStarted;
 
     private NetworkManager()
     {
@@ -145,9 +149,14 @@ public class NetworkManager : Node
     [PuppetSync]
     public bool GameInSession { get; private set; }
 
-    public float ElapsedGameTimeMinutes { get; private set; }
+    /// <summary>
+    ///   The elapsed time since the start of current game session in miliseconds.
+    /// </summary>
+    public long ElapsedGameTime { get; private set; }
 
-    public float ElapsedGameTimeSeconds { get; private set; }
+    public int ElapsedGameTimeMinutes => Mathf.FloorToInt((ElapsedGameTime * 0.001f) / 60);
+
+    public int ElapsedGameTimeSeconds => Mathf.FloorToInt((ElapsedGameTime * 0.001f) % 60);
 
     /// <summary>
     ///   Returns the current game time in a short format.
@@ -175,25 +184,35 @@ public class NetworkManager : Node
         PauseMode = PauseModeEnum.Process;
     }
 
-    public override void _Process(float delta)
+    public override void _PhysicsProcess(float delta)
     {
         if (!IsNetworked)
             return;
 
-        if (peer!.GetConnectionStatus() == NetworkedMultiplayerPeer.ConnectionStatus.Connecting)
+        if (Status == NetworkedMultiplayerPeer.ConnectionStatus.Connecting)
         {
             TimePassedConnecting += delta;
         }
 
-        HandlePing();
+        if (Status == NetworkedMultiplayerPeer.ConnectionStatus.Connected)
+            HandlePing();
 
         if (GameInSession)
         {
-            // TODO: Synchronize clock
-            elapsedGameTime += delta;
+            var deltaMs = delta * 1000;
 
-            ElapsedGameTimeMinutes = Mathf.FloorToInt(elapsedGameTime / 60);
-            ElapsedGameTimeSeconds = Mathf.FloorToInt(elapsedGameTime % 60);
+            // TODO: Why is the apparent client time always ahead of the server?
+            ElapsedGameTime += (long)deltaMs + ping.DeltaRoundTripTime;
+            ping.DeltaRoundTripTime = 0;
+
+            truncatedDecimals += deltaMs - (long)deltaMs;
+
+            // Regain back precision
+            if (truncatedDecimals >= 1.0f)
+            {
+                ++ElapsedGameTime;
+                truncatedDecimals = 0;
+            }
 
             updateTimer += delta;
 
@@ -296,7 +315,8 @@ public class NetworkManager : Node
         peer = null;
         connectedPlayers.Clear();
         GameInSession = false;
-        elapsedGameTime = 0;
+        ElapsedGameTime = 0;
+        timeSessionStarted = 0;
         Settings = null;
 
         ClearChatHistory();
@@ -494,7 +514,7 @@ public class NetworkManager : Node
             if (Settings == null)
                 return false;
 
-            elapsedGameTime = Settings.SessionLength * 60;
+            ElapsedGameTime = Settings.SessionLength * 60000;
         }
 
         return true;
@@ -512,38 +532,30 @@ public class NetworkManager : Node
 
     private void HandlePing()
     {
-        // Must be server-initiated
-        if (!IsAuthoritative)
+        // Must be client-initiated
+        if (!IsClient)
             return;
 
         var currentTime = Time.GetTicksMsec();
 
-        // Ping everyone
-        foreach (var player in ConnectedPlayers)
+        // Check if timed out
+        if (ping.IsWaitingAck && currentTime > ping.TimeSent + Constants.NETWORK_PING_TIMEOUT_MILISECONDS)
         {
-            if (player.Key == DEFAULT_SERVER_ID || !pings.TryGetValue(player.Key, out PingData ping))
-                continue;
+            ++ping.PacketLost;
+            ping.IsWaitingAck = false;
+        }
 
-            if (ping.IsWaitingAck && currentTime > ping.TimeSent + Constants.NETWORK_PING_TIMEOUT_MILISECONDS)
-            {
-                ++ping.PacketLost;
-                ping.IsWaitingAck = false;
-            }
-
-            if (!ping.IsWaitingAck && currentTime > ping.TimeSent + Constants.NETWORK_PING_INTERVAL_MILISECONDS)
-            {
-                SendPing(player.Key);
-            }
+        // Ping server
+        if (!ping.IsWaitingAck && currentTime > ping.TimeSent + Constants.NETWORK_PING_INTERVAL_MILISECONDS)
+        {
+            SendPing();
         }
     }
 
-    private void SendPing(int targetId)
+    private void SendPing()
     {
-        // Must be server-initiated
-        if (!IsAuthoritative || targetId == DEFAULT_SERVER_ID)
-            return;
-
-        if (!pings.TryGetValue(targetId, out PingData ping))
+        // Must be client-initiated
+        if (!IsClient)
             return;
 
         ++ping.Id;
@@ -554,31 +566,30 @@ public class NetworkManager : Node
         packet.Write((byte)RawPacketFlag.Ping);
         packet.Write((ushort)ping.Id);
 
-        Multiplayer.SendBytes(packet.Data, targetId, NetworkedMultiplayerPeer.TransferModeEnum.Unreliable);
-    }
-
-    private void ProcessReceivedPing(PackedBytesBuffer buffer)
-    {
-        var pingId = buffer.ReadUInt16();
-
-        var packet = new PackedBytesBuffer(3);
-        packet.Write((byte)RawPacketFlag.Pong);
-        packet.Write(pingId);
-
-        // Send back to the server (pong)
         Multiplayer.SendBytes(packet.Data, DEFAULT_SERVER_ID, NetworkedMultiplayerPeer.TransferModeEnum.Unreliable);
     }
 
-    private void ProcessReceivedPong(int fromId, ulong timeReceived, PackedBytesBuffer buffer)
+    private void ProcessReceivedPing(int fromId, PackedBytesBuffer buffer)
     {
         // Must be received by the server
         if (!IsAuthoritative)
             return;
 
-        if (!pings.TryGetValue(fromId, out PingData ping))
-            return;
+        var pingId = buffer.ReadUInt16();
 
+        var packet = new PackedBytesBuffer(3);
+        packet.Write((byte)RawPacketFlag.Pong);
+        packet.Write(pingId);
+        packet.Write(Time.GetTicksMsec() - timeSessionStarted);
+
+        // Send back to the client (pong)
+        Multiplayer.SendBytes(packet.Data, fromId, NetworkedMultiplayerPeer.TransferModeEnum.Unreliable);
+    }
+
+    private void ProcessReceivedPong(ulong timeReceived, PackedBytesBuffer buffer)
+    {
         var receivedId = buffer.ReadUInt16();
+        var serverTime = buffer.ReadUInt64();
 
         if (receivedId != ping.Id)
         {
@@ -590,12 +601,19 @@ public class NetworkManager : Node
 
         var roundTripTime = timeReceived - ping.TimeSent;
 
-        // Smooth it out
-        ping.AverageRoundTripTime = ping.AverageRoundTripTime <= 0 ?
-            roundTripTime :
-            (ulong)((ping.AverageRoundTripTime * 0.7f) + (roundTripTime * 0.3f));
+        var oldRtt = ping.AverageRoundTripTime;
 
-        Rpc(nameof(NotifyLatencyUpdate), fromId, (ushort)ping.AverageRoundTripTime);
+        // Smooth it out (TCP RTT calculation)
+        ping.AverageRoundTripTime = (ulong)(ping.AverageRoundTripTime <= 0 ?
+            roundTripTime :
+            (RTT_WEIGHTING_FACTOR * ping.AverageRoundTripTime) + ((1 - RTT_WEIGHTING_FACTOR) * roundTripTime));
+
+        ping.DeltaRoundTripTime = (long)(oldRtt - ping.AverageRoundTripTime);
+
+        ping.EstimatedTimeOffset = (long)(serverTime + (ping.AverageRoundTripTime / 2)) - ElapsedGameTime;
+        ElapsedGameTime += ping.EstimatedTimeOffset;
+
+        Rpc(nameof(NotifyPeerLatency), (ushort)ping.AverageRoundTripTime);
     }
 
     private void OnPeerConnected(int id)
@@ -609,8 +627,6 @@ public class NetworkManager : Node
     {
         if (!HasPlayer(id))
             return;
-
-        pings.Remove(id);
 
         Print("User \"", GetPlayerInfo(id)!.Name, "\" ID: ", id, " has disconnected");
 
@@ -631,10 +647,10 @@ public class NetworkManager : Node
         switch (packetType)
         {
             case RawPacketFlag.Ping:
-                ProcessReceivedPing(buffer);
+                ProcessReceivedPing(fromId, buffer);
                 break;
             case RawPacketFlag.Pong:
-                ProcessReceivedPong(fromId, timeReceived, buffer);
+                ProcessReceivedPong(timeReceived, buffer);
                 break;
         }
     }
@@ -663,7 +679,8 @@ public class NetworkManager : Node
         peer = null;
         connectedPlayers.Clear();
         GameInSession = false;
-        elapsedGameTime = 0;
+        ElapsedGameTime = 0;
+        timeSessionStarted = 0;
         Settings = null!;
 
         ClearChatHistory();
@@ -703,7 +720,10 @@ public class NetworkManager : Node
     private void OnGameReady(object sender, EventArgs args)
     {
         if (IsAuthoritative && !GameInSession)
+        {
             Rset(nameof(GameInSession), true);
+            timeSessionStarted = Time.GetTicksMsec();
+        }
 
         Print("Local game is now ready, notifying the host");
 
@@ -719,9 +739,9 @@ public class NetworkManager : Node
     [RemoteSync]
     private void NotifyPlayerConnected(int id, byte[] data)
     {
-        var packed = new PackedBytesBuffer(data);
+        var incomingPacket = new PackedBytesBuffer(data);
         var info = new NetworkPlayerInfo();
-        info.NetworkDeserialize(packed);
+        info.NetworkDeserialize(incomingPacket);
 
         if (IsAuthoritative)
         {
@@ -755,9 +775,9 @@ public class NetworkManager : Node
                 }
 
                 // Forward other players' info to the newly connected player, including us if we're a listen-server
-                var otherPlayerBuffer = new PackedBytesBuffer();
-                player.Value.NetworkSerialize(otherPlayerBuffer);
-                RpcId(id, nameof(NotifyPlayerConnected), player.Key, otherPlayerBuffer.Data);
+                var playerPacket = new PackedBytesBuffer();
+                player.Value.NetworkSerialize(playerPacket);
+                RpcId(id, nameof(NotifyPlayerConnected), player.Key, playerPacket.Data);
                 RpcId(id, nameof(NotifyPlayerStatusChange), player.Key, player.Value.Status);
             }
 
@@ -767,13 +787,10 @@ public class NetworkManager : Node
                 RpcId(id, nameof(NotifyPlayerConnected), id, data);
 
                 // And finally give the client our server configurations
-                var buffer = new PackedBytesBuffer();
-                Settings.NetworkSerialize(buffer);
-                RpcId(id, nameof(NotifyServerConfigs), buffer.Data);
+                var settingsPacket = new PackedBytesBuffer();
+                Settings.NetworkSerialize(settingsPacket);
+                RpcId(id, nameof(NotifyServerConfigs), settingsPacket.Data);
             }
-
-            // Initialize ping
-            pings[id] = new PingData();
 
             // TODO: might not be true...
             Print("User \"", info.Name, "\" ID: ", id, " has connected");
@@ -892,14 +909,16 @@ public class NetworkManager : Node
     }
 
     [RemoteSync]
-    private void NotifyLatencyUpdate(int peerId, ushort latency)
+    private void NotifyPeerLatency(ushort latency)
     {
-        var info = GetPlayerInfo(peerId);
+        var sender = GetTree().GetRpcSenderId();
+
+        var info = GetPlayerInfo(sender);
 
         if (info != null)
         {
             info.Latency = latency;
-            EmitSignal(nameof(LatencyUpdated), peerId, latency);
+            EmitSignal(nameof(LatencyUpdated), sender, latency);
         }
     }
 
@@ -935,7 +954,8 @@ public class NetworkManager : Node
             Rpc(nameof(NotifyWorldPostExit), PeerId);
         });
 
-        elapsedGameTime = 0;
+        ElapsedGameTime = 0;
+        timeSessionStarted = 0;
 
         Print("Exiting current game session");
     }
@@ -1040,12 +1060,45 @@ public class NetworkManager : Node
         info?.SetVar(what, variant);
     }
 
-    public class PingData
+    /// <summary>
+    ///   Information derived by pinging the server.
+    /// </summary>
+    public struct PingData
     {
+        /// <summary>
+        ///   The current id of a ping packet being transmitted.
+        /// </summary>
         public int Id;
+
+        /// <summary>
+        ///   A timestamp when a ping is transmitted.
+        /// </summary>
         public ulong TimeSent;
+
+        /// <summary>
+        ///   The time it takes for a packet to be transmitted from the client (in this
+        ///   case a ping/pong packet) to the server and back in miliseconds.
+        /// </summary>
         public ulong AverageRoundTripTime;
+
+        /// <summary>
+        ///   The difference between the old and newly calculated average round trip time.
+        /// </summary>
+        public long DeltaRoundTripTime;
+
+        /// <summary>
+        ///   The offset between the client's and the server's clock.
+        /// </summary>
+        public long EstimatedTimeOffset;
+
+        /// <summary>
+        ///   Returns true if a pong is expected from the server.
+        /// </summary>
         public bool IsWaitingAck;
+
+        /// <summary>
+        ///   Increments if current time > timeout factor.
+        /// </summary>
         public uint PacketLost;
     }
 }

@@ -18,11 +18,17 @@ public class PackedBytesBuffer
         buffer = new List<byte>();
     }
 
+    /// <summary>
+    ///   Constructs a new buffer with the given initial capacity.
+    /// </summary>
     public PackedBytesBuffer(int size)
     {
         buffer = new List<byte>(size);
     }
 
+    /// <summary>
+    ///   Constructs a new buffer from the given byte array.
+    /// </summary>
     public PackedBytesBuffer(byte[] buffer)
     {
         this.buffer = new List<byte>(buffer);

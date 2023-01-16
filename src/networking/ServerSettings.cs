@@ -17,7 +17,10 @@ public class ServerSettings : INetworkSerializable
 
     public int MaxPlayers { get; set; } = Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS;
 
-    public float SessionLength { get; set; } = Constants.MULTIPLAYER_DEFAULT_SESSION_LENGTH;
+    /// <summary>
+    ///   The multiplayer session's time limit in minutes.
+    /// </summary>
+    public uint SessionLength { get; set; } = Constants.MULTIPLAYER_DEFAULT_SESSION_LENGTH;
 
     /// <inheritdoc cref="NetworkManager.TimeStep"/>
     public float TimeStep { get; set; } = Constants.DEFAULT_SERVER_TIME_STEP_SECONDS;
@@ -59,7 +62,7 @@ public class ServerSettings : INetworkSerializable
         Address = buffer.ReadString();
         Port = buffer.ReadInt32();
         MaxPlayers = buffer.ReadInt32();
-        SessionLength = buffer.ReadSingle();
+        SessionLength = buffer.ReadUInt32();
         TimeStep = buffer.ReadSingle();
         UseUpnp = buffer.ReadBoolean();
 

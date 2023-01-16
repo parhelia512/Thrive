@@ -138,7 +138,7 @@ public class ServerSetup : CustomDialog
     {
         settings!.Name = name.Text;
         settings.MaxPlayers = (int)maxPlayers.Value;
-        settings.SessionLength = (float)sessionLength.Value;
+        settings.SessionLength = (uint)sessionLength.Value;
         settings.SelectedGameMode = currentGameMode;
         settings.UseUpnp = useUpnp.Pressed;
         settings.GameModeSettings = gameModeOptions?.ReadSettings();

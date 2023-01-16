@@ -4,12 +4,12 @@
 public enum RawPacketFlag
 {
     /// <summary>
-    ///   Server-to-client.
+    ///   Client-to-server.
     /// </summary>
     Ping,
 
     /// <summary>
-    ///   Client-to-server.
+    ///   Server-to-client.
     /// </summary>
     Pong,
 }
