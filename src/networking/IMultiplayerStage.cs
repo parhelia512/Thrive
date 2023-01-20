@@ -9,4 +9,6 @@ public interface IMultiplayerStage : IStage
     ///   Should be emitted when the multiplayer stage is done setting up.
     /// </summary>
     public event EventHandler? GameReady;
+
+    public bool TryGetPlayer(int peerId, out NetworkCharacter player);
 }

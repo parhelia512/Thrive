@@ -5,7 +5,7 @@ using Godot;
 
 /// <summary>
 ///   Holds an resizable array of bytes that can be read and wrote into. Provides low-level access for manually
-///   constructing a binary format encoded using Godot's byte encoding implementation as the base, see
+///   constructing a binary format, encoded using Godot's byte encoding implementation as the base, see
 ///   <see cref="MarshalUtils"/>.
 /// </summary>
 public class PackedBytesBuffer
@@ -40,7 +40,7 @@ public class PackedBytesBuffer
     public byte[] Data => buffer.ToArray();
 
     /// <summary>
-    ///   Gets and sets the read/write cursor.
+    ///   Gets and sets the read/write cursor. Always reset this to 0 when switching from read/write operation.
     /// </summary>
     public int Position
     {
@@ -172,6 +172,19 @@ public class PackedBytesBuffer
     {
         Write(Encoding.ASCII.GetByteCount(value));
         Write(Encoding.ASCII.GetBytes(value));
+    }
+
+    public void Write(Vector2 value)
+    {
+        Write(value.x);
+        Write(value.y);
+    }
+
+    public void Write(Vector3 value)
+    {
+        Write(value.x);
+        Write(value.y);
+        Write(value.z);
     }
 
     /// <summary>
@@ -340,6 +353,16 @@ public class PackedBytesBuffer
         var count = ReadInt32();
         var data = ReadBytes(count);
         return Encoding.UTF8.GetString(data);
+    }
+
+    public Vector2 ReadVector2()
+    {
+        return new Vector2(ReadSingle(), ReadSingle());
+    }
+
+    public Vector3 ReadVector3()
+    {
+        return new Vector3(ReadSingle(), ReadSingle(), ReadSingle());
     }
 
     /// <summary>

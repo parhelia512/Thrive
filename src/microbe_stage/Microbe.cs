@@ -16,16 +16,6 @@ using Environment = System.Environment;
 [DeserializedCallbackTarget]
 public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable
 {
-    /// <summary>
-    ///   The point towards which the microbe will move to point to
-    /// </summary>
-    public Vector3 LookAtPoint = new(0, 0, -1);
-
-    /// <summary>
-    ///   The direction the microbe wants to move. Doesn't need to be normalized
-    /// </summary>
-    public Vector3 MovementDirection = new(0, 0, 0);
-
     private HybridAudioPlayer engulfAudio = null!;
     private HybridAudioPlayer bindingAudio = null!;
     private HybridAudioPlayer movementAudio = null!;
@@ -366,9 +356,7 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
         cellBurstEffectScene = GD.Load<PackedScene>("res://src/microbe_stage/particles/CellBurstEffect.tscn");
         endosomeScene = GD.Load<PackedScene>("res://src/microbe_stage/Endosome.tscn");
 
-        bool localPlayer = PeerId == NetworkManager.Instance.PeerId || !NetworkManager.Instance.IsNetworked;
-
-        engulfAudio.Positional = movementAudio.Positional = bindingAudio.Positional = !IsPlayerMicrobe && localPlayer;
+        engulfAudio.Positional = movementAudio.Positional = bindingAudio.Positional = !IsPlayerMicrobe && IsLocal;
 
         // You may notice that there are two separate ways that an audio is played in this class:
         // using pre-existing audio node e.g "bindingAudio", "movementAudio" and through method e.g "PlaySoundEffect",
@@ -376,7 +364,7 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
         // to the audio player while the latter is more convenient for dynamic and various short one-time sound effects
         // in expense of lesser audio player control.
 
-        if (IsPlayerMicrobe && localPlayer)
+        if (IsPlayerMicrobe && IsLocal)
         {
             // Creates and activates the audio listener for the player microbe. Positional sound will be
             // received by it instead of the main camera.
@@ -723,7 +711,8 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
             queuedToxinToEmit = null;
         }
 
-        HandleSlimeSecretion(delta);
+        if (!NetworkManager.Instance.IsNetworked)
+            HandleSlimeSecretion(delta);
 
         // If we didn't have our membrane ready yet in the async process we need to do these now
         if (absorptionSkippedEarly)
@@ -811,14 +800,17 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
 
         linearAcceleration = (LinearVelocity - lastLinearVelocity) / delta;
 
-        // Movement
-        if (ColonyParent == null && !IsForPreviewOnly)
+        if (!NetworkManager.Instance.IsNetworked)
         {
-            HandleMovement(delta);
-        }
-        else
-        {
-            Colony?.Master.AddMovementForce(queuedMovementForce);
+            // Movement
+            if (ColonyParent == null && !IsForPreviewOnly)
+            {
+                HandleMovement(delta);
+            }
+            else
+            {
+                Colony?.Master.AddMovementForce(queuedMovementForce);
+            }
         }
 
         lastLinearVelocity = LinearVelocity;
@@ -1129,9 +1121,17 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
         if (movement.x == 0.0f && movement.z == 0.0f)
             return;
 
+        var impulse = movement * delta;
+
+        if (NetworkManager.Instance.IsClient)
+        {
+            ApplyPredictiveCentralImpulse(impulse);
+            return;
+        }
+
         // Scale movement by delta time (not by framerate). We aren't Fallout 4
         // TODO: it seems that at low framerate (below 20 or so) cells get a speed boost for some reason
-        ApplyCentralImpulse(movement * delta);
+        ApplyCentralImpulse(impulse);
     }
 
     /// <summary>

@@ -32,7 +32,6 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     public MicrobeCamera Camera { get; private set; } = null!;
     public MicrobialArenaHUD HUD { get; private set; } = null!;
     public PlayerHoverInfo HoverInfo { get; private set; } = null!;
-    public MultiplayerMicrobeStageInput PlayerInput { get; private set; } = null!;
 
     public Action? LocalPlayerSpeciesReceived { get; set; }
 
@@ -71,7 +70,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         HUD.Init(this);
         HoverInfo.Init(Camera, Clouds);
-        PlayerInput.Init(this);
+        playerInputHandler.Init(this);
 
         SetupStage();
     }
@@ -83,7 +82,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         if (!NodeReferencesResolved)
             return;
 
-        if (NetworkManager.Instance.IsAuthoritative)
+        if (NetworkManager.Instance.IsServer)
         {
             TimedLifeSystem.Process(delta);
             ProcessSystem.Process(delta);
@@ -141,11 +140,10 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         guiRoot = GetNode<Control>("GUI");
         HUD = guiRoot.GetNode<MicrobialArenaHUD>("MicrobialArenaHUD");
         HoverInfo = GetNode<PlayerHoverInfo>("PlayerHoverInfo");
-        PlayerInput = GetNode<MultiplayerMicrobeStageInput>("PlayerMicrobialArenaInput");
         Camera = world.GetNode<MicrobeCamera>("PrimaryCamera");
         Clouds = world.GetNode<CompoundCloudSystem>("CompoundClouds");
 
-        if (NetworkManager.Instance.IsAuthoritative)
+        if (NetworkManager.Instance.IsServer)
         {
             TimedLifeSystem = new TimedLifeSystem(rootOfDynamicallySpawned);
             ProcessSystem = new ProcessSystem(rootOfDynamicallySpawned);
@@ -242,7 +240,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         // Disable clouds simulation as it's currently too chaotic to synchronize
         Clouds.RunSimulation = false;
 
-        if (NetworkManager.Instance.IsAuthoritative)
+        if (NetworkManager.Instance.IsServer)
         {
             spawner.OnSpawnCoordinatesChanged = OnSpawnCoordinatesChanged;
             spawner.Init();
@@ -266,7 +264,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         gameOverExitTimer = GAME_OVER_SCREEN_DURATION;
 
-        if (NetworkManager.Instance.IsAuthoritative)
+        if (NetworkManager.Instance.IsServer)
             PauseManager.Instance.AddPause("ArenaGameOver");
 
         HUD.ToggleInfoScreen();
@@ -369,7 +367,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         Camera.SetBackground(SimulationParameters.Instance.GetBackground(
             MultiplayerGameWorld.Map.CurrentPatch!.BiomeTemplate.Background));
 
-        if (NetworkManager.Instance.IsAuthoritative)
+        if (NetworkManager.Instance.IsServer)
         {
             // Update environment for process system
             ProcessSystem.SetBiome(MultiplayerGameWorld.Map.CurrentPatch.Biome);
@@ -444,13 +442,13 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
     private void OnPlayerDied(Microbe player)
     {
-        if (player.PeerId == NetworkManager.Instance.PeerId)
+        if (player.IsLocal)
         {
             Player = null;
             Camera.ObjectToFollow = null;
         }
 
-        if (NetworkManager.Instance.IsAuthoritative)
+        if (NetworkManager.Instance.IsServer)
         {
             ServerSetPlayerVar(player.PeerId, "dead", true);
 

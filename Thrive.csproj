@@ -139,13 +139,13 @@
     <Compile Include="src\general\CustomDifficulty.cs" />
     <Compile Include="src\general\DictionaryWithFallback.cs" />
     <Compile Include="src\general\IDifficulty.cs" />
-    <Compile Include="src\microbe_stage\multiplayer\NetworkMicrobeInput.cs" />
     <Compile Include="src\networking\IMultiplayerStage.cs" />
     <Compile Include="src\general\MarshalUtils.cs" />
     <Compile Include="src\general\PackedBytesBuffer.cs" />
     <Compile Include="src\general\Vars.cs" />
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\CloudBlob.cs" />
-    <Compile Include="src\networking\INetworkInputBatch.cs" />
+    <Compile Include="src\networking\IReconcilableData.cs" />
+    <Compile Include="src\networking\NetworkInputVars.cs" />
     <Compile Include="src\networking\NetworkRigidBody.cs" />
     <Compile Include="src\networking\gui\ChatBoxUndecorated.cs" />
     <Compile Include="src\networking\gui\IGameModeOptionsMenu.cs" />
@@ -368,7 +368,7 @@
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\editor\MicrobialArenaEditor.cs" />
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\MicrobialArena.cs" />
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\MicrobialArenaHUD.cs" />
-    <Compile Include="src\microbe_stage\multiplayer\MultiplayerMicrobeStageInput.cs" />
+    <Compile Include="src\microbe_stage\multiplayer\microbial_arena\PlayerMicrobialArenaInput.cs" />
     <Compile Include="src\microbe_stage\multiplayer\microbial_arena\MicrobialArenaSpawnSystem.cs" />
     <Compile Include="src\microbe_stage\organelle_components\CiliaComponent.cs" />
     <Compile Include="src\microbe_stage\organelle_components\SlimeJetComponent.cs" />

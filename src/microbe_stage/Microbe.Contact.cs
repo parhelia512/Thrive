@@ -781,7 +781,7 @@ public partial class Microbe
             return null;
 
         // Still need to be a valid entity to be able to sync death to clients
-        if (!NetworkManager.Instance.IsAuthoritative)
+        if (!NetworkManager.Instance.IsServer)
             OnDestroyed();
 
         // Post-death handling is done in HandleDeath
@@ -1811,7 +1811,7 @@ public partial class Microbe
                         CompleteIngestion(engulfedObject);
                         break;
                     case PhagocytosisPhase.Digested:
-                        if (NetworkManager.Instance.IsAuthoritative)
+                        if (NetworkManager.Instance.IsServer)
                             engulfable.DestroyAndQueueFree();
 
                         engulfedObjects.Remove(engulfedObject);

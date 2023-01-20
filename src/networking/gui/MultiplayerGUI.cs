@@ -254,7 +254,7 @@ public class MultiplayerGUI : CenterContainer
     {
         var network = NetworkManager.Instance;
 
-        if (NetworkManager.Instance.IsAuthoritative)
+        if (NetworkManager.Instance.IsServer)
         {
             startButton.Text = TranslationServer.Translate("START");
 

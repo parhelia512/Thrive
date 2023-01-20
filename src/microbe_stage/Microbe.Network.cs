@@ -14,6 +14,16 @@ public partial class Microbe
 
     private string? cloudSystemPath;
 
+    private NetworkInputVars lastAppliedInput;
+
+    [Flags]
+    public enum InputFlag : byte
+    {
+        EmitToxin,
+        SecreteSlime,
+        Engulf,
+    }
+
     public MultiplayerGameWorld? MultiplayerGameWorld => GameWorld as MultiplayerGameWorld;
 
     public override string ResourcePath => "res://src/microbe_stage/Microbe.tscn";
@@ -31,7 +41,7 @@ public partial class Microbe
 
         Name = PeerId.ToString(CultureInfo.CurrentCulture);
 
-        if (PeerId != NetworkManager.Instance.PeerId)
+        if (!IsLocal)
             InitNameTag();
 
         Compounds.LockInputAndOutput = NetworkManager.Instance.IsClient;
@@ -179,6 +189,40 @@ public partial class Microbe
         }
 
         allOrganellesDivided = buffer.ReadBoolean();
+    }
+
+    public override void PredictSimulation(float delta)
+    {
+        GlobalTransform = GetNewPhysicsRotation(GlobalTransform);
+
+        base.PredictSimulation(delta);
+    }
+
+    public override void ApplyInput(NetworkInputVars input)
+    {
+        base.ApplyInput(input);
+
+        if ((input.Bools & (byte)InputFlag.EmitToxin) != 0)
+            QueueEmitToxin(SimulationParameters.Instance.GetCompound("oxytoxy"));
+
+        if ((input.Bools & (byte)InputFlag.SecreteSlime) != 0)
+            QueueSecreteSlime(lastAppliedInput.Delta + input.Delta);
+
+        var engulf = (input.Bools & (byte)InputFlag.Engulf) != 0;
+
+        if (engulf && !Membrane.Type.CellWall)
+        {
+            State = MicrobeState.Engulf;
+        }
+        else if (!engulf && State == MicrobeState.Engulf)
+        {
+            State = MicrobeState.Normal;
+        }
+
+        HandleSlimeSecretion(input.Delta);
+        HandleMovement(input.Delta);
+
+        lastAppliedInput = input;
     }
 
     private void InitNameTag()

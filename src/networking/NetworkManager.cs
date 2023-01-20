@@ -13,24 +13,29 @@ public class NetworkManager : Node
 {
     public const int DEFAULT_SERVER_ID = 1;
     public const int MAX_CHAT_HISTORY_COUNT = 200;
+
+    /// <summary>
+    ///   The higher the value, the more immune to short-time changes the resulting average RTT will be.
+    /// </summary>
     public const float RTT_WEIGHTING_FACTOR = 0.7f;
 
     private static NetworkManager? instance;
 
     private readonly Dictionary<int, NetworkPlayerInfo> connectedPlayers = new();
+    private readonly Deque<string> chatHistory = new();
 
     private PingData ping;
-
-    private Deque<string> chatHistory = new();
 
     private NetworkedMultiplayerENet? peer;
     private UPNP? upnp;
 
     private float timeStep;
     private float updateTimer;
-    private float truncatedDecimals;
 
-    private ulong timeSessionStarted;
+    /// <summary>
+    ///   Accumulates decimals from the truncated delta milliseconds.
+    /// </summary>
+    private float truncatedDecimals;
 
     private NetworkManager()
     {
@@ -106,7 +111,7 @@ public class NetworkManager : Node
 
             timeStep = value;
 
-            if (IsAuthoritative)
+            if (IsServer)
             {
                 Rpc(nameof(NotifyServerTimeStepChange), timeStep);
             }
@@ -135,14 +140,15 @@ public class NetworkManager : Node
 
     public IReadOnlyList<string> ChatHistory => chatHistory;
 
-    public bool IsServer => PeerId == DEFAULT_SERVER_ID;
-
     /// <summary>
     ///   Dedicated server has no player set.
     /// </summary>
     public bool IsDedicated => IsServer && !HasPlayer(DEFAULT_SERVER_ID);
 
-    public bool IsAuthoritative => IsNetworked && IsServer && IsNetworkMaster();
+    /// <summary>
+    ///   Returns true if peer id equals 1 or <see cref="DEFAULT_SERVER_ID"/>.
+    /// </summary>
+    public bool IsServer => IsNetworked && PeerId == DEFAULT_SERVER_ID && IsNetworkMaster();
 
     public bool IsClient => IsNetworked && !IsServer && !IsNetworkMaster();
 
@@ -152,6 +158,9 @@ public class NetworkManager : Node
     /// <summary>
     ///   The elapsed time since the start of current game session in miliseconds.
     /// </summary>
+    /// <remarks>
+    ///   This is synced to the server if we're a client.
+    /// </remarks>
     public long ElapsedGameTime { get; private set; }
 
     public int ElapsedGameTimeMinutes => Mathf.FloorToInt((ElapsedGameTime * 0.001f) / 60);
@@ -159,12 +168,12 @@ public class NetworkManager : Node
     public int ElapsedGameTimeSeconds => Mathf.FloorToInt((ElapsedGameTime * 0.001f) % 60);
 
     /// <summary>
-    ///   Returns the current game time in a short format.
+    ///   Returns the elapsed game time in a short format (MM:SS).
     /// </summary>
-    public string GameTime => StringUtils.FormatShortMinutesSeconds(ElapsedGameTimeMinutes, ElapsedGameTimeSeconds);
+    public string GameTimeFormatted => StringUtils.FormatShortMinutesSeconds(ElapsedGameTimeMinutes, ElapsedGameTimeSeconds);
 
     /// <summary>
-    ///   Returns the current game time in a more readable format (with explicit minutes and seconds).
+    ///   Returns the elapsed game time in a more readable format (with explicit minutes and seconds).
     /// </summary>
     public string GameTimeHumanized => StringUtils.FormatLongMinutesSeconds(
         ElapsedGameTimeMinutes, ElapsedGameTimeSeconds);
@@ -199,13 +208,9 @@ public class NetworkManager : Node
 
         if (GameInSession)
         {
-            var deltaMs = delta * 1000;
-
-            // TODO: Why is the apparent client time always ahead of the server?
-            ElapsedGameTime += (long)deltaMs + ping.DeltaRoundTripTime;
-            ping.DeltaRoundTripTime = 0;
-
-            truncatedDecimals += deltaMs - (long)deltaMs;
+            var deltaMilliseconds = delta * 1000;
+            ElapsedGameTime += (long)deltaMilliseconds;
+            truncatedDecimals += deltaMilliseconds - (long)deltaMilliseconds;
 
             // Regain back precision
             if (truncatedDecimals >= 1.0f)
@@ -308,7 +313,14 @@ public class NetworkManager : Node
     {
         Print("Disconnecting...");
         peer?.CloseConnection();
+        Cleanup();
+    }
 
+    /// <summary>
+    ///   Clears network session data.
+    /// </summary>
+    private void Cleanup()
+    {
         if (upnp?.GetDeviceCount() > 0)
             upnp?.DeletePortMapping(Settings!.Port);
 
@@ -316,8 +328,7 @@ public class NetworkManager : Node
         connectedPlayers.Clear();
         GameInSession = false;
         ElapsedGameTime = 0;
-        timeSessionStarted = 0;
-        Settings = null;
+        Settings = null!;
 
         ClearChatHistory();
     }
@@ -351,7 +362,7 @@ public class NetworkManager : Node
 
         NotifyGameLoad();
 
-        if (IsAuthoritative)
+        if (IsServer)
         {
             foreach (var player in connectedPlayers)
             {
@@ -369,12 +380,12 @@ public class NetworkManager : Node
         if (!IsDedicated && LocalPlayer!.Status == NetworkPlayerStatus.Lobby)
             return;
 
-        if (IsAuthoritative && GameInSession)
+        if (IsServer && GameInSession)
             Rset(nameof(GameInSession), false);
 
         NotifyGameExit();
 
-        if (IsAuthoritative)
+        if (IsServer)
         {
             foreach (var player in connectedPlayers)
             {
@@ -389,7 +400,7 @@ public class NetworkManager : Node
 
     public void SetReadyForSessionStatus(bool ready)
     {
-        if (IsAuthoritative)
+        if (IsServer)
             return;
 
         RpcId(DEFAULT_SERVER_ID, nameof(NotifyReadyForSessionStatusChange), PeerId, ready);
@@ -438,14 +449,14 @@ public class NetworkManager : Node
     {
         var str = string.Concat(System.Array.ConvertAll(what, x => x?.ToString() ?? "null"));
         var serverOrHost = IsDedicated ? "[Server] " : "[Host] ";
-        GD.Print(IsAuthoritative ? serverOrHost : "[Client] ", str);
+        GD.Print(IsServer ? serverOrHost : "[Client] ", str);
     }
 
     public void PrintError(params object[] what)
     {
         var str = string.Concat(System.Array.ConvertAll(what, x => x?.ToString() ?? "null"));
         var serverOrHost = IsDedicated ? "[Server] " : "[Host] ";
-        GD.PrintErr(IsAuthoritative ? serverOrHost : "[Client] ", str);
+        GD.PrintErr(IsServer ? serverOrHost : "[Client] ", str);
     }
 
     private void SetupUpnp()
@@ -572,7 +583,7 @@ public class NetworkManager : Node
     private void ProcessReceivedPing(int fromId, PackedBytesBuffer buffer)
     {
         // Must be received by the server
-        if (!IsAuthoritative)
+        if (!IsServer)
             return;
 
         var pingId = buffer.ReadUInt16();
@@ -580,7 +591,7 @@ public class NetworkManager : Node
         var packet = new PackedBytesBuffer(3);
         packet.Write((byte)RawPacketFlag.Pong);
         packet.Write(pingId);
-        packet.Write(Time.GetTicksMsec() - timeSessionStarted);
+        packet.Write(ElapsedGameTime);
 
         // Send back to the client (pong)
         Multiplayer.SendBytes(packet.Data, fromId, NetworkedMultiplayerPeer.TransferModeEnum.Unreliable);
@@ -589,7 +600,7 @@ public class NetworkManager : Node
     private void ProcessReceivedPong(ulong timeReceived, PackedBytesBuffer buffer)
     {
         var receivedId = buffer.ReadUInt16();
-        var serverTime = buffer.ReadUInt64();
+        var serverTime = buffer.ReadInt64();
 
         if (receivedId != ping.Id)
         {
@@ -610,8 +621,8 @@ public class NetworkManager : Node
 
         ping.DeltaRoundTripTime = (long)(oldRtt - ping.AverageRoundTripTime);
 
-        ping.EstimatedTimeOffset = (long)(serverTime + (ping.AverageRoundTripTime / 2)) - ElapsedGameTime;
-        ElapsedGameTime += ping.EstimatedTimeOffset;
+        ping.EstimatedTimeOffset = serverTime + (long)(ping.AverageRoundTripTime / 2) - ElapsedGameTime;
+        ElapsedGameTime += ping.EstimatedTimeOffset + ping.DeltaRoundTripTime;
 
         Rpc(nameof(NotifyPeerLatency), (ushort)ping.AverageRoundTripTime);
     }
@@ -672,19 +683,7 @@ public class NetworkManager : Node
     private void OnServerDisconnected()
     {
         Print("Disconnected from server");
-
-        if (upnp?.GetDeviceCount() > 0)
-            upnp?.DeletePortMapping(Settings!.Port);
-
-        peer = null;
-        connectedPlayers.Clear();
-        GameInSession = false;
-        ElapsedGameTime = 0;
-        timeSessionStarted = 0;
-        Settings = null!;
-
-        ClearChatHistory();
-
+        Cleanup();
         EmitSignal(nameof(ServerStateUpdated));
     }
 
@@ -719,11 +718,8 @@ public class NetworkManager : Node
 
     private void OnGameReady(object sender, EventArgs args)
     {
-        if (IsAuthoritative && !GameInSession)
-        {
+        if (IsServer && !GameInSession)
             Rset(nameof(GameInSession), true);
-            timeSessionStarted = Time.GetTicksMsec();
-        }
 
         Print("Local game is now ready, notifying the host");
 
@@ -743,7 +739,7 @@ public class NetworkManager : Node
         var info = new NetworkPlayerInfo();
         info.NetworkDeserialize(incomingPacket);
 
-        if (IsAuthoritative)
+        if (IsServer)
         {
             if (connectedPlayers.Count >= Settings!.MaxPlayers)
             {
@@ -805,7 +801,7 @@ public class NetworkManager : Node
         SystemChatNotification(
             TranslationServer.Translate("PLAYER_HAS_CONNECTED").FormatSafe(info.Name));
 
-        if (IsAuthoritative)
+        if (IsServer)
         {
             // Tell all peers (and ourselves if this is client hosted) that a new peer have
             // been successfully registered to the server
@@ -834,7 +830,7 @@ public class NetworkManager : Node
     [RemoteSync]
     private void NotifyRegistrationResult(int peerId, RegistrationResult result)
     {
-        if (IsAuthoritative)
+        if (IsServer)
         {
             foreach (var player in connectedPlayers)
             {
@@ -849,7 +845,7 @@ public class NetworkManager : Node
     [RemoteSync]
     private void NotifyPlayerStatusChange(int id, NetworkPlayerStatus environment)
     {
-        if (IsAuthoritative)
+        if (IsServer)
         {
             foreach (var player in connectedPlayers)
             {
@@ -884,7 +880,7 @@ public class NetworkManager : Node
     [RemoteSync]
     private void NotifyReadyForSessionStatusChange(int peerId, bool ready)
     {
-        if (IsAuthoritative)
+        if (IsServer)
         {
             foreach (var player in connectedPlayers)
             {
@@ -955,7 +951,6 @@ public class NetworkManager : Node
         });
 
         ElapsedGameTime = 0;
-        timeSessionStarted = 0;
 
         Print("Exiting current game session");
     }
@@ -977,7 +972,7 @@ public class NetworkManager : Node
     {
         var sender = GetTree().GetRpcSenderId();
 
-        if (IsAuthoritative && sender != DEFAULT_SERVER_ID &&
+        if (IsServer && sender != DEFAULT_SERVER_ID &&
             LocalPlayer?.Status != NetworkPlayerStatus.Active)
         {
             Print("Not yet ready. \"World ready\" notification from ", sender, " is rejected");
@@ -991,7 +986,7 @@ public class NetworkManager : Node
         if (playerInfo == null)
             return;
 
-        if (IsAuthoritative)
+        if (IsServer)
         {
             Print("Received \"world ready\" notification from ", peerId, ", forwarding to others");
 

@@ -22,7 +22,9 @@ public class ServerSettings : INetworkSerializable
     /// </summary>
     public uint SessionLength { get; set; } = Constants.MULTIPLAYER_DEFAULT_SESSION_LENGTH;
 
-    /// <inheritdoc cref="NetworkManager.TimeStep"/>
+    /// <summary>
+    ///   Exclusively server's timestep, for client timestep see <see cref="NetworkManager.TimeStep"/>.
+    /// </summary>
     public float TimeStep { get; set; } = Constants.DEFAULT_SERVER_TIME_STEP_SECONDS;
 
     public bool UseUpnp { get; set; }

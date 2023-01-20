@@ -1,32 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using Godot;
 
 /// <summary>
 ///   Handles key input in a multiplayer microbe stage.
 /// </summary>
-public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena, NetworkMicrobeInput>
+public class PlayerMicrobialArenaInput : MultiplayerInputBase
 {
     private Random random = new();
 
-    private NetworkMicrobeInput cachedInput;
+    private NetworkInputVars cachedInput;
+    private Vector2 lastMousePosition;
 
-    private Dictionary<int, NetworkMicrobeInput> serverIncomingInputs = new();
+    protected MicrobialArena Stage => MultiplayerStage as MicrobialArena ??
+        throw new InvalidOperationException("Stage hasn't been set");
 
     public override void _PhysicsProcess(float delta)
     {
         base._PhysicsProcess(delta);
 
-        if (stage == null)
-            return;
-
-        foreach (var incomingInput in serverIncomingInputs)
-        {
-            if (!stage.TryGetPlayer(incomingInput.Key, out Microbe player))
-                continue;
-
-            RunInput(player, incomingInput.Value, delta);
-        }
+        cachedInput.Delta = delta;
     }
 
     // TODO: when using controller movement this should be screen relative movement by default
@@ -44,11 +36,11 @@ public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena,
             autoMove = false;
         }
 
-        if (stage!.Player != null)
+        if (Stage.Player != null)
         {
-            if (stage.Player.State == Microbe.MicrobeState.Unbinding)
+            if (Stage.Player.State == Microbe.MicrobeState.Unbinding)
             {
-                stage.Player.MovementDirection = Vector3.Zero;
+                Stage.Player.MovementDirection = Vector3.Zero;
                 return;
             }
 
@@ -59,52 +51,53 @@ public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena,
             var direction = autoMove ? new Vector3(0, 0, -1) : movement.Normalized();
 
             cachedInput.MovementDirection = direction;
-            cachedInput.LookAtPoint = stage.Camera.CursorWorldPos;
+            cachedInput.WorldLookAtPoint = Stage.Camera.CursorWorldPos;
+            lastMousePosition = GetViewport().GetMousePosition();
         }
     }
 
     [RunOnKeyDown("g_fire_toxin")]
     public bool EmitToxin()
     {
-        cachedInput.EmitToxin = true;
+        cachedInput.Bools |= (byte)Microbe.InputFlag.EmitToxin;
         return false;
     }
 
     [RunOnKeyUp("g_fire_toxin")]
     public void StopEmittingToxin()
     {
-        cachedInput.EmitToxin = false;
+        cachedInput.Bools &= (byte)~Microbe.InputFlag.EmitToxin;
     }
 
     [RunOnKeyDown("g_secrete_slime")]
     public bool SecreteSlime()
     {
-        cachedInput.SecreteSlime = true;
+        cachedInput.Bools |= (byte)Microbe.InputFlag.SecreteSlime;
         return false;
     }
 
     [RunOnKeyUp("g_secrete_slime")]
     public void StopSecretingSlime()
     {
-        cachedInput.SecreteSlime = false;
+        cachedInput.Bools &= (byte)~Microbe.InputFlag.SecreteSlime;
     }
 
     [RunOnKeyDown("g_toggle_engulf")]
     public void ToggleEngulf()
     {
-        cachedInput.Engulf = !cachedInput.Engulf;
+        cachedInput.Bools ^= (byte)Microbe.InputFlag.Engulf;
     }
 
     [RunOnKeyChange("g_toggle_scoreboard")]
     public void ShowInfoScreen(bool heldDown)
     {
-        stage?.HUD.ToggleInfoScreen();
+        Stage.HUD.ToggleInfoScreen();
     }
 
     [RunOnKeyChange("g_toggle_map")]
     public void ShowMap(bool heldDown)
     {
-        stage?.HUD.ToggleMap();
+        Stage.HUD.ToggleMap();
     }
 
     [RunOnKey("g_cheat_glucose")]
@@ -139,45 +132,37 @@ public class MultiplayerMicrobeStageInput : MultiplayerInputBase<MicrobialArena,
     {
         if (Settings.Instance.CheatsEnabled)
         {
-            stage!.HUD.ShowReproductionDialog();
+            Stage.HUD.ShowReproductionDialog();
         }
     }
 
-    protected override NetworkMicrobeInput SampleInput()
+    protected override bool ShouldApplyInput(NetworkInputVars sampled)
     {
-        var cached = cachedInput;
-        return cached;
+        if (base.ShouldApplyInput(sampled))
+        {
+            if (Stage.LocalPlayerVars.GetVar<bool>("editor"))
+                return false;
+
+            if (GetViewport().GetMousePosition() != lastMousePosition)
+                return true;
+
+            if (sampled.MovementDirection == Vector3.Zero && lastSampledInput.MovementDirection != Vector3.Zero)
+                return true;
+
+            return sampled.MovementDirection != Vector3.Zero;
+        }
+
+        return false;
     }
 
-    protected override void ApplyInput(int peerId, NetworkMicrobeInput input)
+    protected override NetworkInputVars SampleInput()
     {
-        serverIncomingInputs[peerId] = input;
+        return cachedInput;
     }
 
     private void SpawnCheatCloud(string name, float delta)
     {
-        SpawnHelpers.SpawnCloud(stage!.Clouds, stage.Camera.CursorWorldPos,
+        SpawnHelpers.SpawnCloud(Stage.Clouds, Stage.Camera.CursorWorldPos,
             SimulationParameters.Instance.GetCompound(name), Constants.CLOUD_CHEAT_DENSITY * delta, random);
-    }
-
-    private void RunInput(Microbe player, NetworkMicrobeInput input, float delta)
-    {
-        player.LookAtPoint = input.LookAtPoint;
-        player.MovementDirection = input.MovementDirection;
-
-        if (input.EmitToxin)
-            player.QueueEmitToxin(SimulationParameters.Instance.GetCompound("oxytoxy"));
-
-        if (input.SecreteSlime)
-            player.QueueSecreteSlime(delta);
-
-        if (input.Engulf && !player.Membrane.Type.CellWall)
-        {
-            player.State = Microbe.MicrobeState.Engulf;
-        }
-        else if (!input.Engulf && player.State == Microbe.MicrobeState.Engulf)
-        {
-            player.State = Microbe.MicrobeState.Normal;
-        }
     }
 }

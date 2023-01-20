@@ -140,7 +140,7 @@ public class NetworkPlayerLog : PanelContainer
 
     private void UpdateKickButton()
     {
-        kickButton.Visible = NetworkManager.Instance.IsAuthoritative && PeerID != NetworkManager.Instance.PeerId;
+        kickButton.Visible = NetworkManager.Instance.IsServer && PeerID != NetworkManager.Instance.PeerId;
         spacer.Visible = !kickButton.Visible;
     }
 

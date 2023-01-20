@@ -30,7 +30,7 @@ public class MultiplayerGameWorld : GameWorld
     }
 
     /// <summary>
-    ///   Stores variables of registered players in relation to the current game world.
+    ///   Stores informations of registered players in relation to the current game session.
     /// </summary>
     public Dictionary<int, NetworkPlayerVars> PlayerVars { get; set; } = new();
 

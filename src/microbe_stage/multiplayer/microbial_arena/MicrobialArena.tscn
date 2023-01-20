@@ -49,7 +49,7 @@
 [ext_resource path="res://assets/textures/gui/bevel/parts/SignalingAgentIcon.png" type="Texture" id=47]
 [ext_resource path="res://assets/textures/gui/bevel/compressPanelActive.png" type="Texture" id=48]
 [ext_resource path="res://src/gui_common/fonts/EmptyFont.tres" type="DynamicFont" id=49]
-[ext_resource path="res://src/microbe_stage/multiplayer/MultiplayerMicrobeStageInput.cs" type="Script" id=50]
+[ext_resource path="res://src/microbe_stage/multiplayer/microbial_arena/PlayerMicrobialArenaInput.cs" type="Script" id=50]
 [ext_resource path="res://src/gui_common/ActionButton.tscn" type="PackedScene" id=51]
 [ext_resource path="res://src/networking/gui/NetworkPlayerList.tscn" type="PackedScene" id=52]
 [ext_resource path="res://src/networking/gui/ChatBox.tscn" type="PackedScene" id=53]
@@ -563,6 +563,7 @@ pause_mode = 2
 script = ExtResource( 7 )
 PauseMenuPath = NodePath("GUI/PauseMenu")
 HUDRootPath = NodePath("GUI/MicrobialArenaHUD")
+MultiplayerInputPath = NodePath("PlayerMicrobialArenaInput")
 
 [node name="World" type="Spatial" parent="."]
 pause_mode = 1

@@ -8,12 +8,12 @@ public class Vars : INetworkSerializable
     /// <summary>
     ///   Currently serializable up to 255 entries.
     /// </summary>
-    private Dictionary<string, object> entries = new();
+    protected Dictionary<string, object> entries = new();
 
     /// <summary>
     ///   Guaranteed to accept primitive types.
     /// </summary>
-    public void SetVar(string key, object variant)
+    public virtual void SetVar(string key, object variant)
     {
         entries[key] = variant;
     }
