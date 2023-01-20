@@ -322,7 +322,10 @@ public class NetworkManager : Node
     private void Cleanup()
     {
         if (upnp?.GetDeviceCount() > 0)
+        {
             upnp?.DeletePortMapping(Settings!.Port);
+            upnp = null;
+        }
 
         peer = null;
         connectedPlayers.Clear();

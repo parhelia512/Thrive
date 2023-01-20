@@ -590,26 +590,30 @@ public class MultiplayerGUI : CenterContainer
             {
                 loadingDialog.Hide();
 
+                currentJobStatus = ConnectionJob.None;
+
                 if (result != UPNP.UPNPResult.Success)
                 {
                     ShowGeneralDialog(TranslationServer.Translate("PORT_FORWARDING"), TranslationServer.Translate(
                         "UPNP_ATTEMPTING_TO_FORWARD_PORT_FAILED").FormatSafe(result.ToString()));
+
+                    NetworkManager.Instance.Disconnect();
                 }
-
-                currentJobStatus = ConnectionJob.None;
-
-                NetworkManager.Instance.Disconnect();
+                else
+                {
+                    SetSubMenu(SubMenu.Lobby);
+                }
 
                 break;
             }
         }
     }
 
-    private void OnLatencyUpdated(int peerId, int miliseconds)
+    private void OnLatencyUpdated(int peerId, int milliseconds)
     {
         if (peerId != NetworkManager.Instance.PeerId)
             return;
 
-        UpdateLatencyIndicator(miliseconds);
+        UpdateLatencyIndicator(milliseconds);
     }
 }
