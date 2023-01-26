@@ -4,7 +4,7 @@
 public interface INetworkEntity : IEntity, INetworkSerializable
 {
     /// <summary>
-    ///   The scene path to this entity for remote instantiation.
+    ///   The scene path to this entity for remote instantiation (object replication).
     /// </summary>
     public string ResourcePath { get; }
 

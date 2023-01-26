@@ -102,8 +102,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
             }
         }
 
-        // We need these to be run on the client also since both systems run some logic that's better be handled
-        // client-side.
+        // We also need to run these client-side for independent processing
         microbeSystem.Process(delta);
         floatingChunkSystem.Process(delta, null);
 
@@ -264,12 +263,11 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
 
         gameOverExitTimer = GAME_OVER_SCREEN_DURATION;
 
-        if (NetworkManager.Instance.IsServer)
-            PauseManager.Instance.AddPause("ArenaGameOver");
-
         HUD.ToggleInfoScreen();
 
         Jukebox.Instance.PlayCategory("MicrobialArenaEnd");
+
+        PauseManager.Instance.AddPause("ArenaGameOver");
     }
 
     protected override void NetworkTick(float delta)
@@ -504,8 +502,8 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     {
         HUD.SortScoreBoard();
 
-        var attackerName = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(attackerId)!.Name}[/color]";
-        var victimName = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(victimId)!.Name}[/color]";
+        var attackerName = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(attackerId)?.Nickname}[/color]";
+        var victimName = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(victimId)?.Nickname}[/color]";
 
         var ownId = NetworkManager.Instance.PeerId;
         bool highlight = attackerId == ownId || victimId == ownId;
@@ -532,7 +530,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     [PuppetSync]
     private void ClientNotifyReturningFromEditor(int peerId)
     {
-        var name = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(peerId)!.Name}[/color]";
+        var name = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(peerId)!.Nickname}[/color]";
 
         HUD.AddKillFeedLog(TranslationServer.Translate("KILL_FEED_EVOLVED").FormatSafe(name),
             peerId == NetworkManager.Instance.PeerId);
@@ -541,7 +539,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
     [PuppetSync]
     private void ClientNotifyMicrobeSuicide(int peerId)
     {
-        var name = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(peerId)!.Name}[/color]";
+        var name = $"[color=yellow]{NetworkManager.Instance.GetPlayerInfo(peerId)!.Nickname}[/color]";
 
         HUD.AddKillFeedLog(TranslationServer.Translate("KILL_FEED_SUICIDE").FormatSafe(name),
             peerId == NetworkManager.Instance.PeerId);
@@ -605,7 +603,7 @@ public class MicrobialArena : MultiplayerStageBase<Microbe>
         if (NetworkManager.Instance.IsClient)
             return;
 
-        if (TryGetPlayer(peerId, out Microbe player) && !player.Dead)
+        if (TryGetPlayer(peerId, out Microbe player))
         {
             player.Damage(9999.0f, "suicide");
             Rpc(nameof(ClientNotifyMicrobeSuicide), peerId);

@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2023-01-15 19:23+0700\n"
-"PO-Revision-Date: 2023-01-15 19:25+0700\n"
+"PO-Revision-Date: 2023-01-22 12:09+0700\n"
 "Last-Translator: Sur3 <sur3@gmx.de>\n"
 "Language-Team: English <https://translate.revolutionarygamesstudio.com/projects/thrive/thrive-game/en/>\n"
 "Language: en\n"
@@ -5594,7 +5594,7 @@ msgstr "Client timestep has been changed to {0}s"
 
 #: ../src/networking/NetworkManager.cs:405
 msgid "CHAT_PREFIX_AS_SYSTEM"
-msgstr "[color=#d8d8d8][system]: {0}[/color]"
+msgstr "[color=#d8d8d8][color=#90d0ff][system]: [/color] {0}[/color]"
 
 #: ../src/networking/NetworkManager.cs:618
 msgid "PLAYER_HAS_DISCONNECTED"

@@ -5,11 +5,13 @@ public struct NetworkInputVars : INetworkSerializable, IEquatable<NetworkInputVa
 {
     public ushort Id { get; set; }
 
-    public float Delta { get; set; }
-
     public Vector3 WorldLookAtPoint { get; set; }
 
-    public Vector3 MovementDirection { get; set; }
+    /// <summary>
+    ///   We know that movement direction will always be in the range of (1, 1, 1) so we can just encode each axis plus
+    ///   sign bits in 6 bits.
+    /// </summary>
+    public byte MovementDirection { get; set; }
 
     /// <summary>
     ///   Bitmask of inputs.
@@ -26,10 +28,36 @@ public struct NetworkInputVars : INetworkSerializable, IEquatable<NetworkInputVa
         return !left.Equals(right);
     }
 
+    public void EncodeMovementDirection(Vector3 direction)
+    {
+        MovementDirection = 0;
+
+        MovementDirection |= (byte)((direction.x < 0 ? 1 : 0) << 0);
+        MovementDirection |= (byte)((direction.y < 0 ? 1 : 0) << 1);
+        MovementDirection |= (byte)((direction.z < 0 ? 1 : 0) << 2);
+
+        MovementDirection |= (byte)(Mathf.CeilToInt(Mathf.Abs(direction.x)) << 3);
+        MovementDirection |= (byte)(Mathf.CeilToInt(Mathf.Abs(direction.y)) << 4);
+        MovementDirection |= (byte)(Mathf.CeilToInt(Mathf.Abs(direction.z)) << 5);
+    }
+
+    public Vector3 DecodeMovementDirection()
+    {
+        var x = MovementDirection.ToBoolean(3) ? 1 : 0;
+        var y = MovementDirection.ToBoolean(4) ? 1 : 0;
+        var z = MovementDirection.ToBoolean(5) ? 1 : 0;
+
+        return new Vector3(
+            MovementDirection.ToBoolean(0) ? -x : x,
+            MovementDirection.ToBoolean(1) ? -y : y,
+            MovementDirection.ToBoolean(2) ? -z : z).Normalized();
+    }
+
     public void NetworkSerialize(PackedBytesBuffer buffer)
     {
+        // 16 bytes
+
         buffer.Write(Id);
-        buffer.Write(Delta);
         buffer.Write(WorldLookAtPoint);
         buffer.Write(MovementDirection);
         buffer.Write(Bools);
@@ -38,16 +66,15 @@ public struct NetworkInputVars : INetworkSerializable, IEquatable<NetworkInputVa
     public void NetworkDeserialize(PackedBytesBuffer buffer)
     {
         Id = buffer.ReadUInt16();
-        Delta = buffer.ReadSingle();
         WorldLookAtPoint = buffer.ReadVector3();
-        MovementDirection = buffer.ReadVector3();
+        MovementDirection = buffer.ReadByte();
         Bools = buffer.ReadByte();
     }
 
     public bool Equals(NetworkInputVars other)
     {
         return WorldLookAtPoint.IsEqualApprox(other.WorldLookAtPoint) &&
-            MovementDirection.IsEqualApprox(other.MovementDirection) &&
+            MovementDirection == other.MovementDirection &&
             Bools == other.Bools;
     }
 
@@ -60,7 +87,6 @@ public struct NetworkInputVars : INetworkSerializable, IEquatable<NetworkInputVa
     {
         int hashCode = -1311921306;
         hashCode = hashCode * -1521134295 + Id.GetHashCode();
-        hashCode = hashCode * -1521134295 + Delta.GetHashCode();
         hashCode = hashCode * -1521134295 + WorldLookAtPoint.GetHashCode();
         hashCode = hashCode * -1521134295 + MovementDirection.GetHashCode();
         hashCode = hashCode * -1521134295 + Bools.GetHashCode();

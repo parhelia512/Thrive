@@ -150,7 +150,7 @@ public class MultiplayerGUI : CenterContainer
         NetworkManager.Instance.Connect(nameof(NetworkManager.ServerStateUpdated), this, nameof(UpdateLobby));
         NetworkManager.Instance.Connect(nameof(NetworkManager.Kicked), this, nameof(OnKicked));
         NetworkManager.Instance.Connect(
-            nameof(NetworkManager.ReadyForSessionReceived), this, nameof(UpdateReadyStatus));
+            nameof(NetworkManager.LobbyReadyStateReceived), this, nameof(UpdateReadyStatus));
         NetworkManager.Instance.Connect(
             nameof(NetworkManager.UpnpCallResultReceived), this, nameof(OnUPNPCallResultReceived));
         NetworkManager.Instance.Connect(nameof(NetworkManager.LatencyUpdated), this, nameof(OnLatencyUpdated));
@@ -233,7 +233,7 @@ public class MultiplayerGUI : CenterContainer
         gameModeDescription.ExtendedBbcode = network.Settings?.SelectedGameMode!.Description;
 
         foreach (var player in network.ConnectedPlayers)
-            UpdateReadyStatus(player.Key, player.Value.ReadyForSession);
+            UpdateReadyStatus(player.Key, player.Value.LobbyReady);
 
         UpdateStartButton();
     }
@@ -260,7 +260,7 @@ public class MultiplayerGUI : CenterContainer
 
             // Disable start game button if one or more player is not ready
             // NOTE: For now, we let the host start the game regardless other players' ready status to avoid potential
-            //       annoying long wait time due to uncooperative player. We keep this in case this behavior is
+            //       annoying long wait time due to uncooperative players. We keep this in case this behavior is
             //       otherwise preferred.
             // startButton.Disabled = network.ConnectedPlayers.Any(
             //    p => p.Key != NetworkManager.DEFAULT_SERVER_ID && !p.Value.ReadyForSession);
@@ -276,7 +276,7 @@ public class MultiplayerGUI : CenterContainer
             startButton.ToggleMode = !network.GameInSession;
 
             if (network.LocalPlayer != null)
-                startButton.SetPressedNoSignal(network.LocalPlayer.ReadyForSession);
+                startButton.SetPressedNoSignal(network.LocalPlayer.LobbyReady);
         }
     }
 
@@ -555,7 +555,7 @@ public class MultiplayerGUI : CenterContainer
 
     private void OnReadyToggled(bool active)
     {
-        NetworkManager.Instance.SetReadyForSessionStatus(active);
+        NetworkManager.Instance.SetLobbyReadyState(active);
     }
 
     private void OnUPNPCallResultReceived(UPNP.UPNPResult result, NetworkManager.UpnpJobStep step)

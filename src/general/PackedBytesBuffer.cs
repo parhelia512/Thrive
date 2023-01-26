@@ -13,6 +13,9 @@ public class PackedBytesBuffer
     private List<byte> buffer;
     private int position;
 
+    /// <summary>
+    ///   Constructs an empty resizable buffer.
+    /// </summary>
     public PackedBytesBuffer()
     {
         buffer = new List<byte>();

@@ -22,7 +22,7 @@ public class ChatBoxUndecorated : ChatBox
     {
         base.OnFocusEntered();
 
-        namePrefix.Text = $"[{NetworkManager.Instance.LocalPlayer?.Name}]:";
+        namePrefix.Text = $"[{NetworkManager.Instance.LocalPlayer?.Nickname}]:";
 
         // Preserve layout by not hiding the control completely
         chatInput.Modulate = Colors.White;

@@ -7,7 +7,8 @@ using Nito.Collections;
 using Array = Godot.Collections.Array;
 
 /// <summary>
-///   Manages high-level multiplayer mechanisms and provides support for online game sessions.
+///   Manages high-level multiplayer mechanisms and provides support for online game sessions. Shared code
+///   by both server and client.
 /// </summary>
 public class NetworkManager : Node
 {
@@ -24,7 +25,7 @@ public class NetworkManager : Node
     private readonly Dictionary<int, NetworkPlayerInfo> connectedPlayers = new();
     private readonly Deque<string> chatHistory = new();
 
-    private PingData ping;
+    private PingPongData pingPong;
 
     private NetworkedMultiplayerENet? peer;
     private UPNP? upnp;
@@ -67,7 +68,7 @@ public class NetworkManager : Node
     public delegate void PlayerLeft(int peerId);
 
     [Signal]
-    public delegate void ReadyForSessionReceived(int peerId, bool ready);
+    public delegate void LobbyReadyStateReceived(int peerId, bool ready);
 
     [Signal]
     public delegate void PlayerStatusChanged(int peerId, NetworkPlayerStatus status);
@@ -127,7 +128,7 @@ public class NetworkManager : Node
     public int PeerId { get; private set; }
 
     /// <summary>
-    ///   Returns true if we are a peer in a network (in multiplayer mode).
+    ///   Returns true if we are a peer in a network (is in multiplayer mode).
     /// </summary>
     public bool IsNetworked => peer != null;
 
@@ -136,12 +137,15 @@ public class NetworkManager : Node
     /// </summary>
     public IReadOnlyDictionary<int, NetworkPlayerInfo> ConnectedPlayers => connectedPlayers;
 
+    /// <summary>
+    ///   Session information regarding the local player in the network.
+    /// </summary>
     public NetworkPlayerInfo? LocalPlayer => IsNetworked ? GetPlayerInfo(PeerId) : null;
 
     public IReadOnlyList<string> ChatHistory => chatHistory;
 
     /// <summary>
-    ///   Dedicated server has no player set.
+    ///   Dedicated server has no local player set.
     /// </summary>
     public bool IsDedicated => IsServer && !HasPlayer(DEFAULT_SERVER_ID);
 
@@ -277,7 +281,7 @@ public class NetworkManager : Node
         }
 
         OnConnectedToServer(playerName);
-        NotifyReadyForSessionStatusChange(DEFAULT_SERVER_ID, true);
+        NotifyLobbyReadyStateChange(DEFAULT_SERVER_ID, true);
 
         Print("Server is player hosted");
 
@@ -314,26 +318,6 @@ public class NetworkManager : Node
         Print("Disconnecting...");
         peer?.CloseConnection();
         Cleanup();
-    }
-
-    /// <summary>
-    ///   Clears network session data.
-    /// </summary>
-    private void Cleanup()
-    {
-        if (upnp?.GetDeviceCount() > 0)
-        {
-            upnp?.DeletePortMapping(Settings!.Port);
-            upnp = null;
-        }
-
-        peer = null;
-        connectedPlayers.Clear();
-        GameInSession = false;
-        ElapsedGameTime = 0;
-        Settings = null!;
-
-        ClearChatHistory();
     }
 
     public bool HasPlayer(int peerId)
@@ -401,12 +385,12 @@ public class NetworkManager : Node
         }
     }
 
-    public void SetReadyForSessionStatus(bool ready)
+    public void SetLobbyReadyState(bool ready)
     {
         if (IsServer)
             return;
 
-        RpcId(DEFAULT_SERVER_ID, nameof(NotifyReadyForSessionStatusChange), PeerId, ready);
+        RpcId(DEFAULT_SERVER_ID, nameof(NotifyLobbyReadyStateChange), PeerId, ready);
     }
 
     public void Kick(int id, string reason)
@@ -460,6 +444,26 @@ public class NetworkManager : Node
         var str = string.Concat(System.Array.ConvertAll(what, x => x?.ToString() ?? "null"));
         var serverOrHost = IsDedicated ? "[Server] " : "[Host] ";
         GD.PrintErr(IsServer ? serverOrHost : "[Client] ", str);
+    }
+
+    /// <summary>
+    ///   Clears network session data.
+    /// </summary>
+    private void Cleanup()
+    {
+        if (upnp?.GetDeviceCount() > 0)
+        {
+            upnp?.DeletePortMapping(Settings!.Port);
+            upnp = null;
+        }
+
+        peer = null;
+        connectedPlayers.Clear();
+        GameInSession = false;
+        ElapsedGameTime = 0;
+        Settings = null!;
+
+        ClearChatHistory();
     }
 
     private void SetupUpnp()
@@ -553,14 +557,14 @@ public class NetworkManager : Node
         var currentTime = Time.GetTicksMsec();
 
         // Check if timed out
-        if (ping.IsWaitingAck && currentTime > ping.TimeSent + Constants.NETWORK_PING_TIMEOUT_MILISECONDS)
+        if (pingPong.IsWaitingAck && currentTime > pingPong.TimeSent + Constants.NETWORK_PING_TIMEOUT_MILISECONDS)
         {
-            ++ping.PacketLost;
-            ping.IsWaitingAck = false;
+            ++pingPong.PacketLost;
+            pingPong.IsWaitingAck = false;
         }
 
         // Ping server
-        if (!ping.IsWaitingAck && currentTime > ping.TimeSent + Constants.NETWORK_PING_INTERVAL_MILISECONDS)
+        if (!pingPong.IsWaitingAck && currentTime > pingPong.TimeSent + Constants.NETWORK_PING_INTERVAL_MILISECONDS)
         {
             SendPing();
         }
@@ -572,13 +576,13 @@ public class NetworkManager : Node
         if (!IsClient)
             return;
 
-        ++ping.Id;
-        ping.TimeSent = Time.GetTicksMsec();
-        ping.IsWaitingAck = true;
+        ++pingPong.Id;
+        pingPong.TimeSent = Time.GetTicksMsec();
+        pingPong.IsWaitingAck = true;
 
         var packet = new PackedBytesBuffer(3);
         packet.Write((byte)RawPacketFlag.Ping);
-        packet.Write((ushort)ping.Id);
+        packet.Write((ushort)pingPong.Id);
 
         Multiplayer.SendBytes(packet.Data, DEFAULT_SERVER_ID, NetworkedMultiplayerPeer.TransferModeEnum.Unreliable);
     }
@@ -605,29 +609,31 @@ public class NetworkManager : Node
         var receivedId = buffer.ReadUInt16();
         var serverTime = buffer.ReadInt64();
 
-        if (receivedId != ping.Id)
+        if (receivedId != pingPong.Id)
         {
             PrintError("Invalid ping/pong packet received");
             return;
         }
 
-        ping.IsWaitingAck = false;
+        pingPong.IsWaitingAck = false;
 
-        var roundTripTime = timeReceived - ping.TimeSent;
+        var roundTripTime = timeReceived - pingPong.TimeSent;
 
-        var oldRtt = ping.AverageRoundTripTime;
+        var oldRtt = pingPong.AverageRoundTripTime;
 
         // Smooth it out (TCP RTT calculation)
-        ping.AverageRoundTripTime = (ulong)(ping.AverageRoundTripTime <= 0 ?
+        pingPong.AverageRoundTripTime = (ulong)(pingPong.AverageRoundTripTime <= 0 ?
             roundTripTime :
-            (RTT_WEIGHTING_FACTOR * ping.AverageRoundTripTime) + ((1 - RTT_WEIGHTING_FACTOR) * roundTripTime));
+            (RTT_WEIGHTING_FACTOR * pingPong.AverageRoundTripTime) + ((1 - RTT_WEIGHTING_FACTOR) * roundTripTime));
 
-        ping.DeltaRoundTripTime = (long)(oldRtt - ping.AverageRoundTripTime);
+        pingPong.DeltaRoundTripTime = (long)(oldRtt - pingPong.AverageRoundTripTime);
 
-        ping.EstimatedTimeOffset = serverTime + (long)(ping.AverageRoundTripTime / 2) - ElapsedGameTime;
-        ElapsedGameTime += ping.EstimatedTimeOffset + ping.DeltaRoundTripTime;
+        pingPong.EstimatedTimeOffset = serverTime + (long)(pingPong.AverageRoundTripTime / 2) - ElapsedGameTime;
+        ElapsedGameTime += pingPong.EstimatedTimeOffset + pingPong.DeltaRoundTripTime;
 
-        Rpc(nameof(NotifyPeerLatency), (ushort)ping.AverageRoundTripTime);
+        Rpc(nameof(NotifyPeerLatency), (ushort)pingPong.AverageRoundTripTime);
+
+        DebugOverlays.Instance.ReportPingPong(pingPong);
     }
 
     private void OnPeerConnected(int id)
@@ -642,10 +648,10 @@ public class NetworkManager : Node
         if (!HasPlayer(id))
             return;
 
-        Print("User \"", GetPlayerInfo(id)!.Name, "\" ID: ", id, " has disconnected");
+        Print("User \"", GetPlayerInfo(id)!.Nickname, "\" ID: ", id, " has disconnected");
 
         SystemChatNotification(
-            TranslationServer.Translate("PLAYER_HAS_DISCONNECTED").FormatSafe(GetPlayerInfo(id)!.Name));
+            TranslationServer.Translate("PLAYER_HAS_DISCONNECTED").FormatSafe(GetPlayerInfo(id)!.Nickname));
 
         NotifyPlayerDisconnected(id);
     }
@@ -666,6 +672,9 @@ public class NetworkManager : Node
             case RawPacketFlag.Pong:
                 ProcessReceivedPong(timeReceived, buffer);
                 break;
+            default:
+                // Unknown packet, possibly malformed or not handled by us
+                break;
         }
     }
 
@@ -674,7 +683,7 @@ public class NetworkManager : Node
         PeerId = peer!.GetUniqueId();
 
         var packed = new PackedBytesBuffer();
-        var info = new NetworkPlayerInfo { Name = playerName };
+        var info = new NetworkPlayerInfo { Nickname = playerName };
         info.NetworkSerialize(packed);
 
         // TODO: some kind of authentication
@@ -753,7 +762,7 @@ public class NetworkManager : Node
                 return;
             }
 
-            if (connectedPlayers.Values.Any(p => p.Name == info.Name))
+            if (connectedPlayers.Values.Any(p => p.Nickname == info.Nickname))
             {
                 // No need to notify everyone about this
                 RpcId(id, nameof(NotifyRegistrationResult), id, RegistrationResult.DuplicateName);
@@ -792,7 +801,7 @@ public class NetworkManager : Node
             }
 
             // TODO: might not be true...
-            Print("User \"", info.Name, "\" ID: ", id, " has connected");
+            Print("User \"", info.Nickname, "\" ID: ", id, " has connected");
         }
 
         if (HasPlayer(id))
@@ -802,7 +811,7 @@ public class NetworkManager : Node
         EmitSignal(nameof(ServerStateUpdated));
 
         SystemChatNotification(
-            TranslationServer.Translate("PLAYER_HAS_CONNECTED").FormatSafe(info.Name));
+            TranslationServer.Translate("PLAYER_HAS_CONNECTED").FormatSafe(info.Nickname));
 
         if (IsServer)
         {
@@ -881,7 +890,7 @@ public class NetworkManager : Node
     }
 
     [RemoteSync]
-    private void NotifyReadyForSessionStatusChange(int peerId, bool ready)
+    private void NotifyLobbyReadyStateChange(int peerId, bool ready)
     {
         if (IsServer)
         {
@@ -890,14 +899,14 @@ public class NetworkManager : Node
                 if (player.Key == DEFAULT_SERVER_ID)
                     continue;
 
-                RpcId(player.Key, nameof(NotifyReadyForSessionStatusChange), peerId, ready);
+                RpcId(player.Key, nameof(NotifyLobbyReadyStateChange), peerId, ready);
             }
         }
 
         var info = GetPlayerInfo(peerId)!;
-        info.ReadyForSession = ready;
+        info.LobbyReady = ready;
 
-        EmitSignal(nameof(ReadyForSessionReceived), peerId, ready);
+        EmitSignal(nameof(LobbyReadyStateReceived), peerId, ready);
     }
 
     [RemoteSync]
@@ -1004,7 +1013,7 @@ public class NetworkManager : Node
         EmitSignal(nameof(PlayerJoined), peerId);
         EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
 
-        SystemChatNotification(TranslationServer.Translate("PLAYER_HAS_JOINED").FormatSafe(playerInfo.Name));
+        SystemChatNotification(TranslationServer.Translate("PLAYER_HAS_JOINED").FormatSafe(playerInfo.Nickname));
     }
 
     [RemoteSync]
@@ -1030,21 +1039,21 @@ public class NetworkManager : Node
 
         playerInfo.Status = NetworkPlayerStatus.Lobby;
         EmitSignal(nameof(PlayerStatusChanged), peerId, playerInfo.Status);
-        EmitSignal(nameof(ReadyForSessionReceived), peerId, playerInfo.ReadyForSession);
+        EmitSignal(nameof(LobbyReadyStateReceived), peerId, playerInfo.LobbyReady);
         EmitSignal(nameof(ServerStateUpdated));
 
-        SystemChatNotification(TranslationServer.Translate("PLAYER_HAS_LEFT").FormatSafe(playerInfo.Name));
+        SystemChatNotification(TranslationServer.Translate("PLAYER_HAS_LEFT").FormatSafe(playerInfo.Nickname));
     }
 
     [RemoteSync]
     private void SendChat(string message)
     {
         var senderId = GetTree().GetRpcSenderId();
-        var senderState = GetPlayerInfo(senderId);
+        var senderInfo = GetPlayerInfo(senderId);
 
-        var formatted = $"[b]({senderState?.GetStatusReadableShort()}) [{senderState?.Name}]:[/b] {message}";
+        var nameTagged = $"[b][color=#d7ff73][lb]{senderInfo?.Nickname}[rb]: [/color][/b] {message}";
 
-        SendChatInternal(formatted);
+        SendChatInternal(nameTagged);
     }
 
     [PuppetSync]
@@ -1061,7 +1070,7 @@ public class NetworkManager : Node
     /// <summary>
     ///   Information derived by pinging the server.
     /// </summary>
-    public struct PingData
+    public struct PingPongData
     {
         /// <summary>
         ///   The current id of a ping packet being transmitted.
@@ -1069,7 +1078,7 @@ public class NetworkManager : Node
         public int Id;
 
         /// <summary>
-        ///   A timestamp when a ping is transmitted.
+        ///   A timestamp of when a ping is transmitted.
         /// </summary>
         public ulong TimeSent;
 
@@ -1080,12 +1089,12 @@ public class NetworkManager : Node
         public ulong AverageRoundTripTime;
 
         /// <summary>
-        ///   The difference between the old and newly calculated average round trip time.
+        ///   The difference between previous and newly calculated average round trip time.
         /// </summary>
         public long DeltaRoundTripTime;
 
         /// <summary>
-        ///   The offset between the client's and the server's clock.
+        ///   The offset between the client's and the server's clock <see cref="ElapsedGameTime"/>.
         /// </summary>
         public long EstimatedTimeOffset;
 

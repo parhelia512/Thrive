@@ -5,22 +5,22 @@
 /// </summary>
 public class NetworkPlayerInfo : Vars
 {
-    public string Name { get; set; } = string.Empty;
+    public string Nickname { get; set; } = string.Empty;
 
     public NetworkPlayerStatus Status { get; set; } = NetworkPlayerStatus.Lobby;
 
-    public bool ReadyForSession { get; set; }
+    public bool LobbyReady { get; set; }
 
-    /// <inheritdoc cref="NetworkManager.PingData.AverageRoundTripTime"/>
+    /// <inheritdoc cref="NetworkManager.PingPongData.AverageRoundTripTime"/>
     public int Latency { get; set; }
 
     public override void NetworkSerialize(PackedBytesBuffer buffer)
     {
         base.NetworkSerialize(buffer);
 
-        buffer.Write(Name);
+        buffer.Write(Nickname);
         buffer.Write((byte)Status);
-        buffer.Write(ReadyForSession);
+        buffer.Write(LobbyReady);
         buffer.Write((ushort)Latency);
     }
 
@@ -28,9 +28,9 @@ public class NetworkPlayerInfo : Vars
     {
         base.NetworkDeserialize(buffer);
 
-        Name = buffer.ReadString();
+        Nickname = buffer.ReadString();
         Status = (NetworkPlayerStatus)buffer.ReadByte();
-        ReadyForSession = buffer.ReadBoolean();
+        LobbyReady = buffer.ReadBoolean();
         Latency = buffer.ReadUInt16();
     }
 
@@ -46,19 +46,6 @@ public class NetworkPlayerInfo : Vars
                 return TranslationServer.Translate("JOINING_LOWERCASE");
             case NetworkPlayerStatus.Leaving:
                 return TranslationServer.Translate("LEAVING_LOWERCASE");
-            default:
-                return TranslationServer.Translate("N_A");
-        }
-    }
-
-    public string GetStatusReadableShort()
-    {
-        switch (Status)
-        {
-            case NetworkPlayerStatus.Active:
-                return TranslationServer.Translate("G_LETTER");
-            case NetworkPlayerStatus.Lobby:
-                return TranslationServer.Translate("L_LETTER");
             default:
                 return TranslationServer.Translate("N_A");
         }

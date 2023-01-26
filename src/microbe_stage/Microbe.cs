@@ -333,6 +333,7 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
 
         Membrane = GetNode<Membrane>("Membrane");
         OrganelleParent = GetNode<Spatial>("OrganelleParent");
+        tagBox = GetNode<MeshInstance>("TagBox");
 
         if (IsForPreviewOnly)
         {
@@ -711,8 +712,7 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
             queuedToxinToEmit = null;
         }
 
-        if (!NetworkManager.Instance.IsNetworked)
-            HandleSlimeSecretion(delta);
+        HandleSlimeSecretion(delta);
 
         // If we didn't have our membrane ready yet in the async process we need to do these now
         if (absorptionSkippedEarly)
@@ -752,6 +752,8 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
         // can be directly set without problems
 
         HandleChemoreceptorLines(delta);
+
+        UpdateNametag();
 
         if (Colony != null && Colony.Master == this)
             Colony.Process(delta);

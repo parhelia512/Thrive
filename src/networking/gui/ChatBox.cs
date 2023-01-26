@@ -104,9 +104,14 @@ public class ChatBox : VBoxContainer
     {
         var builder = new StringBuilder(100);
 
+        var first = true;
         foreach (var message in NetworkManager.Instance.ChatHistory)
         {
-            builder.AppendLine(message);
+            if (!first)
+                builder.Append('\n');
+
+            builder.Append(message);
+            first = false;
         }
 
         chatDisplay.ExtendedBbcode = builder.ToString();

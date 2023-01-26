@@ -48,7 +48,7 @@ public class NetworkPlayerList : VBoxContainer
 
         foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
-            RegisterPlayer(player.Key, player.Value.Name);
+            RegisterPlayer(player.Key, player.Value.Nickname);
         }
     }
 
@@ -115,7 +115,7 @@ public class NetworkPlayerList : VBoxContainer
     private void OnPlayerRegistered(int peerId, NetworkManager.RegistrationResult result)
     {
         if (result == NetworkManager.RegistrationResult.Success)
-            RegisterPlayer(peerId, NetworkManager.Instance.GetPlayerInfo(peerId)!.Name);
+            RegisterPlayer(peerId, NetworkManager.Instance.GetPlayerInfo(peerId)!.Nickname);
     }
 
     private void OnPlayerDisconnected(int peerId)

@@ -140,7 +140,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     }
 
     /// <summary>
-    ///   Syncs the whole game-wide player vars.
+    ///   Syncs all game-wide player vars.
     /// </summary>
     public void ServerSyncPlayerVars(int peerId, NetworkPlayerVars vars)
     {
@@ -207,6 +207,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
                 return;
             }
 
+            NetworkManager.Instance.Print("Requesting game world data");
             LoadingScreen.Instance.Show(TranslationServer.Translate("REGISTERING_TO_SERVER"), MainGameState.Invalid);
             RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(ServerRequestRegistration));
         }
@@ -603,14 +604,14 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     ///   Process received server entity state in this client.
     /// </summary>
     /// <param name="id">The entity's id</param>
-    /// <param name="ackedInputId"></param>
+    /// <param name="ackedInputId">The most recent id of the input acked by the server</param>
     /// <param name="data">The entity state</param>
     [PuppetSync]
     private void NotifyEntityStateUpdate(uint id, ushort ackedInputId, byte[] data)
     {
         if (!MultiplayerGameWorld.TryGetNetworkEntity(id, out INetworkEntity entity))
         {
-            // Entity is not found locally so we need to replicate it
+            // Entity is not found locally so we need to replicate (spawn) it
             RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(RequestEntitySpawn), id);
             return;
         }
@@ -636,6 +637,10 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         NetworkManager.Instance.Print("Downloading entities");
     }
 
+    /// <summary>
+    ///   Client sends request to the server to be registered to the game world (stage) and be sent the game world
+    ///   state.
+    /// </summary>
     [Remote]
     private void ServerRequestRegistration()
     {

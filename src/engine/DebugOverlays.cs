@@ -22,6 +22,9 @@ public partial class DebugOverlays : Control
     public NodePath PerformanceMetricsPath = null!;
 
     [Export]
+    public NodePath NetworkMetricsPath = null!;
+
+    [Export]
     public NodePath EntityLabelsPath = null!;
 
     private static DebugOverlays? instance;
@@ -31,6 +34,7 @@ public partial class DebugOverlays : Control
     private CustomCheckBox performanceMetricsCheckBox = null!;
     private Control fpsCounter = null!;
     private CustomDialog performanceMetrics = null!;
+    private CustomDialog networkMetrics = null!;
     private Control labelsLayer = null!;
 
     private DebugOverlays()
@@ -64,11 +68,13 @@ public partial class DebugOverlays : Control
         debugPanelDialog = GetNode<CustomDialog>(DebugPanelDialogPath);
         fpsCounter = GetNode<Control>(FPSCounterPath);
         performanceMetrics = GetNode<CustomDialog>(PerformanceMetricsPath);
+        networkMetrics = GetNode<CustomDialog>(NetworkMetricsPath);
         labelsLayer = GetNode<Control>(EntityLabelsPath);
         smallerFont = GD.Load<Font>("res://src/gui_common/fonts/Lato-Regular-Tiny.tres");
         fpsLabel = GetNode<Label>(FPSLabelPath);
         deltaLabel = GetNode<Label>(DeltaLabelPath);
         metricsText = GetNode<Label>(MetricsTextPath);
+        networkMetricsText = GetNode<Label>(NetworkMetricsTextPath);
         fpsDisplayLabel = GetNode<Label>(FPSDisplayLabelPath);
     }
 
@@ -83,6 +89,10 @@ public partial class DebugOverlays : Control
         // Performance metrics
         if (performanceMetrics.Visible)
             UpdateMetrics(delta);
+
+        // Network metrics
+        if (networkMetrics.Visible)
+            UpdateNetworkMetrics(delta);
 
         // FPS counter
         if (fpsCounter.Visible)
@@ -126,6 +136,21 @@ public partial class DebugOverlays : Control
         else
         {
             performanceMetrics.Hide();
+        }
+    }
+
+    private void OnNetworkMetricsCheckBoxToggled(bool state)
+    {
+        if (networkMetrics.Visible == state)
+            return;
+
+        if (state)
+        {
+            networkMetrics.Show();
+        }
+        else
+        {
+            networkMetrics.Hide();
         }
     }
 

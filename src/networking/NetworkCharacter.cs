@@ -20,7 +20,12 @@ public abstract class NetworkCharacter : NetworkRigidBody
     ///   Specifies value for which an error from predicted state and incoming server state is tolerable.
     /// </summary>
     [Export]
-    public float PredictionErrorThreshold = 0.05f;
+    public float PredictionErrorToleranceThreshold = 0.05f;
+
+    [Export]
+    public bool UseClientSidePrediction = true;
+
+    protected bool replaying;
 
     private Tween? tween;
     private bool setup;
@@ -73,7 +78,6 @@ public abstract class NetworkCharacter : NetworkRigidBody
         var incomingState = stateBuffer.Dequeue();
 
         // Server reconciliation begins here
-        // TODO: Look into other sync methods and fix super annoying jitters
 
         // Discard old inputs relative to the latest received server ack
         while (predictedStates.Count > 0 && predictedStates.Peek().Input.Id < incomingState.LastAckedInputId)
@@ -81,8 +85,8 @@ public abstract class NetworkCharacter : NetworkRigidBody
 
         if (predictedStates.Count <= 0)
         {
-            // No new inputs, just lerp to server state
-            stateInterpolations.Enqueue(incomingState.State);
+            // No new inputs, just lerp to the server state
+            ApplyState(incomingState.State);
             return;
         }
 
@@ -90,23 +94,28 @@ public abstract class NetworkCharacter : NetworkRigidBody
 
         var positionError = incomingState.State.Position - predictedState.Result.Position;
 
-        if (positionError.LengthSquared() > PredictionErrorThreshold)
+        if (positionError.LengthSquared() > PredictionErrorToleranceThreshold)
         {
             // Too much error, needs rewinding
 
-            NetworkManager.Instance.Print("Rewinding. Error: ", positionError.Length());
-
             NetworkLinearVelocity = incomingState.State.LinearVelocity;
 
-            // TODO: lerp just won't work right. Should rotation be reconciled?
-            GlobalTranslation = incomingState.State.Position;
+            // TODO: lerp just won't work right.
+            ClearInterpolations();
+            GlobalTransform = new Transform(incomingState.State.Rotation, incomingState.State.Position);
 
             // Replay remaining inputs not yet acked by the server
             foreach (var replay in predictedStates)
             {
+                replaying = true;
+
                 ApplyInput(replay.Input);
-                PredictSimulation(replay.Input.Delta);
+
+                // TODO: Fix super annoying jitters
+                PredictSimulation(delta);
             }
+
+            replaying = false;
         }
     }
 
@@ -122,9 +131,9 @@ public abstract class NetworkCharacter : NetworkRigidBody
     {
         var ackedInputId = buffer.ReadUInt16();
 
-        if (!IsLocal)
+        if (!IsLocal || !UseClientSidePrediction)
         {
-            // Other player characters doesn't need CSP and reconciliation, just interpolate them (if enabled)
+            // Other player characters don't need CSP and reconciliation, just interpolate them (if enabled)
             base.NetworkDeserialize(buffer);
             return;
         }
@@ -152,17 +161,22 @@ public abstract class NetworkCharacter : NetworkRigidBody
         if (IsLocal)
         {
             Mode = ModeEnum.Rigid;
-            interpolateStatesUntilNone = true;
+            interpolateStatesUntilNone = UseClientSidePrediction;
         }
     }
 
     public virtual void ApplyInput(NetworkInputVars input)
     {
-        LookAtPoint = input.WorldLookAtPoint;
-        MovementDirection = input.MovementDirection;
+        if (NetworkManager.Instance.IsClient)
+        {
+            if (!UseClientSidePrediction)
+                return;
 
-        if (NetworkManager.Instance.IsClient && IsLocal)
             latestPredictedInput = input;
+        }
+
+        LookAtPoint = input.WorldLookAtPoint;
+        MovementDirection = input.DecodeMovementDirection();
     }
 
     public virtual IReconcilableData ToSnapshot()

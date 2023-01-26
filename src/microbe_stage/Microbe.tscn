@@ -42,6 +42,7 @@ params_billboard_mode = 1
 albedo_color = Color( 0, 0, 0, 0.588235 )
 
 [sub_resource type="QuadMesh" id=9]
+resource_local_to_scene = true
 size = Vector2( 0.3, 0.06 )
 
 [node name="Microbe" type="RigidBody"]

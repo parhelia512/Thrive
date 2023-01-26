@@ -8,20 +8,19 @@ using Godot;
 /// </summary>
 public partial class Microbe
 {
-    private MeshInstance? tagBox;
-
-    private float lastHitpoints;
+    private MeshInstance tagBox = null!;
 
     private string? cloudSystemPath;
 
+    private float lastHitpoints;
     private NetworkInputVars lastAppliedInput;
 
     [Flags]
     public enum InputFlag : byte
     {
-        EmitToxin,
-        SecreteSlime,
-        Engulf,
+        EmitToxin = 1 << 0,
+        SecreteSlime = 1 << 1,
+        Engulf = 1 << 2,
     }
 
     public MultiplayerGameWorld? MultiplayerGameWorld => GameWorld as MultiplayerGameWorld;
@@ -41,9 +40,6 @@ public partial class Microbe
 
         Name = PeerId.ToString(CultureInfo.CurrentCulture);
 
-        if (!IsLocal)
-            InitNameTag();
-
         Compounds.LockInputAndOutput = NetworkManager.Instance.IsClient;
 
         // Kind of hackish I guess??
@@ -53,7 +49,7 @@ public partial class Microbe
 
     public override void NetworkSerialize(PackedBytesBuffer buffer)
     {
-        // TODO: Find a way to compress this further, look into delta encoding
+        // TODO: Find a way to compress this even further, look into delta encoding
 
         base.NetworkSerialize(buffer);
 
@@ -193,7 +189,8 @@ public partial class Microbe
 
     public override void PredictSimulation(float delta)
     {
-        GlobalTransform = GetNewPhysicsRotation(GlobalTransform);
+        if (ColonyParent == null && !Dead)
+            GlobalTransform = GetNewPhysicsRotation(GlobalTransform);
 
         base.PredictSimulation(delta);
     }
@@ -206,7 +203,7 @@ public partial class Microbe
             QueueEmitToxin(SimulationParameters.Instance.GetCompound("oxytoxy"));
 
         if ((input.Bools & (byte)InputFlag.SecreteSlime) != 0)
-            QueueSecreteSlime(lastAppliedInput.Delta + input.Delta);
+            QueueSecreteSlime(GetPhysicsProcessDeltaTime());
 
         var engulf = (input.Bools & (byte)InputFlag.Engulf) != 0;
 
@@ -219,31 +216,31 @@ public partial class Microbe
             State = MicrobeState.Normal;
         }
 
-        HandleSlimeSecretion(input.Delta);
-        HandleMovement(input.Delta);
+        HandleMovement(GetPhysicsProcessDeltaTime());
 
         lastAppliedInput = input;
     }
 
-    private void InitNameTag()
+    private void UpdateNametag()
     {
         if (!NetworkManager.Instance.IsNetworked)
             return;
-
-        tagBox = GetNode<MeshInstance>("TagBox");
 
         var tagBoxMesh = (QuadMesh)tagBox.Mesh;
         var tagBoxMaterial = (SpatialMaterial)tagBox.MaterialOverride;
 
         var tag = tagBox.GetChild<Label3D>(0);
 
-        tagBox.Visible = true;
-        tag.Text = NetworkManager.Instance.ConnectedPlayers[PeerId].Name;
+        tagBox.Visible = !Dead && PeerId != NetworkManager.Instance.PeerId;
 
-        tagBoxMesh.Size = tag.Font.GetStringSize(tag.Text) * tag.PixelSize * 1.2f;
+        var name = NetworkManager.Instance.GetPlayerInfo(PeerId)?.Nickname;
+        tag.Text = name;
+
+        tagBoxMesh.Size = tag.Font.GetStringSize(name) * tag.PixelSize * 1.2f;
         tagBoxMaterial.RenderPriority = RenderPriority + 1;
         tag.RenderPriority = tagBoxMaterial.RenderPriority + 1;
 
-        // TODO: offset tag above the membrane (Z-axis)
+        // Always offset tag above the membrane (Z - axis)
+        tagBox.GlobalTranslation = GlobalTranslation + Vector3.Forward * (Radius + 1.0f);
     }
 }

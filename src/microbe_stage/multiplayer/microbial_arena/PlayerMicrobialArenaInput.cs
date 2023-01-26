@@ -14,13 +14,6 @@ public class PlayerMicrobialArenaInput : MultiplayerInputBase
     protected MicrobialArena Stage => MultiplayerStage as MicrobialArena ??
         throw new InvalidOperationException("Stage hasn't been set");
 
-    public override void _PhysicsProcess(float delta)
-    {
-        base._PhysicsProcess(delta);
-
-        cachedInput.Delta = delta;
-    }
-
     // TODO: when using controller movement this should be screen relative movement by default
     [RunOnAxis(new[] { "g_move_forward", "g_move_backwards" }, new[] { -1.0f, 1.0f })]
     [RunOnAxis(new[] { "g_move_left", "g_move_right" }, new[] { -1.0f, 1.0f })]
@@ -50,7 +43,7 @@ public class PlayerMicrobialArenaInput : MultiplayerInputBase
             // work
             var direction = autoMove ? new Vector3(0, 0, -1) : movement.Normalized();
 
-            cachedInput.MovementDirection = direction;
+            cachedInput.EncodeMovementDirection(direction);
             cachedInput.WorldLookAtPoint = Stage.Camera.CursorWorldPos;
             lastMousePosition = GetViewport().GetMousePosition();
         }
@@ -146,11 +139,17 @@ public class PlayerMicrobialArenaInput : MultiplayerInputBase
             if (GetViewport().GetMousePosition() != lastMousePosition)
                 return true;
 
-            if (sampled.MovementDirection == Vector3.Zero && lastSampledInput.MovementDirection != Vector3.Zero)
+            if (sampled.MovementDirection == 0 && lastSampledInput.MovementDirection != 0)
                 return true;
 
-            return sampled.MovementDirection != Vector3.Zero;
+            if (sampled.Bools == 0 && lastSampledInput.Bools != 0)
+                return true;
+
+            return sampled.MovementDirection != 0 || sampled.Bools != 0;
         }
+
+        if ((cachedInput.Bools & (byte)Microbe.InputFlag.SecreteSlime) != 0)
+            return true;
 
         return false;
     }

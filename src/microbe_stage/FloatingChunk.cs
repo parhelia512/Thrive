@@ -277,6 +277,9 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
 
         if (initPhysics)
             InitPhysics();
+
+        if (NetworkManager.Instance.IsServer)
+            SyncVelocity = false;
     }
 
     public void ProcessChunk(float delta, CompoundCloudSystem compoundClouds)

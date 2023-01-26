@@ -26,9 +26,12 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
     [Export]
     public bool SyncAngularZAxis = true;
 
+    [Export]
+    public bool SyncVelocity = true;
+
     /// <summary>
     ///   Enables state (position, rotation) interpolation to the newly incoming state.
-    ///   This adds a delay, the amount of which equals to <see cref="NetworkManager.TimeStep"/>.
+    ///   This adds delay, the amount of which equals to <see cref="NetworkManager.TimeStep"/>.
     /// </summary>
     [Export]
     public bool EnableStateInterpolations = true;
@@ -114,7 +117,9 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
         var testMotionResult = new PhysicsTestMotionResult();
 
         predictedToCollide = PhysicsServer.BodyTestMotion(
-            GetRid(), GlobalTransform, NetworkLinearVelocity, false, testMotionResult);
+            GetRid(), GlobalTransform, NetworkLinearVelocity * delta, false, testMotionResult);
+
+        // TODO: Handle collision
 
         // Integrate transform
         GlobalTranslation += NetworkLinearVelocity * delta;
@@ -129,7 +134,7 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
 
     public virtual void NetworkSerialize(PackedBytesBuffer buffer)
     {
-        var bools = new bool[6]
+        var bools = new bool[7]
         {
             SyncLinearXAxis,
             SyncLinearYAxis,
@@ -137,24 +142,31 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
             SyncAngularXAxis,
             SyncAngularYAxis,
             SyncAngularZAxis,
+            SyncVelocity,
         };
         buffer.Write(bools.ToByte());
 
         if (SyncLinearXAxis)
         {
-            buffer.Write(NetworkLinearVelocity.x);
+            if (SyncVelocity)
+                buffer.Write(NetworkLinearVelocity.x);
+
             buffer.Write(GlobalTranslation.x);
         }
 
         if (SyncLinearYAxis)
         {
-            buffer.Write(NetworkLinearVelocity.y);
+            if (SyncVelocity)
+                buffer.Write(NetworkLinearVelocity.y);
+
             buffer.Write(GlobalTranslation.y);
         }
 
         if (SyncLinearZAxis)
         {
-            buffer.Write(NetworkLinearVelocity.z);
+            if (SyncVelocity)
+                buffer.Write(NetworkLinearVelocity.z);
+
             buffer.Write(GlobalTranslation.z);
         }
 
@@ -170,16 +182,7 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
 
     public virtual void NetworkDeserialize(PackedBytesBuffer buffer)
     {
-        var state = DecodePacket(buffer);
-
-        if (EnableStateInterpolations)
-        {
-            stateInterpolations.Enqueue(state);
-        }
-        else
-        {
-            GlobalTransform = new Transform(state.Rotation, state.Position);
-        }
+        ApplyState(DecodePacket(buffer));
     }
 
     public virtual void PackSpawnState(PackedBytesBuffer buffer)
@@ -198,6 +201,21 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
         AliveMarker.Alive = false;
     }
 
+    public void ApplyState(StateSnapshot state)
+    {
+        if (EnableStateInterpolations)
+        {
+            while (stateInterpolations.Count > 2)
+                stateInterpolations.Dequeue();
+
+            stateInterpolations.Enqueue(state);
+        }
+        else
+        {
+            GlobalTransform = new Transform(state.Rotation, state.Position);
+        }
+    }
+
     protected StateSnapshot DecodePacket(PackedBytesBuffer packet)
     {
         var bools = packet.ReadByte();
@@ -207,19 +225,25 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
 
         if (bools.ToBoolean(0))
         {
-            xVel = packet.ReadSingle();
+            if (bools.ToBoolean(6))
+                xVel = packet.ReadSingle();
+
             xPos = packet.ReadSingle();
         }
 
         if (bools.ToBoolean(1))
         {
-            yVel = packet.ReadSingle();
+            if (bools.ToBoolean(6))
+                yVel = packet.ReadSingle();
+
             yPos = packet.ReadSingle();
         }
 
         if (bools.ToBoolean(2))
         {
-            zVel= packet.ReadSingle();
+            if (bools.ToBoolean(6))
+                zVel = packet.ReadSingle();
+
             zPos = packet.ReadSingle();
         }
 
@@ -272,6 +296,12 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
 
             GlobalTransform = new Transform(rotation, position);
         }
+    }
+
+    protected void ClearInterpolations()
+    {
+        fromState = null;
+        stateInterpolations.Clear();
     }
 
     public struct StateSnapshot : IReconcilableData

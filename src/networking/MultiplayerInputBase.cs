@@ -61,6 +61,9 @@ public abstract class MultiplayerInputBase : PlayerInputBase
     {
         base._PhysicsProcess(delta);
 
+        if (NetworkManager.Instance.LocalPlayer?.Status == NetworkPlayerStatus.Active)
+            DebugOverlays.Instance.ReportUnackedInputs(LocalInputs.Buffer.Count);
+
         if (NetworkManager.Instance.IsServer)
             ProcessIncomingInputs();
 
@@ -74,7 +77,7 @@ public abstract class MultiplayerInputBase : PlayerInputBase
         if (NetworkManager.Instance.IsClient)
             LocalInputs.Buffer.Enqueue(sampled);
 
-        // For client, this is Client-side prediction
+        // For client, this is client-side prediction
         ProcessInput(NetworkManager.Instance.PeerId, sampled);
     }
 
@@ -126,16 +129,17 @@ public abstract class MultiplayerInputBase : PlayerInputBase
         if (!NetworkManager.Instance.IsClient)
             return;
 
+        var packet = new PackedBytesBuffer();
+
         while (LocalInputs.Buffer.Count > 0)
         {
+            // Batch buffered inputs into one packet
             var input = LocalInputs.Buffer.Dequeue();
-
-            var packet = new PackedBytesBuffer();
             input.NetworkSerialize(packet);
-
-            // We don't reliably send because another will be resent each network tick anyway
-            RpcUnreliableId(NetworkManager.DEFAULT_SERVER_ID, nameof(InputReceived), packet.Data);
         }
+
+        // We don't reliably send because another will be resent each network tick anyway
+        RpcUnreliableId(NetworkManager.DEFAULT_SERVER_ID, nameof(InputReceived), packet.Data);
     }
 
     private void OnPlayerJoined(int peerId)
@@ -154,12 +158,21 @@ public abstract class MultiplayerInputBase : PlayerInputBase
         if (!NetworkManager.Instance.IsServer)
             return;
 
-        var packet = new PackedBytesBuffer(data);
-        var input = default(NetworkInputVars);
-        input.NetworkDeserialize(packet);
+        var sender = GetTree().GetRpcSenderId();
 
-        // TODO: input validation i.e. cheat preventions
-        peersInputs[GetTree().GetRpcSenderId()].Buffer.Enqueue(input);
+        if (!peersInputs.ContainsKey(sender))
+            OnPlayerJoined(sender);
+
+        var packet = new PackedBytesBuffer(data);
+
+        while (packet.Position < packet.Length)
+        {
+            var input = default(NetworkInputVars);
+            input.NetworkDeserialize(packet);
+
+            // TODO: input validation i.e. cheat preventions
+            peersInputs[sender].Buffer.Enqueue(input);
+        }
     }
 
     public class PeerInputs

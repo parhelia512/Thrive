@@ -11,7 +11,7 @@ public class ServerSettings : INetworkSerializable
     /// </summary>
     public string Name { get; set; } = TranslationServer.Translate("N_A");
 
-    public string Address { get; set; } = Constants.LOCAL_HOST;
+    public string Address { get; set; } = Constants.DEFAULT_HOST_ADDRESS;
 
     public int Port { get; set; } = Constants.MULTIPLAYER_DEFAULT_PORT;
 
