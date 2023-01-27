@@ -31,8 +31,6 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
     /// </summary>
     public string? AnimationPath;
 
-    private bool initPhysics = true;
-
     /// <summary>
     ///   Used to check if a microbe wants to engulf this
     /// </summary>
@@ -275,8 +273,7 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
         if (chunkMesh == null && !isParticles)
             throw new InvalidOperationException("Can't make a chunk without graphics scene");
 
-        if (initPhysics)
-            InitPhysics();
+        InitPhysics();
 
         if (NetworkManager.Instance.IsServer)
             SyncVelocity = false;
@@ -407,11 +404,12 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
 
         buffer.Write(GraphicsScene.ResourcePath);
 
-        var bools = new bool[3]
+        var bools = new bool[4]
         {
             !string.IsNullOrEmpty(Name),
             !string.IsNullOrEmpty(ModelNodePath),
             !string.IsNullOrEmpty(AnimationPath),
+            ConvexPhysicsMesh != null,
         };
         buffer.Write(bools.ToByte());
 
@@ -423,6 +421,9 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
 
         if (bools[2])
             buffer.Write(AnimationPath!);
+
+        if (bools[3])
+            buffer.Write(ConvexPhysicsMesh!.ResourcePath);
 
         buffer.Write((byte)Compounds.Compounds.Count);
         foreach (var compound in Compounds)
@@ -449,6 +450,9 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
         if (bools.ToBoolean(2))
             AnimationPath = buffer.ReadString();
 
+        if (bools.ToBoolean(3))
+            ConvexPhysicsMesh = GD.Load<ConvexPolygonShape>(buffer.ReadString());
+
         var compoundsCount = buffer.ReadByte();
         for (int i = 0; i < compoundsCount; ++i)
         {
@@ -457,9 +461,6 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
         }
 
         AddToGroup(Constants.AI_TAG_CHUNK);
-
-        if (NetworkManager.Instance.IsClient)
-            initPhysics = false;
     }
 
     public void OnAttemptedToBeEngulfed()

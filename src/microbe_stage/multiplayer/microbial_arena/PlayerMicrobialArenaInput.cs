@@ -148,7 +148,7 @@ public class PlayerMicrobialArenaInput : MultiplayerInputBase
             return sampled.MovementDirection != 0 || sampled.Bools != 0;
         }
 
-        if ((cachedInput.Bools & (byte)Microbe.InputFlag.SecreteSlime) != 0)
+        if ((sampled.Bools & (byte)Microbe.InputFlag.SecreteSlime) != 0)
             return true;
 
         return false;

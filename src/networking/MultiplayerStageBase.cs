@@ -394,11 +394,16 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
     protected virtual void SetEntityAsAttached(INetworkEntity entity, bool attached)
     {
-        if (attached && !entity.EntityNode.IsInsideTree())
+        if (!IsInstanceValid(entity.EntityNode))
+            return;
+
+        var isParent = rootOfDynamicallySpawned.IsAParentOf(entity.EntityNode);
+
+        if (attached && entity.EntityNode.GetParent() == null && !entity.EntityNode.IsInsideTree())
         {
             rootOfDynamicallySpawned.AddChild(entity.EntityNode);
         }
-        else if (!attached && entity.EntityNode.IsInsideTree())
+        else if (!attached && isParent && entity.EntityNode.IsInsideTree())
         {
             rootOfDynamicallySpawned.RemoveChild(entity.EntityNode);
         }
@@ -446,6 +451,8 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
     private void NetworkUpdateGameState(float delta)
     {
+        _ = delta;
+
         for (int i = MultiplayerGameWorld.EntityIDs.Count - 1; i >= 0; --i)
         {
             var id = MultiplayerGameWorld.EntityIDs[i];

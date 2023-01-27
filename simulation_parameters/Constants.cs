@@ -1113,7 +1113,7 @@ public static class Constants
 
     public const int FORCE_CLOSE_AFTER_TRIES = 3;
 
-    public const string LOCAL_HOST = "127.0.0.1";
+    public const string DEFAULT_HOST_ADDRESS = "127.0.0.1";
     public const int MULTIPLAYER_DEFAULT_PORT = 4242;
     public const int MULTIPLAYER_DEFAULT_MAX_PLAYERS = 20;
     public const int MULTIPLAYER_DEFAULT_MAX_CLIENTS = 100;

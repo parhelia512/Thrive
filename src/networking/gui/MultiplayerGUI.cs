@@ -242,7 +242,7 @@ public class MultiplayerGUI : CenterContainer
     {
         nameBox.PlaceholderText = Settings.EnvironmentUserName;
         portBox.Text = Constants.MULTIPLAYER_DEFAULT_PORT.ToString(CultureInfo.CurrentCulture);
-        addressBox.Text = Constants.LOCAL_HOST;
+        addressBox.Text = Constants.DEFAULT_HOST_ADDRESS;
     }
 
     private void ValidateFields()

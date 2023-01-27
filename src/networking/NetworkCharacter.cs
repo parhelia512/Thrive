@@ -63,7 +63,7 @@ public abstract class NetworkCharacter : NetworkRigidBody
             predictedStates.Enqueue(new PredictedState
             {
                 Input = latestPredictedInput.Value,
-                Result = (StateSnapshot)ToSnapshot(),
+                Result = ToSnapshot(),
             });
 
             latestPredictedInput = null;
@@ -165,6 +165,9 @@ public abstract class NetworkCharacter : NetworkRigidBody
         }
     }
 
+    /// <summary>
+    ///   Applies an incoming networked input into this character.
+    /// </summary>
     public virtual void ApplyInput(NetworkInputVars input)
     {
         if (NetworkManager.Instance.IsClient)
@@ -179,7 +182,10 @@ public abstract class NetworkCharacter : NetworkRigidBody
         MovementDirection = input.DecodeMovementDirection();
     }
 
-    public virtual IReconcilableData ToSnapshot()
+    /// <summary>
+    ///   Records the current rigidbody state into a snapshot.
+    /// </summary>
+    public virtual StateSnapshot ToSnapshot()
     {
         return new StateSnapshot
         {

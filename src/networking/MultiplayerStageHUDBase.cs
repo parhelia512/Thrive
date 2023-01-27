@@ -20,7 +20,7 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
     protected ChatBox chatBox = null!;
     protected Control infoScreen = null!;
     protected NetworkPlayerList scoreBoard = null!;
-    protected CustomConfirmationDialog welcomeDialog = null!;
+    protected TutorialDialog welcomeDialog = null!;
 
     // The values of the following variable is the opposite of the expected value.
     // I.e. its value is true when its respective panel is collapsed.
@@ -34,7 +34,7 @@ public abstract class MultiplayerStageHUDBase<TStage> : StageHUDBase<TStage>
         chatBox = GetNode<ChatBox>(ChatBoxPath);
         infoScreen = GetNode<Control>(InfoScreenPath);
         scoreBoard = GetNode<NetworkPlayerList>(ScoreBoardPath);
-        welcomeDialog = GetNode<CustomConfirmationDialog>(WelcomeDialogPath);
+        welcomeDialog = GetNode<TutorialDialog>(WelcomeDialogPath);
     }
 
     public override void Init(TStage containedInStage)

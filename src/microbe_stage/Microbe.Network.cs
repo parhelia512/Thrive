@@ -73,7 +73,6 @@ public partial class Microbe
 
         buffer.Write(Hitpoints);
         buffer.Write((byte)State);
-        buffer.Write((byte)PhagocytosisStep);
         buffer.Write(DigestedAmount);
 
         var bools = new bool[2] { HostileEngulfer.Value != null, Dead };
@@ -81,6 +80,8 @@ public partial class Microbe
 
         if (HostileEngulfer.Value != null)
             buffer.Write(HostileEngulfer.Value.NetworkEntityId);
+
+        buffer.Write((byte)PhagocytosisStep);
     }
 
     public override void NetworkDeserialize(PackedBytesBuffer buffer)
@@ -108,7 +109,6 @@ public partial class Microbe
 
         Hitpoints = buffer.ReadSingle();
         State = (MicrobeState)buffer.ReadByte();
-        PhagocytosisStep = (PhagocytosisPhase)buffer.ReadByte();
         DigestedAmount = buffer.ReadSingle();
 
         var bools = buffer.ReadByte();
@@ -116,24 +116,23 @@ public partial class Microbe
         if (bools.ToBoolean(0) && MultiplayerGameWorld!.TryGetNetworkEntity(
                 buffer.ReadUInt32(), out INetworkEntity entity) && entity is Microbe engulfer)
         {
-            // TODO: Very broken
+            // TODO: Mildly broken.
             engulfer.IngestEngulfable(this);
         }
         else
         {
+            // TODO: Need proper handling when engulfer player leaves the game so it won't cause crash
             HostileEngulfer.Value?.EjectEngulfable(this);
         }
 
-        // TODO: Dead won't sync properly again -_-
+        PhagocytosisStep = (PhagocytosisPhase)buffer.ReadByte();
+
         Dead = bools.ToBoolean(1);
 
         if (Hitpoints < lastHitpoints)
             Flash(1.0f, new Color(1, 0, 0, 0.5f), 1);
 
         lastHitpoints = Hitpoints;
-
-        if (tagBox != null)
-            tagBox.Visible = !Dead;
     }
 
     public override void PackSpawnState(PackedBytesBuffer buffer)

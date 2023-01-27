@@ -100,8 +100,11 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
     /// <remarks>
     ///   <para>
     ///     For server reconciliation, each player input replays need to move the underlying rigidbodies accordingly,
-    ///     in order to do this we need to step physics in a single frame. However, there's currently now way in Godot
-    ///     to do that so we just predict the physics simulation hoping for the end result to be similar.
+    ///     in order to do that we need to step physics in a single frame. However, there's currently now way in Godot
+    ///     to do it so we just predict the physics simulation hoping the end result to be similar.
+    ///   </para>
+    ///   <para>
+    ///     A workaround until <see href="https://github.com/godotengine/godot-proposals/issues/2821"/> is implemented.
     ///   </para>
     /// </remarks>
     public virtual void PredictSimulation(float delta)
@@ -111,6 +114,9 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
         // TODO: In some game runs, misprediction is higher but sometimes it's also fewer??
         //       Though, higher ping consistenly have higher errors
 
+        if (bodyState == null)
+            return;
+
         // Damping
         NetworkLinearVelocity *= 1.0f - delta * LinearDamp;
 
@@ -119,7 +125,30 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
         predictedToCollide = PhysicsServer.BodyTestMotion(
             GetRid(), GlobalTransform, NetworkLinearVelocity * delta, false, testMotionResult);
 
-        // TODO: Handle collision
+        if (predictedToCollide)
+        {
+            // Resolve collision
+
+            var otherBodyState = PhysicsServer.BodyGetDirectState(testMotionResult.ColliderRid);
+            if (otherBodyState == null)
+                return;
+
+            var relativeVel = testMotionResult.ColliderVelocity - NetworkLinearVelocity;
+
+            var restitution = Mathf.Min(
+                PhysicsServer.BodyGetParam(GetRid(), PhysicsServer.BodyParameter.Bounce),
+                PhysicsServer.BodyGetParam(testMotionResult.ColliderRid, PhysicsServer.BodyParameter.Bounce));
+
+            var collisionImpulse = -(1f + restitution) * relativeVel.Dot(testMotionResult.CollisionNormal);
+            collisionImpulse /= bodyState.InverseMass + otherBodyState.InverseMass;
+
+            NetworkLinearVelocity -= collisionImpulse / Mass * testMotionResult.CollisionNormal;
+        }
+
+        NetworkLinearVelocity = new Vector3(
+            AxisLockLinearX ? 0 : NetworkLinearVelocity.x,
+            AxisLockLinearY ? 0 : NetworkLinearVelocity.y,
+            AxisLockLinearZ ? 0 : NetworkLinearVelocity.z);
 
         // Integrate transform
         GlobalTranslation += NetworkLinearVelocity * delta;
@@ -201,6 +230,9 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
         AliveMarker.Alive = false;
     }
 
+    /// <summary>
+    ///   Applies a rigidbody state snapshot data into this rigidbody, possibly with interpolation.
+    /// </summary>
     public void ApplyState(StateSnapshot state)
     {
         if (EnableStateInterpolations)
@@ -304,7 +336,7 @@ public abstract class NetworkRigidBody : RigidBody, INetworkEntity
         stateInterpolations.Clear();
     }
 
-    public struct StateSnapshot : IReconcilableData
+    public struct StateSnapshot
     {
         public Vector3 LinearVelocity { get; set; }
         public Vector3 Position { get; set; }
