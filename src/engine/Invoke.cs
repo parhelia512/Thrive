@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Godot;
-using Object = Godot.Object;
+using Object = Godot.GodotObject;
 
 /// <summary>
 ///   Runs actions on the main thread before the next update
 /// </summary>
-public class Invoke : Node
+public partial class Invoke : Node
 {
     private static Invoke? instance;
 
@@ -21,7 +21,7 @@ public class Invoke : Node
     {
         instance = this;
 
-        PauseMode = PauseModeEnum.Process;
+        ProcessMode = ProcessModeEnum.Always;
         ProcessPriority = -1000;
     }
 
@@ -82,7 +82,7 @@ public class Invoke : Node
         queuedInvokes.Add(action);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         // Move the queued invokes to a temp list
         while (nextFrameInvokes.TryTake(out Action tmp))

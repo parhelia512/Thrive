@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Attribute for a method, that gets called when the defined key is released.
@@ -30,7 +30,7 @@ public class RunOnKeyUpAttribute : RunOnKeyAttribute
         return false;
     }
 
-    public override void OnProcess(float delta)
+    public override void OnProcess(double delta)
     {
     }
 }

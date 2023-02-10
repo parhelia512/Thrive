@@ -1,28 +1,28 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Applies the tint to the defined children
 /// </summary>
-public class OrganelleMeshWithChildren : MeshInstance
+public partial class OrganelleMeshWithChildren : MeshInstance3D
 {
     public void SetTintOfChildren(Color value)
     {
-        foreach (GeometryInstance mesh in GetChildren())
+        foreach (GeometryInstance3D mesh in GetChildren())
         {
             if (mesh.MaterialOverride is ShaderMaterial shaderMaterial)
             {
-                shaderMaterial.SetShaderParam("tint", value);
+                shaderMaterial.SetShaderParameter("tint", value);
             }
         }
     }
 
     public void SetDissolveEffectOfChildren(float value)
     {
-        foreach (GeometryInstance mesh in GetChildren())
+        foreach (GeometryInstance3D mesh in GetChildren())
         {
             if (mesh.MaterialOverride is ShaderMaterial shaderMaterial)
             {
-                shaderMaterial.SetShaderParam("dissolveValue", value);
+                shaderMaterial.SetShaderParameter("dissolveValue", value);
             }
         }
     }

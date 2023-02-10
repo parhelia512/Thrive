@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using Godot;
 
-public class SpeciesDetailsPanel : VBoxContainer
+public partial class SpeciesDetailsPanel : VBoxContainer
 {
     [Export]
     public NodePath? SpeciesDetailsLabelPath;

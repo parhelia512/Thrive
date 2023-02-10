@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   This exists purely to make complex undo/redo structures correctly apply changes to the right cell types

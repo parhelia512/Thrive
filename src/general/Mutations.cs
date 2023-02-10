@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -101,7 +101,7 @@ public class Mutations
             mutated.MembraneType = RandomMembraneType(simulation);
             if (mutated.MembraneType != simulation.GetMembrane("single"))
             {
-                colour.a = RandomOpacityChitin();
+                colour.A = RandomOpacityChitin();
             }
         }
         else
@@ -496,7 +496,7 @@ public class Mutations
                 case 0:
                 {
                     letterPool = isVowel ? Vowels : Consonants;
-                    newName.Erase(0, 1);
+                    newName.Remove(0, 1);
                     newName.Insert(0, letterPool.Random(random));
                     break;
                 }
@@ -512,7 +512,7 @@ public class Mutations
 
                     var nextLetterInPool = letterPool.ElementAt(nextIndex);
 
-                    newName.Erase(0, 1);
+                    newName.Remove(0, 1);
                     newName.Insert(0, nextLetterInPool);
                     break;
                 }
@@ -541,7 +541,7 @@ public class Mutations
                 bool isPermute = PronounceablePermutation.Contains(part);
                 if (random.Next(0, 21) <= 10 && isPermute)
                 {
-                    newName.Erase(index, 2);
+                    newName.Remove(index, 2);
                     changes++;
                     newName.Insert(index, PronounceablePermutation.Random(random));
                 }
@@ -571,7 +571,7 @@ public class Mutations
 
                 if (!isVowel && newName.ToString(index, 1) != "r" && !isPermute)
                 {
-                    newName.Erase(index, 1);
+                    newName.Remove(index, 1);
                     changes++;
                     switch (random.Next(0, 6))
                     {
@@ -603,7 +603,7 @@ public class Mutations
                 // If is vowel
                 else if (newName.ToString(index, 1) != "r" && !isPermute)
                 {
-                    newName.Erase(index, 1);
+                    newName.Remove(index, 1);
                     changes++;
                     if (random.Next(0, 21) <= 10)
                     {
@@ -641,13 +641,13 @@ public class Mutations
             {
                 if (!isVowel && newName.ToString(index, 1) != "r" && !isPermute)
                 {
-                    newName.Erase(index, 1);
+                    newName.Remove(index, 1);
                     letterChanges++;
                     newName.Insert(index, Consonants.Random(random));
                 }
                 else if (!isPermute)
                 {
-                    newName.Erase(index, 1);
+                    newName.Remove(index, 1);
                     letterChanges++;
                     newName.Insert(index, Vowels.Random(random));
                 }

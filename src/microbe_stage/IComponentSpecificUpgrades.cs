@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   Classes implementing this interface store organelle component specific upgrade data

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,13 +6,12 @@ using Godot;
 using Newtonsoft.Json;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
-using Directory = Godot.Directory;
-using File = Godot.File;
+using FileAccess = Godot.FileAccess;
 
 /// <summary>
 ///   Contains definitions for global game configuration like Compounds, Organelles etc.
 /// </summary>
-public class SimulationParameters : Node
+public partial class SimulationParameters : Node
 {
     public const string AUTO_EVO_CONFIGURATION_NAME = "AutoEvoConfiguration";
     public const string DAY_NIGHT_CYCLE_NAME = "DayNightConfiguration";
@@ -123,9 +122,7 @@ public class SimulationParameters : Node
             LoadYamlFile<Dictionary<string, VersionPatchNotes>>("res://simulation_parameters/common/patch_notes.yml");
 
         // Build info is only loaded if the file is present
-        using var directory = new Directory();
-
-        if (directory.FileExists(Constants.BUILD_INFO_FILE))
+        if (FileAccess.FileExists(Constants.BUILD_INFO_FILE))
         {
             buildInfo = LoadDirectObject<BuildInfo>(Constants.BUILD_INFO_FILE);
         }
@@ -438,12 +435,8 @@ public class SimulationParameters : Node
 
     private static string ReadJSONFile(string path)
     {
-        using var file = new File();
-        file.Open(path, File.ModeFlags.Read);
+        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
         var result = file.GetAsText();
-
-        // This might be completely unnecessary
-        file.Close();
 
         if (string.IsNullOrEmpty(result))
             throw new IOException($"Failed to read registry file: {path}");

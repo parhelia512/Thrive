@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Common helper operations for CollisionObjects
@@ -10,7 +10,7 @@ public static class CollisionObjectHelpers
     ///  Applies a given transform to the new shapeOwner.
     /// </summary>
     /// <returns>Returns the id of the newly created shapeOwner</returns>
-    public static uint CreateShapeOwnerWithTransform(this CollisionObject entity, Transform transform, Shape shape)
+    public static uint CreateShapeOwnerWithTransform(this CollisionObject3D entity, Transform3D transform, Shape3D shape)
     {
         var newShapeOwnerId = entity.CreateShapeOwner(shape);
         entity.ShapeOwnerAddShape(newShapeOwnerId, shape);
@@ -24,8 +24,8 @@ public static class CollisionObjectHelpers
     ///  Doesn't destroy the oldShapeOwner.
     /// </summary>
     /// <returns>Returns the new ShapeOwnerId.</returns>
-    public static uint CreateNewOwnerId(this CollisionObject oldParent,
-        CollisionObject newParent, Transform transform, uint oldShapeOwnerId)
+    public static uint CreateNewOwnerId(this CollisionObject3D oldParent,
+        CollisionObject3D newParent, Transform3D transform, uint oldShapeOwnerId)
     {
         var shape = oldParent.ShapeOwnerGetShape(oldShapeOwnerId, 0);
         var newShapeOwnerId = CreateShapeOwnerWithTransform(newParent, transform, shape);

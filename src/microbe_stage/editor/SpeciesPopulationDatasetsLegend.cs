@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
 
 /// <summary>
 ///   Extension of LineChart's default datasets dropdown legend to allow sectioning of extinct species.
 /// </summary>
-public class SpeciesPopulationDatasetsLegend : LineChart.DataSetsDropdownLegend
+public partial class SpeciesPopulationDatasetsLegend : LineChart.DataSetsDropdownLegend
 {
     private List<KeyValuePair<string, ChartDataSet>> extinctSpecies;
 

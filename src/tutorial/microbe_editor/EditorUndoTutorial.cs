@@ -1,4 +1,4 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
     using Godot;
@@ -7,7 +7,7 @@
     /// <summary>
     ///   Ensures the player knows about the undo button
     /// </summary>
-    public class EditorUndoTutorial : TutorialPhase
+    public partial class EditorUndoTutorial : TutorialPhase
     {
         public override string ClosedByName => "CellEditorUndo";
 

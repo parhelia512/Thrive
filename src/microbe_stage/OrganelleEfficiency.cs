@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 /// <summary>
 ///   Efficiency of an organelle in a patch
 /// </summary>
-public class OrganelleEfficiency
+public partial class OrganelleEfficiency
 {
     public OrganelleEfficiency(OrganelleDefinition organelle)
     {

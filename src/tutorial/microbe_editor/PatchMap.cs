@@ -1,11 +1,11 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
     /// <summary>
     ///   Tutorial for the patch map tab
     /// </summary>
-    public class PatchMap : TutorialPhase
+    public partial class PatchMap : TutorialPhase
     {
         private readonly string patchMapTab = EditorTab.PatchMap.ToString();
         private readonly string cellEditorTab = EditorTab.CellEditor.ToString();

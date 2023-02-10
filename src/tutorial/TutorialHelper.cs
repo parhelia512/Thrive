@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Helper methods for tutorials
 /// </summary>
 public static class TutorialHelper

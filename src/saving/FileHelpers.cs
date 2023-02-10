@@ -1,7 +1,6 @@
-﻿using System.IO;
+using System.IO;
 using Godot;
-using Directory = Godot.Directory;
-using File = Godot.File;
+using FileAccess = Godot.FileAccess;
 
 /// <summary>
 ///   Helpers regarding file operations
@@ -13,7 +12,7 @@ public static class FileHelpers
     /// </summary>
     public static void MakeSureDirectoryExists(string path)
     {
-        using var directory = new Directory();
+        using var directory = DirAccess.Open("user://");
         var result = directory.MakeDirRecursive(path);
 
         if (result != Error.AlreadyExists && result != Error.Ok)
@@ -29,8 +28,7 @@ public static class FileHelpers
     /// <returns>True on success</returns>
     public static bool DeleteFile(string path)
     {
-        using var directory = new Directory();
-        var result = directory.Remove(path);
+        var result = DirAccess.RemoveAbsolute(path);
         return result == Error.Ok;
     }
 
@@ -41,8 +39,7 @@ public static class FileHelpers
     /// <returns>True if exists, false otherwise</returns>
     public static bool Exists(string path)
     {
-        using var directory = new Directory();
-        return directory.FileExists(path);
+        return FileAccess.FileExists(path);
     }
 
     /// <summary>
@@ -57,12 +54,10 @@ public static class FileHelpers
     /// </remarks>
     public static Error TryWriteFile(string path)
     {
-        using var file = new File();
-        var error = file.Open(path, File.ModeFlags.Write);
-        if (error != Error.Ok)
-            return error;
+        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
+        if (file?.GetError() != Error.Ok)
+            return file?.GetError() ?? Error.Failed;
 
-        file.Close();
         DeleteFile(path);
 
         return Error.Ok;

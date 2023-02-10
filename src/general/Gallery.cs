@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 /// <summary>
 ///   A specific collection of Thrive's assets, such as concept art, musics, models.

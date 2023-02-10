@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +7,7 @@ using Godot;
 /// <summary>
 ///   Tweaked colour picker allows for tooltip texts translations and has a customized theming.
 /// </summary>
-public class TweakedColourPicker : ColorPicker
+public partial class TweakedColourPicker : ColorPicker
 {
     /// <summary>
     ///   This is where presets are stored after a colour picker exited scene tree.
@@ -29,7 +29,7 @@ public class TweakedColourPicker : ColorPicker
     private HSlider sliderGOrS = null!;
     private HSlider sliderBOrV = null!;
     private HSlider sliderA = null!;
-    private ToolButton pickerButton = null!;
+    private Button pickerButton = null!;
     private CustomCheckBox? hsvCheckBox;
     private CustomCheckBox rawCheckBox = null!;
     private Label htmlColourStart = null!;
@@ -43,7 +43,6 @@ public class TweakedColourPicker : ColorPicker
     private bool rawButtonEnabled = true;
     private bool presetsEditable = true;
     private bool presetsVisible = true;
-    private PickerMode mode;
 
     private bool pickingColor;
     private Color colorBeforePicking;
@@ -54,13 +53,6 @@ public class TweakedColourPicker : ColorPicker
     private delegate void AddPresetDelegate(Color colour);
 
     private delegate void DeletePresetDelegate(Color colour);
-
-    private enum PickerMode
-    {
-        Rgb,
-        Hsv,
-        Raw,
-    }
 
     [Export]
     public string PresetGroup { get; private set; } = "default";
@@ -101,13 +93,12 @@ public class TweakedColourPicker : ColorPicker
     ///   </remarks>
     /// </summary>
     [Export]
-    public new bool HsvMode
+    public bool HsvMode
     {
-        get => base.HsvMode;
+        get => ColorMode == ColorPicker.ColorModeType.Hsv;
         set
         {
-            mode = value ? PickerMode.Hsv : PickerMode.Rgb;
-            base.HsvMode = value;
+            ColorMode = value ? ColorModeType.Hsv : ColorModeType.Rgb;
             UpdateButtonsState();
 
             // Update HSV sliders' tooltips
@@ -121,15 +112,14 @@ public class TweakedColourPicker : ColorPicker
     [Export]
     public new bool RawMode
     {
-        get => base.RawMode;
+        get => ColorMode == ColorModeType.Raw;
         set
         {
-            mode = value ? PickerMode.Raw : PickerMode.Rgb;
+            ColorMode = value ? ColorModeType.Raw : ColorModeType.Rgb;
 
             if (value == false)
                 ValidateRgbColor();
 
-            base.RawMode = value;
             UpdateButtonsState();
             UpdateTooltips();
         }
@@ -199,7 +189,7 @@ public class TweakedColourPicker : ColorPicker
         sliderGOrS = baseControl.GetChild(1).GetChild<HSlider>(1);
         sliderBOrV = baseControl.GetChild(2).GetChild<HSlider>(1);
         sliderA = baseControl.GetChild(3).GetChild<HSlider>(1);
-        pickerButton = GetChild(1).GetChild<ToolButton>(1);
+        pickerButton = GetChild(1).GetChild<Button>(1);
         hsvCheckBox = GetNode<CustomCheckBox>("MarginButtonsContainer/ButtonsContainer/HSVCheckBox");
         rawCheckBox = GetNode<CustomCheckBox>("MarginButtonsContainer/ButtonsContainer/RawCheckBox");
         htmlColourStart = GetNode<Label>("MarginButtonsContainer/ButtonsContainer/HtmlColourStart");
@@ -211,11 +201,11 @@ public class TweakedColourPicker : ColorPicker
         // Picker button logic rewrite #3055
         // TODO: Revert this PR once https://github.com/godotengine/godot/issues/57343 is solved.
         baseControl = GetChild(1);
-        var customPickerButton = new ToolButton { Icon = pickerButton.Icon };
+        var customPickerButton = new Button { Icon = pickerButton.Icon };
         pickerButton.Hide();
         baseControl.AddChild(customPickerButton);
         pickerButton = customPickerButton;
-        pickerButton.Connect("pressed", this, nameof(OnPickerClicked));
+        pickerButton.Connect("pressed",new Callable(this,nameof(OnPickerClicked)));
 
         // Update control state.
         UpdateButtonsState();
@@ -251,13 +241,13 @@ public class TweakedColourPicker : ColorPicker
         UpdateTooltips();
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
         if (pickingColor)
         {
-            HandleActiveColourPicking(delta);
+            HandleActiveColourPicking((float)delta);
         }
     }
 
@@ -265,14 +255,14 @@ public class TweakedColourPicker : ColorPicker
     {
         if (pickingColor)
         {
-            if (@event is InputEventMouse { ButtonMask: (int)ButtonList.Left })
+            if (@event is InputEventMouse { ButtonMask: MouseButtonMask.Left })
             {
                 // Confirm, perform the last pick so that the colour is precisely the pixel clicked
                 HandleActiveColourPicking(Constants.COLOUR_PICKER_PICK_INTERVAL);
                 pickingColor = false;
             }
-            else if (@event is InputEventKey { Scancode: (int)KeyList.Escape, Pressed: true }
-                     or InputEventMouse { ButtonMask: (int)ButtonList.Right })
+            else if (@event is InputEventKey { Keycode: Key.Escape, Pressed: true }
+                     or InputEventMouse { ButtonMask: MouseButtonMask.Right })
             {
                 // Cancel
                 pickingColor = false;
@@ -371,12 +361,12 @@ public class TweakedColourPicker : ColorPicker
     {
         var colour = Color;
 
-        if (colour.r > 1)
-            colour.r = 1;
-        if (colour.g > 1)
-            colour.g = 1;
-        if (colour.b > 1)
-            colour.b = 1;
+        if (colour.R > 1)
+            colour.R = 1;
+        if (colour.G > 1)
+            colour.G = 1;
+        if (colour.B > 1)
+            colour.B = 1;
 
         SetColour(colour);
     }
@@ -386,25 +376,25 @@ public class TweakedColourPicker : ColorPicker
         if (addPresetButton == null || hsvCheckBox == null)
             return;
 
-        pickerButton.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_PICK_COLOUR");
-        addPresetButton.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_ADD_PRESET");
-        hsvCheckBox.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_HSV_BUTTON_TOOLTIP");
-        rawCheckBox.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_RAW_BUTTON_TOOLTIP");
+        pickerButton.TooltipText = TranslationServer.Translate("COLOUR_PICKER_PICK_COLOUR");
+        addPresetButton.TooltipText = TranslationServer.Translate("COLOUR_PICKER_ADD_PRESET");
+        hsvCheckBox.TooltipText = TranslationServer.Translate("COLOUR_PICKER_HSV_BUTTON_TOOLTIP");
+        rawCheckBox.TooltipText = TranslationServer.Translate("COLOUR_PICKER_RAW_BUTTON_TOOLTIP");
 
         if (HsvMode)
         {
-            sliderROrH.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_H_TOOLTIP");
-            sliderGOrS.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_S_TOOLTIP");
-            sliderBOrV.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_V_TOOLTIP");
+            sliderROrH.TooltipText = TranslationServer.Translate("COLOUR_PICKER_H_TOOLTIP");
+            sliderGOrS.TooltipText = TranslationServer.Translate("COLOUR_PICKER_S_TOOLTIP");
+            sliderBOrV.TooltipText = TranslationServer.Translate("COLOUR_PICKER_V_TOOLTIP");
         }
         else
         {
-            sliderROrH.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_R_TOOLTIP");
-            sliderGOrS.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_G_TOOLTIP");
-            sliderBOrV.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_B_TOOLTIP");
+            sliderROrH.TooltipText = TranslationServer.Translate("COLOUR_PICKER_R_TOOLTIP");
+            sliderGOrS.TooltipText = TranslationServer.Translate("COLOUR_PICKER_G_TOOLTIP");
+            sliderBOrV.TooltipText = TranslationServer.Translate("COLOUR_PICKER_B_TOOLTIP");
         }
 
-        sliderA.HintTooltip = TranslationServer.Translate("COLOUR_PICKER_A_TOOLTIP");
+        sliderA.TooltipText = TranslationServer.Translate("COLOUR_PICKER_A_TOOLTIP");
     }
 
     private void UpdateButtonsState()
@@ -412,26 +402,26 @@ public class TweakedColourPicker : ColorPicker
         if (hsvCheckBox == null)
             return;
 
-        switch (mode)
+        switch (ColorMode)
         {
-            case PickerMode.Rgb:
+            case ColorModeType.Rgb:
             {
-                hsvCheckBox.Pressed = false;
-                rawCheckBox.Pressed = false;
+                hsvCheckBox.ButtonPressed = false;
+                rawCheckBox.ButtonPressed = false;
                 break;
             }
 
-            case PickerMode.Hsv:
+            case ColorModeType.Hsv:
             {
-                rawCheckBox.Pressed = false;
-                hsvCheckBox.Pressed = true;
+                rawCheckBox.ButtonPressed = false;
+                hsvCheckBox.ButtonPressed = true;
                 break;
             }
 
-            case PickerMode.Raw:
+            case ColorModeType.Raw:
             {
-                hsvCheckBox.Pressed = false;
-                rawCheckBox.Pressed = true;
+                hsvCheckBox.ButtonPressed = false;
+                rawCheckBox.ButtonPressed = true;
                 break;
             }
 
@@ -466,7 +456,7 @@ public class TweakedColourPicker : ColorPicker
     private void OnColourChanged(Color colour)
     {
         // Hide HtmlColourEdit color change when Raw mode is on and any color value is above 1.0
-        htmlColourStart.Visible = htmlColourEdit.Visible = !(mode == PickerMode.Raw && colour.IsRaw());
+        htmlColourStart.Visible = htmlColourEdit.Visible = !(ColorMode == ColorModeType.Raw && colour.IsRaw());
 
         htmlColourEdit.Text = colour.ToHtml();
     }
@@ -510,20 +500,18 @@ public class TweakedColourPicker : ColorPicker
         if (pickerTimeElapsed < Constants.COLOUR_PICKER_PICK_INTERVAL)
             return;
 
-        var viewportTexture = GetViewport().GetTexture().GetData();
+        var viewportTexture = GetViewport().GetTexture().GetImage();
         var viewportRect = GetViewportRect();
-        var scale = viewportRect.End.x / viewportTexture.GetSize().x;
+        var scale = viewportRect.End.X / viewportTexture.GetSize().X;
         var position = GetGlobalMousePosition() / scale;
-        position.y = viewportTexture.GetHeight() - position.y;
+        position.Y = viewportTexture.GetHeight() - position.Y;
 
-        viewportTexture.Lock();
-        SetColour(viewportTexture.GetPixelv(position));
-        viewportTexture.Unlock();
+        SetColour(viewportTexture.GetPixelv(position.ToVector2I()));
 
         pickerTimeElapsed = 0;
     }
 
-    private class TweakedColourPickerPreset : ColorRect
+    private partial class TweakedColourPickerPreset : ColorRect
     {
         private readonly TweakedColourPicker owner;
 
@@ -533,10 +521,10 @@ public class TweakedColourPicker : ColorPicker
             Color = colour;
 
             // Init the GUI part of the ColorRect
-            MarginTop = MarginBottom = MarginLeft = MarginRight = 6.0f;
-            RectMinSize = new Vector2(20, 20);
-            SizeFlagsHorizontal = (int)SizeFlags.ShrinkEnd;
-            SizeFlagsVertical = (int)SizeFlags.ShrinkCenter;
+            OffsetTop = OffsetBottom = OffsetLeft = OffsetRight = 6.0f;
+            CustomMinimumSize = new Vector2(20, 20);
+            SizeFlagsHorizontal = SizeFlags.ShrinkEnd;
+            SizeFlagsVertical = SizeFlags.ShrinkCenter;
             UpdateTooltip();
         }
 
@@ -552,21 +540,21 @@ public class TweakedColourPicker : ColorPicker
         {
             if (inputEvent is InputEventMouseButton { Pressed: true } mouseEvent)
             {
-                switch ((ButtonList)mouseEvent.ButtonIndex)
+                switch (mouseEvent.ButtonIndex)
                 {
-                    case ButtonList.Left:
+                    case MouseButton.Left:
                     {
-                        GetTree().SetInputAsHandled();
+                        GetViewport().SetInputAsHandled();
                         owner.SetColour(Color);
                         return;
                     }
 
-                    case ButtonList.Right:
+                    case MouseButton.Right:
                     {
                         if (!owner.PresetsEditable)
                             break;
 
-                        GetTree().SetInputAsHandled();
+                        GetViewport().SetInputAsHandled();
                         owner.ErasePreset(Color);
                         return;
                     }
@@ -578,7 +566,7 @@ public class TweakedColourPicker : ColorPicker
 
         private void UpdateTooltip()
         {
-            HintTooltip = TranslationServer.Translate("COLOUR_PICKER_PRESET_TOOLTIP")
+            TooltipText = TranslationServer.Translate("COLOUR_PICKER_PRESET_TOOLTIP")
                 .FormatSafe(Color.IsRaw() ? "argb(" + Color + ")" : "#" + Color.ToHtml());
         }
     }

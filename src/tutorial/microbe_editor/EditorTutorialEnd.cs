@@ -1,11 +1,11 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
     /// <summary>
     ///   Last words of the microbe editor tutorial
     /// </summary>
-    public class EditorTutorialEnd : TutorialPhase
+    public partial class EditorTutorialEnd : TutorialPhase
     {
         public EditorTutorialEnd()
         {

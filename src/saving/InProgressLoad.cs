@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using Godot;
 using Saving;
@@ -12,7 +12,7 @@ using Saving;
 ///     This is very similar to InProgressSave
 ///   </para>
 /// </remarks>
-public class InProgressLoad
+public partial class InProgressLoad
 {
     private readonly string saveName;
 

@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
 
-public class PatchMapNameGenerator : IRegistryType
+public partial class PatchMapNameGenerator : IRegistryType
 {
     [JsonRequired]
     private int syllablesLowerLimit = 2;

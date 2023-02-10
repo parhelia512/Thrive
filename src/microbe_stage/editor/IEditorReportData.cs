@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Editor with data to fill in for the editor report screen
 /// </summary>
 public interface IEditorReportData : IEditor

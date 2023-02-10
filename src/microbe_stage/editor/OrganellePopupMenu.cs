@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -7,7 +7,7 @@ using Godot;
 ///   Manages a custom context menu solely for showing list of options for a placed organelle
 ///   in the microbe editor.
 /// </summary>
-public class OrganellePopupMenu : HexPopupMenu
+public partial class OrganellePopupMenu : HexPopupMenu
 {
     private List<OrganelleTemplate>? selectedOrganelles;
 
@@ -81,7 +81,7 @@ public class OrganellePopupMenu : HexPopupMenu
         mpLabel.Text = new LocalizedString("MP_COST", -mpCost).ToString();
 
         deleteButton.Disabled = !EnableDeleteOption;
-        deleteButton.HintTooltip = DeleteOptionTooltip;
+        deleteButton.TooltipText = DeleteOptionTooltip;
     }
 
     protected override void UpdateMoveButton()

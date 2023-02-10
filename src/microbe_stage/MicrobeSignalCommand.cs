@@ -1,4 +1,4 @@
-﻿public enum MicrobeSignalCommand
+public enum MicrobeSignalCommand
 {
     /// <summary>
     ///   No command specified

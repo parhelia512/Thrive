@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
-public class RadialMenu : CenterContainer
+public partial class RadialMenu : CenterContainer
 {
     [Export]
     public NodePath? CenterLabelPath;
@@ -15,7 +15,7 @@ public class RadialMenu : CenterContainer
 
 #pragma warning disable CA2213
     [Export]
-    public Texture HoveredItemHighlightBackground = null!;
+    public Texture2D HoveredItemHighlightBackground = null!;
 #pragma warning restore CA2213
 
     /// <summary>
@@ -70,7 +70,7 @@ public class RadialMenu : CenterContainer
     private Vector2? relativeMousePosition;
 
     [Signal]
-    public delegate void OnItemSelected(int itemId);
+    public delegate void OnItemSelectedEventHandler(int itemId);
 
     public string CenterText
     {
@@ -117,7 +117,7 @@ public class RadialMenu : CenterContainer
         InputManager.UnregisterReceiver(this);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (!Visible)
             return;
@@ -129,7 +129,7 @@ public class RadialMenu : CenterContainer
         // Let's hope there's so few labels that constantly updating their colours is not a problem
         foreach (var label in createdLabels)
         {
-            label.AddColorOverride("font_color", label.Id == HoveredItem ? CircleHighlightColour : Colors.White);
+            label.AddThemeColorOverride("font_color", label.Id == HoveredItem ? CircleHighlightColour : Colors.White);
         }
     }
 
@@ -144,10 +144,10 @@ public class RadialMenu : CenterContainer
         }
         else if (@event is InputEventMouseButton mouseButton)
         {
-            if (mouseButton.Pressed && mouseButton.ButtonIndex == (int)ButtonList.Left)
+            if (mouseButton.Pressed && mouseButton.ButtonIndex == MouseButton.Left)
             {
                 if (AcceptHoveredItem())
-                    GetTree().SetInputAsHandled();
+                    GetViewport().SetInputAsHandled();
             }
         }
     }
@@ -158,7 +158,7 @@ public class RadialMenu : CenterContainer
 
         switch (what)
         {
-            case NotificationResized:
+            case (int)NotificationResized:
                 if (Visible && centerLabel != null && createdLabels.Count > 0)
                     RepositionLabels();
                 break;
@@ -169,7 +169,7 @@ public class RadialMenu : CenterContainer
     {
         base._Draw();
 
-        var center = RectSize / 2;
+        var center = Size / 2;
 
         var circleEnd = RadialCircleStart + RadialCircleThickness;
 
@@ -243,7 +243,7 @@ public class RadialMenu : CenterContainer
         foreach (var (text, id) in items)
         {
             var label = new LabelWithId(text, id);
-            label.RectMinSize = new Vector2(MaxRadialLabelLength, 0);
+            label.CustomMinimumSize = new Vector2(MaxRadialLabelLength, 0);
             dynamicLabelsContainer.AddChild(label);
             createdLabels.Add(label);
         }
@@ -301,13 +301,13 @@ public class RadialMenu : CenterContainer
 
         foreach (var label in createdLabels)
         {
-            label.RectPosition =
+            label.Position =
                 new Vector2((float)Math.Cos(currentAngle), (float)Math.Sin(currentAngle)) *
                 LabelDistanceFromCenter + centerOffset;
             currentAngle += anglePerItem;
         }
 
-        Update();
+        QueueRedraw();
         UpdateIndicator();
     }
 
@@ -327,7 +327,7 @@ public class RadialMenu : CenterContainer
             return;
         }
 
-        var center = RectSize / 2;
+        var center = Size / 2;
         var indicatorOffset = center - new Vector2(IndicatorSize / 2.0f, IndicatorSize);
 
         indicator.Visible = true;
@@ -343,7 +343,7 @@ public class RadialMenu : CenterContainer
             if (HoveredItem != null)
             {
                 HoveredItem = null;
-                Update();
+                QueueRedraw();
             }
 
             return;
@@ -353,9 +353,9 @@ public class RadialMenu : CenterContainer
         var mouseAngle = mouseDirection.Angle();
 
         // In the indicator rotation coordinates the mouse is a quarter circle off
-        indicator.RectRotation = Mathf.Rad2Deg(mouseAngle) + 90;
+        indicator.Rotation = Mathf.RadToDeg(mouseAngle) + 90;
 
-        indicator.RectPosition = new Vector2(Mathf.Cos(mouseAngle), Mathf.Sin(mouseAngle)) *
+        indicator.Position = new Vector2(Mathf.Cos(mouseAngle), Mathf.Sin(mouseAngle)) *
             RadialCircleStart + indicatorOffset;
 
         UpdateHoveredFromAngle(mouseAngle);
@@ -386,18 +386,18 @@ public class RadialMenu : CenterContainer
         var previous = HoveredItem;
         HoveredItem = createdLabels[itemIndex].Id;
         if (previous != HoveredItem)
-            Update();
+            QueueRedraw();
     }
 
-    private class LabelWithId : Label
+    private partial class LabelWithId : Label
     {
         public LabelWithId(string text, int id)
         {
             Text = text;
             Id = id;
 
-            Align = AlignEnum.Center;
-            Valign = VAlign.Center;
+            HorizontalAlignment = HorizontalAlignment.Center;
+            VerticalAlignment = VerticalAlignment.Center;
         }
 
         public int Id { get; }

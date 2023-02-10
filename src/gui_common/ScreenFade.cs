@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Controls the screen fade transition
 /// </summary>
-public class ScreenFade : Control, ITransition
+public partial class ScreenFade : Control, ITransition
 {
 #pragma warning disable CA2213
     private ColorRect? rect;
@@ -13,7 +13,7 @@ public class ScreenFade : Control, ITransition
     private FadeType currentFadeType;
 
     [Signal]
-    public delegate void OnFinishedSignal();
+    public delegate void OnFinishedSignalEventHandler();
 
     public enum FadeType
     {
@@ -47,10 +47,10 @@ public class ScreenFade : Control, ITransition
         rect = GetNode<ColorRect>("Rect");
         fader = GetNode<Tween>("Fader");
 
-        fader.Connect("tween_all_completed", this, nameof(OnFinished));
+        fader.Connect("tween_all_completed",new Callable(this,nameof(OnFinished)));
 
         // Keep this node running while paused
-        PauseMode = PauseModeEnum.Process;
+        ProcessMode = ProcessModeEnum.Always;
 
         SetInitialColours();
         Hide();
@@ -68,9 +68,9 @@ public class ScreenFade : Control, ITransition
 
     public void FadeTo(Color final)
     {
-        fader.InterpolateProperty(rect, "color", null, final, FadeDuration);
+        fader.TweenProperty(rect, "color", final, FadeDuration);
 
-        fader.Start();
+        fader.Play();
     }
 
     public void Begin()

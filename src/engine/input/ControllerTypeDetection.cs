@@ -1,4 +1,4 @@
-﻿public static class ControllerTypeDetection
+public static class ControllerTypeDetection
 {
     /// <summary>
     ///   Detects the type of a controlled (gamepad, joypad) from its name

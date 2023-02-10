@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Specifies at which point in time retrieved compounds are sampled (or if the average value should be returned)
 /// </summary>
 /// <remarks>

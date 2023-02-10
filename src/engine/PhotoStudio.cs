@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
@@ -12,7 +12,7 @@ using Godot;
 ///     if game version changes to avoid bugs and size limited to not take too many gigabytes of space)
 ///   </para>
 /// </remarks>
-public class PhotoStudio : Viewport
+public partial class PhotoStudio : SubViewport
 {
     [Export]
     public NodePath? CameraPath;
@@ -49,10 +49,10 @@ public class PhotoStudio : Viewport
     /// </summary>
     private Image? renderedImage;
 
-    private Spatial? instancedScene;
+    private Node3D? instancedScene;
 
-    private Camera camera = null!;
-    private Spatial renderedObjectHolder = null!;
+    private Camera3D camera = null!;
+    private Node3D renderedObjectHolder = null!;
 
 #pragma warning restore CA2213
 
@@ -97,18 +97,18 @@ public class PhotoStudio : Viewport
 
         base._Ready();
 
-        camera = GetNode<Camera>(CameraPath);
-        renderedObjectHolder = GetNode<Spatial>(RenderedObjectHolderPath);
+        camera = GetNode<Camera3D>(CameraPath);
+        renderedObjectHolder = GetNode<Node3D>(RenderedObjectHolderPath);
 
         // We manually trigger rendering when we want
         RenderTargetUpdateMode = UpdateMode.Disabled;
 
         camera.Fov = Constants.PHOTO_STUDIO_CAMERA_FOV;
 
-        PauseMode = PauseModeEnum.Process;
+        ProcessMode = ProcessModeEnum.Always;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (currentTaskStep == Step.NoTask)
         {
@@ -191,7 +191,7 @@ public class PhotoStudio : Viewport
 
             case Step.PositionCamera:
             {
-                camera.Translation = new Vector3(0,
+                camera.Position = new Vector3(0,
                     currentTask!.Photographable.CalculatePhotographDistance(instancedScene!), 0);
                 currentTaskStep = Step.Render;
                 break;
@@ -207,7 +207,7 @@ public class PhotoStudio : Viewport
 
             case Step.CaptureImage:
             {
-                renderedImage = GetTexture().GetData();
+                renderedImage = GetTexture().GetImage();
                 currentTaskStep = Step.Save;
                 break;
             }
@@ -216,9 +216,7 @@ public class PhotoStudio : Viewport
             {
                 renderedImage!.Convert(Image.Format.Rgba8);
 
-                var texture = new ImageTexture();
-                texture.CreateFromImage(renderedImage,
-                    (uint)Texture.FlagsEnum.Filter | (uint)Texture.FlagsEnum.Mipmaps);
+                var texture = ImageTexture.CreateFromImage(renderedImage);
 
                 currentTask!.OnFinished(texture, renderedImage);
                 currentTask = null;
@@ -290,7 +288,7 @@ public class PhotoStudio : Viewport
 
     private void InstanceCurrentScene()
     {
-        instancedScene = taskScene!.Instance<Spatial>();
+        instancedScene = taskScene!.Instantiate<Node3D>();
 
         waitingForBackgroundOperation = false;
         currentTaskStep = Step.ApplySceneParameters;

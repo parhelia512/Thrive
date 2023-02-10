@@ -67,9 +67,9 @@ __meta__ = {
 }
 
 [node name="Label" type="Label" parent="EarlyMulticellularEditorGUI/NoCellSelected"]
-margin_top = 347.0
-margin_right = 1280.0
-margin_bottom = 372.0
+offset_top = 347.0
+offset_right = 1280.0
+offset_bottom = 372.0
 text = "SELECT_CELL_TYPE_FROM_EDITOR"
 align = 1
 

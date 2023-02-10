@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/Microbe.tscn", UsesEarlyResolve = false)]
 [DeserializedCallbackTarget]
-public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable
+public partial class Microbe : RigidBody3D, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable
 {
     /// <summary>
     ///   The point towards which the microbe will move to point to
@@ -92,7 +92,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
     /// <summary>
     ///   3d audio listener attached to this microbe if it is the player owned one.
     /// </summary>
-    private Listener? listener;
+    private AudioListener3D? listener;
 #pragma warning restore CA2213
 
     private MicrobeSpecies? cachedMicrobeSpecies;
@@ -229,10 +229,10 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
     public bool IsForPreviewOnly { get; set; }
 
     [JsonIgnore]
-    public Spatial EntityNode => this;
+    public Node3D EntityNode => this;
 
     [JsonIgnore]
-    public GeometryInstance EntityGraphics => Membrane;
+    public GeometryInstance3D EntityGraphics => Membrane;
 
     [JsonIgnore]
     public int RenderPriority
@@ -343,12 +343,12 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
             return;
 
         Membrane = GetNode<Membrane>("Membrane");
-        OrganelleParent = GetNode<Spatial>("OrganelleParent");
+        OrganelleParent = GetNode<Node3D>("OrganelleParent");
 
         if (IsForPreviewOnly)
         {
             // Disable our physics to not cause issues with multiple preview cells bumping into each other
-            Mode = ModeEnum.Kinematic;
+            FreezeMode = FreezeModeEnum.Kinematic;
             return;
         }
 
@@ -376,7 +376,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         {
             // Creates and activates the audio listener for the player microbe. Positional sound will be
             // received by it instead of the main camera.
-            listener = new Listener();
+            listener = new AudioListener3D();
             AddChild(listener);
             listener.MakeCurrent();
 
@@ -386,17 +386,17 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
             GD.Print("Player Microbe spawned");
         }
 
-        // pseudopodTarget = GetNode<MeshInstance>("PseudopodTarget");
-        // var pseudopodRange = GetNode<Area>("PseudopodRange");
-        // pseudopodRangeSphereShape = (SphereShape)pseudopodRange.GetNode<CollisionShape>("SphereShape").Shape;
+        // pseudopodTarget = GetNode<MeshInstance3D>("PseudopodTarget");
+        // var pseudopodRange = GetNode<Area3D>("PseudopodRange");
+        // pseudopodRangeSphereShape = (SphereShape3D)pseudopodRange.GetNode<CollisionShape3D>("SphereShape3D").Shape3D;
 
-        // pseudopodRange.Connect("body_entered", this, nameof(OnBodyEnteredPseudopodRange));
-        // pseudopodRange.Connect("body_exited", this, nameof(OnBodyExitedPseudopodRange));
+        // pseudopodRange.Connect("body_entered",new Callable(this,nameof(OnBodyEnteredPseudopodRange)));
+        // pseudopodRange.Connect("body_exited",new Callable(this,nameof(OnBodyExitedPseudopodRange)));
 
         // Setup physics callback stuff
-        ContactsReported = Constants.DEFAULT_STORE_CONTACTS_COUNT;
-        Connect("body_shape_entered", this, nameof(OnContactBegin));
-        Connect("body_shape_exited", this, nameof(OnContactEnd));
+        MaxContactsReported = Constants.DEFAULT_STORE_CONTACTS_COUNT;
+        Connect("body_shape_entered", new Callable(this, nameof(OnContactBegin)));
+        Connect("body_shape_exited", new Callable(this, nameof(OnContactEnd)));
 
         Mass = Constants.MICROBE_BASE_MASS;
 
@@ -432,7 +432,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
                 ReParentShapes(Colony.Master, GetOffsetRelativeToMaster());
                 Colony.Master.AddCollisionExceptionWith(this);
                 AddCollisionExceptionWith(Colony.Master);
-                Mode = ModeEnum.Static;
+                // Mode = ModeEnum.Static;
                 Colony.Master.Mass += Mass;
             }
 
@@ -565,7 +565,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
             otherAudioPlayers.Add(player);
         }
 
-        player.UnitDb = GD.Linear2Db(volume);
+        player.VolumeDb = Mathf.LinearToDb(volume);
         player.Stream = sound;
         player.Play();
     }
@@ -591,7 +591,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
             nonPositionalAudioPlayers.Add(player);
         }
 
-        player.VolumeDb = GD.Linear2Db(volume);
+        player.VolumeDb = Mathf.LinearToDb(volume);
         player.Stream = sound;
         player.Play();
     }
@@ -685,11 +685,11 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         // Updates the listener if this is the player owned microbe.
         if (listener != null)
         {
-            // Listener is directional and since it is a child of the microbe it will have the same forward
+            // AudioListener3D is directional and since it is a child of the microbe it will have the same forward
             // vector as the parent. Since we want sound to come from the side of the screen relative to the
             // camera rather than the microbe we need to force the listener to face up every frame.
-            Transform transform = GlobalTransform;
-            transform.basis = new Basis(new Vector3(0.0f, 0.0f, -1.0f));
+            Transform3D transform = GlobalTransform;
+            transform.Basis = Basis.FromEuler(new Vector3(0.0f, 0.0f, -1.0f));
             listener.GlobalTransform = transform;
         }
 
@@ -785,7 +785,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         }
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (usesExternalProcess)
         {
@@ -793,18 +793,18 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
             return;
         }
 
-        ProcessEarlyAsync(delta);
-        ProcessSync(delta);
+        ProcessEarlyAsync((float)delta);
+        ProcessSync((float)delta);
     }
 
-    public override void _PhysicsProcess(float delta)
+    public override void _PhysicsProcess(double delta)
     {
-        linearAcceleration = (LinearVelocity - lastLinearVelocity) / delta;
+        linearAcceleration = (LinearVelocity - lastLinearVelocity) / (float)delta;
 
         // Movement
         if (ColonyParent == null && !IsForPreviewOnly)
         {
-            HandleMovement(delta);
+            HandleMovement((float)delta);
         }
         else
         {
@@ -851,7 +851,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         }
     }
 
-    public override void _IntegrateForces(PhysicsDirectBodyState physicsState)
+    public override void _IntegrateForces(PhysicsDirectBodyState3D physicsState)
     {
         if (ColonyParent != null)
             return;
@@ -869,7 +869,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
             // TODO: Godot currently does not provide a convenient way to access a collision impulse, this
             // for example is luckily available only in Bullet which makes things a bit easier. Would need
             // proper handling for this in the future.
-            collisionForce += physicsState.GetContactImpulse(i);
+            collisionForce += physicsState.GetContactImpulse(i).Length(); // TODO: ?
         }
     }
 
@@ -887,7 +887,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         var detections = new List<(Compound Compound, Color Colour, Vector3 Target)>();
         foreach (var (compound, range, minAmount, colour) in activeCompoundDetections)
         {
-            var detectedCompound = clouds.FindCompoundNearPoint(Translation, compound, range, minAmount);
+            var detectedCompound = clouds.FindCompoundNearPoint(Position, compound, range, minAmount);
 
             if (detectedCompound != null)
             {
@@ -926,7 +926,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
             var spatial = entity.EntityNode;
 
             // Skip entities that are out of range
-            if ((spatial.Translation - Translation).LengthSquared() > searchRadiusSquared)
+            if ((spatial.Position - Position).LengthSquared() > searchRadiusSquared)
                 continue;
 
             // Skip non-engulfable entities
@@ -937,11 +937,11 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
             if (!entity.Compounds.Compounds.Any(x => Compounds.IsUseful(x.Key)))
                 continue;
 
-            var distance = (spatial.Translation - Translation).LengthSquared();
+            var distance = (spatial.Position - Position).LengthSquared();
 
             if (nearestPoint == null || distance < nearestDistanceSquared)
             {
-                nearestPoint = spatial.Translation;
+                nearestPoint = spatial.Position;
                 nearestDistanceSquared = distance;
             }
         }
@@ -971,16 +971,16 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
     ///   </para>
     /// </remarks>
     /// <returns>Returns relative translation and rotation</returns>
-    private (Vector3 Translation, Vector3 Rotation) GetNewRelativeTransform()
+    private (Vector3 Position, Vector3 Rotation) GetNewRelativeTransform()
     {
         if (ColonyParent == null)
             throw new InvalidOperationException("This microbe doesn't have colony parent set");
 
         // Gets the global rotation of the parent
-        var globalParentRotation = ColonyParent.GlobalTransform.basis.GetEuler();
+        var globalParentRotation = ColonyParent.GlobalTransform.Basis.GetEuler();
 
         // A vector from the parent to me
-        var vectorFromParent = GlobalTransform.origin - ColonyParent.GlobalTransform.origin;
+        var vectorFromParent = GlobalTransform.Origin - ColonyParent.GlobalTransform.Origin;
 
         // A vector from me to the parent
         var vectorToParent = -vectorFromParent;
@@ -989,26 +989,26 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         // This vector represents the vectorToParent as if I had no rotation.
         // This works by rotating vectorToParent by the negative value (therefore Down) of my current rotation
         // This is important, because GetVectorTowardsNearestPointOfMembrane only works with non-rotated microbes
-        var vectorToParentWithoutRotation = vectorToParent.Rotated(Vector3.Down, Rotation.y);
+        var vectorToParentWithoutRotation = vectorToParent.Rotated(Vector3.Down, Rotation.Y);
 
         // This vector represents the vectorFromParent as if the parent had no rotation.
-        var vectorFromParentWithoutRotation = vectorFromParent.Rotated(Vector3.Down, globalParentRotation.y);
+        var vectorFromParentWithoutRotation = vectorFromParent.Rotated(Vector3.Down, globalParentRotation.Y);
 
         // Calculates the vector from the center of the parent's membrane towards me with canceled out rotation.
         // This gets added to the vector calculated one call before.
         var correctedVectorFromParent = ColonyParent.Membrane
-            .GetVectorTowardsNearestPointOfMembrane(vectorFromParentWithoutRotation.x,
-                vectorFromParentWithoutRotation.z).Rotated(Vector3.Up, globalParentRotation.y);
+            .GetVectorTowardsNearestPointOfMembrane(vectorFromParentWithoutRotation.X,
+                vectorFromParentWithoutRotation.Z).Rotated(Vector3.Up, globalParentRotation.Y);
 
         // Calculates the vector from my center to my membrane towards the parent.
         // This vector gets rotated back to cancel out the rotation applied two calls above.
         // -= to negate the vector, so that the two membrane vectors amplify
         correctedVectorFromParent -= Membrane
-            .GetVectorTowardsNearestPointOfMembrane(vectorToParentWithoutRotation.x, vectorToParentWithoutRotation.z)
-            .Rotated(Vector3.Up, Rotation.y);
+            .GetVectorTowardsNearestPointOfMembrane(vectorToParentWithoutRotation.X, vectorToParentWithoutRotation.Z)
+            .Rotated(Vector3.Up, Rotation.Y);
 
         // Rotated because the rotational scope is different.
-        var newTranslation = correctedVectorFromParent.Rotated(Vector3.Down, globalParentRotation.y);
+        var newTranslation = correctedVectorFromParent.Rotated(Vector3.Down, globalParentRotation.Y);
 
         return (newTranslation, Rotation - globalParentRotation);
     }
@@ -1109,14 +1109,14 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
         if (IsPlayerMicrobe && CheatManager.Speed > 1)
             force *= Mass * CheatManager.Speed;
 
-        return Transform.basis.Xform(MovementDirection * force) * appliedFactor *
+        return Transform.Basis * (MovementDirection * force) * appliedFactor *
             (CellTypeProperties.MembraneType.MovementFactor -
                 (CellTypeProperties.MembraneRigidity * Constants.MEMBRANE_RIGIDITY_BASE_MOBILITY_MODIFIER));
     }
 
     private void ApplyMovementImpulse(Vector3 movement, float delta)
     {
-        if (movement.x == 0.0f && movement.z == 0.0f)
+        if (movement.X == 0.0f && movement.Z == 0.0f)
             return;
 
         // Scale movement by delta time (not by framerate). We aren't Fallout 4
@@ -1128,7 +1128,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
     ///   Just slerps towards the target point with the amount being defined by the cell rotation speed.
     ///   For now, eventually we want to use physics forces to turn
     /// </summary>
-    private Transform GetNewPhysicsRotation(Transform transform)
+    private Transform3D GetNewPhysicsRotation(Transform3D transform)
     {
         var target = transform.LookingAt(LookAtPoint, new Vector3(0, 1, 0));
 
@@ -1154,7 +1154,7 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
                     if (colonyMember == this)
                         continue;
 
-                    var distance = colonyMember.Transform.origin.LengthSquared();
+                    var distance = colonyMember.Transform.Origin.LengthSquared();
 
                     if (distance < MathUtils.EPSILON)
                         continue;
@@ -1182,9 +1182,9 @@ public partial class Microbe : RigidBody, ISpawned, IProcessable, IMicrobeAI, IS
 
         // Need to manually normalize everything, otherwise the slerp fails
         // Delta is not used here as the physics frames occur at a fixed number of times per second
-        Quat slerped = transform.basis.Quat().Normalized().Slerp(target.basis.Quat().Normalized(), speed);
+        Quaternion slerped = transform.Basis.GetRotationQuaternion().Normalized().Slerp(target.Basis.GetRotationQuaternion().Normalized(), speed);
 
-        return new Transform(new Basis(slerped), transform.origin);
+        return new Transform3D(new Basis(slerped), transform.Origin);
     }
 
     /// <summary>

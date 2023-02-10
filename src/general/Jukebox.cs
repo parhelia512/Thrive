@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -6,7 +6,7 @@ using Godot;
 /// <summary>
 ///   Manages playing music. Autoload singleton
 /// </summary>
-public class Jukebox : Node
+public partial class Jukebox : Node
 {
     private const float FADE_TIME = 1.0f;
     private const float FADE_LOW_VOLUME = 0.0f;
@@ -76,7 +76,7 @@ public class Jukebox : Node
     {
         categories = SimulationParameters.Instance.GetMusicCategories();
 
-        PauseMode = PauseModeEnum.Process;
+        ProcessMode = ProcessModeEnum.Always;
 
         // Preallocate one audio stream player, due to the dynamic number of simultaneous tracks to play this is a list
         NewPlayer();
@@ -164,7 +164,7 @@ public class Jukebox : Node
         }
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (paused)
             return;
@@ -222,13 +222,13 @@ public class Jukebox : Node
         {
             foreach (var player in audioPlayers)
             {
-                var dbValue = GD.Linear2Db(linearVolume * player.BaseVolume * player.LinearVolume);
+                var dbValue = Mathf.LinearToDb(linearVolume * player.BaseVolume * player.LinearVolume);
                 player.Player.VolumeDb = dbValue;
             }
         }
         else
         {
-            var dbValue = GD.Linear2Db(linearVolume * audioPlayer.BaseVolume * audioPlayer.LinearVolume);
+            var dbValue = Mathf.LinearToDb(linearVolume * audioPlayer.BaseVolume * audioPlayer.LinearVolume);
             audioPlayer.Player.VolumeDb = dbValue;
         }
     }
@@ -242,11 +242,11 @@ public class Jukebox : Node
         player.Bus = "Music";
 
         // Set initial volume to be what the volume should be currently
-        player.VolumeDb = GD.Linear2Db(linearVolume);
+        player.VolumeDb = Mathf.LinearToDb(linearVolume);
 
         // TODO: should MIX_TARGET_SURROUND be used here?
 
-        player.Connect("finished", this, nameof(OnSomeTrackEnded));
+        player.Connect("finished", new Callable(this, nameof(OnSomeTrackEnded)));
 
         var created = new AudioPlayer(player);
 
@@ -295,7 +295,7 @@ public class Jukebox : Node
             if (target.TrackTransition == MusicCategory.Transition.Crossfade)
             {
                 AddFadeIn(player);
-                AddWait(player.Player.Stream.GetLength() - fromPosition - 2 * FADE_TIME, player);
+                AddWait((float)(player.Player.Stream.GetLength() - fromPosition - 2 * FADE_TIME), player);
                 AddFadeOut(player);
             }
 
@@ -368,7 +368,7 @@ public class Jukebox : Node
 
         targetOperations.Enqueue(new Operation(delta =>
         {
-            data.TimeLeft -= delta;
+            data.TimeLeft -= (float)delta;
 
             if (data.TimeLeft <= 0)
                 return true;
@@ -389,7 +389,7 @@ public class Jukebox : Node
 
         targetOperations.Enqueue(new Operation(delta =>
         {
-            data.TimeLeft -= delta;
+            data.TimeLeft -= (float)delta;
 
             if (data.TimeLeft < 0)
                 data.TimeLeft = 0;
@@ -655,9 +655,9 @@ public class Jukebox : Node
 
     private class Operation
     {
-        public Func<float, bool> Action;
+        public Func<double, bool> Action;
 
-        public Operation(Func<float, bool> action)
+        public Operation(Func<double, bool> action)
         {
             Action = action;
         }

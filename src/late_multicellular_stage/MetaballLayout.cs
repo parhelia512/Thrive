@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 /// <summary>
 ///   A species shape specified by metaballs
 /// </summary>
-public class MetaballLayout<T> : ICollection<T>, IReadOnlyCollection<T>
+public partial class MetaballLayout<T> : ICollection<T>, IReadOnlyCollection<T>
     where T : Metaball
 {
     [JsonProperty]

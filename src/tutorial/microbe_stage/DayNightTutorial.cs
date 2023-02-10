@@ -1,11 +1,11 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
     /// <summary>
     ///   Tells the player about the day and night cycle
     /// </summary>
-    public class DayNightTutorial : TutorialPhase
+    public partial class DayNightTutorial : TutorialPhase
     {
         public override string ClosedByName => "DayNightTutorial";
 

@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Class that stores species-wide information.
 /// </summary>
 /// <remarks>

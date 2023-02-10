@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -120,7 +120,7 @@ public partial class CellBodyPlanEditorComponent :
     private bool forceUpdateCellGraphics;
 
     [Signal]
-    public delegate void OnCellTypeToEditSelected(string name);
+    public delegate void OnCellTypeToEditSelectedEventHandler(string name);
 
     public enum SelectionMenuTab
     {
@@ -259,7 +259,7 @@ public partial class CellBodyPlanEditorComponent :
             {
                 var positionVector = direction * distance;
 
-                if (TryAddHexToEditedLayout(hex, (int)positionVector.x, (int)positionVector.y))
+                if (TryAddHexToEditedLayout(hex, (int)positionVector.X, (int)positionVector.Y))
                     break;
 
                 distance += 0.8f;
@@ -298,7 +298,7 @@ public partial class CellBodyPlanEditorComponent :
             while (true)
             {
                 var positionVector = direction * distance;
-                hexWithData.Data!.Position = new Hex((int)positionVector.x, (int)positionVector.y);
+                hexWithData.Data!.Position = new Hex((int)positionVector.X, (int)positionVector.Y);
 
                 if (editedSpecies.Cells.CanPlace(hexWithData.Data))
                 {
@@ -317,7 +317,7 @@ public partial class CellBodyPlanEditorComponent :
         behaviourEditor.OnFinishEditing();
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -597,7 +597,7 @@ public partial class CellBodyPlanEditorComponent :
             var cartesian = Hex.AxialToCartesian(hex.Position);
 
             // Get the min z-axis (highest point in the editor)
-            highestPointInMiddleRows = Mathf.Min(highestPointInMiddleRows, cartesian.z);
+            highestPointInMiddleRows = Mathf.Min(highestPointInMiddleRows, cartesian.Z);
         }
 
         return highestPointInMiddleRows;
@@ -863,7 +863,7 @@ public partial class CellBodyPlanEditorComponent :
             if (!cellTypeSelectionButtons.TryGetValue(cellType.TypeName, out var control))
             {
                 // Need new button
-                control = (CellTypeSelection)cellTypeSelectionButtonScene.Instance();
+                control = (CellTypeSelection)cellTypeSelectionButtonScene.Instantiate();
                 control.SelectionGroup = cellTypeButtonGroup;
 
                 control.PartName = cellType.TypeName;
@@ -873,7 +873,8 @@ public partial class CellBodyPlanEditorComponent :
                 cellTypeSelectionList.AddItem(control);
                 cellTypeSelectionButtons.Add(cellType.TypeName, control);
 
-                control.Connect(nameof(MicrobePartSelection.OnPartSelected), this, nameof(OnCellToPlaceSelected));
+                control.Connect(nameof(MicrobePartSelection.OnPartSelected),
+                    new Callable(this, nameof(OnCellToPlaceSelected)));
             }
 
             control.MPCost = cellType.MPCost;
@@ -999,7 +1000,7 @@ public partial class CellBodyPlanEditorComponent :
 
     private void ShowCellTypeInModelHolder(SceneDisplayer modelHolder, CellType cell, Vector3 position, int orientation)
     {
-        modelHolder.Transform = new Transform(Quat.Identity, position);
+        modelHolder.Transform = new Transform3D(Basis.Identity, position);
 
         var rotation = MathUtils.CreateRotationForOrganelle(1 * orientation);
 
@@ -1018,13 +1019,13 @@ public partial class CellBodyPlanEditorComponent :
         }
         else
         {
-            microbe = (Microbe)microbeScene.Instance();
+            microbe = (Microbe)microbeScene.Instantiate();
             microbe.IsForPreviewOnly = true;
         }
 
         // Set look direction
-        microbe.LookAtPoint = position + rotation.Xform(Vector3.Forward);
-        microbe.Transform = new Transform(rotation, new Vector3(0, 0, 0));
+        microbe.LookAtPoint = position + rotation * Vector3.Forward;
+        microbe.Transform = new Transform3D(rotation, new Vector3(0, 0, 0));
 
         // Skip if it is already displaying the type
         if (wasExisting && !forceUpdateCellGraphics &&
@@ -1075,7 +1076,7 @@ public partial class CellBodyPlanEditorComponent :
 
         duplicateCellTypeName.GrabFocus();
         duplicateCellTypeName.SelectAll();
-        duplicateCellTypeName.CaretPosition = type.TypeName.Length;
+        duplicateCellTypeName.CaretColumn = type.TypeName.Length;
     }
 
     private void OnNewCellTypeNameChanged(string newText)
@@ -1205,21 +1206,21 @@ public partial class CellBodyPlanEditorComponent :
             case SelectionMenuTab.Structure:
             {
                 structureTab.Show();
-                structureTabButton.Pressed = true;
+                structureTabButton.ButtonPressed = true;
                 break;
             }
 
             case SelectionMenuTab.Reproduction:
             {
                 reproductionTab.Show();
-                reproductionTabButton.Pressed = true;
+                reproductionTabButton.ButtonPressed = true;
                 break;
             }
 
             case SelectionMenuTab.Behaviour:
             {
                 behaviourEditor.Show();
-                behaviourTabButton.Pressed = true;
+                behaviourTabButton.ButtonPressed = true;
                 break;
             }
 

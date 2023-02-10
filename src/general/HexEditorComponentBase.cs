@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 /// <summary>
 ///   Editor component that specializes in hex-based stuff editing
 /// </summary>
-public abstract class
+public abstract partial class
     HexEditorComponentBase<TEditor, TCombinedAction, TAction, THexMove> :
         EditorComponentWithActionsBase<TEditor, TCombinedAction>,
         ISaveLoadedTracked, IChildPropertiesLoadCallback
@@ -34,7 +34,7 @@ public abstract class
     /// <summary>
     ///   The hexes that are positioned under the cursor to show where the player is about to place something.
     /// </summary>
-    protected readonly List<MeshInstance> hoverHexes = new();
+    protected readonly List<MeshInstance3D> hoverHexes = new();
 
     /// <summary>
     ///   The sample models that are positioned to show what the player is about to place.
@@ -44,12 +44,12 @@ public abstract class
     /// <summary>
     ///   This is the hexes for the edited thing that are placed; this is the already placed hexes
     /// </summary>
-    protected readonly List<MeshInstance> placedHexes = new();
+    protected readonly List<MeshInstance3D> placedHexes = new();
 
     /// <summary>
     ///   The hexes that have been changed by a hovering hex and need to be reset to old material.
     /// </summary>
-    protected readonly Dictionary<MeshInstance, Material> hoverOverriddenMaterials = new();
+    protected readonly Dictionary<MeshInstance3D, Material> hoverOverriddenMaterials = new();
 
     /// <summary>
     ///   This is the placed down version of models, compare to <see cref="hoverModels"/>
@@ -61,14 +61,14 @@ public abstract class
     /// <summary>
     ///   Object camera is over. Used to move the camera around
     /// </summary>
-    protected Spatial cameraFollow = null!;
+    protected Node3D cameraFollow = null!;
 
     protected MicrobeCamera? camera;
 
     [JsonIgnore]
-    protected MeshInstance editorArrow = null!;
+    protected MeshInstance3D editorArrow = null!;
 
-    protected MeshInstance editorGrid = null!;
+    protected MeshInstance3D editorGrid = null!;
 
     protected Material invalidMaterial = null!;
     protected Material validMaterial = null!;
@@ -134,7 +134,7 @@ public abstract class
     public THexMove? MovingPlacedHex { get; protected set; }
 
     /// <summary>
-    ///   Camera position. Y-position should always be 0
+    ///   Camera3D position. Y-position should always be 0
     /// </summary>
     /// <remarks>
     ///   <para>
@@ -215,11 +215,11 @@ public abstract class
         }
 
         camera = GetNode<MicrobeCamera>(CameraPath);
-        editorArrow = GetNode<MeshInstance>(EditorArrowPath);
-        editorGrid = GetNode<MeshInstance>(EditorGridPath);
-        cameraFollow = GetNode<Spatial>(CameraFollowPath);
+        editorArrow = GetNode<MeshInstance3D>(EditorArrowPath);
+        editorGrid = GetNode<MeshInstance3D>(EditorGridPath);
+        cameraFollow = GetNode<Node3D>(CameraFollowPath);
 
-        camera.Connect(nameof(MicrobeCamera.OnZoomChanged), this, nameof(OnZoomChanged));
+        camera.Connect(nameof(MicrobeCamera.OnZoomChanged), new Callable(this, nameof(OnZoomChanged)));
     }
 
     public override void Init(TEditor owningEditor, bool fresh)
@@ -315,7 +315,7 @@ public abstract class
             return;
 
         camera.CameraHeight = CameraHeight;
-        cameraFollow.Translation = CameraPosition;
+        cameraFollow.Position = CameraPosition;
     }
 
     /// <summary>
@@ -601,7 +601,7 @@ public abstract class
         GUICommon.Instance.PlayCustomSound(hexPlacementSound, 0.7f);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -611,13 +611,13 @@ public abstract class
         // the hover hexes and models when there is some change to them
         foreach (var hex in hoverHexes)
         {
-            hex.Translation = new Vector3(0, 0, 0);
+            hex.Position = new Vector3(0, 0, 0);
             hex.Visible = false;
         }
 
         foreach (var model in hoverModels)
         {
-            model.Translation = new Vector3(0, 0, 0);
+            model.Position = new Vector3(0, 0, 0);
             model.Visible = false;
         }
 
@@ -638,7 +638,7 @@ public abstract class
         if (!Visible)
             return;
 
-        editorGrid.Translation = camera!.CursorWorldPos;
+        editorGrid.Position = camera!.CursorWorldPos;
         editorGrid.Visible = Editor.ShowHover && !ForceHideHover;
     }
 
@@ -668,14 +668,15 @@ public abstract class
 
         if (animateMovement)
         {
-            GUICommon.Instance.Tween.InterpolateProperty(editorArrow, "translation:z", editorArrow.Translation.z,
-                arrowPosition, Constants.EDITOR_ARROW_INTERPOLATE_SPEED,
-                Tween.TransitionType.Expo, Tween.EaseType.Out);
-            GUICommon.Instance.Tween.Start();
+            var tween = GUICommon.Instance.Tween;
+            tween.TweenProperty(editorArrow, "translation:z", arrowPosition, Constants.EDITOR_ARROW_INTERPOLATE_SPEED);
+            tween.SetTrans(Tween.TransitionType.Expo);
+            tween.SetEase(Tween.EaseType.Out);
+            tween.Play();
         }
         else
         {
-            editorArrow.Translation = new Vector3(0, 0, arrowPosition);
+            editorArrow.Position = new Vector3(0, 0, arrowPosition);
         }
     }
 
@@ -696,16 +697,16 @@ public abstract class
         base.Dispose(disposing);
     }
 
-    protected MeshInstance CreateEditorHex()
+    protected MeshInstance3D CreateEditorHex()
     {
-        var hex = (MeshInstance)hexScene.Instance();
+        var hex = (MeshInstance3D)hexScene.Instantiate();
         Editor.RootOfDynamicallySpawned.AddChild(hex);
         return hex;
     }
 
     protected SceneDisplayer CreatePreviewModelHolder()
     {
-        var node = (SceneDisplayer)modelScene.Instance();
+        var node = (SceneDisplayer)modelScene.Instantiate();
         Editor.RootOfDynamicallySpawned.AddChild(node);
         return node;
     }
@@ -945,7 +946,7 @@ public abstract class
             // Skip if there is a placed organelle here already
             foreach (var placed in placedHexes)
             {
-                if ((pos - placed.Translation).LengthSquared() < 0.001f)
+                if ((pos - placed.Position).LengthSquared() < 0.001f)
                 {
                     duplicate = true;
 
@@ -972,7 +973,7 @@ public abstract class
             // Or if there is already a hover hex at this position
             for (int i = 0; i < usedHoverHex; ++i)
             {
-                if ((pos - hoverHexes[i].Translation).LengthSquared() < 0.001f)
+                if ((pos - hoverHexes[i].Position).LengthSquared() < 0.001f)
                 {
                     duplicate = true;
                     break;
@@ -984,7 +985,7 @@ public abstract class
 
             var hoverHex = hoverHexes[usedHoverHex++];
 
-            hoverHex.Translation = pos;
+            hoverHex.Position = pos;
             hoverHex.Visible = true;
 
             hoverHex.MaterialOverride = canPlace ? validMaterial : invalidMaterial;
@@ -1027,7 +1028,7 @@ public abstract class
                 // As we set the correct material, we don't need to remember to restore it anymore
                 hoverOverriddenMaterials.Remove(hexNode);
 
-                hexNode.Translation = pos;
+                hexNode.Position = pos;
 
                 hexNode.Visible = !forceHide;
             }

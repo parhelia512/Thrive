@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 public interface IPhotographable
 {
     string SceneToPhotographPath { get; }
 
-    void ApplySceneParameters(Spatial instancedScene);
-    float CalculatePhotographDistance(Spatial instancedScene);
+    void ApplySceneParameters(Node3D instancedScene);
+    float CalculatePhotographDistance(Node3D instancedScene);
 }

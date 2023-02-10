@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
 ///   Speed information of a process in specific patch. Used in the
 ///   editor to show info to the player.
 /// </summary>
-public class ProcessSpeedInformation : IProcessDisplayInfo
+public partial class ProcessSpeedInformation : IProcessDisplayInfo
 {
     public ProcessSpeedInformation(BioProcess process)
     {

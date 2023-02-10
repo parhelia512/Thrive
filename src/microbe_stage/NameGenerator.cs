@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Newtonsoft.Json;
 
-public class NameGenerator : IRegistryType
+public partial class NameGenerator : IRegistryType
 {
     [JsonRequired]
     public List<string> PrefixCofix = null!;

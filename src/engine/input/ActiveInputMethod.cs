@@ -1,4 +1,4 @@
-﻿public enum ActiveInputMethod
+public enum ActiveInputMethod
 {
     /// <summary>
     ///   Keyboard and mouse is used for input

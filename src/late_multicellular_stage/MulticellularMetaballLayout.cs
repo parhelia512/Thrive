@@ -1,6 +1,6 @@
-﻿using Godot;
+using Godot;
 
-public class MulticellularMetaballLayout : MetaballLayout<MulticellularMetaball>
+public partial class MulticellularMetaballLayout : MetaballLayout<MulticellularMetaball>
 {
     /// <summary>
     ///   Repositions the bottom-most metaballs to touch the ground, and the center of all metaballs to be aligned
@@ -16,14 +16,14 @@ public class MulticellularMetaballLayout : MetaballLayout<MulticellularMetaball>
             center += metaball.Position;
 
             // Make the bottom edge of the lowest metaball touch the "ground"
-            var bottom = metaball.Position.y - metaball.Radius;
+            var bottom = metaball.Position.Y - metaball.Radius;
 
             if (bottom < lowestCoordinate)
                 lowestCoordinate = bottom;
         }
 
         var adjustment = center / Count;
-        adjustment.y = lowestCoordinate;
+        adjustment.Y = lowestCoordinate;
 
         foreach (var metaball in this)
         {

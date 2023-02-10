@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using Godot;
@@ -40,10 +40,10 @@ public partial class DebugOverlays
         get => performanceMetrics.Visible;
         private set
         {
-            if (performanceMetricsCheckBox.Pressed == value)
+            if (performanceMetricsCheckBox.ButtonPressed == value)
                 return;
 
-            performanceMetricsCheckBox.Pressed = value;
+            performanceMetricsCheckBox.ButtonPressed = value;
         }
     }
 
@@ -63,7 +63,7 @@ public partial class DebugOverlays
         currentDespawned += newDespawns;
     }
 
-    private void UpdateMetrics(float delta)
+    private void UpdateMetrics(double delta)
     {
         fpsLabel.Text = new LocalizedString("FPS", Engine.GetFramesPerSecond()).ToString();
         deltaLabel.Text = new LocalizedString("FRAME_DURATION", delta).ToString();
@@ -92,12 +92,12 @@ public partial class DebugOverlays
                         TranslationServer.Translate("UNKNOWN_ON_WINDOWS") :
                         mibFormat.FormatSafe(usedMemory),
                     mibFormat.FormatSafe(usedVideoMemory),
-                    Performance.GetMonitor(Performance.Monitor.RenderObjectsInFrame),
-                    Performance.GetMonitor(Performance.Monitor.RenderDrawCallsInFrame),
-                    Performance.GetMonitor(Performance.Monitor.Render2dDrawCallsInFrame),
-                    Performance.GetMonitor(Performance.Monitor.RenderVerticesInFrame),
-                    Performance.GetMonitor(Performance.Monitor.RenderMaterialChangesInFrame),
-                    Performance.GetMonitor(Performance.Monitor.RenderShaderChangesInFrame),
+                    Performance.GetMonitor(Performance.Monitor.RenderTotalObjectsInFrame),
+                    Performance.GetMonitor(Performance.Monitor.RenderTotalDrawCallsInFrame),
+                    "N/A",
+                    Performance.GetMonitor(Performance.Monitor.RenderTotalPrimitivesInFrame),
+                    "N/A",
+                    "N/A",
                     Performance.GetMonitor(Performance.Monitor.ObjectOrphanNodeCount),
                     Performance.GetMonitor(Performance.Monitor.AudioOutputLatency) * 1000, threads, processorTime)
                 .ToString();

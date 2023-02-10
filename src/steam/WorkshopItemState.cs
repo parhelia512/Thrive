@@ -1,7 +1,7 @@
-﻿/// <summary>
+/// <summary>
 ///   Sate of a subscribed (and potentially locally installed) workshop item
 /// </summary>
-public class WorkshopItemState
+public partial class WorkshopItemState
 {
     /// <summary>
     ///   No info tracked on the client

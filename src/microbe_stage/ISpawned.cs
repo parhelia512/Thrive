@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   All nodes that can be spawned with the spawn system must implement this interface
 /// </summary>
 public interface ISpawned : IEntity

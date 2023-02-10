@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
-public class TemporaryLoadedNodeDeleter : Node
+public partial class TemporaryLoadedNodeDeleter : Node
 {
     private static TemporaryLoadedNodeDeleter? instance;
 
@@ -23,7 +23,7 @@ public class TemporaryLoadedNodeDeleter : Node
 
     public override void _Ready()
     {
-        PauseMode = PauseModeEnum.Process;
+        ProcessMode = ProcessModeEnum.Always;
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public class TemporaryLoadedNodeDeleter : Node
         return null;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (HoldDeletion)
             return;

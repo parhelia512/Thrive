@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,7 +10,7 @@ using Path = System.IO.Path;
 /// <summary>
 ///   Handles loading mods, and auto-loading mods, and also showing related errors etc. popups
 /// </summary>
-public class ModLoader : Node
+public partial class ModLoader : Node
 {
     private static ModLoader? instance;
     private static ModInterface? modInterface;
@@ -74,11 +74,11 @@ public class ModLoader : Node
     /// <returns>The mod details if the mod could be loaded</returns>
     public static FullModDetails? LoadModInfo(string name, bool failureIsError = true)
     {
-        using var currentDirectory = new Directory();
-
         foreach (var location in Constants.ModLocations)
         {
             var modsFolder = Path.Combine(location, name);
+
+            using var currentDirectory = DirAccess.Open(modsFolder);
 
             if (!currentDirectory.DirExists(modsFolder))
                 continue;
@@ -117,7 +117,7 @@ public class ModLoader : Node
 
         var result = new List<FullModDetails>();
 
-        using var directory = new Directory();
+        using var directory = DirAccess.Open(".");
 
         foreach (var location in steamHandler.GetWorkshopItemFolders())
         {
@@ -162,7 +162,7 @@ public class ModLoader : Node
         initialLoad = false;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -239,20 +239,17 @@ public class ModLoader : Node
 
     private static ModInfo? LoadFirstInstalledModInfo()
     {
-        using var currentDirectory = new Directory();
-
         foreach (var location in Constants.ModLocations)
         {
-            if (!currentDirectory.DirExists(location))
-                continue;
+            using var currentDirectory = DirAccess.Open(location);
 
-            if (currentDirectory.Open(location) != Error.Ok)
+            if (DirAccess.GetOpenError() != Error.Ok)
             {
                 GD.PrintErr("Failed to open potential mod folder for reading at: ", location);
                 continue;
             }
 
-            if (currentDirectory.ListDirBegin(true, true) != Error.Ok)
+            if (currentDirectory.ListDirBegin() != Error.Ok)
             {
                 GD.PrintErr("Failed to begin directory listing");
                 continue;

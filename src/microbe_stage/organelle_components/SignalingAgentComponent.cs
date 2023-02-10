@@ -1,8 +1,8 @@
-﻿public class SignalingAgentComponent : EmptyOrganelleComponent
+public partial class SignalingAgentComponent : EmptyOrganelleComponent
 {
 }
 
-public class SignalingAgentComponentFactory : IOrganelleComponentFactory
+public partial class SignalingAgentComponentFactory : IOrganelleComponentFactory
 {
     public IOrganelleComponent Create()
     {

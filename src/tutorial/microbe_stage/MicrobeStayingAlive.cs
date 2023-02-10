@@ -1,11 +1,11 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
     /// <summary>
     ///   Tells the player how to stay alive
     /// </summary>
-    public class MicrobeStayingAlive : TutorialPhase
+    public partial class MicrobeStayingAlive : TutorialPhase
     {
         public override string ClosedByName => "MicrobeStayingAlive";
 

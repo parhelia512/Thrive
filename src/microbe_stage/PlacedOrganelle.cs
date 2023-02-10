@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 /// <summary>
 ///   An organelle that has been placed in a microbe.
 /// </summary>
-public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
+public partial class PlacedOrganelle : Node3D, IPositionedOrganelle, ISaveLoadedTracked
 {
     [JsonIgnore]
     private readonly List<uint> shapes = new();
@@ -33,7 +33,7 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
     /// </summary>
     private ShaderMaterial? organelleMaterial;
 
-    private Spatial? organelleSceneInstance;
+    private Node3D? organelleSceneInstance;
 #pragma warning restore CA2213
 
     /// <summary>
@@ -64,7 +64,7 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
     ///   The graphics child node of this organelle
     /// </summary>
     [JsonIgnore]
-    public Spatial? OrganelleGraphics { get; private set; }
+    public Node3D? OrganelleGraphics { get; private set; }
 
     /// <summary>
     ///   Animation player this organelle has
@@ -475,7 +475,7 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
     /// </summary>
     public Vector3 RotatedPositionInsideColony(Vector3 shapePosition)
     {
-        var rotation = Quat.Identity;
+        var rotation = Quaternion.Identity;
         if (ParentMicrobe?.Colony != null)
         {
             var parent = ParentMicrobe;
@@ -486,7 +486,7 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
                 if (parent == null)
                     throw new Exception("Reached a null parent microbe without finding the colony leader");
 
-                rotation *= new Quat(parent.Transform.basis);
+                rotation *= new Quaternion(parent.Transform.Basis);
                 parent = parent.ColonyParent;
             }
         }
@@ -497,8 +497,8 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
 
         rotation = rotation.Normalized();
 
-        // Transform the vector with the rotation quaternion
-        shapePosition = rotation.Xform(shapePosition);
+        // Transform3D the vector with the rotation quaternion
+        shapePosition = rotation * (shapePosition);
         return shapePosition;
     }
 
@@ -533,7 +533,7 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
             shapePosition += offset;
 
             var ownerId = shapes[i];
-            var transform = new Transform(Quat.Identity, shapePosition);
+            var transform = new Transform3D(Basis.Identity, shapePosition);
 
             // Create a new owner id and apply the new position to it
             shapes[i] = currentShapesParent.CreateNewOwnerId(to, transform, ownerId);
@@ -633,7 +633,7 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
         // Add hex collision shapes
         foreach (Hex hex in Definition.GetRotatedHexes(Orientation))
         {
-            var shape = new SphereShape();
+            var shape = new SphereShape3D();
             shape.Radius = hexSize * 2.0f;
 
             // The shape is in our parent so the final position is our
@@ -645,7 +645,7 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
                 shapePosition *= 0.5f;
 
             // Create a transform for a shape position
-            var transform = new Transform(Quat.Identity, shapePosition);
+            var transform = new Transform3D(Basis.Identity, shapePosition);
             var ownerId = to.CreateShapeOwnerWithTransform(transform, shape);
             shapes.Add(ownerId);
         }
@@ -675,7 +675,7 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
             organelleMeshWithChildren.SetTintOfChildren(color);
         }
 
-        organelleMaterial?.SetShaderParam("tint", color);
+        organelleMaterial?.SetShaderParameter("tint", color);
 
         needsColourUpdate = false;
     }
@@ -687,14 +687,14 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
             organelleMeshWithChildren.SetDissolveEffectOfChildren(dissolveEffectValue);
         }
 
-        organelleMaterial?.SetShaderParam("dissolveValue", dissolveEffectValue);
+        organelleMaterial?.SetShaderParameter("dissolveValue", dissolveEffectValue);
 
         needsDissolveEffectUpdate = false;
     }
 
     private void SetupOrganelleGraphics()
     {
-        organelleSceneInstance = (Spatial)Definition.LoadedScene!.Instance();
+        organelleSceneInstance = (Node3D)Definition.LoadedScene!.Instantiate();
 
         // Store animation player for later use
         if (!string.IsNullOrEmpty(Definition.DisplaySceneAnimation))
@@ -707,7 +707,7 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
         UpdateRenderPriority(Hex.GetRenderPriority(Position));
 
         // There is an intermediate node so that the organelle scene root rotation and scale work
-        OrganelleGraphics = new Spatial();
+        OrganelleGraphics = new Node3D();
         OrganelleGraphics.AddChild(organelleSceneInstance);
 
         AddChild(OrganelleGraphics);
@@ -716,7 +716,7 @@ public class PlacedOrganelle : Spatial, IPositionedOrganelle, ISaveLoadedTracked
             Constants.DEFAULT_HEX_SIZE);
 
         // Position the intermediate node relative to origin of cell
-        var transform = new Transform(Quat.Identity,
+        var transform = new Transform3D(Basis.Identity,
             Hex.AxialToCartesian(Position) + Definition.CalculateModelOffset());
 
         OrganelleGraphics.Transform = transform;

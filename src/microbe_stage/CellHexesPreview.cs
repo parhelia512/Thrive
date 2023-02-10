@@ -1,4 +1,4 @@
-﻿public class CellHexesPreview : PhotographablePreview
+public partial class CellHexesPreview : PhotographablePreview
 {
     private MicrobeSpecies? microbeSpecies;
 

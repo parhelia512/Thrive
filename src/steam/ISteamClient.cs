@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using Object = Godot.Object;
+using Godot;
+using Object = Godot.GodotObject;
 
 /// <summary>
 ///   Interface specifying the Steam operations we use. Implemented in the SteamClient.cs file

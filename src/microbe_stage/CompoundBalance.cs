@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 /// <summary>
 ///   Balance of a given compound. Lists the organelles that contribute to the balance
 /// </summary>
-public class CompoundBalance
+public partial class CompoundBalance
 {
     public readonly Dictionary<string, float> Consumption = new();
 

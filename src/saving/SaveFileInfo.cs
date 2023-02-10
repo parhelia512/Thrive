@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
 ///   Info about a save file on disk
 /// </summary>
-public class SaveFileInfo
+public partial class SaveFileInfo
 {
     private SaveInformation? info;
 
@@ -53,7 +53,6 @@ public class SaveFileInfo
     {
         info = null;
 
-        using var file = new File();
-        LastModified = file.GetModifiedTime(Path);
+        LastModified = FileAccess.GetModifiedTime(Path);
     }
 }

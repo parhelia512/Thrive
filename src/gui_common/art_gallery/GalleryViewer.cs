@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public class GalleryViewer : CustomDialog
+public partial class GalleryViewer : CustomDialog
 {
     public const string ALL_CATEGORY = "All";
 
@@ -90,7 +90,7 @@ public class GalleryViewer : CustomDialog
         slideshowButton = GetNode<Button>(SlideshowButtonPath);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (!Visible)
             return;
@@ -154,8 +154,8 @@ public class GalleryViewer : CustomDialog
         var tabsButtonGroup = new ButtonGroup();
         var itemsButtonGroup = new ButtonGroup();
 
-        tabsButtonGroup.Connect("pressed", this, nameof(OnGallerySelected));
-        itemsButtonGroup.Connect("pressed", this, nameof(OnGalleryItemPressed));
+        tabsButtonGroup.Connect("pressed",new Callable(this,nameof(OnGallerySelected)));
+        itemsButtonGroup.Connect("pressed",new Callable(this,nameof(OnGalleryItemPressed)));
 
         Button? firstEntry = null;
 
@@ -176,7 +176,7 @@ public class GalleryViewer : CustomDialog
                 SizeFlagsHorizontal = 0,
                 ToggleMode = true,
                 ActionMode = BaseButton.ActionModeEnum.Press,
-                Group = tabsButtonGroup,
+                ButtonGroup = tabsButtonGroup,
             };
 
             firstEntry ??= tabButton;
@@ -207,7 +207,7 @@ public class GalleryViewer : CustomDialog
             }
         }
 
-        firstEntry!.Pressed = true;
+        firstEntry!.ButtonPressed = true;
 
         initialized = true;
     }
@@ -236,8 +236,8 @@ public class GalleryViewer : CustomDialog
 
         switch (asset.Type)
         {
-            case AssetType.Texture:
-                item = GalleryCardScene.Instance<GalleryCard>();
+            case AssetType.Texture2D:
+                item = GalleryCardScene.Instantiate<GalleryCard>();
 
                 // To avoid massive lag spikes, only set a placeholder loading icon here and queue a load for the icon
                 var resourceManager = ResourceManager.Instance;
@@ -252,10 +252,10 @@ public class GalleryViewer : CustomDialog
                 resourceManager.QueueLoad(loadingResource);
                 break;
             case AssetType.ModelScene:
-                item = GalleryCardModelScene.Instance<GalleryCardModel>();
+                item = GalleryCardModelScene.Instantiate<GalleryCardModel>();
                 break;
             case AssetType.AudioPlayback:
-                item = GalleryCardAudioScene.Instance<GalleryCardAudio>();
+                item = GalleryCardAudioScene.Instantiate<GalleryCardAudio>();
                 break;
             default:
                 throw new InvalidOperationException("Unhandled asset type: " + asset.Type);
@@ -268,10 +268,10 @@ public class GalleryViewer : CustomDialog
         }
 
         item.Asset = asset;
-        item.Group = buttonGroup;
-        item.Connect(nameof(GalleryCard.OnFullscreenView), this, nameof(OnAssetPreviewOpened));
+        item.ButtonGroup = buttonGroup;
+        item.Connect(nameof(GalleryCard.OnFullscreenView),new Callable(this,nameof(OnAssetPreviewOpened)));
 
-        var tooltip = GalleryDetailsToolTipScene.Instance<GalleryDetailsTooltip>();
+        var tooltip = GalleryDetailsToolTipScene.Instantiate<GalleryDetailsTooltip>();
         tooltip.Name = "galleryCard_" + asset.ResourcePath.GetFile();
         tooltip.DisplayName = string.IsNullOrEmpty(asset.Title) ?
             TranslationServer.Translate("UNTITLED") :
@@ -344,7 +344,7 @@ public class GalleryViewer : CustomDialog
         if (lastSelected == item)
         {
             lastSelected = null;
-            item.Pressed = false;
+            item.ButtonPressed = false;
         }
         else
         {

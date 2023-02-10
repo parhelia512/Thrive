@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
@@ -6,7 +6,7 @@ using Godot;
 /// </summary>
 /// TODO: see https://github.com/Revolutionary-Games/Thrive/issues/2751
 /// [Tool]
-public class ErrorDialog : CustomDialog
+public partial class ErrorDialog : CustomDialog
 {
     private string errorMessage = string.Empty;
     private string? exceptionInfo;
@@ -98,8 +98,8 @@ public class ErrorDialog : CustomDialog
     private void UpdateMessage()
     {
         extraDescriptionLabel!.SizeFlagsVertical = exceptionBox.Visible ?
-            (int)SizeFlags.Fill :
-            (int)SizeFlags.ExpandFill;
+            Control.SizeFlags.Fill :
+            Control.SizeFlags.ExpandFill;
         extraDescriptionLabel.Text = errorMessage;
     }
 
@@ -123,9 +123,9 @@ public class ErrorDialog : CustomDialog
 
     private void OnCopyToClipboardPressed()
     {
-        OS.Clipboard = TranslationServer.Translate(WindowTitle) + " - " +
+        /* OS.Clipboard = TranslationServer.Translate(WindowTitle) + " - " +
             TranslationServer.Translate(extraDescriptionLabel!.Text) + " exception: " +
-            exceptionLabel!.Text;
+            exceptionLabel!.Text; */
     }
 
     private void OnClosePressed()

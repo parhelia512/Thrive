@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -13,7 +13,7 @@ using Saving;
 /// <summary>
 ///   Main JSON conversion class for Thrive handling all our custom stuff
 /// </summary>
-public class ThriveJsonConverter : IDisposable
+public partial class ThriveJsonConverter : IDisposable
 {
     private static readonly ThriveJsonConverter InstanceValue = new(new SaveContext(SimulationParameters.Instance));
 
@@ -409,7 +409,7 @@ public abstract class BaseThriveConverter : JsonConverter
         if (scene == null)
             throw new JsonException($"Couldn't load scene ({data.ScenePath}) for scene loaded type");
 
-        var node = scene.Instance();
+        var node = scene.Instantiate();
 
         // Ensure that instance ended up being a good type
         if (!objectType.IsInstanceOfType(node))
@@ -541,7 +541,7 @@ public abstract class BaseThriveConverter : JsonConverter
             {
                 // Offer our initial value as a potential constructor parameter
                 objectLoad.OfferPotentiallyConstructorParameter((name, value, field, property));
-                objectLoad.GetInstance();
+                objectLoad.GetInstantiate();
 
                 normalPropertiesStarted = true;
 
@@ -550,7 +550,7 @@ public abstract class BaseThriveConverter : JsonConverter
                 continue;
             }
 
-            var instance = objectLoad.GetInstance();
+            var instance = objectLoad.GetInstantiate();
 
             if (field != null)
             {
@@ -590,7 +590,7 @@ public abstract class BaseThriveConverter : JsonConverter
         if (refId != null)
             return serializer.ReferenceResolver.ResolveReference(serializer, refId);
 
-        var instanceAtEnd = objectLoad.GetInstance();
+        var instanceAtEnd = objectLoad.GetInstantiate();
 
         objectLoad.MarkStartCustomFields();
 
@@ -949,7 +949,7 @@ public abstract class BaseThriveConverter : JsonConverter
 ///   When a class has this attribute DefaultThriveJSONConverter is used to serialize it
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-public class UseThriveSerializerAttribute : Attribute
+public partial class UseThriveSerializerAttribute : Attribute
 {
 }
 

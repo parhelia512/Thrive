@@ -1,4 +1,4 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
     using Godot;
@@ -7,7 +7,7 @@
     /// <summary>
     ///   Microbe movement tutorial with key prompts around the cell
     /// </summary>
-    public class MicrobeMovement : TutorialPhase
+    public partial class MicrobeMovement : TutorialPhase
     {
         [JsonProperty]
         private float keyPromptRotation;
@@ -78,7 +78,7 @@
                         }
                         else
                         {
-                            keyPromptRotation = -((RotationEventArgs)args).RotationInDegrees.y;
+                            keyPromptRotation = -((RotationEventArgs)args).RotationInDegrees.Y;
                         }
 
                         consumed = true;

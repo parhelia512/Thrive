@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   When a field or property has this attribute, that field is not entirely assigned on deserialize from JSON,
 ///   only the sub objects (the fields and properties) of the value is assigned. This is used to copy properties
-///   from Godot.Reference derived types to freshly created instances.
+///   from Godot.RefCounted derived types to freshly created instances.
 /// </summary>
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-public class AssignOnlyChildItemsOnDeserializeAttribute : Attribute
+public partial class AssignOnlyChildItemsOnDeserializeAttribute : Attribute
 {
     public AssignOnlyChildItemsOnDeserializeAttribute(bool replaceReferences = true)
     {

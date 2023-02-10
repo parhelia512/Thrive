@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   A variant of running on an action, but this variant also detects the "strength" of the action. Passes extra
@@ -48,7 +48,7 @@ public class RunOnInputWithStrengthAttribute : RunOnKeyAttribute
         return baseResult;
     }
 
-    public override void OnProcess(float delta)
+    public override void OnProcess(double delta)
     {
         if (ReadHeldOrPrimedAndResetPrimed())
         {

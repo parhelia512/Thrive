@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   This interface provides an interface for mods to interact with the game through an API that will try to stay
@@ -18,33 +18,33 @@
 /// </remarks>
 public interface IModInterface
 {
-    public delegate void OnSceneChangedHandler(Node newScene);
+    public delegate void OnSceneChangedEventHandler(Node newScene);
 
-    public delegate void OnDamageReceivedHandler(Node damageReceiver, float amount, bool isPlayer);
+    public delegate void OnDamageReceivedEventHandler(Node damageReceiver, float amount, bool isPlayer);
 
-    public delegate void OnPlayerMicrobeSpawnedHandler(Microbe player);
+    public delegate void OnPlayerMicrobeSpawnedEventHandler(Microbe player);
 
-    public delegate void OnMicrobeSpawnedHandler(Microbe microbe);
+    public delegate void OnMicrobeSpawnedEventHandler(Microbe microbe);
 
-    public delegate void OnChunkSpawnedHandler(FloatingChunk chunk, bool environmental);
+    public delegate void OnChunkSpawnedEventHandler(FloatingChunk chunk, bool environmental);
 
-    public delegate void OnToxinEmittedHandler(AgentProjectile toxin);
+    public delegate void OnToxinEmittedEventHandler(AgentProjectile toxin);
 
-    public delegate void OnMicrobeDiedHandler(Microbe microbe, bool isPlayer);
+    public delegate void OnMicrobeDiedEventHandler(Microbe microbe, bool isPlayer);
 
     // Game events mods can listen to
     // If something you'd want to use is missing, please request it:
     // https://github.com/Revolutionary-Games/Thrive/issues or open a pull request adding it
 
-    public event OnSceneChangedHandler OnSceneChanged;
+    public event OnSceneChangedEventHandler OnSceneChanged;
 
-    public event OnDamageReceivedHandler OnDamageReceived;
+    public event OnDamageReceivedEventHandler OnDamageReceived;
 
-    public event OnPlayerMicrobeSpawnedHandler OnPlayerMicrobeSpawned;
-    public event OnMicrobeSpawnedHandler OnMicrobeSpawned;
-    public event OnChunkSpawnedHandler OnChunkSpawned;
-    public event OnToxinEmittedHandler OnToxinEmitted;
-    public event OnMicrobeDiedHandler OnMicrobeDied;
+    public event OnPlayerMicrobeSpawnedEventHandler OnPlayerMicrobeSpawned;
+    public event OnMicrobeSpawnedEventHandler OnMicrobeSpawned;
+    public event OnChunkSpawnedEventHandler OnChunkSpawned;
+    public event OnToxinEmittedEventHandler OnToxinEmitted;
+    public event OnMicrobeDiedEventHandler OnMicrobeDied;
 
     /// <summary>
     ///   Godot's main SceneTree

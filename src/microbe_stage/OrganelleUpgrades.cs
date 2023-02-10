@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 /// <summary>
 ///   Upgrades for a placed or template organelle
 /// </summary>
-public class OrganelleUpgrades : ICloneable
+public partial class OrganelleUpgrades : ICloneable
 {
     /// <summary>
     ///   A list of "feature" names that have been unlocked for this organelle. Depends on the organelle components

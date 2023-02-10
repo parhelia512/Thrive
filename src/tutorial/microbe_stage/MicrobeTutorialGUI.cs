@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Godot;
 using Tutorial;
 
@@ -7,7 +7,7 @@ using Tutorial;
 ///   Should be placed over any game state GUI so that things drawn by this are on top. Visibility of things is
 ///   Controlled by TutorialState object
 /// </summary>
-public class MicrobeTutorialGUI : Control, ITutorialGUI
+public partial class MicrobeTutorialGUI : Control, ITutorialGUI
 {
     [Export]
     public NodePath? MicrobeWelcomeMessagePath;
@@ -92,7 +92,7 @@ public class MicrobeTutorialGUI : Control, ITutorialGUI
 #pragma warning restore CA2213
 
     [Signal]
-    public delegate void OnHelpMenuOpenRequested();
+    public delegate void OnHelpMenuOpenRequestedEventHandler();
 
     public ITutorialInput? EventReceiver { get; set; }
 
@@ -285,13 +285,13 @@ public class MicrobeTutorialGUI : Control, ITutorialGUI
 
     public float MicrobeMovementRotation
     {
-        get => microbeMovementKeyPrompts.RectRotation;
+        get => microbeMovementKeyPrompts.Rotation;
         set
         {
-            if (Math.Abs(value - microbeMovementKeyPrompts.RectRotation) < 0.01f)
+            if (Math.Abs(value - microbeMovementKeyPrompts.Rotation) < 0.01f)
                 return;
 
-            microbeMovementKeyPrompts.RectRotation = value;
+            microbeMovementKeyPrompts.Rotation = value;
         }
     }
 
@@ -410,12 +410,12 @@ public class MicrobeTutorialGUI : Control, ITutorialGUI
 
         PressEditorButtonHighlight = GetNode<ControlHighlight>(EditorButtonHighlightPath);
 
-        PauseMode = PauseModeEnum.Process;
+        ProcessMode = ProcessModeEnum.Always;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
-        TutorialHelper.ProcessTutorialGUI(this, delta);
+        TutorialHelper.ProcessTutorialGUI(this, (float)delta);
     }
 
     public void OnClickedCloseAll()

@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 [JSONAlwaysDynamicType]
-public class OrganelleRemoveActionData : HexRemoveActionData<OrganelleTemplate>
+public partial class OrganelleRemoveActionData : HexRemoveActionData<OrganelleTemplate>
 {
     /// <summary>
     ///   Used for replacing Cytoplasm. If true this action is free.

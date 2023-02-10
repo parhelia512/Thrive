@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Godot;
@@ -57,7 +57,7 @@ public abstract class InputAttribute : Attribute
     /// </summary>
     /// <param name="obj">The object to compare against</param>
     /// <returns>True if equal</returns>
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         return ReferenceEquals(this, obj);
     }
@@ -78,7 +78,7 @@ public abstract class InputAttribute : Attribute
     ///   Processes input actions that aren't triggered on key events directly
     /// </summary>
     /// <param name="delta">The time since the last call of OnProcess</param>
-    public abstract void OnProcess(float delta);
+    public abstract void OnProcess(double delta);
 
     /// <summary>
     ///   Called when the games window lost it's focus.

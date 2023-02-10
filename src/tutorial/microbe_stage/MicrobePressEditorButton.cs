@@ -1,4 +1,4 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
     using Godot;
@@ -7,7 +7,7 @@
     /// <summary>
     ///   Tells the player to press the editor button if it has been enabled too long
     /// </summary>
-    public class MicrobePressEditorButton : TutorialPhase
+    public partial class MicrobePressEditorButton : TutorialPhase
     {
         public override string ClosedByName => "MicrobeEditorPress";
 

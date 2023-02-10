@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -41,8 +41,7 @@ public partial class AutoEvoExploringTool
     private void ExportCurrentWorldSpeciesHistory(string basePath)
     {
         var path = Path.Combine(basePath, "species_history.csv");
-        var file = new File();
-        file.Open(path, File.ModeFlags.Write);
+        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
 
         // Generate headers
         var header = new List<string> { "Name", "Generation", "Split from", "Population", "Color" };
@@ -108,15 +107,12 @@ public partial class AutoEvoExploringTool
                 file.StoreCsvLine(data.ToArray());
             }
         }
-
-        file.Close();
     }
 
     private void ExportCurrentWorldPopulationHistory(string path)
     {
         path = Path.Combine(path, "population_history.csv");
-        var file = new File();
-        file.Open(path, File.ModeFlags.Write);
+        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
 
         var header = new[] { "Generation", "Patch", "Species", "Population" };
         file.StoreCsvLine(header);
@@ -138,15 +134,12 @@ public partial class AutoEvoExploringTool
                 }
             }
         }
-
-        file.Close();
     }
 
     private void ExportCurrentWorldPatchHistory(string basePath)
     {
         var path = Path.Combine(basePath, "patch_history.csv");
-        var file = new File();
-        file.Open(path, File.ModeFlags.Write);
+        using var file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
 
         var header = new List<string> { "Name", "Generation", "Type" };
 
@@ -180,7 +173,5 @@ public partial class AutoEvoExploringTool
                 file.StoreCsvLine(data.ToArray());
             }
         }
-
-        file.Close();
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
     using Godot;
@@ -7,7 +7,7 @@
     /// <summary>
     ///   Tutorial pointing glucose collection out to the player
     /// </summary>
-    public class GlucoseCollecting : TutorialPhase
+    public partial class GlucoseCollecting : TutorialPhase
     {
         private readonly Compound glucose = SimulationParameters.Instance.GetCompound("glucose");
 

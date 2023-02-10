@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public class FocusGrabber : Control
+public partial class FocusGrabber : Control
 {
     [Export(PropertyHint.None, "Active highest priority grabber gets the focus")]
     public int Priority;
@@ -34,7 +34,7 @@ public class FocusGrabber : Control
     ///   Any paths listed here (and child paths as well) will skip the focus override. This allows creating areas that
     ///   steal focus from other parts of the GUI when they are visible.
     /// </summary>
-    [Export]
+    // [Export]
     public List<NodePath>? SkipOverridingFocusForElements
     {
         get => skipOverridingFocusForElements;
@@ -56,9 +56,9 @@ public class FocusGrabber : Control
         UpdateOverrideFocusStrings();
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
-        elapsed += delta;
+        elapsed += (float)delta;
 
         if (elapsed < Constants.GUI_FOCUS_GRABBER_PROCESS_INTERVAL)
             return;
@@ -127,7 +127,7 @@ public class FocusGrabber : Control
         {
             // To convert relative paths to absolute ones, we need to do this
             // If we ran into problems where this would need to be updated while inside the tree it might be better to
-            // use IsAParentOf()
+            // use IsAncestorOf()
             skipOverridingStringConverted =
                 skipOverridingFocusForElements.Select(n => GetNode(n).GetPath().ToString()).ToList();
         }

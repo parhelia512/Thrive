@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 using Godot;
 
-public class EditorComponentBottomLeftButtons : MarginContainer
+public partial class EditorComponentBottomLeftButtons : MarginContainer
 {
     [Export]
     public bool ShowSymmetryButton = true;
@@ -42,10 +42,10 @@ public class EditorComponentBottomLeftButtons : MarginContainer
     private TextureButton symmetryButton = null!;
     private TextureRect symmetryIcon = null!;
 
-    private Texture symmetryIconDefault = null!;
-    private Texture symmetryIcon2X = null!;
-    private Texture symmetryIcon4X = null!;
-    private Texture symmetryIcon6X = null!;
+    private Texture2D symmetryIconDefault = null!;
+    private Texture2D symmetryIcon2X = null!;
+    private Texture2D symmetryIcon4X = null!;
+    private Texture2D symmetryIcon6X = null!;
 #pragma warning restore CA2213
 
     private bool showNewButton = true;
@@ -58,22 +58,22 @@ public class EditorComponentBottomLeftButtons : MarginContainer
     private bool controlsHoveredOver;
 
     [Signal]
-    public delegate void OnNewClicked();
+    public delegate void OnNewClickedEventHandler();
 
     [Signal]
-    public delegate void OnNameSet(string name);
+    public delegate void OnNameSetEventHandler(string name);
 
     [Signal]
-    public delegate void OnRandomName();
+    public delegate void OnRandomNameEventHandler();
 
     [Signal]
-    public delegate void OnSymmetryChanged();
+    public delegate void OnSymmetryChangedEventHandler();
 
     [Signal]
-    public delegate void OnUndo();
+    public delegate void OnUndoEventHandler();
 
     [Signal]
-    public delegate void OnRedo();
+    public delegate void OnRedoEventHandler();
 
     [Export]
     public bool ShowNewButton
@@ -117,10 +117,10 @@ public class EditorComponentBottomLeftButtons : MarginContainer
         symmetryButton = GetNode<TextureButton>(SymmetryButtonPath);
         symmetryIcon = GetNode<TextureRect>(SymmetryIconPath);
 
-        symmetryIconDefault = GD.Load<Texture>("res://assets/textures/gui/bevel/1xSymmetry.png");
-        symmetryIcon2X = GD.Load<Texture>("res://assets/textures/gui/bevel/2xSymmetry.png");
-        symmetryIcon4X = GD.Load<Texture>("res://assets/textures/gui/bevel/4xSymmetry.png");
-        symmetryIcon6X = GD.Load<Texture>("res://assets/textures/gui/bevel/6xSymmetry.png");
+        symmetryIconDefault = GD.Load<Texture2D>("res://assets/textures/gui/bevel/1xSymmetry.png");
+        symmetryIcon2X = GD.Load<Texture2D>("res://assets/textures/gui/bevel/2xSymmetry.png");
+        symmetryIcon4X = GD.Load<Texture2D>("res://assets/textures/gui/bevel/4xSymmetry.png");
+        symmetryIcon6X = GD.Load<Texture2D>("res://assets/textures/gui/bevel/6xSymmetry.png");
 
         UpdateNewButtonVisibility();
         UpdateRandomButtonVisibility();
@@ -184,7 +184,7 @@ public class EditorComponentBottomLeftButtons : MarginContainer
 
     public void OnClickedOffName()
     {
-        var focused = GetFocusOwner();
+        var focused = GetViewport().GuiGetFocusOwner();
 
         // Ignore if the species name line edit wasn't focused or if one of our controls is hovered
         if (focused != speciesNameEdit || controlsHoveredOver)
@@ -276,7 +276,7 @@ public class EditorComponentBottomLeftButtons : MarginContainer
             else
             {
                 // Prevents user from doing other actions with an invalid name
-                GetTree().SetInputAsHandled();
+                GetViewport().SetInputAsHandled();
 
                 // TODO: Make the popup appear at the top of the line edit instead of at the last mouse position
                 if (!nameLengthValid)
@@ -299,7 +299,7 @@ public class EditorComponentBottomLeftButtons : MarginContainer
 
     private bool ValidateNameLength(string name)
     {
-        return speciesNameEdit.GetFont("font").GetStringSize(name).x < Constants.MAX_SPECIES_NAME_LENGTH_PIXELS;
+        return speciesNameEdit.GetThemeFont("font").GetStringSize(name).X < Constants.MAX_SPECIES_NAME_LENGTH_PIXELS;
     }
 
     private void OnRandomizeNamePressed()

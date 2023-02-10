@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 
 [JSONAlwaysDynamicType]
-public class RigidityActionData : EditorCombinableActionData
+public partial class RigidityActionData : EditorCombinableActionData
 {
     public float NewRigidity;
     public float PreviousRigidity;

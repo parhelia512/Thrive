@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Attribute for a method, that gets called when the defined key is pressed down.
@@ -42,7 +42,7 @@ public class RunOnKeyDownWithRepeatAttribute : RunOnKeyAttribute
         return false;
     }
 
-    public override void OnProcess(float delta)
+    public override void OnProcess(double delta)
     {
     }
 }

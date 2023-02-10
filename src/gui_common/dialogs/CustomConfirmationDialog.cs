@@ -1,11 +1,11 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   A custom reimplementation of ConfirmationDialog and AcceptDialog combined into one.
 /// </summary>
 /// TODO: see https://github.com/Revolutionary-Games/Thrive/issues/2751
 /// [Tool]
-public class CustomConfirmationDialog : CustomDialog
+public partial class CustomConfirmationDialog : CustomDialog
 {
     [Export]
     public bool HideOnOk = true;
@@ -25,10 +25,10 @@ public class CustomConfirmationDialog : CustomDialog
 #pragma warning restore CA2213
 
     [Signal]
-    public delegate void Confirmed();
+    public delegate void ConfirmedEventHandler();
 
     [Signal]
-    public delegate void Cancelled();
+    public delegate void CancelledEventHandler();
 
     /// <summary>
     ///   If true, turns this dialog into its AcceptDialog form (only Ok button visible).
@@ -104,12 +104,14 @@ public class CustomConfirmationDialog : CustomDialog
 
         // Only move the buttons when run outside of the editor to avoid messing up
         // the predefined button order placement in the scene when it's opened
+        /*
         if (OS.IsOkLeftAndCancelRight() && !Engine.EditorHint)
         {
             buttonsContainer.MoveChild(confirmButton, 1);
             buttonsContainer.MoveChild(cancelButton, 3);
             cancelEndSpacer = GetNode<Control>("VBoxContainer/HBoxContainer/Spacer3");
         }
+        */
 
         UpdateLabel();
         UpdateButtons();

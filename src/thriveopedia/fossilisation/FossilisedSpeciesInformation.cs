@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 
 /// <summary>
 ///   Details for a fossilised species saved on disk.
 /// </summary>
-public class FossilisedSpeciesInformation
+public partial class FossilisedSpeciesInformation
 {
     /// <summary>
     ///   Details for a fossilised species saved on disk.

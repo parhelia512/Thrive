@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Interface for any custom popups inheriting Popup.
@@ -6,7 +6,7 @@
 public interface ICustomPopup
 {
     /// <summary>
-    ///   If true and <see cref="Popup.PopupExclusive"/> is true, pressing ESC key will close
+    ///   If true and <see cref="Popup.Exclusive"/> is true, pressing ESC key will close
     ///   the popup.
     /// </summary>
     public bool ExclusiveAllowCloseOnEscape { get; set; }

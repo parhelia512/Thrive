@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
@@ -11,7 +11,7 @@ using Godot;
 ///     may no longer work.
 ///   </para>
 /// </remarks>
-public class PlayerMicrobeInput : NodeWithInput
+public partial class PlayerMicrobeInput : NodeWithInput
 {
     private bool autoMove;
 
@@ -74,18 +74,18 @@ public class PlayerMicrobeInput : NodeWithInput
             if (inputMethod == ActiveInputMethod.Controller)
             {
                 // TODO: look direction for controller input  https://github.com/Revolutionary-Games/Thrive/issues/4034
-                player.LookAtPoint = player.GlobalTranslation + new Vector3(0, 0, -10);
+                player.LookAtPoint = player.GlobalTransform.Origin + new Vector3(0, 0, -10);
             }
             else
             {
-                player.LookAtPoint = stage.Camera.CursorWorldPos;
+                player.LookAtPoint = stage.Camera3D.CursorWorldPos;
             }
 
             // Rotate the inputs when we want to use screen relative movement to make it happen
             if (screenRelative)
             {
                 // Rotate the opposite of the player orientation to get back to screen
-                movement = player.GlobalTransform.basis.Quat().Inverse().Xform(movement);
+                movement = player.GlobalTransform.Basis.GetRotationQuaternion().Inverse() * movement;
             }
 
             if (autoMove)
@@ -100,7 +100,7 @@ public class PlayerMicrobeInput : NodeWithInput
 
             stage.TutorialState.SendEvent(TutorialEventType.MicrobePlayerMovement,
                 new MicrobeMovementEventArgs(screenRelative, player.MovementDirection,
-                    player.LookAtPoint - player.GlobalTranslation), this);
+                    player.LookAtPoint - player.GlobalTransform.Origin), this);
         }
     }
 
@@ -265,6 +265,6 @@ public class PlayerMicrobeInput : NodeWithInput
             multiplier = 4;
 
         stage.Clouds.AddCloud(SimulationParameters.Instance.GetCompound(name),
-            Constants.CLOUD_CHEAT_DENSITY * delta * multiplier, stage.Camera.CursorWorldPos);
+            Constants.CLOUD_CHEAT_DENSITY * delta * multiplier, stage.Camera3D.CursorWorldPos);
     }
 }

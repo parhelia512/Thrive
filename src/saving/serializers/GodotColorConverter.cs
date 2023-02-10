@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Godot;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-public class GodotColorConverter : JsonConverter
+public partial class GodotColorConverter : JsonConverter
 {
     public override bool CanRead => true;
 
@@ -17,16 +17,16 @@ public class GodotColorConverter : JsonConverter
         writer.WriteStartObject();
 
         writer.WritePropertyName("r");
-        serializer.Serialize(writer, colour.r);
+        serializer.Serialize(writer, colour.R);
 
         writer.WritePropertyName("g");
-        serializer.Serialize(writer, colour.g);
+        serializer.Serialize(writer, colour.G);
 
         writer.WritePropertyName("b");
-        serializer.Serialize(writer, colour.b);
+        serializer.Serialize(writer, colour.B);
 
         writer.WritePropertyName("a");
-        serializer.Serialize(writer, colour.a);
+        serializer.Serialize(writer, colour.A);
 
         writer.WriteEndObject();
     }

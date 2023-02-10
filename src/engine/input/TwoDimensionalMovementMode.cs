@@ -1,4 +1,4 @@
-﻿public enum TwoDimensionalMovementMode
+public enum TwoDimensionalMovementMode
 {
     /// <summary>
     ///   Automatically detect based on if controller or keyboard is used (Thrive movement is traditionally player

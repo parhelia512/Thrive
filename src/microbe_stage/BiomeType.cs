@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   This contains predefined biome types
 /// </summary>
 /// <remarks>

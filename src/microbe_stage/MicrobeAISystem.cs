@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 
-public class MicrobeAISystem
+public partial class MicrobeAISystem
 {
     private readonly List<Task> tasks = new();
 

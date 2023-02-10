@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 using Newtonsoft.Json;
@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 ///   Manages the multicellular HUD scene
 /// </summary>
 [JsonObject(MemberSerialization.OptIn)]
-public class MulticellularHUD : StageHUDBase<MulticellularStage>
+public partial class MulticellularHUD : StageHUDBase<MulticellularStage>
 {
     [Export]
     public NodePath? MoveToLandPopupPath;
@@ -30,10 +30,10 @@ public class MulticellularHUD : StageHUDBase<MulticellularStage>
 
     // These signals need to be copied to inheriting classes for Godot editor to pick them up
     [Signal]
-    public new delegate void OnOpenMenu();
+    public new delegate void OnOpenMenuEventHandler();
 
     [Signal]
-    public new delegate void OnOpenMenuToHelp();
+    public new delegate void OnOpenMenuToHelpEventHandler();
 
     protected override string? UnPauseHelpText => null;
 
@@ -50,7 +50,7 @@ public class MulticellularHUD : StageHUDBase<MulticellularStage>
         toLandButton.Disabled = true;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 

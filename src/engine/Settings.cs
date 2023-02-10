@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -14,7 +14,7 @@ using Environment = System.Environment;
 public class Settings
 {
     private static readonly List<string>
-        AvailableLocales = TranslationServer.GetLoadedLocales().Cast<string>().ToList();
+        AvailableLocales = TranslationServer.GetLoadedLocales().ToList();
 
     private static readonly string DefaultLanguageValue = GetSupportedLocale(TranslationServer.GetLocale());
     private static readonly CultureInfo DefaultCultureValue = CultureInfo.CurrentCulture;
@@ -64,8 +64,8 @@ public class Settings
     /// <summary>
     ///   Sets amount of MSAA to apply to the viewport
     /// </summary>
-    public SettingValue<Viewport.MSAA> MSAAResolution { get; set; } =
-        new(Viewport.MSAA.Msaa2x);
+    public SettingValue<Viewport.Msaa> MSAAResolution { get; set; } =
+        new(Viewport.Msaa.Msaa2X);
 
     /// <summary>
     ///   Sets the maximum framerate of the game window
@@ -379,7 +379,7 @@ public class Settings
     /// </summary>
     /// <remarks>
     ///   <para>
-    ///     This should have <see cref="JoystickList.AxisMax"/> values in here to have one for each supported axis.
+    ///     This should have <see cref="JoyAxis.Max"/> values in here to have one for each supported axis.
     ///   </para>
     /// </remarks>
     public SettingValue<IReadOnlyList<float>> ControllerAxisDeadzoneAxes { get; set; } = new(new[]
@@ -444,10 +444,8 @@ public class Settings
     /// <returns>The current inputs</returns>
     public static InputDataList GetCurrentlyAppliedControls()
     {
-        return new InputDataList(InputMap.GetActions().OfType<string>()
-            .ToDictionary(p => p,
-                p => InputMap.GetActionList(p).OfType<InputEvent>().Select(
-                    x => new SpecifiedInputKey(x)).ToList())!);
+        return new InputDataList(InputMap.GetActions().ToDictionary(p => p.ToString(),
+            p => InputMap.ActionGetEvents(p).Select(x => new SpecifiedInputKey(x)).ToList())!);
     }
 
     /// <summary>
@@ -572,8 +570,8 @@ public class Settings
         foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
         {
             // Returns if any of the properties don't match.
-            object thisValue = property.GetValue(this);
-            object objValue = property.GetValue(obj);
+            object? thisValue = property.GetValue(this);
+            object? objValue = property.GetValue(obj);
 
             if (thisValue != objValue && thisValue?.Equals(objValue) != true)
             {
@@ -630,18 +628,15 @@ public class Settings
     /// <returns>True on success, false if the file can't be written.</returns>
     public bool Save()
     {
-        using var file = new File();
-        var error = file.Open(Constants.CONFIGURATION_FILE, File.ModeFlags.Write);
+        using var file = FileAccess.Open(Constants.CONFIGURATION_FILE, FileAccess.ModeFlags.Write);
 
-        if (error != Error.Ok)
+        if (file?.GetError() != Error.Ok)
         {
             GD.PrintErr("Couldn't open settings file for writing.");
             return false;
         }
 
         file.StoreString(JsonConvert.SerializeObject(this));
-
-        file.Close();
 
         return true;
     }
@@ -654,7 +649,7 @@ public class Settings
     /// </param>
     public void ApplyAll(bool delayedApply = false)
     {
-        if (Engine.EditorHint)
+        if (Engine.IsEditorHint())
         {
             // Do not apply settings within the Godot editor.
             return;
@@ -690,10 +685,11 @@ public class Settings
     /// </summary>
     public void ApplyGraphicsSettings()
     {
-        GUICommon.Instance.GetTree().Root.GetViewport().Msaa = MSAAResolution;
+        var viewport = GUICommon.Instance.GetTree().Root.GetViewport();
+        viewport.Msaa2D = viewport.Msaa3D = MSAAResolution;
 
         // Values less than 0 are undefined behaviour
-        Engine.TargetFps = MaxFramesPerSecond >= 0 ? MaxFramesPerSecond : 0;
+        Engine.MaxFps = MaxFramesPerSecond >= 0 ? MaxFramesPerSecond : 0;
         ColourblindScreenFilter.Instance.SetColourblindSetting(ColourblindSetting);
     }
 
@@ -741,8 +737,9 @@ public class Settings
     /// </summary>
     public void ApplyWindowSettings()
     {
-        OS.WindowFullscreen = FullScreen;
-        OS.VsyncEnabled = VSync;
+        GUICommon.Instance.GetWindow().Mode =
+            FullScreen ? Window.ModeEnum.ExclusiveFullscreen : Window.ModeEnum.Windowed;
+        DisplayServer.WindowSetVsyncMode(VSync ? DisplayServer.VSyncMode.Enabled : DisplayServer.VSyncMode.Disabled);
     }
 
     /// <summary>
@@ -760,7 +757,7 @@ public class Settings
         // It seems like there is some kind of threading going on. The getter of AudioServer.Device
         // only returns the new value after some time, therefore we can't check if the output device
         // got applied successfully.
-        AudioServer.Device = audioOutputDevice;
+        AudioServer.OutputDevice = audioOutputDevice;
 
         GD.Print("Set audio output device to: ", audioOutputDevice);
     }
@@ -790,7 +787,7 @@ public class Settings
         }
         else
         {
-            language = GetSupportedLocale(language!);
+            language = GetSupportedLocale(language);
             cultureInfo = GetCultureInfo(language);
         }
 
@@ -836,10 +833,9 @@ public class Settings
     /// </summary>
     private static Settings? LoadSettings()
     {
-        using var file = new File();
-        var error = file.Open(Constants.CONFIGURATION_FILE, File.ModeFlags.Read);
+        using var file = FileAccess.Open(Constants.CONFIGURATION_FILE, FileAccess.ModeFlags.Read);
 
-        if (error != Error.Ok)
+        if (file?.GetError() != Error.Ok)
         {
             GD.Print("Failed to open settings configuration file, file is missing or unreadable. "
                 + "Using default settings instead.");
@@ -851,8 +847,6 @@ public class Settings
         }
 
         var text = file.GetAsText();
-
-        file.Close();
 
         try
         {
@@ -941,9 +935,9 @@ public class Settings
 
             // Since the properties we want to copy are SettingValue generics we use the IAssignableSetting
             // interface and AssignFrom method to convert the property to the correct concrete class.
-            var setting = (IAssignableSetting)property.GetValue(this);
+            var setting = (IAssignableSetting)property.GetValue(this)!;
 
-            setting.AssignFrom(property.GetValue(settings));
+            setting.AssignFrom(property.GetValue(settings)!);
         }
     }
 }

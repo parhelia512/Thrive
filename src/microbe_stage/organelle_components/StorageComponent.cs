@@ -1,7 +1,7 @@
-﻿/// <summary>
+/// <summary>
 ///   Allows cell to store more stuff
 /// </summary>
-public class StorageComponent : EmptyOrganelleComponent
+public partial class StorageComponent : EmptyOrganelleComponent
 {
     public StorageComponent(float capacity)
     {
@@ -11,7 +11,7 @@ public class StorageComponent : EmptyOrganelleComponent
     public float Capacity { get; }
 }
 
-public class StorageComponentFactory : IOrganelleComponentFactory
+public partial class StorageComponentFactory : IOrganelleComponentFactory
 {
     public float Capacity;
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
@@ -6,7 +6,7 @@ using System.Globalization;
 /// <summary>
 ///   Converts between registry types and their internal names
 /// </summary>
-public class RegistryTypeStringConverter : TypeConverter
+public partial class RegistryTypeStringConverter : TypeConverter
 {
     /// <summary>
     ///   All of the supported registry types by this converter.
@@ -130,7 +130,7 @@ public abstract class RegistryTypeStringSingleTypeConverter<TType> : RegistryTyp
 /// <summary>
 ///   Specific converter for <see cref="Compound"/>
 /// </summary>
-public class CompoundStringConverter : RegistryTypeStringSingleTypeConverter<Compound>
+public partial class CompoundStringConverter : RegistryTypeStringSingleTypeConverter<Compound>
 {
     protected override string TypeName => "compound";
 }
@@ -138,7 +138,7 @@ public class CompoundStringConverter : RegistryTypeStringSingleTypeConverter<Com
 /// <summary>
 ///   Specific converter for <see cref="Enzyme"/>
 /// </summary>
-public class EnzymeStringConverter : RegistryTypeStringSingleTypeConverter<Enzyme>
+public partial class EnzymeStringConverter : RegistryTypeStringSingleTypeConverter<Enzyme>
 {
     protected override string TypeName => "enzyme";
 }

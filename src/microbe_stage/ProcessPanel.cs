@@ -1,10 +1,10 @@
-﻿using System.Linq;
+using System.Linq;
 using Godot;
 
 /// <summary>
 ///   Controls the process panel contents
 /// </summary>
-public class ProcessPanel : CustomDialog
+public partial class ProcessPanel : CustomDialog
 {
     [Export]
     public NodePath? ProcessListPath;
@@ -22,7 +22,7 @@ public class ProcessPanel : CustomDialog
 #pragma warning restore CA2213
 
     [Signal]
-    public delegate void OnClosed();
+    public delegate void OnClosedEventHandler();
 
     public ProcessStatistics? ShownData { get; set; }
 
@@ -34,9 +34,9 @@ public class ProcessPanel : CustomDialog
         closeButtonContainer.Visible = ShowCustomCloseButton;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
-        if (!IsVisibleInTree())
+        if (!Visible)
             return;
 
         if (ShownData != null)

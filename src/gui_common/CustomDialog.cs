@@ -1,4 +1,4 @@
-﻿/*************************************************************************/
+/*************************************************************************/
 /*              This file is substantially derived from:                 */
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
@@ -30,7 +30,7 @@ using System;
 using Godot;
 
 /// <summary>
-///   A reimplementation of WindowDialog for a much more customized style and functionality. Suitable for general use
+///   A reimplementation of Window for a much more customized style and functionality. Suitable for general use
 ///   or as a base class for any custom window dialog derived types.
 /// </summary>
 /// <remarks>
@@ -44,15 +44,15 @@ using Godot;
 /// </remarks>
 /// TODO: see https://github.com/Revolutionary-Games/Thrive/issues/2751
 /// [Tool]
-public class CustomDialog : Popup, ICustomPopup
+public partial class CustomDialog : Popup, ICustomPopup
 {
     private string windowTitle = string.Empty;
     private string translatedWindowTitle = string.Empty;
 
     private bool closeHovered;
 
-    private Vector2 dragOffset;
-    private Vector2 dragOffsetFar;
+    private Vector2I dragOffset;
+    private Vector2I dragOffsetFar;
 
 #pragma warning disable CA2213
     private TextureButton? closeButton;
@@ -79,7 +79,7 @@ public class CustomDialog : Popup, ICustomPopup
     ///   for any other hiding behaviors.
     /// </summary>
     [Signal]
-    public delegate void Closed();
+    public delegate void ClosedEventHandler();
 
     [Flags]
     private enum DragType
@@ -107,8 +107,9 @@ public class CustomDialog : Popup, ICustomPopup
             windowTitle = value;
             translatedWindowTitle = TranslationServer.Translate(value);
 
-            MinimumSizeChanged();
-            Update();
+            // TODO: ???
+            // MinimumSizeChanged();
+            // QueueRedraw();
         }
     }
 
@@ -173,31 +174,31 @@ public class CustomDialog : Popup, ICustomPopup
             decorate = value;
 
             // TODO: doesn't this need to adjust titleBarHeight value here as that's only set on tree entry?
-            Update();
+            // Update(); TODO: ???
         }
     }
 
     public override void _EnterTree()
     {
         // To make popup rect readjustment react to window resizing
-        GetTree().Root.Connect("size_changed", this, nameof(ApplyRectSettings));
+        GetTree().Root.Connect("size_changed",new Callable(this,nameof(ApplyRectSettings)));
 
-        customPanel = GetStylebox("custom_panel", "WindowDialog");
-        titleBarPanel = GetStylebox("custom_titlebar", "WindowDialog");
-        titleBarHeight = decorate ? GetConstant("custom_titlebar_height", "WindowDialog") : 0;
-        titleFont = GetFont("custom_title_font", "WindowDialog");
-        titleHeight = GetConstant("custom_title_height", "WindowDialog");
-        titleColor = GetColor("custom_title_color", "WindowDialog");
-        closeButtonHighlight = GetStylebox("custom_close_highlight", "WindowDialog");
-        scaleBorderSize = GetConstant("custom_scaleBorder_size", "WindowDialog");
-        customMargin = decorate ? GetConstant("custom_margin", "Dialogs") : 0;
+        customPanel = GetThemeStylebox("custom_panel", "Window");
+        titleBarPanel = GetThemeStylebox("custom_titlebar", "Window");
+        titleBarHeight = decorate ? GetThemeConstant("custom_titlebar_height", "Window") : 0;
+        titleFont = GetThemeFont("custom_title_font", "Window");
+        titleHeight = GetThemeConstant("custom_title_height", "Window");
+        titleColor = GetThemeColor("custom_title_color", "Window");
+        closeButtonHighlight = GetThemeStylebox("custom_close_highlight", "Window");
+        scaleBorderSize = GetThemeConstant("custom_scaleBorder_size", "Window");
+        customMargin = decorate ? GetThemeConstant("custom_margin", "Dialogs") : 0;
 
         base._EnterTree();
     }
 
     public override void _ExitTree()
     {
-        GetTree().Root.Disconnect("size_changed", this, nameof(ApplyRectSettings));
+        GetTree().Root.Disconnect("size_changed", new Callable(this, nameof(ApplyRectSettings)));
 
         base._ExitTree();
     }
@@ -206,7 +207,7 @@ public class CustomDialog : Popup, ICustomPopup
     {
         switch (what)
         {
-            case NotificationReady:
+            case (int)NotificationReady:
             {
                 SetupCloseButton();
                 UpdateChildRects();
@@ -214,14 +215,16 @@ public class CustomDialog : Popup, ICustomPopup
                 break;
             }
 
-            case NotificationResized:
+            /* TODO: Redacted?
+            case (int)NotificationResized:
             {
                 UpdateChildRects();
                 ApplyRectSettings();
                 break;
             }
+            */
 
-            case NotificationVisibilityChanged:
+            case (int)NotificationVisibilityChanged:
             {
                 if (Visible)
                 {
@@ -237,6 +240,7 @@ public class CustomDialog : Popup, ICustomPopup
                 break;
             }
 
+            /* TODO: No equivalent
             case NotificationMouseExit:
             {
                 // Reset the mouse cursor when leaving the resizable window border.
@@ -248,8 +252,9 @@ public class CustomDialog : Popup, ICustomPopup
 
                 break;
             }
+            */
 
-            case NotificationTranslationChanged:
+            case (int)NotificationTranslationChanged:
             {
                 translatedWindowTitle = TranslationServer.Translate(windowTitle);
                 break;
@@ -257,6 +262,7 @@ public class CustomDialog : Popup, ICustomPopup
         }
     }
 
+    /*
     public override void _Draw()
     {
         if (!Decorate)
@@ -264,19 +270,19 @@ public class CustomDialog : Popup, ICustomPopup
 
         // Draw background panels
         DrawStyleBox(customPanel, new Rect2(
-            new Vector2(0, -titleBarHeight), new Vector2(RectSize.x, RectSize.y + titleBarHeight)));
+            new Vector2(0, -titleBarHeight), new Vector2(Size.X, Size.Y + titleBarHeight)));
 
         DrawStyleBox(titleBarPanel, new Rect2(
-            new Vector2(3, -titleBarHeight + 3), new Vector2(RectSize.x - 6, titleBarHeight - 3)));
+            new Vector2(3, -titleBarHeight + 3), new Vector2(Size.X - 6, titleBarHeight - 3)));
 
         // Draw title in the title bar
         var fontHeight = titleFont!.GetHeight() - titleFont.GetDescent() * 2;
 
         var titlePosition = new Vector2(
-            (RectSize.x - titleFont.GetStringSize(translatedWindowTitle).x) / 2, (-titleHeight + fontHeight) / 2);
+            (Size.X - titleFont.GetStringSize(translatedWindowTitle).X) / 2, (-titleHeight + fontHeight) / 2);
 
         DrawString(titleFont, titlePosition, translatedWindowTitle, titleColor,
-            (int)(RectSize.x - customPanel.GetMinimumSize().x));
+            (int)(Size.X - customPanel.GetMinimumSize().X));
 
         // Draw close button highlight
         if (closeHovered)
@@ -288,19 +294,19 @@ public class CustomDialog : Popup, ICustomPopup
     public override void _GuiInput(InputEvent @event)
     {
         // Handle title bar dragging
-        if (@event is InputEventMouseButton { ButtonIndex: (int)ButtonList.Left } mouseButton)
+        if (@event is InputEventMouseButton { ButtonIndex: MouseButton.Left } mouseButton)
         {
-            if (mouseButton.Pressed && Movable)
+            if (mouseButton.ButtonPressed && Movable)
             {
                 // Begin a possible dragging operation
-                dragType = DragHitTest(new Vector2(mouseButton.Position.x, mouseButton.Position.y));
+                dragType = DragHitTest(new Vector2(mouseButton.Position.X, mouseButton.Position.Y));
 
                 if (dragType != DragType.None)
-                    dragOffset = GetGlobalMousePosition() - RectPosition;
+                    dragOffset = GetGlobalMousePosition() - Position;
 
-                dragOffsetFar = RectPosition + RectSize - GetGlobalMousePosition();
+                dragOffsetFar = Position + Size - GetGlobalMousePosition();
             }
-            else if (dragType != DragType.None && !mouseButton.Pressed)
+            else if (dragType != DragType.None && !mouseButton.ButtonPressed)
             {
                 // End a dragging operation
                 dragType = DragType.None;
@@ -326,19 +332,19 @@ public class CustomDialog : Popup, ICustomPopup
     /// </summary>
     public override bool HasPoint(Vector2 point)
     {
-        var rect = new Rect2(Vector2.Zero, RectSize);
+        var rect = new Rect2(Vector2.Zero, Size);
 
         // Enlarge upwards for title bar
         var adjustedRect = new Rect2(
-            new Vector2(rect.Position.x, rect.Position.y - titleBarHeight),
-            new Vector2(rect.Size.x, rect.Size.y + titleBarHeight));
+            new Vector2(rect.Position.X, rect.Position.Y - titleBarHeight),
+            new Vector2(rect.Size.X, rect.Size.Y + titleBarHeight));
 
         // Inflate by the resizable border thickness
         if (Resizable)
         {
             adjustedRect = new Rect2(
-                new Vector2(adjustedRect.Position.x - scaleBorderSize, adjustedRect.Position.y - scaleBorderSize),
-                new Vector2(adjustedRect.Size.x + scaleBorderSize * 2, adjustedRect.Size.y + scaleBorderSize * 2));
+                new Vector2(adjustedRect.Position.X - scaleBorderSize, adjustedRect.Position.Y - scaleBorderSize),
+                new Vector2(adjustedRect.Size.X + scaleBorderSize * 2, adjustedRect.Size.Y + scaleBorderSize * 2));
         }
 
         return adjustedRect.HasPoint(point);
@@ -348,10 +354,10 @@ public class CustomDialog : Popup, ICustomPopup
     ///   Overrides the minimum size to account for default elements (e.g title, close button, margin) rect size
     ///   and for the other custom added contents on the window.
     /// </summary>
-    public override Vector2 _GetMinimumSize()
+    public override Vector2I _GetMinimumSize()
     {
-        var buttonWidth = closeButton?.GetCombinedMinimumSize().x;
-        var titleWidth = titleFont?.GetStringSize(translatedWindowTitle).x;
+        var buttonWidth = closeButton?.GetCombinedMinimumSize().X;
+        var titleWidth = titleFont?.GetStringSize(translatedWindowTitle).X;
         var buttonArea = buttonWidth + (buttonWidth / 2);
 
         var contentSize = Vector2.Zero;
@@ -360,36 +366,37 @@ public class CustomDialog : Popup, ICustomPopup
         {
             var child = GetChildOrNull<Control>(i);
 
-            if (child == null || child == closeButton || child.IsSetAsToplevel())
+            if (child == null || child == closeButton || child.IsSetAsTopLevel())
                 continue;
 
             var childMinSize = child.GetCombinedMinimumSize();
 
             contentSize = new Vector2(
-                Mathf.Max(childMinSize.x, contentSize.x),
-                Mathf.Max(childMinSize.y, contentSize.y));
+                Mathf.Max(childMinSize.X, contentSize.X),
+                Mathf.Max(childMinSize.Y, contentSize.Y));
         }
 
         // Re-decide whether the largest rect is the default elements' or the contents'
         return new Vector2(Mathf.Max(2 * buttonArea.GetValueOrDefault() + titleWidth.GetValueOrDefault(),
-            contentSize.x + customMargin * 2), contentSize.y + customMargin * 2);
+            contentSize.X + customMargin * 2), contentSize.Y + customMargin * 2);
     }
+    */
 
     public void PopupFullRect()
     {
-        Popup_(GetFullRect());
+        // Popup_(GetFullRect());
     }
 
     public virtual void CustomShow()
     {
         // TODO: implement default show animation(?)
-        ShowModal(PopupExclusive);
+        // ShowModal(Exclusive);
     }
 
     public virtual void CustomHide()
     {
         // TODO: add proper close animation
-        Hide();
+        // Hide();
     }
 
     protected virtual void OnShown()
@@ -407,7 +414,7 @@ public class CustomDialog : Popup, ICustomPopup
     protected Rect2 GetFullRect()
     {
         var viewportSize = GetScreenSize();
-        return new Rect2(new Vector2(0, titleBarHeight), new Vector2(viewportSize.x, viewportSize.y));
+        return new Rect2(new Vector2(0, titleBarHeight), new Vector2(viewportSize.X, viewportSize.Y));
     }
 
     /// <summary>
@@ -419,31 +426,32 @@ public class CustomDialog : Popup, ICustomPopup
 
         if (Resizable)
         {
-            if (position.y < (-titleBarHeight + scaleBorderSize))
+            if (position.Y < (-titleBarHeight + scaleBorderSize))
             {
                 result = DragType.ResizeTop;
             }
-            else if (position.y >= (RectSize.y - scaleBorderSize))
+            else if (position.Y >= (Size.Y - scaleBorderSize))
             {
                 result = DragType.ResizeBottom;
             }
 
-            if (position.x < scaleBorderSize)
+            if (position.X < scaleBorderSize)
             {
                 result |= DragType.ResizeLeft;
             }
-            else if (position.x >= (RectSize.x - scaleBorderSize))
+            else if (position.X >= (Size.X - scaleBorderSize))
             {
                 result |= DragType.ResizeRight;
             }
         }
 
-        if (result == DragType.None && position.y < 0)
+        if (result == DragType.None && position.Y < 0)
             result = DragType.Move;
 
         return result;
     }
 
+    /*
     /// <summary>
     ///   Updates the cursor icon while moving along the borders.
     /// </summary>
@@ -453,7 +461,7 @@ public class CustomDialog : Popup, ICustomPopup
 
         if (Resizable)
         {
-            var previewDragType = DragHitTest(new Vector2(mouseMotion.Position.x, mouseMotion.Position.y));
+            var previewDragType = DragHitTest(new Vector2(mouseMotion.Position.X, mouseMotion.Position.Y));
 
             switch (previewDragType)
             {
@@ -479,6 +487,7 @@ public class CustomDialog : Popup, ICustomPopup
         if (GetCursorShape() != cursor)
             MouseDefaultCursorShape = cursor;
     }
+    */
 
     private Vector2 GetScreenSize()
     {
@@ -490,12 +499,12 @@ public class CustomDialog : Popup, ICustomPopup
     /// </summary>
     private void HandleActiveDrag()
     {
-        var globalMousePos = GetGlobalMousePosition();
+        var globalMousePos = GetMousePosition().ToVector2I();
 
-        var minSize = GetCombinedMinimumSize();
+        var minSize = Vector2I.Zero; // GetCombinedMinimumSize(); TODO: ???
 
-        var newPosition = new Vector2(RectPosition);
-        var newSize = new Vector2(RectSize);
+        var newPosition = Position;
+        var newSize = Size;
 
         if (dragType == DragType.Move)
         {
@@ -508,33 +517,33 @@ public class CustomDialog : Popup, ICustomPopup
 
             if (dragType.HasFlag(DragType.ResizeTop))
             {
-                var bottom = RectPosition.y + RectSize.y;
-                var maxY = bottom - minSize.y;
+                var bottom = Position.Y + Size.Y;
+                var maxY = bottom - minSize.Y;
 
-                newPosition.y = Mathf.Clamp(globalMousePos.y - dragOffset.y, titleBarHeight, maxY);
-                newSize.y = bottom - newPosition.y;
+                newPosition.Y = Mathf.Clamp(globalMousePos.Y - dragOffset.Y, titleBarHeight, maxY);
+                newSize.Y = bottom - newPosition.Y;
             }
             else if (dragType.HasFlag(DragType.ResizeBottom))
             {
-                newSize.y = Mathf.Min(globalMousePos.y - newPosition.y + dragOffsetFar.y, screenSize.y - newPosition.y);
+                newSize.Y = (int)Mathf.Min(globalMousePos.Y - newPosition.Y + dragOffsetFar.Y, screenSize.Y - newPosition.Y);
             }
 
             if (dragType.HasFlag(DragType.ResizeLeft))
             {
-                var right = RectPosition.x + RectSize.x;
-                var maxX = right - minSize.x;
+                var right = Position.X + Size.X;
+                var maxX = right - minSize.X;
 
-                newPosition.x = Mathf.Clamp(globalMousePos.x - dragOffset.x, 0, maxX);
-                newSize.x = right - newPosition.x;
+                newPosition.X = Mathf.Clamp(globalMousePos.X - dragOffset.X, 0, maxX);
+                newSize.X = right - newPosition.X;
             }
             else if (dragType.HasFlag(DragType.ResizeRight))
             {
-                newSize.x = Mathf.Min(globalMousePos.x - newPosition.x + dragOffsetFar.x, screenSize.x - newPosition.x);
+                newSize.X = (int)Mathf.Min(globalMousePos.X - newPosition.X + dragOffsetFar.X, screenSize.X - newPosition.X);
             }
         }
 
-        RectPosition = newPosition;
-        RectSize = newSize;
+        Position = newPosition;
+        Size = newSize;
 
         if (BoundToScreenArea)
             FixRect();
@@ -548,20 +557,21 @@ public class CustomDialog : Popup, ICustomPopup
         var screenSize = GetScreenSize();
 
         // Clamp position to ensure window stays inside the screen
-        RectPosition = new Vector2(
-            Mathf.Clamp(RectPosition.x, 0, screenSize.x - RectSize.x),
-            Mathf.Clamp(RectPosition.y, titleBarHeight, screenSize.y - RectSize.y));
+        Position = new Vector2I(
+            (int)Mathf.Clamp(Position.X, 0, screenSize.X - Size.X),
+            (int)Mathf.Clamp(Position.Y, titleBarHeight, screenSize.Y - Size.Y));
 
         if (Resizable)
         {
             // Size can't be bigger than the viewport
-            RectSize = new Vector2(
-                Mathf.Min(RectSize.x, screenSize.x), Mathf.Min(RectSize.y, screenSize.y - titleBarHeight));
+            Size = new Vector2I(
+                (int)Mathf.Min(Size.X, screenSize.X), (int)Mathf.Min(Size.Y, screenSize.Y - titleBarHeight));
         }
     }
 
     private void SetupCloseButton()
     {
+        /* TODO: First make it appear
         if (!ShowCloseButton)
         {
             if (closeButton != null)
@@ -576,53 +586,54 @@ public class CustomDialog : Popup, ICustomPopup
         if (closeButton != null)
             return;
 
-        var closeColor = GetColor("custom_close_color", "WindowDialog");
+        var closeColor = GetColor("custom_close_color", "Window");
 
         closeButton = new TextureButton
         {
             Expand = true,
-            RectMinSize = new Vector2(14, 14),
+            CustomMinimumSize = new Vector2(14, 14),
             SelfModulate = closeColor,
             MouseFilter = MouseFilterEnum.Pass,
-            TextureNormal = GetIcon("custom_close", "WindowDialog"),
+            TextureNormal = GetIcon("custom_close", "Window"),
         };
 
         closeButton.SetAnchorsPreset(LayoutPreset.TopRight);
 
-        closeButton.RectPosition = new Vector2(
-            -GetConstant("custom_close_h_ofs", "WindowDialog"),
-            -GetConstant("custom_close_v_ofs", "WindowDialog"));
+        closeButton.Position = new Vector2(
+            -GetConstant("custom_close_h_ofs", "Window"),
+            -GetConstant("custom_close_v_ofs", "Window"));
 
-        closeButton.Connect("mouse_entered", this, nameof(OnCloseButtonMouseEnter));
-        closeButton.Connect("mouse_exited", this, nameof(OnCloseButtonMouseExit));
-        closeButton.Connect("pressed", this, nameof(OnCloseButtonPressed));
+        closeButton.Connect("mouse_entered",new Callable(this,nameof(OnCloseButtonMouseEnter)));
+        closeButton.Connect("mouse_exited",new Callable(this,nameof(OnCloseButtonMouseExit)));
+        closeButton.Connect("pressed",new Callable(this,nameof(OnCloseButtonPressed)));
 
         AddChild(closeButton);
+        */
     }
 
     private void UpdateChildRects()
     {
         var childPos = new Vector2(customMargin, customMargin);
-        var childSize = new Vector2(RectSize.x - customMargin * 2, RectSize.y - customMargin * 2);
+        var childSize = new Vector2(Size.X - customMargin * 2, Size.Y - customMargin * 2);
 
         for (int i = 0; i < GetChildCount(); ++i)
         {
             var child = GetChildOrNull<Control>(i);
 
-            if (child == null || child == closeButton || child.IsSetAsToplevel())
+            if (child == null || child == closeButton || child.TopLevel)
                 continue;
 
-            child.RectPosition = childPos;
-            child.RectSize = childSize;
+            child.Position = childPos;
+            child.Size = childSize;
         }
     }
 
     private void SetToFullRect()
     {
-        var fullRect = GetFullRect().Size;
+        var fullRect = GetFullRect().Size.ToVector2I();
 
-        RectPosition = new Vector2(0, titleBarHeight);
-        RectSize = new Vector2(fullRect.x, fullRect.y - titleBarHeight);
+        Position = new Vector2I(0, titleBarHeight);
+        Size = new Vector2I(fullRect.X, fullRect.Y - titleBarHeight);
     }
 
     private void ApplyRectSettings()
@@ -637,13 +648,13 @@ public class CustomDialog : Popup, ICustomPopup
     private void OnCloseButtonMouseEnter()
     {
         closeHovered = true;
-        Update();
+        // Update();
     }
 
     private void OnCloseButtonMouseExit()
     {
         closeHovered = false;
-        Update();
+        // Update();
     }
 
     private void OnCloseButtonPressed()

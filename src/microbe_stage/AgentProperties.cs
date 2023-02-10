@@ -1,7 +1,7 @@
-﻿/// <summary>
+/// <summary>
 ///   Properties of an agent. Mainly used currently to block friendly fire
 /// </summary>
-public class AgentProperties
+public partial class AgentProperties
 {
     public AgentProperties(Species species, Compound compound)
     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 using Newtonsoft.Json;
@@ -7,7 +7,7 @@ using Array = Godot.Collections.Array;
 /// <summary>
 ///   Membrane for microbes
 /// </summary>
-public class Membrane : MeshInstance, IComputedMembraneData
+public partial class Membrane : MeshInstance3D, IComputedMembraneData
 {
     /// <summary>
     ///   This must be big enough that no organelle can be at this position.
@@ -40,8 +40,8 @@ public class Membrane : MeshInstance, IComputedMembraneData
     private MembraneType? type;
 
 #pragma warning disable CA2213
-    private Texture? albedoTexture;
-    private Texture noiseTexture = null!;
+    private Texture2D? albedoTexture;
+    private Texture2D noiseTexture = null!;
 #pragma warning restore CA2213
 
     private string? currentlyLoadedAlbedoTexture;
@@ -113,7 +113,7 @@ public class Membrane : MeshInstance, IComputedMembraneData
                 cachedConvexShape = new Vector3[vertices2D.Count];
                 for (var i = 0; i < vertices2D.Count; ++i)
                 {
-                    cachedConvexShape[i] = new Vector3(vertices2D[i].x, height / 2, vertices2D[i].y);
+                    cachedConvexShape[i] = new Vector3(vertices2D[i].X, height / 2, vertices2D[i].Y);
                 }
 
                 convexShapeIsDirty = false;
@@ -196,7 +196,7 @@ public class Membrane : MeshInstance, IComputedMembraneData
             value.ToHsv(out var hue, out var saturation, out var brightness);
 
             value = Color.FromHsv(hue, saturation * 0.75f, brightness,
-                Mathf.Clamp(value.a, 0.4f - brightness * 0.3f, 1.0f));
+                Mathf.Clamp(value.A, 0.4f - brightness * 0.3f, 1.0f));
 
             if (tint == value)
                 return;
@@ -242,12 +242,12 @@ public class Membrane : MeshInstance, IComputedMembraneData
         if (MaterialToEdit == null)
             GD.PrintErr("MaterialToEdit on Membrane is not set");
 
-        noiseTexture = GD.Load<Texture>("res://assets/textures/dissolve_noise.tres");
+        noiseTexture = GD.Load<Texture2D>("res://assets/textures/dissolve_noise.tres");
 
         Dirty = true;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (!Dirty)
             return;
@@ -270,13 +270,13 @@ public class Membrane : MeshInstance, IComputedMembraneData
         int n = vertices2D.Count;
         for (int i = 0; i < n - 1; i++)
         {
-            if ((vertices2D[i].y <= y && y < vertices2D[i + 1].y) ||
-                (vertices2D[i + 1].y <= y && y < vertices2D[i].y))
+            if ((vertices2D[i].Y <= y && y < vertices2D[i + 1].Y) ||
+                (vertices2D[i + 1].Y <= y && y < vertices2D[i].Y))
             {
-                if (x < (vertices2D[i + 1].x - vertices2D[i].x) *
-                    (y - vertices2D[i].y) /
-                    (vertices2D[i + 1].y - vertices2D[i].y) +
-                    vertices2D[i].x)
+                if (x < (vertices2D[i + 1].X - vertices2D[i].X) *
+                    (y - vertices2D[i].Y) /
+                    (vertices2D[i + 1].Y - vertices2D[i].Y) +
+                    vertices2D[i].X)
                 {
                     crosses = !crosses;
                 }
@@ -315,16 +315,16 @@ public class Membrane : MeshInstance, IComputedMembraneData
 
         foreach (var vertex in vertices2D)
         {
-            if (Mathf.Abs(Mathf.Atan2(vertex.y, vertex.x) - organelleAngle) <
+            if (Mathf.Abs(Mathf.Atan2(vertex.Y, vertex.X) - organelleAngle) <
                 angleToClosest)
             {
-                closestSoFar = new Vector2(vertex.x, vertex.y);
+                closestSoFar = new Vector2(vertex.X, vertex.Y);
                 angleToClosest =
-                    Mathf.Abs(Mathf.Atan2(vertex.y, vertex.x) - organelleAngle);
+                    Mathf.Abs(Mathf.Atan2(vertex.Y, vertex.X) - organelleAngle);
             }
         }
 
-        return new Vector3(closestSoFar.x, 0, closestSoFar.y);
+        return new Vector3(closestSoFar.X, 0, closestSoFar.Y);
     }
 
     /// <summary>
@@ -437,7 +437,7 @@ public class Membrane : MeshInstance, IComputedMembraneData
         float wigglyNessToApply =
             WigglyNess / (EncompassingCircleRadius * sizeWigglyNessDampeningFactor);
 
-        MaterialToEdit.SetShaderParam("wigglyNess", Mathf.Min(WigglyNess, wigglyNessToApply));
+        MaterialToEdit.SetShaderParameter("wigglyNess", Mathf.Min(WigglyNess, wigglyNessToApply));
     }
 
     private void ApplyMovementWiggly()
@@ -452,17 +452,17 @@ public class Membrane : MeshInstance, IComputedMembraneData
         float wigglyNessToApply =
             MovementWigglyNess / (EncompassingCircleRadius * sizeMovementWigglyNessDampeningFactor);
 
-        MaterialToEdit.SetShaderParam("movementWigglyNess", Mathf.Min(MovementWigglyNess, wigglyNessToApply));
+        MaterialToEdit.SetShaderParameter("movementWigglyNess", Mathf.Min(MovementWigglyNess, wigglyNessToApply));
     }
 
     private void ApplyHealth()
     {
-        MaterialToEdit?.SetShaderParam("healthFraction", HealthFraction);
+        MaterialToEdit?.SetShaderParameter("healthFraction", HealthFraction);
     }
 
     private void ApplyTint()
     {
-        MaterialToEdit?.SetShaderParam("tint", Tint);
+        MaterialToEdit?.SetShaderParameter("tint", Tint);
     }
 
     private void ApplyTextures()
@@ -474,17 +474,17 @@ public class Membrane : MeshInstance, IComputedMembraneData
 
         albedoTexture = Type.LoadedAlbedoTexture;
 
-        MaterialToEdit!.SetShaderParam("albedoTexture", albedoTexture);
-        MaterialToEdit.SetShaderParam("normalTexture", Type.LoadedNormalTexture);
-        MaterialToEdit.SetShaderParam("damagedTexture", Type.LoadedDamagedTexture);
-        MaterialToEdit.SetShaderParam("dissolveTexture", noiseTexture);
+        MaterialToEdit!.SetShaderParameter("albedoTexture", albedoTexture);
+        MaterialToEdit.SetShaderParameter("normalTexture", Type.LoadedNormalTexture);
+        MaterialToEdit.SetShaderParameter("damagedTexture", Type.LoadedDamagedTexture);
+        MaterialToEdit.SetShaderParameter("dissolveTexture", noiseTexture);
 
         currentlyLoadedAlbedoTexture = Type.AlbedoTexture;
     }
 
     private void ApplyDissolveEffect()
     {
-        MaterialToEdit?.SetShaderParam("dissolveValue", DissolveEffectValue);
+        MaterialToEdit?.SetShaderParameter("dissolveValue", DissolveEffectValue);
     }
 
     /// <summary>
@@ -507,14 +507,14 @@ public class Membrane : MeshInstance, IComputedMembraneData
 
         foreach (var pos in OrganellePositions)
         {
-            if (Mathf.Abs(pos.x) + 1 > cellDimensions)
+            if (Mathf.Abs(pos.X) + 1 > cellDimensions)
             {
-                cellDimensions = (int)Mathf.Abs(pos.x) + 1;
+                cellDimensions = (int)Mathf.Abs(pos.X) + 1;
             }
 
-            if (Mathf.Abs(pos.y) + 1 > cellDimensions)
+            if (Mathf.Abs(pos.Y) + 1 > cellDimensions)
             {
-                cellDimensions = (int)Mathf.Abs(pos.y) + 1;
+                cellDimensions = (int)Mathf.Abs(pos.Y) + 1;
             }
         }
 
@@ -577,7 +577,7 @@ public class Membrane : MeshInstance, IComputedMembraneData
 
         // Apply the mesh to us
         Mesh = cached.GeneratedMesh;
-        SetSurfaceMaterial(cached.SurfaceIndex, MaterialToEdit);
+        SetSurfaceOverrideMaterial(cached.SurfaceIndex, MaterialToEdit);
     }
 
     /// <summary>
@@ -627,7 +627,7 @@ public class Membrane : MeshInstance, IComputedMembraneData
 
         arrays[(int)Mesh.ArrayType.Vertex] = vertices;
         arrays[(int)Mesh.ArrayType.Index] = indices;
-        arrays[(int)Mesh.ArrayType.TexUv] = uvs;
+        arrays[(int)Mesh.ArrayType.TexUV] = uvs;
 
         // Create the mesh
         var generatedMesh = new ArrayMesh();
@@ -637,7 +637,7 @@ public class Membrane : MeshInstance, IComputedMembraneData
 
         // Apply the mesh to us
         Mesh = generatedMesh;
-        SetSurfaceMaterial(surfaceIndex, MaterialToEdit);
+        SetSurfaceOverrideMaterial(surfaceIndex, MaterialToEdit);
 
         ProceduralDataCache.Instance.WriteMembraneData(CreateDataForCache(generatedMesh, surfaceIndex));
     }
@@ -669,8 +669,8 @@ public class Membrane : MeshInstance, IComputedMembraneData
 
             float currentRadians = multiplier * i / end;
 
-            vertices[writeIndex] = new Vector3(vertices2D[i % end].x, height / 2,
-                vertices2D[i % end].y);
+            vertices[writeIndex] = new Vector3(vertices2D[i % end].X, height / 2,
+                vertices2D[i % end].Y);
 
             uvs[writeIndex] = center +
                 new Vector2(Mathf.Cos(currentRadians), Mathf.Sin(currentRadians)) / 2;
@@ -716,8 +716,8 @@ public class Membrane : MeshInstance, IComputedMembraneData
             {
                 var movementDirection = movementFunc(sourceBuffer[i], closestOrganelle);
 
-                targetBuffer[i] = new Vector2(sourceBuffer[i].x - movementDirection.x,
-                    sourceBuffer[i].y - movementDirection.y);
+                targetBuffer[i] = new Vector2(sourceBuffer[i].X - movementDirection.X,
+                    sourceBuffer[i].Y - movementDirection.Y);
             }
         }
 

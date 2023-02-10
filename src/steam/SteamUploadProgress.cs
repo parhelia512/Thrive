@@ -1,4 +1,4 @@
-﻿public class SteamUploadProgress
+public partial class SteamUploadProgress
 {
     public bool ErrorHappened { get; set; }
 

@@ -1,11 +1,11 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
     /// <summary>
     ///   A welcome popup to the stage
     /// </summary>
-    public class MicrobeStageWelcome : TutorialPhase
+    public partial class MicrobeStageWelcome : TutorialPhase
     {
         private Action? patchNamePopup;
 

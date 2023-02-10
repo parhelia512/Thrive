@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Linq;
 using Godot;
 using Newtonsoft.Json;
@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 [JSONDynamicTypeAllowed]
 [UseThriveConverter]
 [UseThriveSerializer]
-public class MicrobeSpecies : Species, ICellProperties, IPhotographable
+public partial class MicrobeSpecies : Species, ICellProperties, IPhotographable
 {
     [JsonConstructor]
     public MicrobeSpecies(uint id, string genus, string epithet) : base(id, genus, epithet)
@@ -205,7 +205,7 @@ public class MicrobeSpecies : Species, ICellProperties, IPhotographable
         return hash;
     }
 
-    public void ApplySceneParameters(Spatial instancedScene)
+    public void ApplySceneParameters(Node3D instancedScene)
     {
         var microbe = (Microbe)instancedScene;
         microbe.IsForPreviewOnly = true;
@@ -216,7 +216,7 @@ public class MicrobeSpecies : Species, ICellProperties, IPhotographable
         microbe.ApplySpecies(this);
     }
 
-    public float CalculatePhotographDistance(Spatial instancedScene)
+    public float CalculatePhotographDistance(Node3D instancedScene)
     {
         return PhotoStudio.CameraDistanceFromRadiusOfObject(((Microbe)instancedScene).Radius *
             Constants.PHOTO_STUDIO_CELL_RADIUS_MULTIPLIER);

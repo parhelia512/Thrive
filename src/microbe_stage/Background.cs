@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Godot;
 using Newtonsoft.Json;
@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 ///   Background in the microbe stage, needs to have 4 layers (textures)
 /// </summary>
 [SuppressMessage("ReSharper", "CollectionNeverUpdated.Global", Justification = "This is a read-only type")]
-public class Background : IRegistryType
+public partial class Background : IRegistryType
 {
     [JsonRequired]
     public List<string> Textures = null!;
@@ -43,12 +43,10 @@ public class Background : IRegistryType
     {
         _ = parameters;
 
-        var directory = new Directory();
-
         foreach (var resource in Textures)
         {
             // When exported only the .import files exist, so this check is done accordingly
-            if (!directory.FileExists(resource + ".import"))
+            if (!FileAccess.FileExists(resource + ".import"))
             {
                 throw new InvalidRegistryDataException(InternalName, GetType().Name,
                     "Background contains non-existent image: " + resource);

@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 
 [JSONAlwaysDynamicType]
-public class BehaviourActionData : EditorCombinableActionData
+public partial class BehaviourActionData : EditorCombinableActionData
 {
     public float NewValue;
     public float OldValue;

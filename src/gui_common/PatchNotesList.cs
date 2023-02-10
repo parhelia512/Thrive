@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Godot;
 
-public class PatchNotesList : VBoxContainer
+public partial class PatchNotesList : VBoxContainer
 {
     private bool showAll = true;
 
@@ -165,7 +165,7 @@ public class PatchNotesList : VBoxContainer
         };
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (thingsToShowComputeResults != null)
         {
@@ -258,7 +258,7 @@ public class PatchNotesList : VBoxContainer
             if (StyleWithBackground)
             {
                 var panel = new PanelContainer();
-                panel.AddStyleboxOverride("panel", itemBackground);
+                panel.AddThemeStyleboxOverride("panel", itemBackground);
 
                 itemContainer = panel;
             }
@@ -283,9 +283,9 @@ public class PatchNotesList : VBoxContainer
             }
 
             // This uses rich text purely to be clickable
-            var title = customRichTextScene.Instance<CustomRichTextLabel>();
-            title.BbcodeText = titleText;
-            title.AddFontOverride("normal_font", TitleFont);
+            var title = customRichTextScene.Instantiate<CustomRichTextLabel>();
+            title.Text = titleText;
+            title.AddThemeFontOverride("normal_font", TitleFont);
 
             itemContentContainer.AddChild(title);
 
@@ -307,20 +307,20 @@ public class PatchNotesList : VBoxContainer
                 stringBuilder.Append('\n');
             }
 
-            var bodyTextDisplayer = customRichTextScene.Instance<CustomRichTextLabel>();
+            var bodyTextDisplayer = customRichTextScene.Instantiate<CustomRichTextLabel>();
 
-            bodyTextDisplayer.BbcodeText = stringBuilder.ToString();
+            bodyTextDisplayer.Text = stringBuilder.ToString();
             stringBuilder.Clear();
 
             itemContentContainer.AddChild(bodyTextDisplayer);
 
             if (AddTrailingLinkToPatchNotesToViewIt)
             {
-                var visitLink = customRichTextScene.Instance<CustomRichTextLabel>();
+                var visitLink = customRichTextScene.Instantiate<CustomRichTextLabel>();
 
-                visitLink.BbcodeText = linkVisitTemplate.FormatSafe(versionPatchNotes.ReleaseLink);
+                visitLink.Text = linkVisitTemplate.FormatSafe(versionPatchNotes.ReleaseLink);
 
-                visitLink.AddFontOverride("normal_font", TrailingVisitLinkFont);
+                visitLink.AddThemeFontOverride("normal_font", TrailingVisitLinkFont);
 
                 itemContentContainer.AddChild(visitLink);
             }

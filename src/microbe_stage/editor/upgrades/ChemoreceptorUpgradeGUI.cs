@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public class ChemoreceptorUpgradeGUI : VBoxContainer, IOrganelleUpgrader
+public partial class ChemoreceptorUpgradeGUI : VBoxContainer, IOrganelleUpgrader
 {
     [Export]
     public NodePath? CompoundsPath;

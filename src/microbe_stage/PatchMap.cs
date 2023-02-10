@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 ///   A container for patches that are joined together
 /// </summary>
 [UseThriveSerializer]
-public class PatchMap : ISaveLoadable
+public partial class PatchMap : ISaveLoadable
 {
     private Patch? currentPatch;
 

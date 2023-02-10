@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 /// <typeparam name="TPlayer">The type of the player object</typeparam>
 [JsonObject(IsReference = true)]
 [UseThriveSerializer]
-public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNodeResolve
+public abstract partial class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNodeResolve
     where TPlayer : class
 {
     [Export]
@@ -22,7 +22,7 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
 #pragma warning disable CA2213
     protected Node world = null!;
     protected Node rootOfDynamicallySpawned = null!;
-    protected DirectionalLight worldLight = null!;
+    protected DirectionalLight3D worldLight = null!;
     protected PauseMenu pauseMenu = null!;
     protected Control hudRoot = null!;
 #pragma warning restore CA2213
@@ -47,7 +47,7 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
     protected bool gameOver;
 
     [JsonProperty]
-    protected float playerRespawnTimer;
+    protected double playerRespawnTimer;
 
     /// <summary>
     ///   True when the player is extinct in the current patch. The player can still move to another patch.
@@ -129,7 +129,7 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
             {
                 bool disposed = false;
 
-                var casted = (Spatial)node;
+                var casted = (Node3D)node;
 
                 // Objects that cause disposed exceptions. Seems still pretty important to protect saving against
                 // very rare issues
@@ -144,7 +144,7 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
                     }
                     else
                     {
-                        if (casted.Transform.origin == Vector3.Zero)
+                        if (casted.Transform.Origin == Vector3.Zero)
                         {
                         }
                     }
@@ -193,9 +193,9 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
         if (NodeReferencesResolved)
             return;
 
-        world = GetNode<Node>("World");
-        rootOfDynamicallySpawned = GetNode<Node>("World/DynamicallySpawned");
-        worldLight = world.GetNode<DirectionalLight>("WorldLight");
+        world = GetNode<Node>("World3D");
+        rootOfDynamicallySpawned = GetNode<Node>("World3D/DynamicallySpawned");
+        worldLight = world.GetNode<DirectionalLight3D>("WorldLight");
         pauseMenu = GetNode<PauseMenu>(PauseMenuPath);
         hudRoot = GetNode<Control>(HUDRootPath);
 
@@ -204,7 +204,7 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
         NodeReferencesResolved = true;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
@@ -6,7 +6,7 @@ using Godot;
 ///   Manages the screen transitions, usually used for when
 ///   switching scenes. This is autoloaded
 /// </summary>
-public class TransitionManager : ControlWithInput
+public partial class TransitionManager : ControlWithInput
 {
     private static TransitionManager? instance;
 
@@ -29,7 +29,7 @@ public class TransitionManager : ControlWithInput
     }
 
     [Signal]
-    public delegate void QueuedTransitionsFinished();
+    public delegate void QueuedTransitionsFinishedEventHandler();
 
     public static TransitionManager Instance => instance ?? throw new InstanceNotLoadedYetException();
 
@@ -45,7 +45,7 @@ public class TransitionManager : ControlWithInput
     public ScreenFade CreateScreenFade(ScreenFade.FadeType type, float fadeDuration)
     {
         // Instantiate scene
-        var screenFade = (ScreenFade)screenFadeScene.Instance();
+        var screenFade = (ScreenFade)screenFadeScene.Instantiate();
 
         screenFade.CurrentFadeType = type;
         screenFade.FadeDuration = fadeDuration;
@@ -61,7 +61,7 @@ public class TransitionManager : ControlWithInput
     public Cutscene CreateCutscene(string path, float volume = 1.0f)
     {
         // Instantiate scene
-        var cutscene = (Cutscene)cutsceneScene.Instance();
+        var cutscene = (Cutscene)cutsceneScene.Instantiate();
 
         cutscene.Volume = volume;
         cutscene.Stream = GD.Load<VideoStream>(path);
@@ -69,7 +69,7 @@ public class TransitionManager : ControlWithInput
         return cutscene;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (queuedSequences.Count > 0)
         {
@@ -174,7 +174,7 @@ public class TransitionManager : ControlWithInput
     /// <summary>
     ///   A sequence of <see cref="ITransition"/>s. Has its own on finished callback.
     /// </summary>
-    public class Sequence
+    public partial class Sequence
     {
         private Queue<ITransition> queuedTransitions = new();
         private Action? onFinishedCallback;

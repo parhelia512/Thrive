@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text.RegularExpressions;
@@ -10,7 +10,7 @@ using Path = System.IO.Path;
 /// <summary>
 ///   Holds data needed for an in-progress save action. And manages stepping through all the actions that need to happen
 /// </summary>
-public class InProgressSave : IDisposable
+public partial class InProgressSave : IDisposable
 {
     private readonly Func<InProgressSave, Save> createSaveData;
     private readonly Action<InProgressSave, Save> performSave;
@@ -137,7 +137,6 @@ public class InProgressSave : IDisposable
         oldestSave = null;
         ulong oldestModifiedTime = ulong.MaxValue;
 
-        using var file = new File();
         foreach (var name in SaveHelper.CreateListOfSaves(SaveHelper.SaveOrder.FileSystem))
         {
             var match = Regex.Match(name, matchRegex);
@@ -155,7 +154,7 @@ public class InProgressSave : IDisposable
                 if (found > highestNumber)
                     highestNumber = found;
 
-                var modified = file.GetModifiedTime(Path.Combine(Constants.SAVE_FOLDER, name));
+                var modified = FileAccess.GetModifiedTime(Path.Combine(Constants.SAVE_FOLDER, name));
 
                 if (modified < oldestModifiedTime)
                 {

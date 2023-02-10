@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   Converter for CompoundCloudPlane
 /// </summary>
-public class CompoundCloudPlaneConverter : BaseThriveConverter
+public partial class CompoundCloudPlaneConverter : BaseThriveConverter
 {
     public CompoundCloudPlaneConverter(ISaveContext context) : base(context)
     {

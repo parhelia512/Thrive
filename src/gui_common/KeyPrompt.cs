@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
@@ -9,7 +9,7 @@ using Godot;
 ///     This is a <see cref="CenterContainer"/> so that this can show two images layered on top of each other
 ///   </para>
 /// </remarks>
-public class KeyPrompt : CenterContainer
+public partial class KeyPrompt : CenterContainer
 {
     /// <summary>
     ///   Name of the action this key prompt shows
@@ -115,7 +115,7 @@ public class KeyPrompt : CenterContainer
         }
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (!ShowPress)
             return;
@@ -132,9 +132,9 @@ public class KeyPrompt : CenterContainer
 
     private void ApplySize()
     {
-        var size = RectSize;
-        primaryIcon!.RectMinSize = size;
-        secondaryIcon.RectMinSize = size;
+        var size = Size;
+        primaryIcon!.CustomMinimumSize = size;
+        secondaryIcon.CustomMinimumSize = size;
     }
 
     private void OnIconsChanged(object sender, EventArgs args)

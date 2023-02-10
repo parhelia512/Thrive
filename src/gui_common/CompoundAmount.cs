@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Globalization;
 using Godot;
 
 /// <summary>
 ///   Shows a compound amount along with an icon
 /// </summary>
-public class CompoundAmount : HBoxContainer
+public partial class CompoundAmount : HBoxContainer
 {
 #pragma warning disable CA2213
     private Label? amountLabel;
@@ -210,7 +210,7 @@ public class CompoundAmount : HBoxContainer
                 throw new Exception("unhandled colour");
         }
 
-        amountLabel.AddColorOverride("font_color", color);
+        amountLabel.AddThemeColorOverride("font_color", color);
     }
 
     private void UpdateIcon()
@@ -224,6 +224,6 @@ public class CompoundAmount : HBoxContainer
     private void UpdateTooltip()
     {
         if (icon != null)
-            icon.HintTooltip = compound!.Name;
+            icon.TooltipText = compound!.Name;
     }
 }

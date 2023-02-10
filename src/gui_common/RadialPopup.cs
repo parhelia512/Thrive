@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
 
-public class RadialPopup : CustomDialog
+public partial class RadialPopup : CustomDialog
 {
     [Export]
     public NodePath? RadialPath;
 
     [Signal]
-    public delegate void OnItemSelected(int itemId);
+    public delegate void OnItemSelectedEventHandler(int itemId);
 
     [Signal]
-    public delegate void OnCanceled(int itemId);
+    public delegate void OnCanceledEventHandler(int itemId);
 
     public RadialMenu Radial { get; private set; } = null!;
 
@@ -21,7 +21,7 @@ public class RadialPopup : CustomDialog
         FullRect = true;
         Decorate = false;
 
-        Radial.Connect(nameof(RadialMenu.OnItemSelected), this, nameof(ForwardSelected));
+        Radial.Connect(nameof(RadialMenu.OnItemSelected),new Callable(this,nameof(ForwardSelected)));
         Radial.Visible = false;
     }
 
@@ -41,7 +41,7 @@ public class RadialPopup : CustomDialog
 
     public void ShowWithItems(IEnumerable<(string Text, int Id)> items)
     {
-        Popup_();
+        Popup();
         Radial.ShowWithItems(items);
     }
 

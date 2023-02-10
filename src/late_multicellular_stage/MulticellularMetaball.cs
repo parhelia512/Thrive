@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
 using Newtonsoft.Json;
 
 [UseThriveConverter]
-public class MulticellularMetaball : Metaball
+public partial class MulticellularMetaball : Metaball
 {
     public MulticellularMetaball(CellType cellType)
     {

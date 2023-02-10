@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
 using Newtonsoft.Json;
 
@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 /// </summary>
 [UseThriveSerializer]
 [JsonObject(IsReference = true)]
-public class PatchRegion
+public partial class PatchRegion
 {
     public PatchRegion(int id, string name, RegionType regionType, Vector2 screenCoordinates)
     {
@@ -64,8 +64,8 @@ public class PatchRegion
         get => new(Width, Height);
         set
         {
-            Width = value.x;
-            Height = value.y;
+            Width = value.X;
+            Height = value.Y;
         }
     }
 

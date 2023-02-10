@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -14,7 +14,7 @@ using Nito.Collections;
 [JSONAlwaysDynamicType]
 [UseThriveConverter]
 [UseThriveSerializer]
-public class Patch
+public partial class Patch
 {
     private readonly Compound sunlight;
 
@@ -438,7 +438,7 @@ public class Patch
     {
         Biome.CurrentCompoundAmounts[sunlight] = new BiomeCompoundProperties
         {
-            Ambient = Biome.MaximumCompounds[sunlight].Ambient * lightCycle.DayLightFraction,
+            Ambient = (float)(Biome.MaximumCompounds[sunlight].Ambient * lightCycle.DayLightFraction),
         };
     }
 
@@ -486,7 +486,7 @@ public class Patch
 /// <summary>
 ///   Snapshot of a patch at some point in time.
 /// </summary>
-public class PatchSnapshot : ICloneable
+public partial class PatchSnapshot : ICloneable
 {
     public double TimePeriod;
 

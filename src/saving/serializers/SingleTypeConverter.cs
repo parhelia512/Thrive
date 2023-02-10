@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using Newtonsoft.Json;
 
 /// <summary>
 ///   Helper for making single type converters
 /// </summary>
 /// <typeparam name="T">The converted type</typeparam>
-public class SingleTypeConverter<T> : BaseThriveConverter
+public partial class SingleTypeConverter<T> : BaseThriveConverter
 {
     private static readonly Type SupportedType = typeof(T);
 

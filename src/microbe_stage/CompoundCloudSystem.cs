@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 /// <summary>
 ///   Manages spawning and processing compound clouds
 /// </summary>
-public class CompoundCloudSystem : Node, ISaveLoadedTracked
+public partial class CompoundCloudSystem : Node, ISaveLoadedTracked
 {
     [JsonProperty]
     private int neededCloudsAtOnePosition;
@@ -47,9 +47,9 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
         cloudScene = GD.Load<PackedScene>("res://src/microbe_stage/CompoundCloudPlane.tscn");
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
-        elapsed += delta;
+        elapsed += (float)delta;
 
         // Limit the rate at which the clouds are processed as they
         // are a major performance sink
@@ -79,7 +79,7 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
         // We need to dynamically spawn more / delete some if this doesn't match
         while (clouds.Count < neededCloudsAtOnePosition)
         {
-            var createdCloud = (CompoundCloudPlane)cloudScene.Instance();
+            var createdCloud = (CompoundCloudPlane)cloudScene.Instantiate();
             clouds.Add(createdCloud);
             AddChild(createdCloud);
         }
@@ -137,7 +137,7 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
 
             clouds[i].Init(fluidSystem, renderPriority, cloud1, cloud2, cloud3, cloud4);
             --renderPriority;
-            clouds[i].Translation = new Vector3(0, 0, 0);
+            clouds[i].Position = new Vector3(0, 0, 0);
         }
     }
 
@@ -170,7 +170,7 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
     ///   Takes compound at world position
     /// </summary>
     /// <param name="compound">The compound type to take</param>
-    /// <param name="worldPosition">World position to take from</param>
+    /// <param name="worldPosition">World3D position to take from</param>
     /// <param name="fraction">The fraction of compound to take. Should be &lt;= 1</param>
     public float TakeCompound(Compound compound, Vector3 worldPosition, float fraction)
     {
@@ -415,9 +415,9 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
         // The gaps between the positions is used for calculations here. Otherwise
         // all clouds get moved when the player moves
         return new Vector3(
-            (int)Math.Round(pos.x / (Constants.CLOUD_X_EXTENT / 3)),
+            (int)Math.Round(pos.X / (Constants.CLOUD_X_EXTENT / 3)),
             0,
-            (int)Math.Round(pos.z / (Constants.CLOUD_Y_EXTENT / 3)));
+            (int)Math.Round(pos.Z / (Constants.CLOUD_Y_EXTENT / 3)));
     }
 
     /// <summary>
@@ -428,8 +428,8 @@ public class CompoundCloudSystem : Node, ISaveLoadedTracked
         foreach (var cloud in clouds)
         {
             // TODO: make sure the cloud knows where we moved.
-            cloud.Translation = cloudGridCenter * Constants.CLOUD_Y_EXTENT / 3;
-            cloud.UpdatePosition(new Int2((int)cloudGridCenter.x, (int)cloudGridCenter.z));
+            cloud.Position = cloudGridCenter * Constants.CLOUD_Y_EXTENT / 3;
+            cloud.UpdatePosition(new Int2((int)cloudGridCenter.X, (int)cloudGridCenter.Z));
         }
     }
 

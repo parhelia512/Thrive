@@ -1,11 +1,11 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
     /// <summary>
     ///   Introduction to the cell editor
     /// </summary>
-    public class CellEditorIntroduction : TutorialPhase
+    public partial class CellEditorIntroduction : TutorialPhase
     {
         private readonly string cellEditorTab = EditorTab.CellEditor.ToString();
 

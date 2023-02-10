@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 // ReSharper disable InconsistentNaming
 /// <summary>
@@ -6,15 +6,13 @@
 /// </summary>
 public struct Int2 : IEquatable<Int2>
 {
-#pragma warning disable SA1307 // Accessible fields should begin with upper-case letter
-    public int x;
-    public int y;
-#pragma warning restore SA1307 // Accessible fields should begin with upper-case letter
+    public int X;
+    public int Y;
 
     public Int2(int x, int y)
     {
-        this.x = x;
-        this.y = y;
+        X = x;
+        Y = y;
     }
 
     // Unary operators
@@ -25,55 +23,55 @@ public struct Int2 : IEquatable<Int2>
 
     public static Int2 operator -(Int2 p)
     {
-        return new Int2(-p.x, -p.y);
+        return new Int2(-p.X, -p.Y);
     }
 
     // Vector-Scalar operators
     public static Int2 operator /(Int2 p, int i)
     {
-        return new Int2(p.x / i, p.y / i);
+        return new Int2(p.X / i, p.Y / i);
     }
 
     public static Int2 operator *(Int2 p, int i)
     {
-        return new Int2(p.x * i, p.y * i);
+        return new Int2(p.X * i, p.Y * i);
     }
 
     public static Int2 operator *(int i, Int2 p)
     {
-        return new Int2(p.x * i, p.y * i);
+        return new Int2(p.X * i, p.Y * i);
     }
 
     // Vector-Vector operators
     public static Int2 operator +(Int2 p1, Int2 p2)
     {
-        return new Int2(p1.x + p2.x, p1.y + p2.y);
+        return new Int2(p1.X + p2.X, p1.Y + p2.Y);
     }
 
     public static Int2 operator -(Int2 p1, Int2 p2)
     {
-        return new Int2(p1.x - p2.x, p1.y - p2.y);
+        return new Int2(p1.X - p2.X, p1.Y - p2.Y);
     }
 
     public static Int2 operator *(Int2 p1, Int2 p2)
     {
-        return new Int2(p1.x * p2.x, p1.y * p2.y);
+        return new Int2(p1.X * p2.X, p1.Y * p2.Y);
     }
 
     public static Int2 operator /(Int2 p1, Int2 p2)
     {
-        return new Int2(p1.x / p2.x, p1.y / p2.y);
+        return new Int2(p1.X / p2.X, p1.Y / p2.Y);
     }
 
     // Comparators
     public static bool operator >(Int2 p1, Int2 p2)
     {
-        return p1.x > p2.x || (p1.x == p2.x && p1.y > p2.y);
+        return p1.X > p2.X || (p1.X == p2.X && p1.Y > p2.Y);
     }
 
     public static bool operator <(Int2 p1, Int2 p2)
     {
-        return p1.x < p2.x || (p1.x == p2.x && p1.y < p2.y);
+        return p1.X < p2.X || (p1.X == p2.X && p1.Y < p2.Y);
     }
 
     public static bool operator >=(Int2 p1, Int2 p2)
@@ -96,7 +94,7 @@ public struct Int2 : IEquatable<Int2>
         return !(left == right);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
         if (obj is Int2 converted)
         {
@@ -108,11 +106,11 @@ public struct Int2 : IEquatable<Int2>
 
     public override int GetHashCode()
     {
-        return x ^ y;
+        return X ^ Y;
     }
 
     public bool Equals(Int2 other)
     {
-        return x == other.x && y == other.y;
+        return X == other.X && Y == other.Y;
     }
 }

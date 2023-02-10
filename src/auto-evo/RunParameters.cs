@@ -1,4 +1,4 @@
-﻿namespace AutoEvo
+namespace AutoEvo
 {
     using System;
 
@@ -7,11 +7,11 @@
     /// </summary>
     public class RunParameters
     {
-        public readonly GameWorld World;
+        public readonly GameWorld World3D;
 
         public RunParameters(GameWorld world)
         {
-            World = world ?? throw new ArgumentException("GameWorld is null");
+            World3D = world ?? throw new ArgumentException("GameWorld is null");
         }
     }
 }

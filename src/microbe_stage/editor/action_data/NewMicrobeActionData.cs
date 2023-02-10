@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using Godot;
 
 [JSONAlwaysDynamicType]
-public class NewMicrobeActionData : EditorCombinableActionData
+public partial class NewMicrobeActionData : EditorCombinableActionData
 {
     public OrganelleLayout<OrganelleTemplate> OldEditedMicrobeOrganelles;
     public MembraneType OldMembrane;

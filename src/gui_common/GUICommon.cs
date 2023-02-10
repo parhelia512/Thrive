@@ -1,14 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
-using Array = Godot.Collections.Array;
-using Object = Godot.Object;
 using Path = System.IO.Path;
+using Range = Godot.Range;
 
 /// <summary>
 ///   Common helpers for the GUI to work with. This is autoloaded.
 /// </summary>
-public class GUICommon : NodeWithInput
+public partial class GUICommon : NodeWithInput
 {
     private static GUICommon? instance;
 
@@ -21,7 +20,6 @@ public class GUICommon : NodeWithInput
         instance = this;
 
         Tween = new Tween();
-        AddChild(Tween);
     }
 
     public static GUICommon Instance => instance ?? throw new InstanceNotLoadedYetException();
@@ -45,16 +43,18 @@ public class GUICommon : NodeWithInput
     {
         var child = control.GetChild<Control>(0);
 
-        return child.RectMinSize;
+        return child.CustomMinimumSize;
     }
 
+    /*
     public static void PopupMinSizeMarginPosition(Popup popup)
     {
-        var left = popup.MarginLeft;
-        var top = popup.MarginTop;
-        popup.PopupCenteredMinsize();
-        popup.RectPosition = new Vector2(left, top);
+        var left = popup.OffsetLeft;
+        var top = popup.OffsetTop;
+        popup.PopupCenteredClamped();
+        popup.Position = new Vector2I(left, top);
     }
+    */
 
     public static void SmoothlyUpdateBar(Range bar, float target, float delta)
     {
@@ -69,20 +69,20 @@ public class GUICommon : NodeWithInput
     }
 
     /// <summary>
-    ///   Loads a Texture from predefined GUI asset texture folder path.
+    ///   Loads a Texture2D from predefined GUI asset texture folder path.
     /// </summary>
-    public static Texture? LoadGuiTexture(string file)
+    public static Texture2D? LoadGuiTexture(string file)
     {
         var assumedPath = Path.Combine(Constants.ASSETS_GUI_BEVEL_FOLDER, file);
 
-        if (ResourceLoader.Exists(assumedPath, "Texture"))
-            return GD.Load<Texture>(assumedPath);
+        if (ResourceLoader.Exists(assumedPath, "Texture2D"))
+            return GD.Load<Texture2D>(assumedPath);
 
         // Fail-safe if file itself is the absolute path
-        if (ResourceLoader.Exists(file, "Texture"))
-            return GD.Load<Texture>(file);
+        if (ResourceLoader.Exists(file, "Texture2D"))
+            return GD.Load<Texture2D>(file);
 
-        return GD.Load(file) as Texture;
+        return GD.Load(file) as Texture2D;
     }
 
     public static void MarkInputAsInvalid(LineEdit control)
@@ -100,7 +100,7 @@ public class GUICommon : NodeWithInput
         base._Ready();
 
         // Keep this node running even while paused
-        PauseMode = PauseModeEnum.Process;
+        ProcessMode = ProcessModeEnum.Always;
 
         buttonPressSound = GD.Load<AudioStream>(
             "res://assets/sounds/soundeffects/gui/button-hover-click.ogg");
@@ -134,11 +134,11 @@ public class GUICommon : NodeWithInput
     }
 
     /// <summary>
-    ///   Returns the top-most exclusive popup in the current Viewport's modal stack. Null if there is none.
+    ///   Returns the top-most exclusive popup in the current SubViewport's modal stack. Null if there is none.
     /// </summary>
     public Popup? GetCurrentlyActiveExclusivePopup()
     {
-        if (GetViewport().GetModalStackTop() is Popup popup && popup.PopupExclusive)
+        if (GetViewport().GetWindow() is Popup { Exclusive: true } popup)
             return popup;
 
         return null;
@@ -175,31 +175,36 @@ public class GUICommon : NodeWithInput
             AudioSources.Add(player);
         }
 
-        player.VolumeDb = GD.Linear2Db(volume);
+        player.VolumeDb = Mathf.LinearToDb(volume);
         player.Stream = sound;
         player.Play();
     }
 
+    /*
     /// <summary>
-    ///   Smoothly interpolates the value of a TextureProgress bar.
+    ///   Smoothly interpolates the value of a TextureProgressBar bar.
     /// </summary>
-    public void TweenBarValue(TextureProgress bar, float targetValue, float maxValue, float speed)
+    public void TweenBarValue(TextureProgressBar bar, float targetValue, float maxValue, float speed)
     {
         bar.MaxValue = maxValue;
         Tween.InterpolateProperty(bar, "value", bar.Value, targetValue, speed,
             Tween.TransitionType.Cubic, Tween.EaseType.Out);
         Tween.Start();
     }
+    */
 
     /// <summary>
     ///   Smoothly interpolates the value of a ProgressBar.
     /// </summary>
     public void TweenBarValue(ProgressBar bar, float targetValue, float maxValue, float speed)
     {
+        bar.Value = targetValue;
+        /*
         bar.MaxValue = maxValue;
         Tween.InterpolateProperty(bar, "value", bar.Value, targetValue, speed,
             Tween.TransitionType.Cubic, Tween.EaseType.Out);
         Tween.Start();
+        */
     }
 
     public void ModulateFadeIn(Control control, float duration, float delay = 0,
@@ -208,24 +213,32 @@ public class GUICommon : NodeWithInput
         // Make sure the control is visible
         control.Show();
 
+        /*
         Tween.InterpolateProperty(control, "modulate:a", null, 1, duration, transitionType, easeType, delay);
         Tween.Start();
+        */
     }
 
     public void ModulateFadeOut(Control control, float duration, float delay = 0, Tween.TransitionType transitionType =
         Tween.TransitionType.Sine, Tween.EaseType easeType = Tween.EaseType.In, bool hideOnFinished = true)
     {
+        if (hideOnFinished)
+            control.Hide();
+
+        /*
         if (!control.Visible)
             return;
 
         Tween.InterpolateProperty(control, "modulate:a", null, 0, duration, transitionType, easeType, delay);
         Tween.Start();
 
-        if (!Tween.IsConnected("tween_completed", this, nameof(HideControlOnFadeOutComplete)) && hideOnFinished)
+        if (!Tween.IsConnected("tween_completed",new Callable(this,nameof(HideControlOnFadeOutComplete))) && hideOnFinished)
         {
             Tween.Connect("tween_completed", this, nameof(HideControlOnFadeOutComplete),
-                new Array { control }, (int)ConnectFlags.Oneshot);
+                new Array { control }, (int)ConnectFlags.OneShot);
+            Tween.Finished += () => { HideControlOnFadeOutComplete(control); };
         }
+        */
     }
 
     /// <summary>
@@ -235,9 +248,9 @@ public class GUICommon : NodeWithInput
     {
         var element = new TextureRect
         {
-            Expand = true,
-            RectMinSize = new Vector2(sizeX, sizeY),
-            SizeFlagsVertical = (int)Control.SizeFlags.ShrinkCenter,
+            ExpandMode = (TextureRect.ExpandModeEnum)6L,
+            CustomMinimumSize = new Vector2(sizeX, sizeY),
+            SizeFlagsVertical = Control.SizeFlags.ShrinkCenter,
             StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
             Texture = SimulationParameters.Instance.GetCompound(compoundName).LoadedIcon,
         };
@@ -263,11 +276,8 @@ public class GUICommon : NodeWithInput
         target.DrawCustomFocusBorderIfFocused();
     }
 
-    private void HideControlOnFadeOutComplete(Object obj, NodePath key, Control control)
+    private void HideControlOnFadeOutComplete(Control control)
     {
-        _ = obj;
-        _ = key;
-
         control.Hide();
     }
 }

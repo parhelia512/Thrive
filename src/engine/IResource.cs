@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   A game resource loadable through <see cref="ResourceManager"/>

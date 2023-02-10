@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 [JSONAlwaysDynamicType]
-public class OrganellePlacementActionData : HexPlacementActionData<OrganelleTemplate>
+public partial class OrganellePlacementActionData : HexPlacementActionData<OrganelleTemplate>
 {
     public List<OrganelleTemplate>? ReplacedCytoplasm;
 

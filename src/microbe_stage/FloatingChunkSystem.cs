@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,7 +8,7 @@ using Godot;
 ///   Handles floating chunks emitting compounds and dissolving. This is centralized to be able to apply the max chunks
 ///   cap.
 /// </summary>
-public class FloatingChunkSystem
+public partial class FloatingChunkSystem
 {
     private readonly Node worldRoot;
 
@@ -39,7 +39,7 @@ public class FloatingChunkSystem
 
             var comparePosition = latestPlayerPosition;
 
-            return chunks.OrderByDescending(c => c.Translation.DistanceSquaredTo(comparePosition))
+            return chunks.OrderByDescending(c => c.Position.DistanceSquaredTo(comparePosition))
                 .Take(tooManyChunks);
         });
 

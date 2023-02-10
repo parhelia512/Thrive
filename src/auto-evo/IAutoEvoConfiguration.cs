@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Auto-evo configuration parameters to be used
 /// </summary>
 [SupportsCustomizedRegistryType(typeof(AutoEvoConfiguration))]

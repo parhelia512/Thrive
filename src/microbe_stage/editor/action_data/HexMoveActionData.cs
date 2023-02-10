@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 public abstract class HexMoveActionData<THex> : EditorCombinableActionData
     where THex : class, IActionHex

@@ -1,11 +1,11 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
     /// <summary>
     ///   Welcome to early multicellular explaining budding to reduce the amount of complaints about it not working
     /// </summary>
-    public class EarlyMulticellularWelcome : TutorialPhase
+    public partial class EarlyMulticellularWelcome : TutorialPhase
     {
         public EarlyMulticellularWelcome()
         {

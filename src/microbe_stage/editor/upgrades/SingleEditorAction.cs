@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 /// </summary>
 /// <typeparam name="T">Type of the action data to hold</typeparam>
 [JSONAlwaysDynamicType]
-public class SingleEditorAction<T> : EditorAction
+public partial class SingleEditorAction<T> : EditorAction
     where T : EditorCombinableActionData
 {
     [JsonProperty]

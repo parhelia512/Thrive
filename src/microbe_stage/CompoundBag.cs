@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 ///   Object that stores compound amounts and capacities
 /// </summary>
 [UseThriveSerializer]
-public class CompoundBag : ICompoundStorage
+public partial class CompoundBag : ICompoundStorage
 {
     [JsonProperty]
     private readonly HashSet<Compound> usefulCompounds = new();

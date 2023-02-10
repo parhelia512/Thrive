@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Godot;
 using Newtonsoft.Json;
 
@@ -7,10 +7,10 @@ using Newtonsoft.Json;
 /// </summary>
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/AgentProjectile.tscn", UsesEarlyResolve = false)]
-public class AgentProjectile : RigidBody, ITimedLife, IEntity
+public partial class AgentProjectile : RigidBody3D, ITimedLife, IEntity
 {
 #pragma warning disable CA2213
-    private Particles particles = null!;
+    private GpuParticles3D particles = null!;
 #pragma warning restore CA2213
 
     public float TimeToLiveRemaining { get; set; }
@@ -18,7 +18,7 @@ public class AgentProjectile : RigidBody, ITimedLife, IEntity
     public AgentProperties? Properties { get; set; }
     public EntityReference<IEntity> Emitter { get; set; } = new();
 
-    public Spatial EntityNode => this;
+    public Node3D EntityNode => this;
 
     public AliveMarker AliveMarker { get; } = new();
 
@@ -36,22 +36,22 @@ public class AgentProjectile : RigidBody, ITimedLife, IEntity
         if (Properties == null)
             throw new InvalidOperationException($"{nameof(Properties)} is required");
 
-        particles = GetNode<Particles>("Particles");
+        particles = GetNode<GpuParticles3D>("GPUParticles3D");
 
         var emitterNode = Emitter.Value?.EntityNode;
 
         if (emitterNode != null)
             AddCollisionExceptionWith(emitterNode);
 
-        Connect("body_shape_entered", this, nameof(OnContactBegin));
+        Connect("body_shape_entered",new Callable(this,nameof(OnContactBegin)));
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (FadeTimeRemaining == null)
             return;
 
-        FadeTimeRemaining -= delta;
+        FadeTimeRemaining -= (float)delta;
         if (FadeTimeRemaining <= 0)
             this.DestroyDetachAndQueueFree();
     }

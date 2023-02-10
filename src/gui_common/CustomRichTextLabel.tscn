@@ -4,8 +4,8 @@
 [ext_resource path="res://src/gui_common/CustomRichTextLabel.cs" type="Script" id=3]
 
 [node name="CustomRichTextLabel" type="RichTextLabel"]
-margin_right = 22.0
-margin_bottom = 22.0
+offset_right = 22.0
+offset_bottom = 22.0
 theme = ExtResource( 1 )
 custom_colors/default_color = Color( 1, 1, 1, 1 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 0 )

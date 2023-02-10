@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-public class RandomConverter : JsonConverter
+public partial class RandomConverter : JsonConverter
 {
     // ReSharper disable StringLiteralTypo
     private readonly FieldInfo seedArrayInfo = typeof(Random).GetField("_seedArray", BindingFlags.NonPublic |

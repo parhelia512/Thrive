@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   A concrete process that organelle does. Applies a modifier to the process
 /// </summary>
-public class TweakedProcess : ICloneable
+public partial class TweakedProcess : ICloneable
 {
     public float Rate;
 

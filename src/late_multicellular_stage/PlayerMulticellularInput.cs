@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
 ///   Handles input for the (late) multicellular stage
 /// </summary>
-public class PlayerMulticellularInput : NodeWithInput
+public partial class PlayerMulticellularInput : NodeWithInput
 {
     private bool autoMove;
     private bool mouseUnCapturePressed;
@@ -18,7 +18,7 @@ public class PlayerMulticellularInput : NodeWithInput
         // Not the cleanest that the parent has to be MulticellularStage type...
         stage = (MulticellularStage)GetParent();
 
-        PauseMode = PauseModeEnum.Process;
+        ProcessMode = ProcessModeEnum.Always;
     }
 
     public override void _ExitTree()
@@ -29,7 +29,7 @@ public class PlayerMulticellularInput : NodeWithInput
         SetMouseCapture(false);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -91,9 +91,9 @@ public class PlayerMulticellularInput : NodeWithInput
                 ThreeDimensionalMovementMode.WorldRelative)
             {
                 // Rotate movement direction by the 2D rotation of the camera
-                var rotation = new Quat(new Vector3(0, 1, 0), stage.PlayerCamera.YRotation);
+                var rotation = new Quaternion(new Vector3(0, 1, 0), stage.PlayerCamera.YRotation);
 
-                movement = rotation.Xform(movement);
+                movement = rotation * (movement);
             }
 
             stage.Player.MovementDirection = movement;

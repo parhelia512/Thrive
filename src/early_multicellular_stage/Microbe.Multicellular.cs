@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -86,29 +86,29 @@ public partial class Microbe
         // Attach the created cell to the right spot in our colony
         var ourTransform = GlobalTransform;
 
-        var attachVector = ourTransform.origin + ourTransform.basis.Xform(Hex.AxialToCartesian(template.Position));
+        var attachVector = ourTransform.Origin + ourTransform.Basis * Hex.AxialToCartesian(template.Position);
 
         // Ensure no tiny y component exists here
-        attachVector.y = 0;
+        attachVector.Y = 0;
 
-        var newCellTransform = new Transform(
-            MathUtils.CreateRotationForOrganelle(template.Orientation) * ourTransform.basis.Quat(),
+        var newCellTransform = new Transform3D(
+            MathUtils.CreateRotationForOrganelle(template.Orientation) * ourTransform.Basis,
             attachVector);
         cell.GlobalTransform = newCellTransform;
 
-        var newCellPosition = newCellTransform.origin;
+        var newCellPosition = newCellTransform.Origin;
 
         // Adding a cell to a colony snaps it close to its colony parent so we need to find the closes existing
         // cell in the colony to use as that here
         var parent = this;
-        var currentDistanceSquared = (newCellPosition - ourTransform.origin).LengthSquared();
+        var currentDistanceSquared = (newCellPosition - ourTransform.Origin).LengthSquared();
 
         foreach (var colonyMember in Colony.ColonyMembers)
         {
             if (colonyMember == this)
                 continue;
 
-            var distance = (colonyMember.GlobalTransform.origin - newCellPosition).LengthSquared();
+            var distance = (colonyMember.GlobalTransform.Origin - newCellPosition).LengthSquared();
 
             if (distance < currentDistanceSquared)
             {
@@ -148,7 +148,7 @@ public partial class Microbe
 
                 // Grow from the first cell to grow back, in the body plan grow order
                 nextBodyPlanCellToGrowIndex = lostPartsOfBodyPlan.Min();
-                lostPartsOfBodyPlan.Remove(nextBodyPlanCellToGrowIndex);
+                lostPartsOfBodyPlan.RemoveAt(nextBodyPlanCellToGrowIndex);
             }
             else if (resumeBodyPlanAfterReplacingLost != null)
             {
@@ -293,7 +293,7 @@ public partial class Microbe
 
     private Microbe CreateMulticellularColonyMemberCell(CellType cellType)
     {
-        var newCell = SpawnHelpers.SpawnMicrobe(Species, Translation,
+        var newCell = SpawnHelpers.SpawnMicrobe(Species, Position,
             GetParent(), SpawnHelpers.LoadMicrobeScene(), true, cloudSystem!, spawnSystem!, CurrentGame, cellType);
 
         // Make it despawn like normal (if our colony is accidentally somehow disbanded)

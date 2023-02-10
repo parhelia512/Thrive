@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using Godot;
 
-public class FluidSystem
+public partial class FluidSystem
 {
     // private const float MaxForceApplied = 0.525f;
 
@@ -48,11 +48,11 @@ public class FluidSystem
     public void PhysicsProcess(float delta)
     {
         _ = delta;
-        foreach (var body in worldRoot.GetChildrenToProcess<RigidBody>(Constants.FLUID_EFFECT_GROUP))
+        foreach (var body in worldRoot.GetChildrenToProcess<RigidBody3D>(Constants.FLUID_EFFECT_GROUP))
         {
-            var pos = new Vector2(body.Translation.x, body.Translation.z);
+            var pos = new Vector2(body.Position.X, body.Position.Z);
             var vel = VelocityAt(pos) * Constants.MAX_FORCE_APPLIED_BY_CURRENTS;
-            body.ApplyCentralImpulse(new Vector3(vel.x, 0, vel.y));
+            body.ApplyCentralImpulse(new Vector3(vel.X, 0, vel.Y));
         }
     }
 
@@ -60,14 +60,14 @@ public class FluidSystem
     {
         var scaledPosition = position * POSITION_SCALING;
 
-        float disturbancesX = noiseDisturbancesX.GetNoise(scaledPosition.x, scaledPosition.y,
+        float disturbancesX = noiseDisturbancesX.GetNoise(scaledPosition.X, scaledPosition.Y,
             millisecondsPassed * DISTURBANCE_TIMESCALE);
-        float disturbancesY = noiseDisturbancesY.GetNoise(scaledPosition.x, scaledPosition.y,
+        float disturbancesY = noiseDisturbancesY.GetNoise(scaledPosition.X, scaledPosition.Y,
             millisecondsPassed * DISTURBANCE_TIMESCALE);
 
-        float currentsX = noiseCurrentsX.GetNoise(scaledPosition.x * CURRENTS_STRETCHING_MULTIPLIER,
-            scaledPosition.y, millisecondsPassed * CURRENTS_TIMESCALE);
-        float currentsY = noiseCurrentsY.GetNoise(scaledPosition.x, scaledPosition.y * CURRENTS_STRETCHING_MULTIPLIER,
+        float currentsX = noiseCurrentsX.GetNoise(scaledPosition.X * CURRENTS_STRETCHING_MULTIPLIER,
+            scaledPosition.Y, millisecondsPassed * CURRENTS_TIMESCALE);
+        float currentsY = noiseCurrentsY.GetNoise(scaledPosition.X, scaledPosition.Y * CURRENTS_STRETCHING_MULTIPLIER,
             millisecondsPassed * CURRENTS_TIMESCALE);
 
         var disturbancesVelocity = new Vector2(disturbancesX, disturbancesY);

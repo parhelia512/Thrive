@@ -1,4 +1,4 @@
-﻿// This file contains all the different microbe stage spawner types
+// This file contains all the different microbe stage spawner types
 // just so that they are in one place.
 
 using System;
@@ -44,14 +44,14 @@ public static class SpawnHelpers
         CompoundCloudSystem cloudSystem, ISpawnSystem spawnSystem, GameProperties currentGame,
         CellType? multicellularCellType = null)
     {
-        var microbe = (Microbe)microbeScene.Instance();
+        var microbe = (Microbe)microbeScene.Instantiate();
 
         // The second parameter is (isPlayer), and we assume that if the
         // cell is not AI controlled it is the player's cell
         microbe.Init(cloudSystem, spawnSystem, currentGame, !aiControlled);
 
         worldRoot.AddChild(microbe);
-        microbe.Translation = location;
+        microbe.Position = location;
 
         microbe.AddToGroup(Constants.AI_TAG_MICROBE);
         microbe.AddToGroup(Constants.PROCESS_GROUP);
@@ -130,7 +130,7 @@ public static class SpawnHelpers
     public static FloatingChunk SpawnChunk(ChunkConfiguration chunkType,
         Vector3 location, Node worldNode, PackedScene chunkScene, Random random)
     {
-        var chunk = (FloatingChunk)chunkScene.Instance();
+        var chunk = (FloatingChunk)chunkScene.Instantiate();
 
         // Settings need to be applied before adding it to the scene
         var selectedMesh = chunkType.Meshes.Random(random);
@@ -149,10 +149,10 @@ public static class SpawnHelpers
 
         // Chunk is spawned with random rotation (in the 2D plane if it's an Easter egg)
         var rotationAxis = chunk.EasterEgg ? new Vector3(0, 1, 0) : new Vector3(0, 1, 1);
-        chunk.Transform = new Transform(new Quat(
+        chunk.Transform = new Transform3D(new Basis(
             rotationAxis.Normalized(), 2 * Mathf.Pi * (float)random.NextDouble()), location);
 
-        chunk.GetNode<Spatial>("NodeToScale").Scale = new Vector3(chunkType.ChunkScale, chunkType.ChunkScale,
+        chunk.GetNode<Node3D>("NodeToScale").Scale = new Vector3(chunkType.ChunkScale, chunkType.ChunkScale,
             chunkType.ChunkScale);
 
         chunk.AddToGroup(Constants.FLUID_EFFECT_GROUP);
@@ -190,14 +190,14 @@ public static class SpawnHelpers
     {
         var normalizedDirection = direction.Normalized();
 
-        var agent = (AgentProjectile)agentScene.Instance();
+        var agent = (AgentProjectile)agentScene.Instantiate();
         agent.Properties = properties;
         agent.Amount = amount;
         agent.TimeToLiveRemaining = lifetime;
         agent.Emitter = new EntityReference<IEntity>(emitter);
 
         worldRoot.AddChild(agent);
-        agent.Translation = location + (direction * 1.5f);
+        agent.Position = location + (direction * 1.5f);
         var scaleValue = amount / Constants.MAXIMUM_AGENT_EMISSION_AMOUNT;
         agent.Scale = new Vector3(scaleValue, scaleValue, scaleValue);
 
@@ -217,14 +217,14 @@ public static class SpawnHelpers
         Node worldRoot, PackedScene multicellularScene, bool aiControlled, ISpawnSystem spawnSystem,
         GameProperties currentGame)
     {
-        var creature = (MulticellularCreature)multicellularScene.Instance();
+        var creature = (MulticellularCreature)multicellularScene.Instantiate();
 
         // The second parameter is (isPlayer), and we assume that if the
         // cell is not AI controlled it is the player's cell
         creature.Init(spawnSystem, currentGame, !aiControlled);
 
         worldRoot.AddChild(creature);
-        creature.Translation = location;
+        creature.Position = location;
 
         creature.AddToGroup(Constants.ENTITY_TAG_CREATURE);
         creature.AddToGroup(Constants.PROCESS_GROUP);
@@ -247,7 +247,7 @@ public static class SpawnHelpers
 /// <summary>
 ///   Spawns microbes of a specific species
 /// </summary>
-public class MicrobeSpawner : Spawner
+public partial class MicrobeSpawner : Spawner
 {
     private readonly PackedScene microbeScene;
     private readonly CompoundCloudSystem cloudSystem;
@@ -310,7 +310,7 @@ public class MicrobeSpawner : Spawner
 /// <summary>
 ///   Spawns compound clouds of a certain type
 /// </summary>
-public class CompoundCloudSpawner : Spawner
+public partial class CompoundCloudSpawner : Spawner
 {
     private readonly Compound compound;
     private readonly CompoundCloudSystem clouds;
@@ -343,7 +343,7 @@ public class CompoundCloudSpawner : Spawner
 /// <summary>
 ///   Spawns chunks of a specific type
 /// </summary>
-public class ChunkSpawner : Spawner
+public partial class ChunkSpawner : Spawner
 {
     private readonly PackedScene chunkScene;
     private readonly ChunkConfiguration chunkType;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
@@ -7,7 +7,7 @@ using Array = Godot.Collections.Array;
 /// <summary>
 ///   A widget containing a list of saves
 /// </summary>
-public class SaveList : ScrollContainer
+public partial class SaveList : ScrollContainer
 {
     [Export]
     public bool AutoRefreshOnFirstVisible = true;
@@ -83,16 +83,16 @@ public class SaveList : ScrollContainer
     private bool incompatibleIfNotUpgraded;
 
     [Signal]
-    public delegate void OnSelectedChanged();
+    public delegate void OnSelectedChangedEventHandler();
 
     [Signal]
-    public delegate void OnItemsChanged();
+    public delegate void OnItemsChangedEventHandler();
 
     [Signal]
-    public delegate void OnConfirmed(SaveListItem item);
+    public delegate void OnConfirmedEventHandler(SaveListItem item);
 
     [Signal]
-    public delegate void OnSaveLoaded(string saveName);
+    public delegate void OnSaveLoadedEventHandler(string saveName);
 
     public override void _Ready()
     {
@@ -111,7 +111,7 @@ public class SaveList : ScrollContainer
         listItemScene = GD.Load<PackedScene>("res://src/saving/SaveListItem.tscn");
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         bool isCurrentlyVisible = IsVisibleInTree();
 
@@ -142,29 +142,29 @@ public class SaveList : ScrollContainer
 
             foreach (var save in saves)
             {
-                var item = (SaveListItem)listItemScene.Instance();
+                var item = (SaveListItem)listItemScene.Instantiate();
                 item.Selectable = SelectableItems;
                 item.Loadable = LoadableItems;
 
                 if (SelectableItems)
-                    item.Connect(nameof(SaveListItem.OnSelectedChanged), this, nameof(OnSubItemSelectedChanged));
+                    item.Connect(nameof(SaveListItem.OnSelectedChanged), Callable.From(OnSubItemSelectedChanged));
 
-                item.Connect(nameof(SaveListItem.OnDoubleClicked), this, nameof(OnItemDoubleClicked),
-                    new Array { item });
+                item.Connect(nameof(SaveListItem.OnDoubleClicked), Callable.From(() => { OnItemDoubleClicked(item); }));
 
-                item.Connect(nameof(SaveListItem.OnDeleted), this, nameof(OnDeletePressed), new Array { save });
+                item.Connect(nameof(SaveListItem.OnDeleted), Callable.From(() => { OnDeletePressed(save); }));
 
-                item.Connect(nameof(SaveListItem.OnOldSaveLoaded), this, nameof(OnOldSaveLoaded), new Array { save });
+                item.Connect(nameof(SaveListItem.OnOldSaveLoaded), Callable.From(() => { OnOldSaveLoaded(save); }));
 
                 // This can't use binds because we need an additional dynamic parameter from the list item here
-                item.Connect(nameof(SaveListItem.OnUpgradeableSaveLoaded), this, nameof(OnUpgradeableSaveLoaded));
-                item.Connect(nameof(SaveListItem.OnNewSaveLoaded), this, nameof(OnNewSaveLoaded), new Array { save });
-                item.Connect(nameof(SaveListItem.OnBrokenSaveLoaded), this, nameof(OnInvalidLoaded),
-                    new Array { save });
-                item.Connect(nameof(SaveListItem.OnKnownIncompatibleLoaded), this, nameof(OnKnownIncompatibleLoaded));
-                item.Connect(nameof(SaveListItem.OnDifferentVersionPrototypeLoaded), this,
-                    nameof(OnDifferentVersionPrototypeLoaded));
-                item.Connect(nameof(SaveListItem.OnProblemFreeSaveLoaded), this, nameof(OnSaveLoadedWithoutProblems));
+                item.Connect(nameof(SaveListItem.OnUpgradeableSaveLoaded),
+                    Callable.From<string, bool>(OnUpgradeableSaveLoaded));
+                item.Connect(nameof(SaveListItem.OnNewSaveLoaded), Callable.From(() => { OnNewSaveLoaded(save); }));
+                item.Connect(nameof(SaveListItem.OnBrokenSaveLoaded), Callable.From(() => { OnInvalidLoaded(save); }));
+                item.Connect(nameof(SaveListItem.OnKnownIncompatibleLoaded), Callable.From(OnKnownIncompatibleLoaded));
+                item.Connect(nameof(SaveListItem.OnDifferentVersionPrototypeLoaded),
+                    Callable.From(OnDifferentVersionPrototypeLoaded));
+                item.Connect(nameof(SaveListItem.OnProblemFreeSaveLoaded),
+                    Callable.From<string>(OnSaveLoadedWithoutProblems));
 
                 item.SaveName = save;
                 savesList.AddChild(item);

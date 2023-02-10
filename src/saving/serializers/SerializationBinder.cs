@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Numerics;
 using Newtonsoft.Json;
@@ -7,7 +7,7 @@ using Newtonsoft.Json.Serialization;
 /// <summary>
 ///   Controls which dynamic type classes are allowed to be loaded from json (or with specific BinaryFormatters)
 /// </summary>
-public class SerializationBinder : DefaultSerializationBinder
+public partial class SerializationBinder : DefaultSerializationBinder
 {
     private static readonly Type DynamicTypeAllowedAttribute = typeof(JSONDynamicTypeAllowedAttribute);
     private static readonly Type AlwaysDynamicTypeAttribute = typeof(JSONAlwaysDynamicTypeAttribute);
@@ -48,7 +48,7 @@ public class SerializationBinder : DefaultSerializationBinder
 ///   as well as the type is written if something is a subclass of a type with this attribute
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class JSONDynamicTypeAllowedAttribute : Attribute
+public partial class JSONDynamicTypeAllowedAttribute : Attribute
 {
 }
 
@@ -63,6 +63,6 @@ public class JSONDynamicTypeAllowedAttribute : Attribute
 ///   </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class)]
-public class JSONAlwaysDynamicTypeAttribute : Attribute
+public partial class JSONAlwaysDynamicTypeAttribute : Attribute
 {
 }

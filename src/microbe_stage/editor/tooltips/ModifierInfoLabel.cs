@@ -1,10 +1,10 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Used to display a modifier info as UI element on a selection menu tooltip
 ///   (eg. +10 Osmoregulation Cost)
 /// </summary>
-public class ModifierInfoLabel : HBoxContainer
+public partial class ModifierInfoLabel : HBoxContainer
 {
 #pragma warning disable CA2213
     private Label? nameLabel;
@@ -16,7 +16,7 @@ public class ModifierInfoLabel : HBoxContainer
     private string modifierValue = string.Empty;
     private Color modifierNameColor = Colors.White;
     private Color modifierValueColor = Colors.White;
-    private Texture? iconTexture;
+    private Texture2D? iconTexture;
 
     private bool showValue = true;
 
@@ -65,7 +65,7 @@ public class ModifierInfoLabel : HBoxContainer
     }
 
     [Export]
-    public Texture? ModifierIcon
+    public Texture2D? ModifierIcon
     {
         get => iconTexture;
         set
@@ -134,7 +134,7 @@ public class ModifierInfoLabel : HBoxContainer
             return;
 
         nameLabel.Text = displayName;
-        nameLabel.AddColorOverride("font_color", modifierNameColor);
+        nameLabel.AddThemeColorOverride("font_color", modifierNameColor);
     }
 
     private void UpdateValue()
@@ -146,7 +146,7 @@ public class ModifierInfoLabel : HBoxContainer
 
         valueLabel.Text = modifierValue;
 
-        valueLabel.AddColorOverride("font_color", modifierValueColor);
+        valueLabel.AddThemeColorOverride("font_color", modifierValueColor);
     }
 
     private void UpdateIcon()

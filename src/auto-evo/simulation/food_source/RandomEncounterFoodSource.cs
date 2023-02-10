@@ -1,4 +1,4 @@
-﻿namespace AutoEvo
+namespace AutoEvo
 {
     /// <summary>
     ///   A class for random-encounter based food sources.

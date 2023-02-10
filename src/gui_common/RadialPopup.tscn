@@ -6,15 +6,15 @@
 [node name="RadialPopup" type="Popup"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-popup_exclusive = true
+exclusive = true
 script = ExtResource( 1 )
 RadialPath = NodePath("RadialMenu")
 
 [node name="BackgroundDarkener" type="ColorRect" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_right = 40.0
-margin_bottom = 40.0
+offset_right = 40.0
+offset_bottom = 40.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 color = Color( 0, 0, 0, 0.254902 )

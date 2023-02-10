@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Godot;
+using HttpClient = System.Net.Http.HttpClient;
 
 /// <summary>
 ///   Manages downloading and parsing the Thrive news feed into Godot-friendly bbcode
@@ -199,7 +200,7 @@ public static class ThriveNewsFeed
         return results;
     }
 
-    public class FeedItem
+    public partial class FeedItem
     {
         public FeedItem(string title, string? readLink, string contentBbCode, DateTime? publishedAt,
             bool truncated = false)

@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Which level a tab control is at on a screen, controls which set of tab switching hotkeys are used
 /// </summary>
 public enum TabLevel

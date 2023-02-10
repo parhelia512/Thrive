@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
 /// <summary>
 ///   A system that manages detecting what the player is hovering over with the cursor.
 /// </summary>
-public class PlayerHoverInfo : Node
+public partial class PlayerHoverInfo : Node
 {
     /// <summary>
     ///   Used to query the real hovered compound values.
@@ -50,7 +50,7 @@ public class PlayerHoverInfo : Node
         this.cloudSystem = cloudSystem;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (camera == null || cloudSystem == null)
             throw new InvalidOperationException($"{nameof(PlayerHoverInfo)} was not initialized");
@@ -72,7 +72,7 @@ public class PlayerHoverInfo : Node
             if (newAmount == 0.0f && oldAmount > 0.0f)
             {
                 compoundDelayTimer.TryGetValue(compound, out float delayDelta);
-                delayDelta += delta;
+                delayDelta += (float)delta;
                 if (delayDelta > Constants.COMPOUND_HOVER_INFO_REMOVE_DELAY)
                 {
                     compoundDelayTimer.Remove(compound);
@@ -102,7 +102,7 @@ public class PlayerHoverInfo : Node
 
         foreach (Microbe microbe in allMicrobes)
         {
-            var distanceSquared = (microbe.GlobalTransform.origin - camera.CursorWorldPos).LengthSquared();
+            var distanceSquared = (microbe.GlobalTransform.Origin - camera.CursorWorldPos).LengthSquared();
 
             // Find only cells that have the mouse position within their membrane
             // Note: This method of calculation may not be accurate for line-shaped microbes

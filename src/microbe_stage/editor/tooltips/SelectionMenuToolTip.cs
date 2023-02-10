@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,7 +8,7 @@ using Godot;
 ///   The main tooltip class for the selections on the microbe editor's selection menu.
 ///   Contains list of processes and modifiers info.
 /// </summary>
-public class SelectionMenuToolTip : Control, ICustomToolTip
+public partial class SelectionMenuToolTip : Control, ICustomToolTip
 {
     [Export]
     public NodePath? NameLabelPath;
@@ -174,7 +174,7 @@ public class SelectionMenuToolTip : Control, ICustomToolTip
     /// </summary>
     public void AddModifierInfo(string name, float value)
     {
-        var modifierInfo = (ModifierInfoLabel)modifierInfoScene.Instance();
+        var modifierInfo = (ModifierInfoLabel)modifierInfoScene.Instantiate();
 
         modifierInfo.DisplayName = name;
         modifierInfo.ModifierValue = value.ToString(CultureInfo.CurrentCulture);
@@ -198,7 +198,7 @@ public class SelectionMenuToolTip : Control, ICustomToolTip
             processList.QueueFreeChildren();
 
             var noProcessLabel = new Label();
-            noProcessLabel.AddFontOverride("font", latoBoldFont);
+            noProcessLabel.AddThemeFontOverride("font", latoBoldFont);
             noProcessLabel.Text = TranslationServer.Translate("NO_ORGANELLE_PROCESSES");
             processList.AddChild(noProcessLabel);
             return;

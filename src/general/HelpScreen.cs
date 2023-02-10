@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
 ///   Manages the help screen GUI
 /// </summary>
-public class HelpScreen : Control
+public partial class HelpScreen : Control
 {
     /// <summary>
     ///   The category which this help screen belongs to
@@ -38,7 +38,7 @@ public class HelpScreen : Control
     private Random random = null!;
 
     [Signal]
-    public delegate void HelpScreenClosed();
+    public delegate void HelpScreenClosedEventHandler();
 
     public override void _Ready()
     {
@@ -116,7 +116,7 @@ public class HelpScreen : Control
         {
             var message = TranslationServer.Translate(text.Message);
 
-            var helpBox = HelpBoxScene.Instance();
+            var helpBox = HelpBoxScene.Instantiate();
             helpBox.GetNode<CustomRichTextLabel>("MarginContainer/CustomRichTextLabel").ExtendedBbcode = message;
 
             if (text.Column == HelpText.TextColumn.Left)

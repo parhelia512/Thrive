@@ -1,4 +1,5 @@
-﻿using System.Text;
+using System;
+using System.Text;
 using Godot;
 
 /// <summary>
@@ -8,24 +9,21 @@ public static class UnhandledExceptionLogger
 {
     private static bool modsEnabled;
 
-    public static void OnUnhandledException(object sender, UnhandledExceptionArgs args)
+    public static void OnUnhandledException(object sender, UnhandledExceptionEventArgs args)
     {
         var builder = new StringBuilder(500);
 
         // Don't change this as the launcher depends on this, in fact it would be nice to move this to a shared
         // constants file
         builder.Append("------------ Begin of Unhandled Exception Log ------------\n");
+        builder.Append("The following exception ");
 
         if (modsEnabled)
-        {
-            builder.Append("The following exception (potentially from a mod) prevented the game from running:\n\n");
-        }
-        else
-        {
-            builder.Append("The following exception prevented the game from running:\n\n");
-        }
+            builder.Append("(potentially from a mod) ");
 
-        builder.Append(args.Exception);
+        builder.Append(args.IsTerminating ? "prevented the game from running:\n\n" : "happened:\n\n");
+
+        builder.Append(args.ExceptionObject);
 
         if (modsEnabled)
         {

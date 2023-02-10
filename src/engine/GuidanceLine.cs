@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Line helping the player by showing a direction
 /// </summary>
-public class GuidanceLine : ImmediateGeometry
+public partial class GuidanceLine : ImmediateMesh
 {
     private Vector3 lineStart;
 
@@ -55,21 +55,21 @@ public class GuidanceLine : ImmediateGeometry
         }
     }
 
-    public override void _Ready()
+    public GuidanceLine()
     {
-        base._Ready();
-
         // Make the line update after any possible code that might update our parameters
-        ProcessPriority = 800;
-        PauseMode = PauseModeEnum.Process;
+        // ProcessPriority = 800;
+        // ProcessMode = ProcessModeEnum.Always;
 
         // This material is needed for SetColor to work at all
-        var material = new SpatialMaterial();
+        var material = new StandardMaterial3D();
         material.VertexColorUseAsAlbedo = true;
-        MaterialOverride = material;
+        SurfaceSetMaterial(0, material);
+
+        // MaterialOverride = material;
     }
 
-    public override void _Process(float delta)
+    /* public override void _Process(double delta)
     {
         if (!dirty)
             return;
@@ -87,5 +87,5 @@ public class GuidanceLine : ImmediateGeometry
         // that are slightly off from the positions)
 
         End();
-    }
+    }*/
 }

@@ -1,6 +1,6 @@
-﻿using Godot;
+using Godot;
 
-public class HUDBottomBar : HBoxContainer
+public partial class HUDBottomBar : HBoxContainer
 {
     [Export]
     public NodePath? PauseButtonPath;
@@ -27,28 +27,28 @@ public class HUDBottomBar : HBoxContainer
     private bool processPanelPressed;
 
     [Signal]
-    public delegate void OnMenuPressed();
+    public delegate void OnMenuPressedEventHandler();
 
     [Signal]
-    public delegate void OnPausePressed(bool paused);
+    public delegate void OnPausePressedEventHandler(bool paused);
 
     [Signal]
-    public delegate void OnProcessesPressed();
+    public delegate void OnProcessesPressedEventHandler();
 
     [Signal]
-    public delegate void OnCompoundsToggled(bool expanded);
+    public delegate void OnCompoundsToggledEventHandler(bool expanded);
 
     [Signal]
-    public delegate void OnEnvironmentToggled(bool expanded);
+    public delegate void OnEnvironmentToggledEventHandler(bool expanded);
 
     [Signal]
-    public delegate void OnSuicidePressed();
+    public delegate void OnSuicidePressedEventHandler();
 
     [Signal]
-    public delegate void OnHelpPressed();
+    public delegate void OnHelpPressedEventHandler();
 
     [Signal]
-    public delegate void OnStatisticsPressed();
+    public delegate void OnStatisticsPressedEventHandler();
 
     public bool Paused
     {
@@ -176,7 +176,7 @@ public class HUDBottomBar : HBoxContainer
         if (compoundsButton == null)
             return;
 
-        compoundsButton.Pressed = CompoundsPressed;
+        compoundsButton.ButtonPressed = CompoundsPressed;
     }
 
     private void UpdateEnvironmentButton()
@@ -184,7 +184,7 @@ public class HUDBottomBar : HBoxContainer
         if (environmentButton == null)
             return;
 
-        environmentButton.Pressed = EnvironmentPressed;
+        environmentButton.ButtonPressed = EnvironmentPressed;
     }
 
     private void UpdateProcessPanelButton()
@@ -192,6 +192,6 @@ public class HUDBottomBar : HBoxContainer
         if (processPanelButton == null)
             return;
 
-        processPanelButton.Pressed = ProcessesPressed;
+        processPanelButton.ButtonPressed = ProcessesPressed;
     }
 }

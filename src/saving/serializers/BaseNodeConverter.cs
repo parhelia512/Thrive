@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
 ///   Base class for Godot Node derived types converters
 /// </summary>
-public class BaseNodeConverter : BaseThriveConverter
+public partial class BaseNodeConverter : BaseThriveConverter
 {
     public BaseNodeConverter(ISaveContext context) : base(context)
     {
@@ -25,23 +25,23 @@ public class BaseNodeConverter : BaseThriveConverter
             case "EditorDescription":
             case "_ImportPath":
             // TODO: this may cause problems if we ever want to allow objects to dynamically change their pause mode
-            case "PauseMode":
+            case "ProcessMode":
             case "Owner":
             // TODO: or process priority
             case "ProcessPriority":
             case "NativeInstance":
             case "DynamicObject":
             case "Gizmo":
-            // Ignore the extra rotation and translation related stuff that just duplicates what Transform has
+            // Ignore the extra rotation and translation related stuff that just duplicates what Transform3D has
             case "GlobalTranslation":
-            case "Translation":
+            case "Position":
             case "RotationDegrees":
             case "GlobalRotation":
             case "Rotation":
             case "Scale":
             // Ignore this as this is parent relative and probably causes problems loading
             case "GlobalTransform":
-            case "RectGlobalPosition":
+            case "GlobalPosition":
             // Ignore physics properties that cause deprecation warnings
             case "Friction":
             case "Bounce":

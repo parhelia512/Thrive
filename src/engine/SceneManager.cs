@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
 ///   Singleton managing changing game scenes
 /// </summary>
-public class SceneManager : Node
+public partial class SceneManager : Node
 {
     private static SceneManager? instance;
 
@@ -32,12 +32,12 @@ public class SceneManager : Node
     /// <param name="state">The game state to switch to, this automatically looks up the right scene</param>
     public void SwitchToScene(MainGameState state)
     {
-        SwitchToScene(LoadScene(state).Instance());
+        SwitchToScene(LoadScene(state).Instantiate());
     }
 
     public void SwitchToScene(string scenePath)
     {
-        SwitchToScene(LoadScene(scenePath).Instance());
+        SwitchToScene(LoadScene(scenePath).Instantiate());
     }
 
     public Node? SwitchToScene(Node newSceneRoot, bool keepOldRoot = false)
@@ -70,7 +70,7 @@ public class SceneManager : Node
     {
         var scene = LoadScene("res://src/general/MainMenu.tscn");
 
-        var mainMenu = (MainMenu)scene.Instance();
+        var mainMenu = (MainMenu)scene.Instantiate();
 
         mainMenu.IsReturningToMenu = true;
 
@@ -144,7 +144,7 @@ public class SceneManager : Node
                 "The specified class to load a scene for didn't have SceneLoadedClassAttribute");
         }
 
-        return LoadScene(sceneLoaded!.ScenePath);
+        return LoadScene(sceneLoaded.ScenePath);
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoEvo;
@@ -12,7 +12,7 @@ using Godot;
 ///     Note a lot of this functionality is duplicated from AutoEvoExploringTool.
 ///   </para>
 /// </remarks>
-public class ThriveopediaEvolutionaryTreePage : ThriveopediaPage
+public partial class ThriveopediaEvolutionaryTreePage : ThriveopediaPage
 {
     [Export]
     public NodePath? DisabledInFreebuildPath;

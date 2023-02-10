@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using Godot;
 
-public class PatchDetailsPanel : PanelContainer
+public partial class PatchDetailsPanel : PanelContainer
 {
     [Export]
     public NodePath? NothingSelectedPath;
@@ -121,8 +121,8 @@ public class PatchDetailsPanel : PanelContainer
     private TextureRect ammoniaSituation = null!;
     private TextureRect phosphateSituation = null!;
 
-    private Texture increaseIcon = null!;
-    private Texture decreaseIcon = null!;
+    private Texture2D increaseIcon = null!;
+    private Texture2D decreaseIcon = null!;
 #pragma warning restore CA2213
 
     private Compound ammoniaCompound = null!;
@@ -220,8 +220,8 @@ public class PatchDetailsPanel : PanelContainer
         phosphatesCompound = SimulationParameters.Instance.GetCompound("phosphates");
         sunlightCompound = SimulationParameters.Instance.GetCompound("sunlight");
 
-        increaseIcon = GD.Load<Texture>("res://assets/textures/gui/bevel/increase.png");
-        decreaseIcon = GD.Load<Texture>("res://assets/textures/gui/bevel/decrease.png");
+        increaseIcon = GD.Load<Texture2D>("res://assets/textures/gui/bevel/increase.png");
+        decreaseIcon = GD.Load<Texture2D>("res://assets/textures/gui/bevel/decrease.png");
 
         UpdateMoveToPatchButton();
     }

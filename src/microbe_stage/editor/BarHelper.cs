@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Used to access the color and icon of a bar from a provided dictionary
@@ -40,7 +40,7 @@ public static class BarHelper
         }
     }
 
-    public static Texture? GetBarIcon(SegmentedBar.Type type, string name)
+    public static Texture2D? GetBarIcon(SegmentedBar.Type type, string name)
     {
         switch (type)
         {
@@ -49,15 +49,15 @@ public static class BarHelper
                 switch (name)
                 {
                     case "baseMovement":
-                        return GD.Load<Texture>("res://assets/textures/gui/bevel/baseMovementIcon.png");
+                        return GD.Load<Texture2D>("res://assets/textures/gui/bevel/baseMovementIcon.png");
                     case "osmoregulation":
-                        return GD.Load<Texture>("res://assets/textures/gui/bevel/osmoIcon.png");
+                        return GD.Load<Texture2D>("res://assets/textures/gui/bevel/osmoIcon.png");
                 }
 
                 foreach (var organelle in SimulationParameters.Instance.GetAllOrganelles())
                 {
                     if (organelle.InternalName == name)
-                        return GD.Load<Texture>(organelle.IconPath);
+                        return GD.Load<Texture2D>(organelle.IconPath);
                 }
 
                 return null;

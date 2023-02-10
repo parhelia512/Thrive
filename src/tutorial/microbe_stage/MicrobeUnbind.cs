@@ -1,11 +1,11 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
     /// <summary>
     ///   Tells the player how unbinding works
     /// </summary>
-    public class MicrobeUnbind : TutorialPhase
+    public partial class MicrobeUnbind : TutorialPhase
     {
         public override string ClosedByName => "MicrobeUnbind";
 

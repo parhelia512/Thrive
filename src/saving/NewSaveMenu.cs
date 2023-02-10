@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using Godot;
@@ -7,7 +7,7 @@ using Path = System.IO.Path;
 /// <summary>
 ///   Menu for managing making a new save
 /// </summary>
-public class NewSaveMenu : Control
+public partial class NewSaveMenu : Control
 {
     [Export]
     public NodePath? SaveListPath;
@@ -35,10 +35,10 @@ public class NewSaveMenu : Control
     private bool usingSelectedSaveName;
 
     [Signal]
-    public delegate void OnClosed();
+    public delegate void OnClosedEventHandler();
 
     [Signal]
-    public delegate void OnSaveNameChosen(string name);
+    public delegate void OnSaveNameChosenEventHandler(string name);
 
     public override void _Ready()
     {

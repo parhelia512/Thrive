@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Reflection;
 using Newtonsoft.Json;
 
-public class EntityReferenceConverter : JsonConverter
+public partial class EntityReferenceConverter : JsonConverter
 {
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
     {

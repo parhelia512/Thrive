@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 /// <summary>
 ///   Objects that know they have been loaded from a save

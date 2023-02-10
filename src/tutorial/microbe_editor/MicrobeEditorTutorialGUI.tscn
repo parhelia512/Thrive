@@ -3,14 +3,14 @@
 [ext_resource path="res://src/tutorial/microbe_editor/MicrobeEditorTutorialGUI.cs" type="Script" id=1]
 [ext_resource path="res://src/gui_common/thrive_theme.tres" type="Theme" id=2]
 [ext_resource path="res://src/gui_common/ControlHighlight.tscn" type="PackedScene" id=3]
-[ext_resource path="res://src/gui_common/fonts/Lato-Regular-AlmostSmall.tres" type="DynamicFont" id=4]
+[ext_resource path="res://src/gui_common/fonts/Lato-Regular-AlmostSmall.tres" type="FontFile" id=4]
 [ext_resource path="res://src/gui_common/CustomRichTextLabel.tscn" type="PackedScene" id=5]
-[ext_resource path="res://src/gui_common/fonts/Lato-Bold-AlmostSmaller.tres" type="DynamicFont" id=6]
+[ext_resource path="res://src/gui_common/fonts/Lato-Bold-AlmostSmaller.tres" type="FontFile" id=6]
 [ext_resource path="res://src/gui_common/dialogs/TutorialDialog.cs" type="Script" id=7]
 [ext_resource path="res://src/gui_common/dialogs/TutorialDialog.tscn" type="PackedScene" id=8]
 
 [node name="MicrobeEditorTutorialGUI" type="Control"]
-pause_mode = 2
+process_mode = 2
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
@@ -33,11 +33,11 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-margin_left = -533.0
-margin_top = -184.0
-margin_right = -173.0
-margin_bottom = 156.0
-rect_min_size = Vector2( 360, 345 )
+offset_left = -533.0
+offset_top = -184.0
+offset_right = -173.0
+offset_bottom = 156.0
+custom_minimum_size = Vector2( 360, 345 )
 Description = "EDITOR_TUTORIAL_EDITOR_TEXT"
 ShowDelay = 0.7
 
@@ -46,11 +46,11 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-margin_left = -533.0
-margin_top = -184.0
-margin_right = -173.0
-margin_bottom = 161.0
-rect_min_size = Vector2( 360, 340 )
+offset_left = -533.0
+offset_top = -184.0
+offset_right = -173.0
+offset_bottom = 161.0
+custom_minimum_size = Vector2( 360, 340 )
 Description = "TUTORIAL_MICROBE_EDITOR_PATCH_TEXT"
 
 [node name="CellEditorIntro" parent="." instance=ExtResource( 8 )]
@@ -58,11 +58,11 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-margin_left = -403.0
-margin_top = -134.0
-margin_right = -43.0
-margin_bottom = 206.0
-rect_min_size = Vector2( 360, 340 )
+offset_left = -403.0
+offset_top = -134.0
+offset_right = -43.0
+offset_bottom = 206.0
+custom_minimum_size = Vector2( 360, 340 )
 Description = "TUTORIAL_MICROBE_EDITOR_CELL_TEXT"
 ShowDelay = 0.7
 
@@ -71,11 +71,11 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-margin_left = -403.0
-margin_top = -134.0
-margin_right = -43.0
-margin_bottom = 206.0
-rect_min_size = Vector2( 360, 340 )
+offset_left = -403.0
+offset_top = -134.0
+offset_right = -43.0
+offset_bottom = 206.0
+custom_minimum_size = Vector2( 360, 340 )
 ShowCloseButton = false
 Description = "TUTORIAL_MICROBE_EDITOR_REMOVE_ORGANELLE_TEXT"
 ShowDelay = 0.3
@@ -88,11 +88,11 @@ anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-margin_left = -455.0
-margin_top = -150.0
-margin_right = -95.0
-margin_bottom = 225.0
-rect_min_size = Vector2( 360, 375 )
+offset_left = -455.0
+offset_top = -150.0
+offset_right = -95.0
+offset_bottom = 225.0
+custom_minimum_size = Vector2( 360, 375 )
 ShowCloseButton = false
 Description = "TUTORIAL_MICROBE_EDITOR_SELECT_ORGANELLE_TEXT"
 ShowDelay = 0.3
@@ -105,11 +105,11 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -180.0
-margin_top = -185.0
-margin_right = 180.0
-margin_bottom = 200.0
-rect_min_size = Vector2( 360, 385 )
+offset_left = -180.0
+offset_top = -185.0
+offset_right = 180.0
+offset_bottom = 200.0
+custom_minimum_size = Vector2( 360, 385 )
 theme = ExtResource( 2 )
 script = ExtResource( 7 )
 __meta__ = {
@@ -123,32 +123,32 @@ LabelPath = NodePath("ScrollContainer/VBoxContainer/CustomRichTextLabel")
 [node name="ScrollContainer" type="ScrollContainer" parent="CellEditorClosingWords"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-rect_min_size = Vector2( 230, 230 )
+custom_minimum_size = Vector2( 230, 230 )
 scroll_horizontal_enabled = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="CellEditorClosingWords/ScrollContainer"]
-margin_right = 360.0
-margin_bottom = 385.0
+offset_right = 360.0
+offset_bottom = 385.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="CustomRichTextLabel" parent="CellEditorClosingWords/ScrollContainer/VBoxContainer" instance=ExtResource( 5 )]
-margin_right = 360.0
+offset_right = 360.0
 custom_fonts/normal_font = ExtResource( 4 )
 ExtendedBbcode = ""
 
 [node name="Control" type="Control" parent="CellEditorClosingWords/ScrollContainer/VBoxContainer"]
-margin_top = 26.0
-margin_right = 360.0
-margin_bottom = 304.0
+offset_top = 26.0
+offset_right = 360.0
+offset_bottom = 304.0
 size_flags_vertical = 3
 
 [node name="Button" type="Button" parent="CellEditorClosingWords/ScrollContainer/VBoxContainer"]
-margin_left = 125.0
-margin_top = 308.0
-margin_right = 235.0
-margin_bottom = 340.0
-rect_min_size = Vector2( 110, 0 )
+offset_left = 125.0
+offset_top = 308.0
+offset_right = 235.0
+offset_bottom = 340.0
+custom_minimum_size = Vector2( 110, 0 )
 size_flags_horizontal = 4
 custom_fonts/font = ExtResource( 6 )
 text = "GOT_IT"
@@ -161,11 +161,11 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -180.0
-margin_top = -190.0
-margin_right = 180.0
-margin_bottom = 150.0
-rect_min_size = Vector2( 360, 390 )
+offset_left = -180.0
+offset_top = -190.0
+offset_right = 180.0
+offset_bottom = 150.0
+custom_minimum_size = Vector2( 360, 390 )
 ShowCloseButton = false
 Description = "TUTORIAL_MICROBE_EDITOR_AUTO-EVO_PREDICTION"
 ShowDelay = 0.7
@@ -175,11 +175,11 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -185.0
-margin_top = -180.0
-margin_right = 190.0
-margin_bottom = 205.0
-rect_min_size = Vector2( 375, 385 )
+offset_left = -185.0
+offset_top = -180.0
+offset_right = 190.0
+offset_bottom = 205.0
+custom_minimum_size = Vector2( 375, 385 )
 theme = ExtResource( 2 )
 script = ExtResource( 7 )
 __meta__ = {
@@ -193,32 +193,32 @@ LabelPath = NodePath("ScrollContainer/VBoxContainer/CustomRichTextLabel")
 [node name="ScrollContainer" type="ScrollContainer" parent="StaySmall"]
 anchor_right = 1.0
 anchor_bottom = 1.0
-rect_min_size = Vector2( 230, 230 )
+custom_minimum_size = Vector2( 230, 230 )
 scroll_horizontal_enabled = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="StaySmall/ScrollContainer"]
-margin_right = 375.0
-margin_bottom = 385.0
+offset_right = 375.0
+offset_bottom = 385.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="CustomRichTextLabel" parent="StaySmall/ScrollContainer/VBoxContainer" instance=ExtResource( 5 )]
-margin_right = 360.0
+offset_right = 360.0
 custom_fonts/normal_font = ExtResource( 4 )
 ExtendedBbcode = ""
 
 [node name="Control" type="Control" parent="StaySmall/ScrollContainer/VBoxContainer"]
-margin_top = 26.0
-margin_right = 360.0
-margin_bottom = 304.0
+offset_top = 26.0
+offset_right = 360.0
+offset_bottom = 304.0
 size_flags_vertical = 3
 
 [node name="Button" type="Button" parent="StaySmall/ScrollContainer/VBoxContainer"]
-margin_left = 125.0
-margin_top = 308.0
-margin_right = 235.0
-margin_bottom = 340.0
-rect_min_size = Vector2( 110, 0 )
+offset_left = 125.0
+offset_top = 308.0
+offset_right = 235.0
+offset_bottom = 340.0
+custom_minimum_size = Vector2( 110, 0 )
 size_flags_horizontal = 4
 custom_fonts/font = ExtResource( 6 )
 text = "CLOSE"

@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
 ///   Controls the little popup text saying "saving" and "save complete"
 /// </summary>
-public class SaveStatusOverlay : Control
+public partial class SaveStatusOverlay : Control
 {
     [Export]
     public NodePath? StatusLabelPath;
@@ -81,7 +81,7 @@ public class SaveStatusOverlay : Control
         errorDialog.ShowError(title, message, exception, returnToMenu, onClosed, allowExceptionCopy);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (hideTimer > 0)
         {
@@ -91,7 +91,7 @@ public class SaveStatusOverlay : Control
             }
             else
             {
-                hideTimer -= delta;
+                hideTimer -= (float)delta;
             }
         }
         else

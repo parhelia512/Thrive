@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
 ///   Adds radar capability to a cell
 /// </summary>
-public class ChemoreceptorComponent : ExternallyPositionedComponent
+public partial class ChemoreceptorComponent : ExternallyPositionedComponent
 {
     private Compound? targetCompound;
     private float searchRange;
@@ -38,12 +38,12 @@ public class ChemoreceptorComponent : ExternallyPositionedComponent
     protected override bool NeedsUpdateAnyway()
     {
         // TODO: https://github.com/Revolutionary-Games/Thrive/issues/2906
-        return organelle!.OrganelleGraphics!.Transform.basis == Transform.Identity.basis;
+        return organelle!.OrganelleGraphics!.Transform.Basis == Transform3D.Identity.Basis;
     }
 
-    protected override void OnPositionChanged(Quat rotation, float angle, Vector3 membraneCoords)
+    protected override void OnPositionChanged(Quaternion rotation, float angle, Vector3 membraneCoords)
     {
-        organelle!.OrganelleGraphics!.Transform = new Transform(rotation, membraneCoords);
+        organelle!.OrganelleGraphics!.Transform = new Transform3D(new Basis(rotation), membraneCoords);
     }
 
     private void SetConfiguration(ChemoreceptorUpgrades configuration)
@@ -63,7 +63,7 @@ public class ChemoreceptorComponent : ExternallyPositionedComponent
     }
 }
 
-public class ChemoreceptorComponentFactory : IOrganelleComponentFactory
+public partial class ChemoreceptorComponentFactory : IOrganelleComponentFactory
 {
     public IOrganelleComponent Create()
     {
@@ -76,7 +76,7 @@ public class ChemoreceptorComponentFactory : IOrganelleComponentFactory
 }
 
 [JSONDynamicTypeAllowed]
-public class ChemoreceptorUpgrades : IComponentSpecificUpgrades
+public partial class ChemoreceptorUpgrades : IComponentSpecificUpgrades
 {
     public ChemoreceptorUpgrades(Compound targetCompound, float searchRange, float searchAmount, Color lineColour)
     {

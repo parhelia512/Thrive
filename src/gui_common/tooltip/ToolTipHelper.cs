@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
@@ -22,7 +22,7 @@ public static class ToolTipHelper
     /// </summary>
     public static DefaultToolTip GetDefaultToolTip()
     {
-        return DefaultToolTipCache.Count == 0 ? (DefaultToolTip)DefaultTipScene.Instance() : DefaultToolTipCache.Pop();
+        return DefaultToolTipCache.Count == 0 ? (DefaultToolTip)DefaultTipScene.Instantiate() : DefaultToolTipCache.Pop();
     }
 
     /// <summary>
@@ -57,10 +57,10 @@ public static class ToolTipHelper
 
         var toolTipCallbackData = new ToolTipCallbackData(control, tooltip);
 
-        control.Connect("mouse_entered", toolTipCallbackData, nameof(ToolTipCallbackData.OnMouseEnter));
-        control.Connect("mouse_exited", toolTipCallbackData, nameof(ToolTipCallbackData.OnMouseExit));
-        control.Connect("hide", toolTipCallbackData, nameof(ToolTipCallbackData.OnMouseExit));
-        control.Connect("tree_exiting", toolTipCallbackData, nameof(ToolTipCallbackData.OnExitingTree));
+        control.Connect("mouse_entered",new Callable(toolTipCallbackData,nameof(ToolTipCallbackData.OnMouseEnter)));
+        control.Connect("mouse_exited",new Callable(toolTipCallbackData,nameof(ToolTipCallbackData.OnMouseExit)));
+        control.Connect("hide",new Callable(toolTipCallbackData,nameof(ToolTipCallbackData.OnMouseExit)));
+        control.Connect("tree_exiting",new Callable(toolTipCallbackData,nameof(ToolTipCallbackData.OnExitingTree)));
 
         ToolTipCallbacks.Add(toolTipCallbackData);
     }
@@ -75,10 +75,10 @@ public static class ToolTipHelper
 
         var data = GetToolTipCallbackData(control, tooltip);
 
-        control.Disconnect("mouse_entered", data, nameof(ToolTipCallbackData.OnMouseEnter));
-        control.Disconnect("mouse_exited", data, nameof(ToolTipCallbackData.OnMouseExit));
-        control.Disconnect("hide", data, nameof(ToolTipCallbackData.OnMouseExit));
-        control.Disconnect("tree_exiting", data, nameof(ToolTipCallbackData.OnExitingTree));
+        control.Disconnect("mouse_entered",new Callable(data,nameof(ToolTipCallbackData.OnMouseEnter)));
+        control.Disconnect("mouse_exited",new Callable(data,nameof(ToolTipCallbackData.OnMouseExit)));
+        control.Disconnect("hide",new Callable(data,nameof(ToolTipCallbackData.OnMouseExit)));
+        control.Disconnect("tree_exiting",new Callable(data,nameof(ToolTipCallbackData.OnExitingTree)));
 
         ToolTipCallbacks.Remove(data);
     }

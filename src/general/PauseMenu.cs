@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using Godot;
 
@@ -7,7 +7,7 @@ using Godot;
 /// </summary>
 [SuppressMessage("Usage", "CA2213:Disposable fields should be disposed", Justification =
     "We don't manually dispose Godot derived types")]
-public class PauseMenu : CustomDialog
+public partial class PauseMenu : CustomDialog
 {
     [Export]
     public string HelpCategory = null!;
@@ -58,20 +58,20 @@ public class PauseMenu : CustomDialog
     private int exitTries;
 
     [Signal]
-    public delegate void OnResumed();
+    public delegate void OnResumedEventHandler();
 
     /// <summary>
     ///   Triggered when the user hits ESC to open the pause menu
     /// </summary>
     [Signal]
-    public delegate void OnOpenWithKeyPress();
+    public delegate void OnOpenWithKeyPressEventHandler();
 
     /// <summary>
     ///   Called when a save needs to be made
     /// </summary>
     /// <param name="name">Name of the save to make or empty string</param>
     [Signal]
-    public delegate void MakeSave(string name);
+    public delegate void MakeSaveEventHandler(string name);
 
     /// <summary>
     ///   Types of exit the player can request. Used to store the action for when the warning popup
@@ -227,15 +227,15 @@ public class PauseMenu : CustomDialog
         unsavedProgressWarning = GetNode<CustomConfirmationDialog>(UnsavedProgressWarningPath);
         animationPlayer = GetNode<AnimationPlayer>("AnimationPlayer");
 
-        unsavedProgressWarning.Connect(nameof(Closed), this, nameof(CancelExit));
-        unsavedProgressWarning.Connect(nameof(CustomConfirmationDialog.Cancelled), this, nameof(CancelExit));
+        unsavedProgressWarning.Connect(nameof(Closed),new Callable(this,nameof(CancelExit)));
+        unsavedProgressWarning.Connect(nameof(CustomConfirmationDialog.Cancelled),new Callable(this,nameof(CancelExit)));
     }
 
     public override void _Notification(int notification)
     {
         base._Notification(notification);
 
-        if (notification == NotificationWmQuitRequest)
+        if (notification == NotificationWMCloseRequest)
         {
             // For some reason we need to perform this later, otherwise Godot complains about a node being busy
             // setting up children

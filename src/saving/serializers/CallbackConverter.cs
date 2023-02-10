@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 /// <summary>
 ///   Converter for callback methods
 /// </summary>
-public class CallbackConverter : JsonConverter
+public partial class CallbackConverter : JsonConverter
 {
     public override bool CanRead => true;
 
@@ -144,7 +144,7 @@ public class CallbackConverter : JsonConverter
 ///   </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class)]
-public class DeserializedCallbackTargetAttribute : Attribute
+public partial class DeserializedCallbackTargetAttribute : Attribute
 {
 }
 
@@ -152,6 +152,6 @@ public class DeserializedCallbackTargetAttribute : Attribute
 ///   Specifies that a method is valid deserialized callback target
 /// </summary>
 [AttributeUsage(AttributeTargets.Method)]
-public class DeserializedCallbackAllowedAttribute : Attribute
+public partial class DeserializedCallbackAllowedAttribute : Attribute
 {
 }

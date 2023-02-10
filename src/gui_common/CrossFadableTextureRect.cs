@@ -1,24 +1,24 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Displays image that can be changed smoothly with fade.
 /// </summary>
-public class CrossFadableTextureRect : TextureRect
+public partial class CrossFadableTextureRect : TextureRect
 {
-    private Texture? image;
+    private Texture2D? image;
 
 #pragma warning disable CA2213
     private Tween tween = null!;
 #pragma warning restore CA2213
 
     [Signal]
-    public delegate void Faded();
+    public delegate void FadedEventHandler();
 
     /// <summary>
     ///   Image to be displayed. This fades the texture rect. To change the image without fading use
-    ///   <see cref="TextureRect.Texture"/>.
+    ///   <see cref="TextureRect.Texture2D"/>.
     /// </summary>
-    public Texture? Image
+    public Texture2D? Image
     {
         get => image;
         set
@@ -45,14 +45,14 @@ public class CrossFadableTextureRect : TextureRect
             return;
         }
 
-        tween.InterpolateProperty(this, "modulate", null, Colors.Black, FadeDuration);
-        tween.Start();
+        tween.TweenProperty(this, "modulate", Colors.Black, FadeDuration);
+        tween.Play();
 
         tween.CheckAndConnect(
-            "tween_completed", this, nameof(OnFaded), null, (uint)ConnectFlags.Oneshot);
+            "tween_completed", this, nameof(OnFaded), null, (uint)ConnectFlags.OneShot);
     }
 
-    private void OnFaded(Object @object, NodePath key)
+    private void OnFaded(GodotObject @object, NodePath key)
     {
         _ = @object;
         _ = key;
@@ -60,7 +60,7 @@ public class CrossFadableTextureRect : TextureRect
         Texture = Image;
         EmitSignal(nameof(Faded));
 
-        tween.InterpolateProperty(this, "modulate", null, Colors.White, FadeDuration);
-        tween.Start();
+        tween.TweenProperty(this, "modulate", Colors.White, FadeDuration);
+        tween.Play();
     }
 }

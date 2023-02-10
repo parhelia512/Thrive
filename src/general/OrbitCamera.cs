@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
-///   Camera that rotates around a pivot.
+///   Camera3D that rotates around a pivot.
 /// </summary>
-public class OrbitCamera : Spatial
+public partial class OrbitCamera : Node3D
 {
     [Export]
     public float Distance = 5;
@@ -27,7 +27,7 @@ public class OrbitCamera : Spatial
     public float InterpolateZoomSpeed = 5.0f;
 
 #pragma warning disable CA2213
-    private Camera camera = null!;
+    private Camera3D camera = null!;
 #pragma warning restore CA2213
 
     private Vector3 rotation;
@@ -47,7 +47,7 @@ public class OrbitCamera : Spatial
 
     public override void _Ready()
     {
-        camera = GetNode<Camera>("Camera");
+        camera = GetNode<Camera3D>("Camera3D");
     }
 
     [RunOnAxis(new[] { "g_zoom_in", "g_zoom_out" }, new[] { -1.0f, 1.0f }, UseDiscreteKeyInputs = true,
@@ -57,27 +57,27 @@ public class OrbitCamera : Spatial
         Distance += ZoomSpeed * value * delta * 165;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
-        rotation.x -= moveSpeed.y * delta * RotationSpeed;
-        rotation.y -= moveSpeed.x * delta * RotationSpeed;
-        rotation.x = rotation.x.Clamp(-Mathf.Pi / 2, Mathf.Pi / 2);
+        rotation.X -= moveSpeed.Y * (float)delta * RotationSpeed;
+        rotation.Y -= moveSpeed.X * (float)delta * RotationSpeed;
+        rotation.X = rotation.X.Clamp(-Mathf.Pi / 2, Mathf.Pi / 2);
         moveSpeed = Vector2.Zero;
 
         Distance = Distance.Clamp(MinCameraDistance, MaxCameraDistance);
 
-        camera.Translation = camera.Translation.LinearInterpolate(
-            new Vector3(0, 0, Distance), InterpolateZoomSpeed * delta);
+        camera.Position = camera.Position.Lerp(
+            new Vector3(0, 0, Distance), InterpolateZoomSpeed * (float)delta);
 
-        var currentRotation = new Quat(Transform.basis);
-        var targetRotation = new Quat(rotation);
-        var smoothRotation = currentRotation.Slerp(targetRotation, InterpolateRotationSpeed * delta);
-        Transform = new Transform(new Basis(smoothRotation), Translation);
+        var currentRotation = new Quaternion(Transform.Basis);
+        var targetRotation = new Quaternion(rotation.Normalized(), 0);
+        var smoothRotation = currentRotation.Slerp(targetRotation, InterpolateRotationSpeed * (float)delta);
+        Transform = new Transform3D(new Basis(smoothRotation), Position);
     }
 
     public override void _Input(InputEvent @event)
     {
-        if (@event is InputEventMouseMotion motion && Input.IsMouseButtonPressed((int)ButtonList.Left))
+        if (@event is InputEventMouseMotion motion && Input.IsMouseButtonPressed(MouseButton.Left))
         {
             moveSpeed = motion.Relative;
         }

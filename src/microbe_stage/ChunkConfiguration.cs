@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 using Newtonsoft.Json;
@@ -133,7 +133,7 @@ public struct ChunkConfiguration : IEquatable<ChunkConfiguration>
     /// <summary>
     ///   Don't modify instances of this class
     /// </summary>
-    public class ChunkScene : ISaveLoadable
+    public partial class ChunkScene : ISaveLoadable
     {
         public string ScenePath = null!;
 
@@ -143,7 +143,7 @@ public struct ChunkConfiguration : IEquatable<ChunkConfiguration>
         public string? ConvexShapePath;
 
         /// <summary>
-        ///   Path to the MeshInstance inside the ScenePath scene, null if it is the root
+        ///   Path to the MeshInstance3D inside the ScenePath scene, null if it is the root
         /// </summary>
         public string? SceneModelPath;
 
@@ -156,7 +156,7 @@ public struct ChunkConfiguration : IEquatable<ChunkConfiguration>
         public PackedScene? LoadedScene;
 
         [JsonIgnore]
-        public ConvexPolygonShape? LoadedConvexShape;
+        public ConvexPolygonShape3D? LoadedConvexShape;
 
         public void LoadScene()
         {
@@ -166,7 +166,7 @@ public struct ChunkConfiguration : IEquatable<ChunkConfiguration>
             LoadedScene = GD.Load<PackedScene>(ScenePath);
 
             if (!string.IsNullOrEmpty(ConvexShapePath))
-                LoadedConvexShape = GD.Load<ConvexPolygonShape>(ConvexShapePath);
+                LoadedConvexShape = GD.Load<ConvexPolygonShape3D>(ConvexShapePath);
         }
 
         public void FinishLoading(ISaveContext? context)

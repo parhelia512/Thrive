@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -13,7 +13,7 @@ using System.Linq;
 ///     <see cref="Patch"/> which contains a dictionary of species.
 ///   </para>
 /// </remarks>
-public class ThriveTypeConverter : TypeConverter
+public partial class ThriveTypeConverter : TypeConverter
 {
     private static readonly Type StringType = typeof(string);
 
@@ -59,6 +59,6 @@ public class ThriveTypeConverter : TypeConverter
 ///   Attribute for marking a class compatible with ThriveTypeConverter
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
-public class UseThriveConverterAttribute : Attribute
+public partial class UseThriveConverterAttribute : Attribute
 {
 }

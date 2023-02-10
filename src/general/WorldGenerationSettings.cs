@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using Godot;
@@ -146,7 +146,7 @@ public class WorldGenerationSettings
 
     public override string ToString()
     {
-        return "World generation settings: [" +
+        return "World3D generation settings: [" +
             $"LAWK: {LAWK}" +
             $", Difficulty: {Difficulty.GetDescriptionString()}" +
             $", Life origin: {Origin}" +

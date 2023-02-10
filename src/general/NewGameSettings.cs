@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Godot;
 
-public class NewGameSettings : ControlWithInput
+public partial class NewGameSettings : ControlWithInput
 {
     [Export]
     public NodePath? BasicOptionsPath;
@@ -194,10 +194,10 @@ public class NewGameSettings : ControlWithInput
     private DifficultyPreset custom = null!;
 
     [Signal]
-    public delegate void OnNewGameSettingsClosed();
+    public delegate void OnNewGameSettingsClosedEventHandler();
 
     [Signal]
-    public delegate void OnWantToSwitchToOptionsMenu();
+    public delegate void OnWantToSwitchToOptionsMenuEventHandler();
 
     private enum SelectedOptionsTab
     {
@@ -288,7 +288,7 @@ public class NewGameSettings : ControlWithInput
         SetSeed(seed);
 
         // Make sure non-lawk options are disabled if lawk is set to true on start-up
-        UpdateLifeOriginOptions(lawkButton.Pressed);
+        UpdateLifeOriginOptions(lawkButton.ButtonPressed);
     }
 
     [RunOnKeyDown("ui_cancel", Priority = Constants.SUBMENU_CANCEL_PRIORITY)]
@@ -323,14 +323,14 @@ public class NewGameSettings : ControlWithInput
             GUICommon.MarkInputAsValid(gameSeed);
             GUICommon.MarkInputAsValid(gameSeedAdvanced);
             confirmButton.Disabled = false;
-            confirmButton.HintTooltip = TranslationServer.Translate("CONFIRM_NEW_GAME_BUTTON_TOOLTIP");
+            confirmButton.TooltipText = TranslationServer.Translate("CONFIRM_NEW_GAME_BUTTON_TOOLTIP");
         }
         else
         {
             GUICommon.MarkInputAsInvalid(gameSeed);
             GUICommon.MarkInputAsInvalid(gameSeedAdvanced);
             confirmButton.Disabled = true;
-            confirmButton.HintTooltip = TranslationServer.Translate("CONFIRM_NEW_GAME_BUTTON_TOOLTIP_DISABLED");
+            confirmButton.TooltipText = TranslationServer.Translate("CONFIRM_NEW_GAME_BUTTON_TOOLTIP_DISABLED");
         }
     }
 
@@ -427,15 +427,15 @@ public class NewGameSettings : ControlWithInput
         {
             case SelectedOptionsTab.Difficulty:
                 difficultyTab.Show();
-                difficultyTabButton.Pressed = true;
+                difficultyTabButton.ButtonPressed = true;
                 break;
             case SelectedOptionsTab.Planet:
                 planetTab.Show();
-                planetTabButton.Pressed = true;
+                planetTabButton.ButtonPressed = true;
                 break;
             case SelectedOptionsTab.Miscellaneous:
                 miscTab.Show();
-                miscTabButton.Pressed = true;
+                miscTabButton.ButtonPressed = true;
                 break;
             default:
                 GD.PrintErr("Invalid tab");
@@ -507,9 +507,9 @@ public class NewGameSettings : ControlWithInput
                 PlayerDeathPopulationPenalty = (float)playerDeathPopulationPenalty.Value,
                 GlucoseDecay = (float)glucoseDecayRate.Value * 0.01f,
                 OsmoregulationMultiplier = (float)osmoregulationMultiplier.Value,
-                FreeGlucoseCloud = freeGlucoseCloudButton.Pressed,
-                PassiveReproduction = passiveReproductionButton.Pressed,
-                LimitGrowthRate = limitGrowthRateButton.Pressed,
+                FreeGlucoseCloud = freeGlucoseCloudButton.ButtonPressed,
+                PassiveReproduction = passiveReproductionButton.ButtonPressed,
+                LimitGrowthRate = limitGrowthRateButton.ButtonPressed,
             };
 
             settings.Difficulty = customDifficulty;
@@ -521,13 +521,13 @@ public class NewGameSettings : ControlWithInput
 
         settings.MapType = MapTypeIndexToValue(mapTypeButton.Selected);
         settings.Origin = (WorldGenerationSettings.LifeOrigin)lifeOriginButton.Selected;
-        settings.LAWK = lawkButton.Pressed;
-        settings.DayNightCycleEnabled = dayNightCycleButton.Pressed;
+        settings.LAWK = lawkButton.ButtonPressed;
+        settings.DayNightCycleEnabled = dayNightCycleButton.ButtonPressed;
         settings.DayLength = (int)dayLength.Value;
         settings.Seed = latestValidSeed;
 
-        settings.IncludeMulticellular = includeMulticellularButton.Pressed;
-        settings.EasterEggs = easterEggsButton.Pressed;
+        settings.IncludeMulticellular = includeMulticellularButton.ButtonPressed;
+        settings.EasterEggs = easterEggsButton.ButtonPressed;
 
         // Stop music for the video (stop is used instead of pause to stop the menu music playing a bit after the video
         // before the stage music starts)
@@ -553,7 +553,7 @@ public class NewGameSettings : ControlWithInput
             MainMenu.OnEnteringGame();
 
             // TODO: Add loading screen while changing between scenes
-            var microbeStage = (MicrobeStage)SceneManager.Instance.LoadScene(MainGameState.MicrobeStage).Instance();
+            var microbeStage = (MicrobeStage)SceneManager.Instance.LoadScene(MainGameState.MicrobeStage).Instantiate();
             microbeStage.CurrentGame = GameProperties.StartNewMicrobeGame(settings);
             SceneManager.Instance.SwitchToScene(microbeStage);
         });
@@ -584,9 +584,9 @@ public class NewGameSettings : ControlWithInput
         playerDeathPopulationPenalty.Value = preset.PlayerDeathPopulationPenalty;
         glucoseDecayRate.Value = preset.GlucoseDecay * 100;
         osmoregulationMultiplier.Value = preset.OsmoregulationMultiplier;
-        freeGlucoseCloudButton.Pressed = preset.FreeGlucoseCloud;
-        passiveReproductionButton.Pressed = preset.PassiveReproduction;
-        limitGrowthRateButton.Pressed = preset.LimitGrowthRate;
+        freeGlucoseCloudButton.ButtonPressed = preset.FreeGlucoseCloud;
+        passiveReproductionButton.ButtonPressed = preset.PassiveReproduction;
+        limitGrowthRateButton.ButtonPressed = preset.LimitGrowthRate;
 
         UpdateSelectedDifficultyPresetControl();
     }
@@ -618,13 +618,13 @@ public class NewGameSettings : ControlWithInput
             if (Math.Abs((float)osmoregulationMultiplier.Value - preset.OsmoregulationMultiplier) > MathUtils.EPSILON)
                 continue;
 
-            if (freeGlucoseCloudButton.Pressed != preset.FreeGlucoseCloud)
+            if (freeGlucoseCloudButton.ButtonPressed != preset.FreeGlucoseCloud)
                 continue;
 
-            if (passiveReproductionButton.Pressed != preset.PassiveReproduction)
+            if (passiveReproductionButton.ButtonPressed != preset.PassiveReproduction)
                 continue;
 
-            if (limitGrowthRateButton.Pressed != preset.LimitGrowthRate)
+            if (limitGrowthRateButton.ButtonPressed != preset.LimitGrowthRate)
                 continue;
 
             // If all values are equal to the values for a preset, use that preset
@@ -735,8 +735,8 @@ public class NewGameSettings : ControlWithInput
     private void OnLAWKToggled(bool pressed)
     {
         // Set both buttons here as we only received a signal from one of them
-        lawkButton.Pressed = pressed;
-        lawkAdvancedButton.Pressed = pressed;
+        lawkButton.ButtonPressed = pressed;
+        lawkAdvancedButton.ButtonPressed = pressed;
 
         UpdateLifeOriginOptions(pressed);
     }

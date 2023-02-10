@@ -1,22 +1,22 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Implementation of the default <see cref="IModInterface"/>
 /// </summary>
-public class ModInterface : IModInterface
+public partial class ModInterface : IModInterface
 {
     public ModInterface(SceneTree sceneTree)
     {
         SceneTree = sceneTree;
     }
 
-    public event IModInterface.OnSceneChangedHandler? OnSceneChanged;
-    public event IModInterface.OnDamageReceivedHandler? OnDamageReceived;
-    public event IModInterface.OnPlayerMicrobeSpawnedHandler? OnPlayerMicrobeSpawned;
-    public event IModInterface.OnMicrobeSpawnedHandler? OnMicrobeSpawned;
-    public event IModInterface.OnChunkSpawnedHandler? OnChunkSpawned;
-    public event IModInterface.OnToxinEmittedHandler? OnToxinEmitted;
-    public event IModInterface.OnMicrobeDiedHandler? OnMicrobeDied;
+    public event IModInterface.OnSceneChangedEventHandler? OnSceneChanged;
+    public event IModInterface.OnDamageReceivedEventHandler? OnDamageReceived;
+    public event IModInterface.OnPlayerMicrobeSpawnedEventHandler? OnPlayerMicrobeSpawned;
+    public event IModInterface.OnMicrobeSpawnedEventHandler? OnMicrobeSpawned;
+    public event IModInterface.OnChunkSpawnedEventHandler? OnChunkSpawned;
+    public event IModInterface.OnToxinEmittedEventHandler? OnToxinEmitted;
+    public event IModInterface.OnMicrobeDiedEventHandler? OnMicrobeDied;
 
     public SceneTree SceneTree { get; }
 

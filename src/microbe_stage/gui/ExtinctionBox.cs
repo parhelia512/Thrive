@@ -1,6 +1,6 @@
-﻿using Godot;
+using Godot;
 
-public class ExtinctionBox : CustomDialog
+public partial class ExtinctionBox : CustomDialog
 {
     [Export]
     public NodePath? ExtinctionMenuPath;

@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Interface for <see cref="StageHUDBase{TStage}"/> to make complex inter dependencies work like with
 ///   <see cref="IEditor"/>
 /// </summary>

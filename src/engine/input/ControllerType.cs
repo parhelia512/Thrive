@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   The type of a controller, used to determine which button icon set to use. Only add new values to the end as
 ///   these are saved as ints.
 /// </summary>

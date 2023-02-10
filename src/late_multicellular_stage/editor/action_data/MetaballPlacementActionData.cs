@@ -1,7 +1,7 @@
-﻿using Godot;
+using Godot;
 using Newtonsoft.Json;
 
-public class MetaballPlacementActionData<TMetaball> : EditorCombinableActionData
+public partial class MetaballPlacementActionData<TMetaball> : EditorCombinableActionData
     where TMetaball : Metaball
 {
     public TMetaball PlacedMetaball;

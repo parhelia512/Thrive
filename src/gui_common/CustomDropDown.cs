@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
 
 /// <summary>
@@ -6,7 +6,7 @@ using Godot;
 ///   such as adjusted custom icon size with tweakable color and some slide down animation.
 ///   (Might need to expand this later)
 /// </summary>
-public class CustomDropDown : MenuButton
+public partial class CustomDropDown : MenuButton
 {
 #pragma warning disable CA2213
     /// <summary>
@@ -33,19 +33,17 @@ public class CustomDropDown : MenuButton
         Popup = GetPopup();
         tween = new Tween();
 
-        AddChild(tween);
+        cachedPopupVSeparation = Popup.GetThemeConstant("vseparation");
 
-        cachedPopupVSeparation = Popup.GetConstant("vseparation");
-
-        var checkSize = Popup.GetIcon("checked").GetSize();
+        var checkSize = Popup.GetThemeIcon("checked").GetSize();
 
         // Set the custom icon size
-        iconSize = new Vector2(checkSize.x - 2, checkSize.y - 2);
+        iconSize = new Vector2(checkSize.X - 2, checkSize.Y - 2);
 
-        Popup.RectClipContent = true;
+        // Popup.ClipContents = true;
 
-        Connect("about_to_show", this, nameof(OnPopupAboutToShow));
-        Popup.Connect("draw", this, nameof(RedrawPopup));
+        Connect("about_to_show",new Callable(this,nameof(OnPopupAboutToShow)));
+        Popup.Connect("draw",new Callable(this,nameof(RedrawPopup)));
     }
 
     public override void _Draw()
@@ -66,7 +64,7 @@ public class CustomDropDown : MenuButton
     /// <returns>
     ///   The CustomDropDown's own Item class. All custom operations relating to the dropdown uses this.
     /// </returns>
-    public Item AddItem(string text, bool checkable, Color color, Texture? icon = null,
+    public Item AddItem(string text, bool checkable, Color color, Texture2D? icon = null,
         string section = "default")
     {
         if (!items.ContainsKey(section))
@@ -180,8 +178,8 @@ public class CustomDropDown : MenuButton
         }
 
         // Redraw the menu button and popup
-        Popup.Update();
-        Update();
+        // Popup; // TODO: ?????
+        // Update();
     }
 
     private void RedrawPopup()
@@ -197,10 +195,10 @@ public class CustomDropDown : MenuButton
     private void ReadjustRectSizes()
     {
         // Adjust the menu button to have the same length as the popup
-        RectMinSize = new Vector2(Popup.GetMinimumSize().x + iconSize.x + 6, RectMinSize.y);
+        // CustomMinimumSize = new Vector2(Popup.X + iconSize.X + 6, CustomMinimumSize.Y);
 
         // Set popup to minimum length
-        Popup.RectSize = new Vector2(RectSize.x, 0);
+        Popup.Size = new Vector2I((int)Size.X, 0);
     }
 
     /// <summary>
@@ -211,10 +209,10 @@ public class CustomDropDown : MenuButton
         if (!Popup.Visible)
             return;
 
-        var font = Popup.GetFont("font");
+        var font = Popup.GetThemeFont("font");
 
         // Offset from the top
-        var height = Popup.GetStylebox("panel").ContentMarginTop + (font.GetHeight() / 2) - (iconSize.y / 2);
+        var height = Popup.GetThemeStylebox("panel").ContentMarginTop + (font.GetHeight() / 2) - (iconSize.Y / 2);
 
         foreach (var section in items)
         {
@@ -222,7 +220,7 @@ public class CustomDropDown : MenuButton
             {
                 if (item.Separator && item.Text != "default")
                 {
-                    height += font.GetHeight() + Popup.GetConstant("vseparation");
+                    height += font.GetHeight() + Popup.GetThemeConstant("vseparation");
                     continue;
                 }
 
@@ -230,23 +228,26 @@ public class CustomDropDown : MenuButton
                 if (item.Icon == null)
                     continue;
 
-                var position = new Vector2(Popup.RectSize.x - iconSize.x - 6, height);
+                var position = new Vector2(Popup.Size.X - iconSize.X - 6, height);
 
-                Popup.DrawTextureRect(item.Icon, new Rect2(position, iconSize), false, item.Color);
+                // Popup.DrawTextureRect(item.Icon, new Rect2(position, iconSize), false, item.Color);
 
-                height += font.GetHeight() + Popup.GetConstant("vseparation");
+                height += font.GetHeight() + Popup.GetThemeConstant("vseparation");
             }
         }
     }
 
     private void OnPopupAboutToShow()
     {
-        Popup.AddConstantOverride("vseparation", -14);
+        Popup.AddThemeConstantOverride("vseparation", -14);
+
+        Popup.Set("custom_constants/vseparation", -14);
 
         // Animate slide down
-        tween.InterpolateProperty(Popup, "custom_constants/vseparation", -14, cachedPopupVSeparation, 0.1f,
-            Tween.TransitionType.Cubic, Tween.EaseType.Out);
-        tween.Start();
+        tween.TweenProperty(Popup, "custom_constants/vseparation", cachedPopupVSeparation, 0.1f);
+        tween.SetTrans(Tween.TransitionType.Cubic);
+        tween.SetEase(Tween.EaseType.Out);
+        tween.Play();
     }
 
     /// <summary>
@@ -259,10 +260,10 @@ public class CustomDropDown : MenuButton
     ///     change the internal items by using methods in <see cref="Popup"/>.
     ///   </para>
     /// </remarks>
-    public class Item
+    public partial class Item
     {
         public string Text = string.Empty;
-        public Texture? Icon;
+        public Texture2D? Icon;
         public Color Color;
         public bool Checkable;
         public bool Checked;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   A combinable action data can be combined with other actions.

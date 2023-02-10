@@ -1,11 +1,11 @@
-﻿/// <summary>
+/// <summary>
 ///   Used to detect if a binding agent is present
 /// </summary>
-public class BindingAgentComponent : EmptyOrganelleComponent
+public partial class BindingAgentComponent : EmptyOrganelleComponent
 {
 }
 
-public class BindingAgentComponentFactory : IOrganelleComponentFactory
+public partial class BindingAgentComponentFactory : IOrganelleComponentFactory
 {
     public IOrganelleComponent Create()
     {

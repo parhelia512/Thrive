@@ -1,4 +1,4 @@
-﻿public interface IEditorWithActions : IEditor
+public interface IEditorWithActions : IEditor
 {
     public new int MutationPoints { get; set; }
 

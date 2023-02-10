@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   An extended version of <see cref="ModInfo"/> that contains non-mod author controlled data
 /// </summary>
-public class FullModDetails : IEquatable<FullModDetails>
+public partial class FullModDetails : IEquatable<FullModDetails>
 {
     public FullModDetails(string internalName, string folder, ModInfo info)
     {

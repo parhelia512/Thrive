@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -10,7 +10,7 @@ public interface IGraphicalEntity : IEntity
     ///   This entity's visual instance.
     /// </summary>
     [JsonIgnore]
-    public GeometryInstance EntityGraphics { get; }
+    public GeometryInstance3D EntityGraphics { get; }
 
     [JsonIgnore]
     public int RenderPriority { get; set; }

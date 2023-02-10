@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
 ///   Converter for PackedScene
 /// </summary>
-public class PackedSceneConverter : JsonConverter
+public partial class PackedSceneConverter : JsonConverter
 {
     public override bool CanRead => true;
 

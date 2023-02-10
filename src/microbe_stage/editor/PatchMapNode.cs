@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
 ///   A single patch in PatchMapDrawer
 /// </summary>
-public class PatchMapNode : MarginContainer
+public partial class PatchMapNode : MarginContainer
 {
     [Export]
     public NodePath? IconPath;
@@ -37,7 +37,7 @@ public class PatchMapNode : MarginContainer
     private Panel? adjacentHighlightPanel;
 #pragma warning restore CA2213
 
-    private Texture? patchIcon;
+    private Texture2D? patchIcon;
 
     /// <summary>
     ///   True if mouse is hovering on this node
@@ -101,7 +101,7 @@ public class PatchMapNode : MarginContainer
         }
     }
 
-    public Texture? PatchIcon
+    public Texture2D? PatchIcon
     {
         get => patchIcon;
         set
@@ -176,11 +176,11 @@ public class PatchMapNode : MarginContainer
         UpdateGreyscale();
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
-        currentBlinkTime += delta;
+        currentBlinkTime += (float)delta;
         if (currentBlinkTime > HalfBlinkInterval)
         {
             currentBlinkTime = 0;
@@ -197,12 +197,12 @@ public class PatchMapNode : MarginContainer
 
         if (@event is InputEventMouseButton
             {
-                Pressed: true, ButtonIndex: (int)ButtonList.Left or (int)ButtonList.Right,
+                Pressed: true, ButtonIndex: MouseButton.Left or MouseButton.Right,
             })
         {
             IsDirty = true;
             OnSelect();
-            GetTree().SetInputAsHandled();
+            GetViewport().SetInputAsHandled();
         }
     }
 

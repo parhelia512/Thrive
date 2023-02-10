@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 ///   Manages the microbe HUD
 /// </summary>
 [JsonObject(MemberSerialization.OptIn)]
-public class MicrobeHUD : StageHUDBase<MicrobeStage>
+public partial class MicrobeHUD : StageHUDBase<MicrobeStage>
 {
     [Export]
     public NodePath? MulticellularButtonPath;
@@ -56,10 +56,10 @@ public class MicrobeHUD : StageHUDBase<MicrobeStage>
 
     // These signals need to be copied to inheriting classes for Godot editor to pick them up
     [Signal]
-    public new delegate void OnOpenMenu();
+    public new delegate void OnOpenMenuEventHandler();
 
     [Signal]
-    public new delegate void OnOpenMenuToHelp();
+    public new delegate void OnOpenMenuToHelpEventHandler();
 
     protected override string? UnPauseHelpText => TranslationServer.Translate("PAUSE_PROMPT");
 
@@ -79,7 +79,7 @@ public class MicrobeHUD : StageHUDBase<MicrobeStage>
         macroscopicButton.Visible = false;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -159,11 +159,11 @@ public class MicrobeHUD : StageHUDBase<MicrobeStage>
 
         winExtinctBoxHolder.Show();
 
-        winBox = WinBoxScene.Instance<CustomDialog>();
+        winBox = WinBoxScene.Instantiate<CustomDialog>();
         winExtinctBoxHolder.AddChild(winBox);
         winBox.Show();
 
-        winBox.GetNode<Timer>("Timer").Connect("timeout", this, nameof(ToggleWinBox));
+        winBox.GetNode<Timer>("Timer").Connect("timeout",new Callable(this,nameof(ToggleWinBox)));
     }
 
     public override void ShowFossilisationButtons()
@@ -175,16 +175,16 @@ public class MicrobeHUD : StageHUDBase<MicrobeStage>
             if (microbe.Species is not MicrobeSpecies)
                 continue;
 
-            var button = FossilisationButtonScene.Instance<FossilisationButton>();
+            var button = FossilisationButtonScene.Instantiate<FossilisationButton>();
             button.AttachedEntity = microbe;
-            button.Connect(nameof(FossilisationButton.OnFossilisationDialogOpened), this,
-                nameof(ShowFossilisationDialog));
+            button.Connect(nameof(FossilisationButton.OnFossilisationDialogOpened),
+                Callable.From<FossilisationButton>(ShowFossilisationDialog));
 
             // Display a faded button with a different hint if the species has been fossilised.
             var alreadyFossilised =
                 FossilisedSpecies.IsSpeciesAlreadyFossilised(microbe.Species.FormattedName, fossils);
             button.AlreadyFossilised = alreadyFossilised;
-            button.HintTooltip = alreadyFossilised ?
+            button.TooltipText = alreadyFossilised ?
                 TranslationServer.Translate("FOSSILISATION_HINT_ALREADY_FOSSILISED") :
                 TranslationServer.Translate("FOSSILISATION_HINT");
 
@@ -259,7 +259,7 @@ public class MicrobeHUD : StageHUDBase<MicrobeStage>
         healthBar.MaxValue = maxHP;
         GUICommon.SmoothlyUpdateBar(healthBar, hp, delta);
         hpLabel.Text = hpText;
-        hpLabel.HintTooltip = hpText;
+        hpLabel.TooltipText = hpText;
     }
 
     protected override CompoundBag? GetPlayerUsefulCompounds()
@@ -307,12 +307,12 @@ public class MicrobeHUD : StageHUDBase<MicrobeStage>
         return stage!.Player!.Colony?.ColonyCompounds ?? (ICompoundStorage)stage.Player.Compounds;
     }
 
-    protected override void UpdateCompoundBars(float delta)
+    protected override void UpdateCompoundBars(double delta)
     {
         base.UpdateCompoundBars(delta);
 
         ingestedMatterBar.MaxValue = stage!.Player!.Colony?.HexCount ?? stage.Player.HexCount;
-        GUICommon.SmoothlyUpdateBar(ingestedMatterBar, GetPlayerUsedIngestionCapacity(), delta);
+        GUICommon.SmoothlyUpdateBar(ingestedMatterBar, GetPlayerUsedIngestionCapacity(), (float)delta);
         ingestedMatterBar.GetNode<Label>("Value").Text = ingestedMatterBar.Value + " / " + ingestedMatterBar.MaxValue;
     }
 
@@ -340,7 +340,7 @@ public class MicrobeHUD : StageHUDBase<MicrobeStage>
     protected override string GetMouseHoverCoordinateText()
     {
         return TranslationServer.Translate("STUFF_AT")
-            .FormatSafe(stage!.Camera.CursorWorldPos.x, stage.Camera.CursorWorldPos.z);
+            .FormatSafe(stage!.Camera3D.CursorWorldPos.X, stage.Camera3D.CursorWorldPos.Z);
     }
 
     protected override void UpdateAbilitiesHotBar()
@@ -368,8 +368,8 @@ public class MicrobeHUD : StageHUDBase<MicrobeStage>
         bindingModeHotkey.Visible = player.CanBind;
         unbindAllHotkey.Visible = player.CanUnbind;
 
-        bindingModeHotkey.Pressed = player.State == Microbe.MicrobeState.Binding;
-        unbindAllHotkey.Pressed = Input.IsActionPressed(unbindAllHotkey.ActionName);
+        bindingModeHotkey.ButtonPressed = player.State == Microbe.MicrobeState.Binding;
+        unbindAllHotkey.ButtonPressed = Input.IsActionPressed(unbindAllHotkey.ActionName);
     }
 
     private void OnRadialItemSelected(int itemId)

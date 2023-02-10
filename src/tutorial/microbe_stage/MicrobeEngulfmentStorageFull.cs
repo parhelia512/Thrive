@@ -1,8 +1,8 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
-    public class MicrobeEngulfmentStorageFull : TutorialPhase
+    public partial class MicrobeEngulfmentStorageFull : TutorialPhase
     {
         public override string ClosedByName => "MicrobeEngulfmentStorageFull";
 

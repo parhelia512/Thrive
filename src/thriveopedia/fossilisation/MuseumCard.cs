@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Card displaying a fossilised species in the Thriveopedia museum.
 /// </summary>
-public class MuseumCard : Button
+public partial class MuseumCard : Button
 {
     [Export]
     public NodePath? SpeciesNameLabelPath;
@@ -22,7 +22,7 @@ public class MuseumCard : Button
     private Image? fossilPreviewImage;
 
     [Signal]
-    public delegate void OnSpeciesSelected(MuseumCard card);
+    public delegate void OnSpeciesSelectedEventHandler(MuseumCard card);
 
     /// <summary>
     ///   The fossilised species associated with this card.
@@ -93,12 +93,11 @@ public class MuseumCard : Button
 
         if (FossilPreviewImage != null)
         {
-            var imageTexture = new ImageTexture();
+            var imageTexture = ImageTexture.CreateFromImage(FossilPreviewImage);
 
             // Could add filter and mipmap flags here if the preview images look too bad at small sizes, but that
             // would presumably make this take more time, so maybe then this shouldn't be done in a blocking way here
             // and instead using ResourceManager
-            imageTexture.CreateFromImage(FossilPreviewImage);
 
             speciesPreview.Texture = imageTexture;
         }
@@ -112,13 +111,13 @@ public class MuseumCard : Button
 
     private void OnMouseEnter()
     {
-        GUICommon.Instance.Tween.InterpolateProperty(speciesPreview, "modulate", null, Colors.Gray, 0.5f);
-        GUICommon.Instance.Tween.Start();
+        // GUICommon.Instance.Tween.InterpolateProperty(speciesPreview, "modulate", null, Colors.Gray, 0.5f);
+        // GUICommon.Instance.Tween.Start();
     }
 
     private void OnMouseExit()
     {
-        GUICommon.Instance.Tween.InterpolateProperty(speciesPreview, "modulate", null, Colors.White, 0.5f);
-        GUICommon.Instance.Tween.Start();
+        // GUICommon.Instance.Tween.InterpolateProperty(speciesPreview, "modulate", null, Colors.White, 0.5f);
+        // GUICommon.Instance.Tween.Start();
     }
 }

@@ -1,6 +1,6 @@
-﻿using Godot;
+using Godot;
 
-public class LysosomeComponent : IOrganelleComponent
+public partial class LysosomeComponent : IOrganelleComponent
 {
     public void OnAttachToCell(PlacedOrganelle organelle)
     {
@@ -32,7 +32,7 @@ public class LysosomeComponent : IOrganelleComponent
     }
 }
 
-public class LysosomeComponentFactory : IOrganelleComponentFactory
+public partial class LysosomeComponentFactory : IOrganelleComponentFactory
 {
     public IOrganelleComponent Create()
     {
@@ -45,7 +45,7 @@ public class LysosomeComponentFactory : IOrganelleComponentFactory
 }
 
 [JSONDynamicTypeAllowed]
-public class LysosomeUpgrades : IComponentSpecificUpgrades
+public partial class LysosomeUpgrades : IComponentSpecificUpgrades
 {
     public LysosomeUpgrades(Enzyme enzyme)
     {

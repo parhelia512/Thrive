@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Customized difficulty setting
 /// </summary>
 [CustomizedRegistryType]

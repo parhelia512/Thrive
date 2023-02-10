@@ -1,4 +1,4 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
     using Godot;
@@ -7,7 +7,7 @@
     /// <summary>
     ///   Redo tutorial in the cell editor
     /// </summary>
-    public class EditorRedoTutorial : TutorialPhase
+    public partial class EditorRedoTutorial : TutorialPhase
     {
         public override string ClosedByName => "CellEditorRedo";
 

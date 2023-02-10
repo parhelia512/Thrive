@@ -1,4 +1,4 @@
-﻿public interface IRegistryType : IRegistryAssignable
+public interface IRegistryType : IRegistryAssignable
 {
     /// <summary>
     ///   The name referred to this registry object in json

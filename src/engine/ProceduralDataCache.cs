@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
 /// <summary>
 ///   Stores procedurally generated data to speed up things by not requiring it to be recomputed
 /// </summary>
-public class ProceduralDataCache : Node
+public partial class ProceduralDataCache : Node
 {
     private static ProceduralDataCache? instance;
 
@@ -13,8 +13,8 @@ public class ProceduralDataCache : Node
 
     private MainGameState previousState = MainGameState.Invalid;
 
-    private float currentTime;
-    private float timeSinceClean;
+    private double currentTime;
+    private double timeSinceClean;
 
     private ProceduralDataCache()
     {
@@ -23,7 +23,7 @@ public class ProceduralDataCache : Node
 
     public static ProceduralDataCache Instance => instance ?? throw new InstanceNotLoadedYetException();
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         currentTime += delta;
         timeSinceClean += delta;
@@ -79,6 +79,7 @@ public class ProceduralDataCache : Node
     }
 
     private void CleanOldCacheEntriesIn<TKey, T>(Dictionary<TKey, CacheEntry<T>> entries, float keepTime)
+        where TKey : notnull
     {
         if (entries.Count < 1)
             return;
@@ -98,9 +99,9 @@ public class ProceduralDataCache : Node
         /// </summary>
         public readonly T Value;
 
-        public float LastUsed;
+        public double LastUsed;
 
-        public CacheEntry(T value, float currentTime)
+        public CacheEntry(T value, double currentTime)
         {
             Value = value;
             LastUsed = currentTime;

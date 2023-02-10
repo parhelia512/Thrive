@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -214,7 +214,7 @@ public static class PatchMapGenerator
     /// </summary>
     private static void DelaunayTriangulation(ref bool[,] graph, List<Vector2> vertexCoordinates)
     {
-        var triangles = Geometry.TriangulateDelaunay2d(vertexCoordinates.ToArray());
+        var triangles = Geometry2D.TriangulateDelaunay(vertexCoordinates.ToArray());
         for (var i = 0; i < triangles.Length; i += 3)
         {
             graph[triangles[i], triangles[i + 1]] = graph[triangles[i + 1], triangles[i]] = true;

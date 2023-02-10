@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
 
 /// <summary>
 ///   Custom widget for microbe editor's collapsible/expandable item list box
 /// </summary>
-public class CollapsibleList : VBoxContainer
+public partial class CollapsibleList : VBoxContainer
 {
     [Export]
     public NodePath? TitleLabelPath;
@@ -87,7 +87,7 @@ public class CollapsibleList : VBoxContainer
         expandButton = GetNode<TextureButton>(ExpandButtonPath);
         tween = GetNode<Tween>(TweenPath);
 
-        cachedTopMarginValue = clipBox.GetConstant("margin_top");
+        cachedTopMarginValue = clipBox.GetThemeConstant("margin_top");
 
         UpdateItemContainer();
         UpdateTitle();
@@ -104,7 +104,7 @@ public class CollapsibleList : VBoxContainer
 
         // Readjusts the clip box height
         if (Collapsed)
-            clipBox.AddConstantOverride("margin_top", -(int)itemContainer.RectSize.y);
+            clipBox.AddThemeConstantOverride("margin_top", -(int)itemContainer.Size.Y);
     }
 
     public T GetItem<T>(string name)
@@ -207,12 +207,13 @@ public class CollapsibleList : VBoxContainer
         collapseButton.Hide();
         expandButton.Show();
 
-        tween.InterpolateProperty(clipBox, "custom_constants/margin_top", cachedTopMarginValue,
-            -clipBox.RectSize.y, 0.3f, Tween.TransitionType.Sine, Tween.EaseType.Out);
-        tween.Start();
+        tween.TweenProperty(clipBox, "custom_constants/margin_top", -clipBox.Size.Y, 0.3f);
+        tween.SetTrans(Tween.TransitionType.Sine);
+        tween.SetEase(Tween.EaseType.Out);
+        tween.Play();
 
-        tween.Connect("tween_all_completed", this, nameof(OnCollapsingFinished), null,
-            (int)ConnectFlags.Oneshot);
+        tween.Connect("tween_all_completed", new Callable(this, nameof(OnCollapsingFinished)),
+            (int)ConnectFlags.OneShot);
 
         isCollapsing = true;
     }
@@ -224,9 +225,10 @@ public class CollapsibleList : VBoxContainer
 
         itemContainer!.Show();
 
-        tween.InterpolateProperty(clipBox, "custom_constants/margin_top", null, cachedTopMarginValue, 0.3f,
-            Tween.TransitionType.Sine, Tween.EaseType.Out);
-        tween.Start();
+        tween.TweenProperty(clipBox, "custom_constants/margin_top", cachedTopMarginValue, 0.3f);
+        tween.SetTrans(Tween.TransitionType.Sine);
+        tween.SetEase(Tween.EaseType.Out);
+        tween.Play();
     }
 
     // GUI Callbacks

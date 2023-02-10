@@ -1,11 +1,11 @@
-﻿using Godot;
+using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
 ///   General data about an available upgrade that is either present or not (some more in-depth upgrades have their
 ///   own data classes to store all of their data)
 /// </summary>
-public class AvailableUpgrade : IRegistryType
+public partial class AvailableUpgrade : IRegistryType
 {
 #pragma warning disable CS0169,CS0649 // used through reflection
     private string? untranslatedName;
@@ -44,7 +44,7 @@ public class AvailableUpgrade : IRegistryType
     ///   </para>
     /// </remarks>
     [JsonIgnore]
-    public Texture? LoadedIcon { get; private set; }
+    public Texture2D? LoadedIcon { get; private set; }
 
     [JsonIgnore]
     public string InternalName { get; set; } = null!;
@@ -74,7 +74,7 @@ public class AvailableUpgrade : IRegistryType
     public void Resolve()
     {
         if (!string.IsNullOrEmpty(IconPath))
-            LoadedIcon = GD.Load<Texture>(IconPath);
+            LoadedIcon = GD.Load<Texture2D>(IconPath);
     }
 
     public void ApplyTranslations()

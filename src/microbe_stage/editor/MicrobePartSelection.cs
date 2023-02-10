@@ -1,10 +1,10 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Godot;
 
 /// <summary>
 ///   A specialized button to display a microbe part for selection in the cell editor.
 /// </summary>
-public class MicrobePartSelection : MarginContainer
+public partial class MicrobePartSelection : MarginContainer
 {
 #pragma warning disable CA2213
     [Export]
@@ -18,7 +18,7 @@ public class MicrobePartSelection : MarginContainer
 #pragma warning restore CA2213
 
     private int mpCost;
-    private Texture? partIcon;
+    private Texture2D? partIcon;
     private string name = "Error: unset";
     private bool locked;
     private bool alwaysShowLabel;
@@ -29,7 +29,7 @@ public class MicrobePartSelection : MarginContainer
     ///   (and not PartName)
     /// </summary>
     [Signal]
-    public delegate void OnPartSelected(string name);
+    public delegate void OnPartSelectedEventHandler(string name);
 
     [Export]
     public int MPCost
@@ -46,7 +46,7 @@ public class MicrobePartSelection : MarginContainer
     }
 
     [Export]
-    public Texture? PartIcon
+    public Texture2D? PartIcon
     {
         get => partIcon;
         set
@@ -148,7 +148,7 @@ public class MicrobePartSelection : MarginContainer
 
         nameLabel.Visible = showNameLabel;
 
-        contentContainer.AddConstantOverride("separation", showNameLabel ? 1 : 4);
+        contentContainer.AddThemeConstantOverride("separation", showNameLabel ? 1 : 4);
     }
 
     private void UpdateLabels()
@@ -189,8 +189,8 @@ public class MicrobePartSelection : MarginContainer
         if (button == null)
             return;
 
-        button.Group = SelectionGroup;
-        button.Pressed = Selected;
+        button.ButtonGroup = SelectionGroup;
+        button.ButtonPressed = Selected;
         button.Disabled = Locked;
     }
 

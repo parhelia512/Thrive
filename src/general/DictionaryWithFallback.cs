@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -150,10 +150,10 @@ public class DictionaryWithFallback<TKey, TValue> : IDictionary<TKey, TValue>, I
 
     public bool TryGetValue(TKey key, out TValue value)
     {
-        if (primary.TryGetValue(key, out value))
+        if (primary.TryGetValue(key, out value!))
             return true;
 
-        return fallback.TryGetValue(key, out value);
+        return fallback.TryGetValue(key, out value!);
     }
 
     /// <summary>

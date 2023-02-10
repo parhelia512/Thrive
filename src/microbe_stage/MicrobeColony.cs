@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 [JsonObject(IsReference = true)]
 [UseThriveSerializer]
-public class MicrobeColony
+public partial class MicrobeColony
 {
     private Microbe.MicrobeState state;
 

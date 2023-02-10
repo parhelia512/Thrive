@@ -1,4 +1,4 @@
-﻿namespace Saving
+namespace Saving
 {
     using System;
     using System.Collections.Generic;
@@ -254,7 +254,7 @@
                 "colour", "rigidity", "editedMicrobeOrganelles", "placementRotation", "activeActionName",
                 "Membrane", "Symmetry", "MicrobePreviewMode");
 
-            // Remove the organelle change callbacks which will be redone anyway on load
+            // RemoveAt the organelle change callbacks which will be redone anyway on load
             RemoveProperty(cellEditorTab, "editedMicrobeOrganelles.onAdded");
             RemoveProperty(cellEditorTab, "editedMicrobeOrganelles.onRemoved");
 
@@ -581,7 +581,7 @@
 
             if (remainingPath.Length == 1)
             {
-                // Remove the key now that we are at the right object
+                // RemoveAt the key now that we are at the right object
                 if (!currentObject.Remove(remainingPath[0]) && errorIfCannotRemove)
                 {
                     throw new JsonException(

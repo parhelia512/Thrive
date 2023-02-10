@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using Newtonsoft.Json;
 
-public class MetaballMoveActionData<TMetaball> : EditorCombinableActionData
+public partial class MetaballMoveActionData<TMetaball> : EditorCombinableActionData
     where TMetaball : Metaball
 {
     public TMetaball MovedMetaball;

@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 /// <summary>
 ///   Adds toxin shooting capability
 /// </summary>
-public class AgentVacuoleComponent : EmptyOrganelleComponent
+public partial class AgentVacuoleComponent : EmptyOrganelleComponent
 {
     public string Compound;
 
@@ -13,7 +13,7 @@ public class AgentVacuoleComponent : EmptyOrganelleComponent
     }
 }
 
-public class AgentVacuoleComponentFactory : IOrganelleComponentFactory
+public partial class AgentVacuoleComponentFactory : IOrganelleComponentFactory
 {
     [JsonRequired]
     public string Compound = null!;

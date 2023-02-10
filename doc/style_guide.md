@@ -558,7 +558,7 @@ Godot usage
   has a corresponding scene (.tscn) file; use `new T` if it doesn't.
   ```C#
   var scene = GD.Load<PackedScene>("res://src/gui_common/T.tscn");
-  var instance = scene.Instance<T>();
+  var instance = scene.Instantiate<T>();
   ```
 
 - Question popups should have a short title ending in a question mark

@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   Handles the opening, closing and operations of the cheat menus
 /// </summary>
-public abstract class CheatMenu : CustomDialog
+public abstract partial class CheatMenu : CustomDialog
 {
     /// <summary>
     ///   Whether the cheat menu may be opened or not
@@ -92,7 +92,7 @@ public abstract class CheatMenu : CustomDialog
         CheatManager.NoAI = value;
     }
 
-    public void SetSpeed(float value)
+    public void SetVelocity(float value)
     {
         CheatManager.Speed = value;
     }

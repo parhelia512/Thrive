@@ -1,4 +1,4 @@
-﻿public enum SteamItemVisibility
+public enum SteamItemVisibility
 {
     Public = 0,
     FriendsOnly = 1,

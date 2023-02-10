@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
 /// <summary>
 ///   Adds a stabby thing to the cell, positioned similarly to the flagellum
 /// </summary>
-public class PilusComponent : ExternallyPositionedComponent
+public partial class PilusComponent : ExternallyPositionedComponent
 {
     private List<uint> addedChildShapes = new();
 
@@ -41,7 +41,7 @@ public class PilusComponent : ExternallyPositionedComponent
             // Pilus rotation
             var angle = GetAngle(middle - position);
             var rotation = MathUtils.CreateRotationForPhysicsOrganelle(angle);
-            var transform = new Transform(rotation, position);
+            var transform = new Transform3D(new Basis(rotation), position);
 
             // New ownerId
             var ownerId = currentShapesParent.CreateNewOwnerId(newShapeParent, transform, addedChildShapes[0]);
@@ -74,10 +74,10 @@ public class PilusComponent : ExternallyPositionedComponent
         return addedChildShapes.Count < 1;
     }
 
-    protected override void OnPositionChanged(Quat rotation, float angle,
+    protected override void OnPositionChanged(Quaternion rotation, float angle,
         Vector3 membraneCoords)
     {
-        organelle!.OrganelleGraphics!.Transform = new Transform(rotation, membraneCoords);
+        organelle!.OrganelleGraphics!.Transform = new Transform3D(new Basis(rotation), membraneCoords);
 
         Vector3 middle = Hex.AxialToCartesian(new Hex(0, 0));
         Vector3 membranePointDirection = (membraneCoords - middle).Normalized();
@@ -99,7 +99,7 @@ public class PilusComponent : ExternallyPositionedComponent
             membraneCoords += parentMicrobe.GetOffsetRelativeToMaster();
         }
 
-        var transform = new Transform(physicsRotation, membraneCoords);
+        var transform = new Transform3D(new Basis(physicsRotation), membraneCoords);
         if (NeedsUpdateAnyway())
             CreateShape(parentMicrobe);
 
@@ -120,7 +120,7 @@ public class PilusComponent : ExternallyPositionedComponent
         // https://github.com/godotengine/godot-proposals/issues/610
         // So this uses a cylinder for now
         // Create the shape
-        var shape = new CylinderShape();
+        var shape = new CylinderShape3D();
         shape.Radius = pilusSize / 10.0f;
         shape.Height = pilusSize;
 
@@ -145,7 +145,7 @@ public class PilusComponent : ExternallyPositionedComponent
     }
 }
 
-public class PilusComponentFactory : IOrganelleComponentFactory
+public partial class PilusComponentFactory : IOrganelleComponentFactory
 {
     public IOrganelleComponent Create()
     {

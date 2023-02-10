@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
 /// <summary>
 ///   Base class for more specialized right click popup menus for the editor
 /// </summary>
-public abstract class HexPopupMenu : PopupPanel
+public abstract partial class HexPopupMenu : PopupPanel
 {
     [Export]
     public NodePath? TitleLabelPath;
@@ -34,13 +34,13 @@ public abstract class HexPopupMenu : PopupPanel
     private string? deleteTooltip;
 
     [Signal]
-    public delegate void DeletePressed();
+    public delegate void DeletePressedEventHandler();
 
     [Signal]
-    public delegate void MovePressed();
+    public delegate void MovePressedEventHandler();
 
     [Signal]
-    public delegate void ModifyPressed();
+    public delegate void ModifyPressedEventHandler();
 
     public Func<IEnumerable<EditorCombinableActionData>, int>? GetActionPrice { get; set; }
 
@@ -55,9 +55,8 @@ public abstract class HexPopupMenu : PopupPanel
             // TODO: See #1857
             if (ShowPopup)
             {
-                RectPosition = GetViewport().GetMousePosition();
-                ShowModal();
-                SetAsMinsize();
+                Position = GetViewport().GetMousePosition().ToVector2I();
+                Popup();
             }
             else
             {
@@ -202,14 +201,14 @@ public abstract class HexPopupMenu : PopupPanel
         if (pressed)
         {
             icon.Modulate = new Color(0, 0, 0);
-            nameLabel.AddColorOverride("font_color", new Color(0, 0, 0));
-            mpLabel.AddColorOverride("font_color", new Color(0, 0, 0));
+            nameLabel.AddThemeColorOverride("font_color", new Color(0, 0, 0));
+            mpLabel.AddThemeColorOverride("font_color", new Color(0, 0, 0));
         }
         else
         {
             icon.Modulate = new Color(1, 1, 1);
-            nameLabel.AddColorOverride("font_color", new Color(1, 1, 1));
-            mpLabel.AddColorOverride("font_color", new Color(1, 1, 1));
+            nameLabel.AddThemeColorOverride("font_color", new Color(1, 1, 1));
+            mpLabel.AddThemeColorOverride("font_color", new Color(1, 1, 1));
         }
     }
 

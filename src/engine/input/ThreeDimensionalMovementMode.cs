@@ -1,4 +1,4 @@
-﻿public enum ThreeDimensionalMovementMode
+public enum ThreeDimensionalMovementMode
 {
     /// <summary>
     ///   Left/right and forward/back are relative to the player's look direction (what the screen shows)

@@ -1,16 +1,16 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Globalization;
 using Newtonsoft.Json.Serialization;
 
 /// <summary>
-///   Reference resolver for JSON as there doesn't seem to be a default one (their default one is marked internal)
+///   RefCounted resolver for JSON as there doesn't seem to be a default one (their default one is marked internal)
 /// </summary>
 /// <remarks>
 ///   <para>
 ///     Determine if the context should be used or not
 ///   </para>
 /// </remarks>
-public class ReferenceResolver : IReferenceResolver
+public partial class ReferenceResolver : IReferenceResolver
 {
     private readonly Dictionary<string, object> referenceToObject = new();
     private readonly Dictionary<object, string> objectToReference = new();

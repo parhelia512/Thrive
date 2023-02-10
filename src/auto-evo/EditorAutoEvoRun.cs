@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using AutoEvo;
 
 /// <summary>
@@ -18,8 +18,8 @@ public class EditorAutoEvoRun : AutoEvoRun
     protected override void GatherInfo(Queue<IRunStep> steps)
     {
         // Custom run setup for editor's use
-        var map = Parameters.World.Map;
-        var worldSettings = Parameters.World.WorldSettings;
+        var map = Parameters.World3D.Map;
+        var worldSettings = Parameters.World3D.WorldSettings;
 
         steps.Enqueue(new CalculatePopulation(configuration, worldSettings, map,
             new List<Species> { ModifiedProperties },

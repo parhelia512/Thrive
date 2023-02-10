@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Is like a <see cref="Godot.Control"/>, but handles instance management for the input system.
 /// </summary>
-public class ControlWithInput : Control
+public partial class ControlWithInput : Control
 {
     public override void _EnterTree()
     {

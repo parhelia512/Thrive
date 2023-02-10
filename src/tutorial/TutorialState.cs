@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -9,7 +9,7 @@ using Tutorial;
 ///   State of the tutorials for a game of Thrive
 /// </summary>
 [JsonObject(IsReference = true)]
-public class TutorialState : ITutorialInput
+public partial class TutorialState : ITutorialInput
 {
     /// <summary>
     ///   True when the tutorial has paused the game

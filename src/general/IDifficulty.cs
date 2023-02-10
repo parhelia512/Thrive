@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Game difficulty data
 /// </summary>
 [SupportsCustomizedRegistryType(typeof(CustomDifficulty))]

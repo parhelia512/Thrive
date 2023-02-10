@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using Godot;
 using Newtonsoft.Json;
 
 [DeserializedCallbackTarget]
 [IgnoreNoMethodsTakingInput]
 [SceneLoadedClass("res://src/microbe_stage/editor/BehaviourEditorSubComponent.tscn", UsesEarlyResolve = false)]
-public class BehaviourEditorSubComponent : EditorComponentBase<ICellEditorData>
+public partial class BehaviourEditorSubComponent : EditorComponentBase<ICellEditorData>
 {
     [Export]
     public NodePath? AggressionSliderPath;

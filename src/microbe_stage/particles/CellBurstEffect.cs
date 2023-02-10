@@ -1,29 +1,29 @@
-﻿using Godot;
+using Godot;
 using Newtonsoft.Json;
 
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/particles/CellBurstEffect.tscn", UsesEarlyResolve = false)]
-public class CellBurstEffect : Spatial, ITimedLife
+public partial class CellBurstEffect : Node3D, ITimedLife
 {
     [JsonProperty]
     public float Radius;
 
 #pragma warning disable CA2213
-    private Particles particles = null!;
+    private GpuParticles3D particles = null!;
 #pragma warning restore CA2213
 
     public float TimeToLiveRemaining { get; set; }
 
     public override void _Ready()
     {
-        particles = GetNode<Particles>("Particles");
+        particles = GetNode<GpuParticles3D>("GPUParticles3D");
 
-        TimeToLiveRemaining = particles.Lifetime;
+        TimeToLiveRemaining = (float)particles.Lifetime;
 
-        var material = (ParticlesMaterial)particles.ProcessMaterial;
+        var material = (ParticleProcessMaterial)particles.ProcessMaterial;
 
         material.EmissionSphereRadius = Radius / 2;
-        material.LinearAccel = Radius / 2;
+        material.LinearAccelMax = Radius / 2;
         particles.OneShot = true;
     }
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -7,7 +7,7 @@ using Godot;
 /// <summary>
 ///   Runs processes in parallel on entities
 /// </summary>
-public class ProcessSystem
+public partial class ProcessSystem
 {
     private static readonly Compound ATP = SimulationParameters.Instance.GetCompound("atp");
     private static readonly Compound Temperature = SimulationParameters.Instance.GetCompound("temperature");

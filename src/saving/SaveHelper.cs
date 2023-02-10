@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -222,13 +222,12 @@ public static class SaveHelper
     {
         var result = new List<string>();
 
-        using (var directory = new Directory())
+        using (var directory = DirAccess.Open(Constants.SAVE_FOLDER))
         {
-            if (!directory.DirExists(Constants.SAVE_FOLDER))
+            if (DirAccess.GetOpenError() != Error.Ok)
                 return result;
 
-            directory.Open(Constants.SAVE_FOLDER);
-            directory.ListDirBegin(true, true);
+            directory.ListDirBegin();
 
             while (true)
             {
@@ -254,18 +253,16 @@ public static class SaveHelper
         {
             case SaveOrder.LastModifiedFirst:
             {
-                using var file = new File();
                 result = result.OrderByDescending(item =>
-                    file.GetModifiedTime(Path.Combine(Constants.SAVE_FOLDER, item))).ToList();
+                    FileAccess.GetModifiedTime(Path.Combine(Constants.SAVE_FOLDER, item))).ToList();
 
                 break;
             }
 
             case SaveOrder.FirstModifiedFirst:
             {
-                using var file = new File();
                 result = result.OrderBy(item =>
-                    file.GetModifiedTime(Path.Combine(Constants.SAVE_FOLDER, item))).ToList();
+                    FileAccess.GetModifiedTime(Path.Combine(Constants.SAVE_FOLDER, item))).ToList();
 
                 break;
             }
@@ -282,19 +279,19 @@ public static class SaveHelper
         int count = 0;
         ulong totalSize = 0;
 
-        using var file = new File();
         foreach (var save in CreateListOfSaves())
         {
             if (nameMatches?.IsMatch(save) != false)
             {
-                if (file.Open(Path.Combine(Constants.SAVE_FOLDER, save), File.ModeFlags.Read) != Error.Ok)
+                using var file = FileAccess.Open(Path.Combine(Constants.SAVE_FOLDER, save), FileAccess.ModeFlags.Read);
+                if (file?.GetError() != Error.Ok)
                 {
                     GD.PrintErr("Can't read size of save file: ", save);
                     continue;
                 }
 
                 ++count;
-                totalSize += file.GetLen();
+                totalSize += file.GetLength();
             }
         }
 
@@ -306,11 +303,10 @@ public static class SaveHelper
     /// </summary>
     public static void DeleteSave(string saveName)
     {
-        using var directory = new Directory();
         var finalPath = Path.Combine(Constants.SAVE_FOLDER, saveName);
-        directory.Remove(finalPath);
+        DirAccess.RemoveAbsolute(finalPath);
 
-        if (directory.FileExists(finalPath))
+        if (FileAccess.FileExists(finalPath))
             GD.PrintErr("Failed to delete: ", finalPath);
     }
 

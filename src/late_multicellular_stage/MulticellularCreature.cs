@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/late_multicellular_stage/MulticellularCreature.tscn", UsesEarlyResolve = false)]
 [DeserializedCallbackTarget]
-public class MulticellularCreature : RigidBody, ISpawned, IProcessable, ISaveLoadedTracked
+public partial class MulticellularCreature : RigidBody3D, ISpawned, IProcessable, ISaveLoadedTracked
 {
     private static readonly Vector3 SwimUpForce = new(0, 20, 0);
 
@@ -95,7 +95,7 @@ public class MulticellularCreature : RigidBody, ISpawned, IProcessable, ISaveLoa
     public AliveMarker AliveMarker { get; } = new();
 
     [JsonIgnore]
-    public Spatial EntityNode => this;
+    public Node3D EntityNode => this;
 
     public int DespawnRadiusSquared { get; set; }
 
@@ -139,7 +139,7 @@ public class MulticellularCreature : RigidBody, ISpawned, IProcessable, ISaveLoa
         AliveMarker.Alive = false;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -147,19 +147,19 @@ public class MulticellularCreature : RigidBody, ISpawned, IProcessable, ISaveLoa
         OnReproductionStatus?.Invoke(this, true);
     }
 
-    public override void _PhysicsProcess(float delta)
+    public override void _PhysicsProcess(double delta)
     {
         base._PhysicsProcess(delta);
 
         // TODO: apply buoyancy (if this is underwater)
 
-        if (Translation.y < targetSwimLevel)
-            ApplyCentralImpulse(Mass * SwimUpForce * delta);
+        if (Position.Y < targetSwimLevel)
+            ApplyCentralImpulse(Mass * SwimUpForce * (float)delta);
 
         if (MovementDirection != Vector3.Zero)
         {
             // TODO: movement force calculation
-            ApplyCentralImpulse(Mass * MovementDirection * delta);
+            ApplyCentralImpulse(Mass * MovementDirection * (float)delta);
         }
     }
 
@@ -189,7 +189,7 @@ public class MulticellularCreature : RigidBody, ISpawned, IProcessable, ISaveLoa
 
     public MulticellularCreature SpawnOffspring()
     {
-        var currentPosition = GlobalTransform.origin;
+        var currentPosition = GlobalTransform.Origin;
 
         // TODO: calculate size somehow
         var separation = new Vector3(10, 0, 0);
@@ -273,7 +273,7 @@ public class MulticellularCreature : RigidBody, ISpawned, IProcessable, ISaveLoa
             otherAudioPlayers.Add(player);
         }
 
-        player.UnitDb = GD.Linear2Db(volume);
+        player.VolumeDb = Mathf.LinearToDb(volume);
         player.Stream = sound;
         player.Play();*/
     }

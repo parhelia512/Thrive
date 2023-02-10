@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   Stores info about a startup attempt for use with running using different settings on subsequent launch to get

@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   A page that can be opened in the Thriveopedia.
 /// </summary>
-public abstract class ThriveopediaPage : PanelContainer
+public abstract partial class ThriveopediaPage : PanelContainer
 {
     /// <summary>
     ///   Whether this page should display the default panel background.
@@ -17,7 +17,7 @@ public abstract class ThriveopediaPage : PanelContainer
     private GameProperties? currentGame;
 
     [Signal]
-    public delegate void OnSceneChanged();
+    public delegate void OnSceneChangedEventHandler();
 
     /// <summary>
     ///   The internal name of this page. Must be PascalCase to open the Godot scene correctly.
@@ -50,7 +50,7 @@ public abstract class ThriveopediaPage : PanelContainer
 
         // If we're not displaying the background, show a blank panel instead
         if (!DisplayBackground)
-            AddStyleboxOverride("panel", new StyleBoxEmpty());
+            AddThemeStyleboxOverride("panel", new StyleBoxEmpty());
     }
 
     /// <summary>

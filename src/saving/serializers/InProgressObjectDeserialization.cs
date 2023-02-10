@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -14,7 +14,7 @@ using Newtonsoft.Json;
 ///     this helper allows reading properties in a piecemeal fashion, which is needed for the way we set IDs.
 ///   </para>
 /// </remarks>>
-public class InProgressObjectDeserialization
+public partial class InProgressObjectDeserialization
 {
     public Type? DynamicType;
 
@@ -166,7 +166,7 @@ public class InProgressObjectDeserialization
                         read = true;
                         return (name, serializer.Deserialize(reader, valueType), field, property);
                     });
-                    CreateInstance();
+                    CreateInstantiate();
                     ClearPriorityCallbackForConstructor();
                 }
 
@@ -308,10 +308,10 @@ public class InProgressObjectDeserialization
         return instanceFields != null || instanceProperties != null;
     }
 
-    public object GetInstance()
+    public object GetInstantiate()
     {
         if (createdInstance == null)
-            CreateInstance();
+            CreateInstantiate();
 
         return createdInstance!;
     }
@@ -426,7 +426,7 @@ public class InProgressObjectDeserialization
         offeredConstructorParameter = null;
     }
 
-    private void CreateInstance()
+    private void CreateInstantiate()
     {
         var type = DynamicType ?? staticType;
 

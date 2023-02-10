@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
@@ -6,7 +6,7 @@ using Godot;
 /// <summary>
 ///   Handles processing <see cref="Microbe"/>s in a multithreaded way
 /// </summary>
-public class MicrobeSystem
+public partial class MicrobeSystem
 {
     private readonly List<Task> tasks = new();
 

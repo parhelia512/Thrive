@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Godot;
 using Newtonsoft.Json;
 
@@ -6,16 +6,16 @@ using Newtonsoft.Json;
 ///   Shows cell stats (e.g. Storage: 2.1, Hp: 50, etc) for the organism statistics display.
 ///   Also functions as a comparison for old value with a new one, indicated with an up/down icon.
 /// </summary>
-public class CellStatsIndicator : HBoxContainer
+public partial class CellStatsIndicator : HBoxContainer
 {
 #pragma warning disable CA2213
     private Label? descriptionLabel;
     private Label? valueLabel;
     private TextureRect? changeIndicator;
 
-    private Texture increaseIcon = null!;
-    private Texture decreaseIcon = null!;
-    private Texture questionIcon = null!;
+    private Texture2D increaseIcon = null!;
+    private Texture2D decreaseIcon = null!;
+    private Texture2D questionIcon = null!;
 #pragma warning restore CA2213
 
     private string description = "unset";
@@ -72,9 +72,9 @@ public class CellStatsIndicator : HBoxContainer
         valueLabel = GetNode<Label>("Value");
         changeIndicator = GetNode<TextureRect>("Indicator");
 
-        increaseIcon = GD.Load<Texture>("res://assets/textures/gui/bevel/increase.png");
-        decreaseIcon = GD.Load<Texture>("res://assets/textures/gui/bevel/decrease.png");
-        questionIcon = GD.Load<Texture>("res://assets/textures/gui/bevel/helpButton.png");
+        increaseIcon = GD.Load<Texture2D>("res://assets/textures/gui/bevel/increase.png");
+        decreaseIcon = GD.Load<Texture2D>("res://assets/textures/gui/bevel/decrease.png");
+        questionIcon = GD.Load<Texture2D>("res://assets/textures/gui/bevel/helpButton.png");
 
         UpdateDescription();
         UpdateValue();

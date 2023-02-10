@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using Newtonsoft.Json;
@@ -30,14 +30,14 @@ public class Base64BinaryConverter : BaseThriveConverter
             return (null, true);
 
         using var dataReader = new MemoryStream(Convert.FromBase64String(encoded));
-        return (formatter.Deserialize(dataReader), true);
+        return (null, false); // (formatter.Deserialize(dataReader), true);
     }
 
     protected override bool WriteCustomJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
         // Would be nice to be able to know beforehand how many bytes we need
         using var dataWriter = new MemoryStream();
-        formatter.Serialize(dataWriter, value);
+        // formatter.Serialize(dataWriter, value); // TODO
 
         serializer.Serialize(writer, Convert.ToBase64String(dataWriter.GetBuffer()));
 

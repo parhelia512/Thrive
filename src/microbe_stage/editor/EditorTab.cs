@@ -1,4 +1,4 @@
-﻿public enum EditorTab
+public enum EditorTab
 {
     Report,
     PatchMap,

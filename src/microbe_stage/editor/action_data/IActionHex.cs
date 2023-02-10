@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Interface needed for the generic base hex actions to work with specific types
 /// </summary>
 public interface IActionHex

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
@@ -6,7 +6,7 @@ using Godot;
 /// </summary>
 /// TODO: see https://github.com/Revolutionary-Games/Thrive/issues/2751
 /// [Tool]
-public class TutorialDialog : CustomDialog
+public partial class TutorialDialog : CustomDialog
 {
     [Export]
     public NodePath? LabelPath;
@@ -58,7 +58,7 @@ public class TutorialDialog : CustomDialog
     {
         label = GetNode<CustomRichTextLabel>(LabelPath);
 
-        AddChild(tween);
+        // AddChild(tween);
 
         CheckShownTextVersion();
         UpdateLabel();
@@ -94,16 +94,16 @@ public class TutorialDialog : CustomDialog
     protected override void OnShown()
     {
         // Don't animate if currently running inside the editor
-        if (Engine.EditorHint)
+        if (Engine.IsEditorHint())
             return;
 
-        RectPivotOffset = RectSize / 2;
-        RectScale = Vector2.Zero;
+        // PivotOffset = Size / 2; // TODO
+        // ContentScaleFactor = 0;
 
-        tween.InterpolateProperty(
+        /*tween.InterpolateProperty(
             this, "rect_scale", Vector2.Zero, Vector2.One, 0.3f, Tween.TransitionType.Expo,
             Tween.EaseType.Out, ShowDelay);
-        tween.Start();
+        tween.Start();*/
     }
 
     private void UpdateLabel()

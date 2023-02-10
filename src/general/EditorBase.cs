@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Godot;
@@ -29,7 +29,7 @@ using Newtonsoft.Json;
 ///     those few operations are merged into this class.
 ///   </para>
 /// </remarks>
-public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoadableGameState,
+public abstract partial class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoadableGameState,
     IGodotEarlyNodeResolve
     where TAction : EditorAction
     where TStage : Node, IReturnableGameState
@@ -100,7 +100,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
     ///   a one more level of parent nodes so that different editor components can have their things visible at
     ///   different times
     /// </summary>
-    public Spatial RootOfDynamicallySpawned { get; private set; } = null!;
+    public Node3D RootOfDynamicallySpawned { get; private set; } = null!;
 
     [JsonIgnore]
     public bool TransitionFinished { get; protected set; }
@@ -165,7 +165,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
     }
 
     [JsonProperty]
-    public bool Ready
+    public bool IsReady
     {
         get => ready;
         set
@@ -209,7 +209,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
         NodeReferencesResolved = true;
 
         world = GetNode("EditorWorld");
-        RootOfDynamicallySpawned = world.GetNode<Spatial>("DynamicallySpawned");
+        RootOfDynamicallySpawned = world.GetNode<Node3D>("DynamicallySpawned");
         pauseMenu = GetNode<PauseMenu>(PauseMenuPath);
         editorGUIBaseNode = GetNode<Control>(EditorGUIBaseNodePath);
 
@@ -254,9 +254,9 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
         ReturnToStage?.OnFinishLoading(save);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
-        if (!Ready)
+        if (!IsReady)
         {
             if (!CurrentGame.GameWorld.IsAutoEvoFinished())
             {
@@ -266,7 +266,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
                 return;
             }
 
-            Ready = true;
+            IsReady = true;
             TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.5f, OnEditorReady, false, false);
         }
 
@@ -384,7 +384,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
     public void QuickSave()
     {
         // Can only save once the editor is ready
-        if (Ready)
+        if (IsReady)
         {
             GD.Print("quick saving ", GetType().Name);
             PerformQuickSave();
@@ -599,7 +599,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
             // For now we only show a loading screen if auto-evo is not ready yet
             if (!CurrentGame.GameWorld.IsAutoEvoFinished())
             {
-                Ready = false;
+                IsReady = false;
                 LoadingScreen.Instance.Show(EditorLoadingMessage, ReturnToState,
                     CurrentGame.GameWorld.GetAutoEvoRun().Status);
 
@@ -625,7 +625,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
         }
         else
         {
-            if (Ready != true || CurrentGame == null)
+            if (IsReady != true || CurrentGame == null)
                 throw new InvalidOperationException("loaded editor isn't in the ready state, or missing current game");
 
             // Make absolutely sure the current game doesn't have an auto-evo run
@@ -656,7 +656,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
     /// </summary>
     protected virtual void OnEditorReady()
     {
-        Ready = true;
+        IsReady = true;
         LoadingScreen.Instance.Hide();
 
         GD.Print("Elapsing time on editor entry");
@@ -735,7 +735,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
         DirtyMutationPointsCache();
     }
 
-    protected virtual void UpdateEditor(float delta)
+    protected virtual void UpdateEditor(double delta)
     {
         if (mutationPointsCache == null)
         {
@@ -826,7 +826,7 @@ public abstract class EditorBase<TAction, TStage> : NodeWithInput, IEditor, ILoa
 
             var scene = SceneManager.Instance.LoadScene(typeof(TStage).GetCustomAttribute<SceneLoadedClassAttribute>());
 
-            ReturnToStage = (TStage)scene.Instance();
+            ReturnToStage = (TStage)scene.Instantiate();
             ReturnToStage.CurrentGame = CurrentGame;
         }
     }

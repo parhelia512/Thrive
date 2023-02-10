@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Nito.Collections;
@@ -6,7 +6,7 @@ using Nito.Collections;
 /// <summary>
 ///   Holds process running statistics information
 /// </summary>
-public class ProcessStatistics
+public partial class ProcessStatistics
 {
     /// <summary>
     ///   The processes and their associated speed statistics
@@ -54,7 +54,7 @@ public class ProcessStatistics
 /// <summary>
 ///   Statistics for a single process
 /// </summary>
-public class SingleProcessStatistics : IProcessDisplayInfo
+public partial class SingleProcessStatistics : IProcessDisplayInfo
 {
     private readonly float keepSnapshotTime;
     private readonly Deque<SingleProcessStatisticsSnapshot> snapshots = new();
@@ -313,7 +313,7 @@ public class SingleProcessStatistics : IProcessDisplayInfo
 /// <summary>
 ///   Computed average statistics for a single process
 /// </summary>
-public class AverageProcessStatistics : IProcessDisplayInfo
+public partial class AverageProcessStatistics : IProcessDisplayInfo
 {
     public readonly Dictionary<Compound, float> WritableInputs = new();
     public readonly Dictionary<Compound, float> WritableOutputs = new();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 ///   Combines multiple <see cref="EditorAction"/>s into one singular action to act as a single unit in the undo system
 /// </summary>
 [JSONAlwaysDynamicType]
-public class CombinedEditorAction : EditorAction
+public partial class CombinedEditorAction : EditorAction
 {
     [JsonProperty]
     private List<EditorAction> actions;

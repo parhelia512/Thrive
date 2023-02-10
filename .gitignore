@@ -150,3 +150,6 @@ simulation_parameters/revision.json
 out.txt
 output.png
 *.DS_Store
+
+# Godot 4
+.godot/

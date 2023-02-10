@@ -1,11 +1,11 @@
-﻿using Godot;
+using Godot;
 
-public class GalleryCardModel : GalleryCard
+public partial class GalleryCardModel : GalleryCard
 {
     private ImageTask? imageTask;
 
 #pragma warning disable CA2213
-    private Texture imageLoadingIcon = null!;
+    private Texture2D imageLoadingIcon = null!;
 #pragma warning restore CA2213
 
     private bool finishedLoadingImage;
@@ -14,10 +14,10 @@ public class GalleryCardModel : GalleryCard
     {
         base._Ready();
 
-        imageLoadingIcon = GD.Load<Texture>("res://assets/textures/gui/bevel/IconGenerating.png");
+        imageLoadingIcon = GD.Load<Texture2D>("res://assets/textures/gui/bevel/IconGenerating.png");
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -55,14 +55,14 @@ public class GalleryCardModel : GalleryCard
 
         public string SceneToPhotographPath => resourcePath;
 
-        public void ApplySceneParameters(Spatial instancedScene)
+        public void ApplySceneParameters(Node3D instancedScene)
         {
         }
 
-        public float CalculatePhotographDistance(Spatial instancedScene)
+        public float CalculatePhotographDistance(Node3D instancedScene)
         {
-            var instancedMesh = instancedScene.GetNode<MeshInstance>(meshNodePath);
-            return instancedMesh.GetTransformedAabb().Size.Length();
+            var instancedMesh = instancedScene.GetNode<MeshInstance3D>(meshNodePath);
+            return instancedMesh.GetAabb().Size.Length(); // TODO: ?
         }
     }
 }

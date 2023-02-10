@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 ///     supports.
 ///   </para>
 /// </remarks>
-public class RegistryTypeConverter : BaseThriveConverter
+public partial class RegistryTypeConverter : BaseThriveConverter
 {
     private readonly Type registryAssignable = typeof(IRegistryAssignable);
     private readonly Type concreteCustomizedRegistryAttribute = typeof(CustomizedRegistryTypeAttribute);
@@ -144,7 +144,7 @@ public class RegistryTypeConverter : BaseThriveConverter
 ///   </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-public class SupportsCustomizedRegistryTypeAttribute : Attribute
+public partial class SupportsCustomizedRegistryTypeAttribute : Attribute
 {
     public SupportsCustomizedRegistryTypeAttribute(Type targetType)
     {
@@ -165,6 +165,6 @@ public class SupportsCustomizedRegistryTypeAttribute : Attribute
 ///   </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface)]
-public class CustomizedRegistryTypeAttribute : Attribute
+public partial class CustomizedRegistryTypeAttribute : Attribute
 {
 }

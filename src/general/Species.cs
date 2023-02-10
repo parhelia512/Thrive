@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -58,7 +58,7 @@ public abstract class Species : ICloneable
         get
         {
             var colour = Colour;
-            return new Color(colour.r, colour.g, colour.b, 1);
+            return new Color(colour.R, colour.G, colour.B, 1);
         }
     }
 

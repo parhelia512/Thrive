@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Godot;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-public class GodotBasisConverter : JsonConverter
+public partial class GodotBasisConverter : JsonConverter
 {
     public override bool CanRead => true;
 

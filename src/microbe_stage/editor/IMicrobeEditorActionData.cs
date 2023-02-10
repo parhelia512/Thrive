@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 /// <summary>
 ///   This is its own interface to make JSON loading dynamic type more strict
@@ -10,7 +10,7 @@ public interface IMicrobeEditorActionData
 #pragma warning restore CA1040
 
 [JSONAlwaysDynamicType]
-public class PlacementActionData : IMicrobeEditorActionData
+public partial class PlacementActionData : IMicrobeEditorActionData
 {
     public List<OrganelleTemplate>? ReplacedCytoplasm;
     public OrganelleTemplate Organelle;
@@ -22,7 +22,7 @@ public class PlacementActionData : IMicrobeEditorActionData
 }
 
 [JSONAlwaysDynamicType]
-public class RemoveActionData : IMicrobeEditorActionData
+public partial class RemoveActionData : IMicrobeEditorActionData
 {
     public OrganelleTemplate Organelle;
 
@@ -33,7 +33,7 @@ public class RemoveActionData : IMicrobeEditorActionData
 }
 
 [JSONAlwaysDynamicType]
-public class MoveActionData : IMicrobeEditorActionData
+public partial class MoveActionData : IMicrobeEditorActionData
 {
     public OrganelleTemplate Organelle;
     public Hex OldLocation;
@@ -53,7 +53,7 @@ public class MoveActionData : IMicrobeEditorActionData
 }
 
 [JSONAlwaysDynamicType]
-public class MembraneActionData : IMicrobeEditorActionData
+public partial class MembraneActionData : IMicrobeEditorActionData
 {
     public MembraneType OldMembrane;
     public MembraneType NewMembrane;
@@ -66,7 +66,7 @@ public class MembraneActionData : IMicrobeEditorActionData
 }
 
 [JSONAlwaysDynamicType]
-public class BehaviourChangeActionData : IMicrobeEditorActionData
+public partial class BehaviourChangeActionData : IMicrobeEditorActionData
 {
     public float NewValue;
     public float OldValue;
@@ -81,7 +81,7 @@ public class BehaviourChangeActionData : IMicrobeEditorActionData
 }
 
 [JSONAlwaysDynamicType]
-public class RigidityChangeActionData : IMicrobeEditorActionData
+public partial class RigidityChangeActionData : IMicrobeEditorActionData
 {
     public float NewRigidity;
     public float PreviousRigidity;
@@ -94,7 +94,7 @@ public class RigidityChangeActionData : IMicrobeEditorActionData
 }
 
 [JSONAlwaysDynamicType]
-public class NewMicrobeActionData : IMicrobeEditorActionData
+public partial class NewMicrobeActionData : IMicrobeEditorActionData
 {
     public OrganelleLayout<OrganelleTemplate> OldEditedMicrobeOrganelles;
     public int PreviousMP;

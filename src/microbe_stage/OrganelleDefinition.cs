@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -15,7 +15,7 @@ using Newtonsoft.Json;
 ///     organelles.json.
 ///   </para>
 /// </remarks>
-public class OrganelleDefinition : IRegistryType
+public partial class OrganelleDefinition : IRegistryType
 {
     // TODO: split the following comment to the actual properties in this class:
     /*
@@ -62,7 +62,7 @@ public class OrganelleDefinition : IRegistryType
     public string? CorpseChunkScene;
 
     /// <summary>
-    ///   If the root of the display scene is not the MeshInstance this needs to have the relative node path
+    ///   If the root of the display scene is not the MeshInstance3D this needs to have the relative node path
     /// </summary>
     public string? DisplaySceneModelPath;
 
@@ -87,7 +87,7 @@ public class OrganelleDefinition : IRegistryType
     ///   Loaded icon for display in GUIs
     /// </summary>
     [JsonIgnore]
-    public Texture? LoadedIcon;
+    public Texture2D? LoadedIcon;
 
     public float Mass;
 
@@ -434,7 +434,7 @@ public class OrganelleDefinition : IRegistryType
 
         if (!string.IsNullOrEmpty(IconPath))
         {
-            LoadedIcon = GD.Load<Texture>(IconPath);
+            LoadedIcon = GD.Load<Texture2D>(IconPath);
         }
 
         // Resolve process names
@@ -494,7 +494,7 @@ public class OrganelleDefinition : IRegistryType
         HasCiliaComponent = HasComponentFactory<CiliaComponentFactory>();
     }
 
-    public class OrganelleComponentFactoryInfo
+    public partial class OrganelleComponentFactoryInfo
     {
         public NucleusComponentFactory? Nucleus;
         public StorageComponentFactory? Storage;

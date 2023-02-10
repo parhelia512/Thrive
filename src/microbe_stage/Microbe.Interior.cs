@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -124,7 +124,7 @@ public partial class Microbe
     ///   All organelle nodes need to be added to this node to make scale work
     /// </summary>
     [JsonIgnore]
-    public Spatial OrganelleParent { get; private set; } = null!;
+    public Node3D OrganelleParent { get; private set; } = null!;
 
     /// <summary>
     ///   The cached highest assigned render priority from all of the organelles.
@@ -297,14 +297,14 @@ public partial class Microbe
         if (Colony != null)
         {
             direction = Colony.Master.GlobalTransform
-                .basis.Quat().Normalized().Xform(Vector3.Forward);
+                .Basis.GetRotationQuaternion().Normalized() * Vector3.Forward;
         }
         else
         {
-            direction = GlobalTransform.basis.Quat().Normalized().Xform(Vector3.Forward);
+            direction = GlobalTransform.Basis.GetRotationQuaternion().Normalized() * Vector3.Forward;
         }
 
-        var position = GlobalTransform.origin + (direction * ejectionDistance);
+        var position = GlobalTransform.Origin + (direction * ejectionDistance);
 
         var agent = SpawnHelpers.SpawnAgent(props, amountEmitted, Constants.EMITTED_AGENT_LIFETIME,
             position, direction, GetStageAsParent(),
@@ -386,7 +386,7 @@ public partial class Microbe
         if (ColonyParent != null)
             throw new ArgumentException("Cell that is a colony member (non-leader) can't divide");
 
-        var currentPosition = GlobalTransform.origin;
+        var currentPosition = GlobalTransform.Origin;
 
         // Separate the two cells.
         var separation = new Vector3(Radius, 0, 0);
@@ -394,7 +394,7 @@ public partial class Microbe
         if (Colony != null)
         {
             // When in a colony we approximate a much higher separation distance
-            var colonyRadius = separation.x;
+            var colonyRadius = separation.X;
 
             foreach (var colonyMember in Colony.ColonyMembers)
             {
@@ -404,10 +404,10 @@ public partial class Microbe
                 var radius = colonyMember.Radius + Constants.COLONY_DIVIDE_EXTRA_DAUGHTER_OFFSET;
 
                 // TODO: switch this to something else if this is too slow for large colonies
-                var positionInColony = colonyMember.GlobalTransform.origin - currentPosition;
+                var positionInColony = colonyMember.GlobalTransform.Origin - currentPosition;
 
-                var outerRadius = Math.Max(Math.Abs(positionInColony.x) + radius,
-                    Math.Abs(positionInColony.z) + radius);
+                var outerRadius = Math.Max(Math.Abs(positionInColony.X) + radius,
+                    Math.Abs(positionInColony.Z) + radius);
 
                 if (outerRadius > colonyRadius)
                     colonyRadius = outerRadius;
@@ -656,11 +656,11 @@ public partial class Microbe
         // max here buffs compound absorbing for the smallest cells
         var grabRadius = Mathf.Max(Radius, 3.0f);
 
-        cloudSystem!.AbsorbCompounds(GlobalTransform.origin, grabRadius, Compounds,
+        cloudSystem!.AbsorbCompounds(GlobalTransform.Origin, grabRadius, Compounds,
             TotalAbsorbedCompounds, delta, Membrane.Type.ResourceAbsorptionFactor);
 
         // Cells with jets aren't affected by mucilage
-        slowedBySlime = SlimeJets.Count < 1 && cloudSystem.AmountAvailable(mucilage, GlobalTransform.origin, 1.0f) >
+        slowedBySlime = SlimeJets.Count < 1 && cloudSystem.AmountAvailable(mucilage, GlobalTransform.Origin, 1.0f) >
             Constants.COMPOUND_DENSITY_CATEGORY_FAIR_AMOUNT;
 
         if (IsPlayerMicrobe && CheatManager.InfiniteCompounds)
@@ -1340,7 +1340,7 @@ public partial class Microbe
         /*
         // The back of the microbe
         var exit = Hex.AxialToCartesian(new Hex(0, 1));
-        var membraneCoords = Membrane.GetVectorTowardsNearestPointOfMembrane(exit.x, exit.z);
+        var membraneCoords = Membrane.GetVectorTowardsNearestPointOfMembrane(exit.X, exit.Z);
 
         // Get the distance to eject the compounds
         var ejectionDistance = Membrane.EncompassingCircleRadius;
@@ -1352,8 +1352,8 @@ public partial class Microbe
         float angle = 180;
 
         // Find the direction the microbe is facing
-        var yAxis = Transform.basis.y;
-        var microbeAngle = Mathf.Atan2(yAxis.x, yAxis.y);
+        var yAxis = Transform3D.basis.Y;
+        var microbeAngle = Mathf.Atan2(yAxis.X, yAxis.Y);
         if (microbeAngle < 0)
         {
             microbeAngle += 2 * Mathf.Pi;
@@ -1367,10 +1367,10 @@ public partial class Microbe
         var s = Mathf.Sin(finalAngle / 180 * Mathf.Pi);
         var c = Mathf.Cos(finalAngle / 180 * Mathf.Pi);
 
-        var ejectionDirection = new Vector3(-membraneCoords.x * c + membraneCoords.z * s, 0,
-            membraneCoords.x * s + membraneCoords.z * c);
+        var ejectionDirection = new Vector3(-membraneCoords.X * c + membraneCoords.Z * s, 0,
+            membraneCoords.X * s + membraneCoords.Z * c);
 
-        return Translation + (ejectionDirection * ejectionDistance);
+        return Position + (ejectionDirection * ejectionDistance);
         */
 
         // Unlike the commented block of code above, this uses cheap membrane radius to calculate
@@ -1383,9 +1383,9 @@ public partial class Microbe
 
         distance += displacement;
 
-        var ejectionDirection = GlobalTransform.basis.Quat().Normalized().Xform(direction);
+        var ejectionDirection = GlobalTransform.Basis.GetRotationQuaternion().Normalized() * direction;
 
-        var result = GlobalTransform.origin + (ejectionDirection * distance);
+        var result = GlobalTransform.Origin + (ejectionDirection * distance);
 
         return result;
     }

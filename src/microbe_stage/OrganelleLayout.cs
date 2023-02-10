@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -9,7 +9,7 @@ using Newtonsoft.Json;
 /// </summary>
 /// <typeparam name="T">The type of organelle contained in this layout</typeparam>
 [UseThriveSerializer]
-public class OrganelleLayout<T> : HexLayout<T>
+public partial class OrganelleLayout<T> : HexLayout<T>
     where T : class, IPositionedOrganelle
 {
     public OrganelleLayout(Action<T> onAdded, Action<T>? onRemoved = null) : base(onAdded, onRemoved)

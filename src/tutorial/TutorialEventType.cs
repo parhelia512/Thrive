@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Types of tutorial events sent to the tutorial system
 /// </summary>
 public enum TutorialEventType

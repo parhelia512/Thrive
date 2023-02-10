@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   The Symmetry setting of the hex based Editor.
 /// </summary>
 public enum HexEditorSymmetry

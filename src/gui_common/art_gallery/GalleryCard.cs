@@ -1,6 +1,6 @@
-﻿using Godot;
+using Godot;
 
-public class GalleryCard : Button
+public partial class GalleryCard : Button
 {
     [Export]
     public NodePath? TitleLabelPath;
@@ -10,15 +10,15 @@ public class GalleryCard : Button
 
 #pragma warning disable CA2213
     [Export]
-    public Texture MissingTexture = null!;
+    public Texture2D MissingTexture = null!;
 
     private Label? titleLabel;
     private TextureRect? imagePreview;
-    private Texture? thumbnail;
+    private Texture2D? thumbnail;
 #pragma warning restore CA2213
 
     [Signal]
-    public delegate void OnFullscreenView(GalleryCard item);
+    public delegate void OnFullscreenViewEventHandler(GalleryCard item);
 
     /// <summary>
     ///   If this is true, this item can be featured in slideshow.
@@ -28,7 +28,7 @@ public class GalleryCard : Button
 
     public Asset Asset { get; set; } = null!;
 
-    public Texture Thumbnail
+    public Texture2D Thumbnail
     {
         get => thumbnail ?? MissingTexture;
         set
@@ -48,11 +48,11 @@ public class GalleryCard : Button
 
     public override void _GuiInput(InputEvent @event)
     {
-        if (@event is InputEventMouseButton { Pressed: true, ButtonIndex: (int)ButtonList.Left } mouse)
+        if (@event is InputEventMouseButton { Pressed: true, ButtonIndex: MouseButton.Left } mouse)
         {
             AcceptEvent();
 
-            if (mouse.Doubleclick)
+            if (mouse.DoubleClick)
             {
                 GUICommon.Instance.PlayButtonPressSound();
                 EmitSignal(nameof(OnFullscreenView), this);
@@ -85,13 +85,13 @@ public class GalleryCard : Button
 
     private void OnMouseEnter()
     {
-        GUICommon.Instance.Tween.InterpolateProperty(imagePreview, "modulate", null, Colors.Gray, 0.5f);
-        GUICommon.Instance.Tween.Start();
+        GUICommon.Instance.Tween.TweenProperty(imagePreview, "modulate", default(Variant), 0.5f);
+        GUICommon.Instance.Tween.Play();
     }
 
     private void OnMouseExit()
     {
-        GUICommon.Instance.Tween.InterpolateProperty(imagePreview, "modulate", null, Colors.White, 0.5f);
-        GUICommon.Instance.Tween.Start();
+        GUICommon.Instance.Tween.TweenProperty(imagePreview, "modulate", default(Variant), 0.5f);
+        GUICommon.Instance.Tween.Play();
     }
 }

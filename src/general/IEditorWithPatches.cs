@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Access to overall editor state for patch map editor components
 /// </summary>
 public interface IEditorWithPatches : IEditor

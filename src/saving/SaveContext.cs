@@ -1,7 +1,7 @@
-﻿/// <summary>
+/// <summary>
 ///   Object providing access for converters as well as loading finalizing for the current game context
 /// </summary>
-public class SaveContext : ISaveContext
+public partial class SaveContext : ISaveContext
 {
     public SaveContext(SimulationParameters simulation)
     {
@@ -14,5 +14,5 @@ public class SaveContext : ISaveContext
 
     public SimulationParameters Simulation { get; }
 
-    public GameWorld? World { get; set; }
+    public GameWorld? World3D { get; set; }
 }

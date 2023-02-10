@@ -1,4 +1,4 @@
-﻿[JSONAlwaysDynamicType]
+[JSONAlwaysDynamicType]
 public abstract class HexPlacementActionData<THex> : EditorCombinableActionData
     where THex : class, IActionHex
 {

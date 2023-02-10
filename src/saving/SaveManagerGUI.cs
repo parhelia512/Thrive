@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,7 +8,7 @@ using Godot;
 /// <summary>
 ///   Shows a GUI to the user that lists the existing saves and allows doing things with them like loading and deleting
 /// </summary>
-public class SaveManagerGUI : Control
+public partial class SaveManagerGUI : Control
 {
     [Export]
     public NodePath? SaveListPath;
@@ -69,7 +69,7 @@ public class SaveManagerGUI : Control
     private Task<(int Count, ulong DiskSpace)>? getBackupCountTask;
 
     [Signal]
-    public delegate void OnBackPressed();
+    public delegate void OnBackPressedEventHandler();
 
     public List<SaveListItem> Selected
     {
@@ -98,10 +98,10 @@ public class SaveManagerGUI : Control
         deleteOldConfirmDialog = GetNode<CustomConfirmationDialog>(DeleteOldConfirmDialogPath);
         saveDirectoryWarningDialog = GetNode<CustomConfirmationDialog>(SaveDirectoryWarningDialogPath);
 
-        saveList.Connect(nameof(SaveList.OnItemsChanged), this, nameof(RefreshSaveCounts));
+        saveList.Connect(nameof(SaveList.OnItemsChanged),new Callable(this,nameof(RefreshSaveCounts)));
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (!saveCountRefreshed && IsVisibleInTree())
         {

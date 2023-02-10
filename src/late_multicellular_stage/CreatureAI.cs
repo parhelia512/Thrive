@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using Newtonsoft.Json;
 
-public class CreatureAI
+public partial class CreatureAI
 {
     [JsonProperty]
     private MulticellularCreature creature;

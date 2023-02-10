@@ -1,4 +1,4 @@
-﻿namespace Saving
+namespace Saving
 {
     using System.Collections.Generic;
     using Godot;
@@ -57,9 +57,9 @@
             if (QueuedTraces.Count < 1)
                 return;
 
-            using (var file = new File())
+            using (var file = FileAccess.Open(Constants.JSON_DEBUG_OUTPUT_FILE, FileAccess.ModeFlags.Write))
             {
-                if (file.Open(Constants.JSON_DEBUG_OUTPUT_FILE, File.ModeFlags.Write) != Error.Ok)
+                if (file.GetError() != Error.Ok)
                 {
                     GD.PrintErr("Failed to open JSON debug file for writing at: ", Constants.JSON_DEBUG_OUTPUT_FILE);
                 }

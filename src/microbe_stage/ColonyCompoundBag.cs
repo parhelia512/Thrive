@@ -1,11 +1,11 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
 using Newtonsoft.Json;
 
 [UseThriveSerializer]
-public class ColonyCompoundBag : ICompoundStorage
+public partial class ColonyCompoundBag : ICompoundStorage
 {
     private bool nanIssueReported;
 

@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
 /// <summary>
 ///   Shows a single chemical equation in a control
 /// </summary>
-public class ChemicalEquation : VBoxContainer
+public partial class ChemicalEquation : VBoxContainer
 {
     [Export]
     public NodePath? TitlePath;
@@ -21,7 +21,7 @@ public class ChemicalEquation : VBoxContainer
     private TextureRect? spinner;
     private HBoxContainer firstLineContainer = null!;
 
-    private Texture equationArrowTexture = null!;
+    private Texture2D equationArrowTexture = null!;
 
     // Dynamically generated controls
     private CompoundListBox? leftSide;
@@ -111,22 +111,22 @@ public class ChemicalEquation : VBoxContainer
         spinner = GetNode<TextureRect>(SpinnerPath);
         firstLineContainer = GetNode<HBoxContainer>(FirstLineContainerPath);
 
-        equationArrowTexture = GD.Load<Texture>("res://assets/textures/gui/bevel/WhiteArrow.png");
+        equationArrowTexture = GD.Load<Texture2D>("res://assets/textures/gui/bevel/WhiteArrow.png");
 
         UpdateEquation();
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (ShowSpinner && EquationFromProcess != null)
         {
-            currentSpinnerRotation += delta * EquationFromProcess.CurrentSpeed * SpinnerBaseSpeed;
+            currentSpinnerRotation += (float)delta * EquationFromProcess.CurrentSpeed * SpinnerBaseSpeed;
 
             // TODO: should we at some point subtract like 100000*360 from the spinner rotation to avoid float range
             // exceeding?
 
             // Now uses the same math as LoadingScreen as a spinner glitch was fixed there
-            spinner!.RectRotation = (int)currentSpinnerRotation % 360;
+            spinner!.Rotation = (int)currentSpinnerRotation % 360;
         }
 
         if (AutoRefreshProcess)
@@ -216,11 +216,11 @@ public class ChemicalEquation : VBoxContainer
 
         if (MarkRedOnLimitingCompounds && EquationFromProcess.LimitingCompounds is { Count: > 0 })
         {
-            title.AddColorOverride("font_color", new Color(1.0f, 0.3f, 0.3f));
+            title.AddThemeColorOverride("font_color", new Color(1.0f, 0.3f, 0.3f));
         }
         else
         {
-            title.AddColorOverride("font_color", DefaultTitleColour);
+            title.AddThemeColorOverride("font_color", DefaultTitleColour);
         }
     }
 
@@ -258,8 +258,10 @@ public class ChemicalEquation : VBoxContainer
             {
                 equationArrow = new TextureRect
                 {
-                    Expand = true, RectMinSize = new Vector2(20, 20), Texture = equationArrowTexture,
+                    ExpandMode = (TextureRect.ExpandModeEnum)6L,
+                    CustomMinimumSize = new Vector2(20, 20), Texture = equationArrowTexture,
                 };
+
                 firstLineContainer.AddChild(equationArrow);
             }
 
@@ -289,8 +291,8 @@ public class ChemicalEquation : VBoxContainer
                 environmentSeparator = new Label
                 {
                     Text = GetEnvironmentLabelText(),
-                    RectMinSize = new Vector2(30, 20),
-                    Align = Label.AlignEnum.Center,
+                    CustomMinimumSize = new Vector2(30, 20),
+                    HorizontalAlignment = HorizontalAlignment.Center,
                 };
 
                 firstLineContainer.AddChild(environmentSeparator);

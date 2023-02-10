@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -887,7 +887,7 @@ public static class Constants
     public const string TIMED_GROUP = "timed";
 
     /// <summary>
-    ///   All RigidBody nodes tagged with this are affected by currents by the fluid system
+    ///   All RigidBody3D nodes tagged with this are affected by currents by the fluid system
     /// </summary>
     public const string FLUID_EFFECT_GROUP = "fluid_effect";
 
@@ -908,7 +908,7 @@ public static class Constants
     /// <remarks>
     ///   <para>
     ///     NOTE: This is not related to <see cref="PROCESS_GROUP"/> which is in the context of in-game compounds
-    ///     processes, this is related to the engine's <see cref="Node._Process(float)"/> on the nodes.
+    ///     processes, this is related to the engine's <see cref="Node._Process(double)"/> on the nodes.
     ///   </para>
     /// </remarks>
     public const string RUNNABLE_MICROBE_GROUP = "microbe_runnable";
@@ -1231,7 +1231,7 @@ public static class Constants
         (MICROBE_REPRODUCTION_TUTORIAL_DELAY + 1 < MICROBE_EDITOR_BUTTON_TUTORIAL_DELAY) ? 0 : -42;
 
     // Needed to be true by InputManager
-    private const uint GodotJoystickAxesStartAtZero = (JoystickList.Axis0 == 0) ? 0 : -42;
+    private const uint GodotJoystickAxesStartAtZero = 0;
 
     // ReSharper restore UnreachableCode HeuristicUnreachableCode
 #pragma warning restore CA1823

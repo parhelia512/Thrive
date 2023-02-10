@@ -1,10 +1,10 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
     using Godot;
     using Newtonsoft.Json;
 
-    public class AutoEvoPrediction : EditorEntryCountingTutorial
+    public partial class AutoEvoPrediction : EditorEntryCountingTutorial
     {
         public AutoEvoPrediction()
         {

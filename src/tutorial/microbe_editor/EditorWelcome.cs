@@ -1,11 +1,11 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
     /// <summary>
     ///   Welcome message and intro to the report tab
     /// </summary>
-    public class EditorWelcome : TutorialPhase
+    public partial class EditorWelcome : TutorialPhase
     {
         private readonly string reportTab = EditorTab.Report.ToString();
 

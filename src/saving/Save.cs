@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Text;
 using Godot;
@@ -6,8 +6,7 @@ using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Directory = Godot.Directory;
-using File = Godot.File;
+using FileAccess = Godot.FileAccess;
 
 /// <summary>
 ///   A class representing a single saved game
@@ -239,8 +238,8 @@ public class Save
 
     private static void WriteDataToSaveFile(string target, string justInfo, string serialized, Image? screenshot)
     {
-        using var file = new File();
-        if (file.Open(target, File.ModeFlags.Write) != Error.Ok)
+        using var file = FileAccess.Open(target, FileAccess.ModeFlags.Write);
+        if (file?.GetError() != Error.Ok)
         {
             GD.PrintErr("Cannot open file for writing: ", target);
             throw new IOException("Cannot open: " + target);
@@ -270,11 +269,8 @@ public class Save
     private static (SaveInformation? Info, Save? Save, Image? Screenshot) LoadFromFile(string file, bool info,
         bool save, bool screenshot, Action? readFinished)
     {
-        using (var directory = new Directory())
-        {
-            if (!directory.FileExists(file))
-                throw new ArgumentException("save with the given name doesn't exist");
-        }
+        if (!FileAccess.FileExists(file))
+            throw new ArgumentException("save with the given name doesn't exist");
 
         var (infoStr, saveStr, screenshotData) = LoadDataFromFile(file, info, save, screenshot);
 
@@ -347,10 +343,9 @@ public class Save
             throw new ArgumentException("no things to load specified from save");
         }
 
-        using var reader = new File();
-        reader.Open(file, File.ModeFlags.Read);
+        using var reader = FileAccess.Open(file, FileAccess.ModeFlags.Read);
 
-        if (!reader.IsOpen())
+        if (reader?.IsOpen() != true)
             throw new ArgumentException("couldn't open the file for reading");
 
         using var stream = new GodotFileStream(reader);

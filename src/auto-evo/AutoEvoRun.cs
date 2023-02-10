@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -255,7 +255,7 @@ public class AutoEvoRun
 
         ApplyExternalEffects();
 
-        results.ApplyResults(Parameters.World, false);
+        results.ApplyResults(Parameters.World3D, false);
 
         UpdateMap(playerCantGoExtinct);
     }
@@ -374,8 +374,8 @@ public class AutoEvoRun
 
         var alreadyHandledSpecies = new HashSet<Species>();
 
-        var map = Parameters.World.Map;
-        var worldSettings = Parameters.World.WorldSettings;
+        var map = Parameters.World3D.Map;
+        var worldSettings = Parameters.World3D.WorldSettings;
 
         var autoEvoConfiguration = configuration;
 
@@ -453,7 +453,7 @@ public class AutoEvoRun
         // numbers
         steps.Enqueue(new RemoveInvalidMigrations(alreadyHandledSpecies));
 
-        AddPlayerSpeciesPopulationChangeClampStep(steps, map, Parameters.World.PlayerSpecies);
+        AddPlayerSpeciesPopulationChangeClampStep(steps, map, Parameters.World3D.PlayerSpecies);
 
         steps.Enqueue(new ForceExtinction(map.Patches.Values.ToList(), autoEvoConfiguration));
     }
@@ -570,7 +570,7 @@ public class AutoEvoRun
                         // sensitive while auto-evo runs this value needs to be reduced
                         int maxTasksAtOnce = 1000;
 
-                        while (runSteps.Peek()?.CanRunConcurrently == true && maxTasksAtOnce > 0)
+                        while (runSteps.Peek().CanRunConcurrently && maxTasksAtOnce > 0)
                         {
                             var step = runSteps.Dequeue();
 
@@ -633,23 +633,23 @@ public class AutoEvoRun
 
     private void UpdateMap(bool playerCantGoExtinct)
     {
-        Parameters.World.Map.UpdateGlobalTimePeriod(Parameters.World.TotalPassedTime);
+        Parameters.World3D.Map.UpdateGlobalTimePeriod(Parameters.World3D.TotalPassedTime);
 
         // Update populations before recording conditions - should not affect per-patch population
-        Parameters.World.Map.UpdateGlobalPopulations();
+        Parameters.World3D.Map.UpdateGlobalPopulations();
 
         // Needs to be before the remove extinct species call, so that extinct species could still be stored
         // for reference in patch history (e.g. displaying it as zero on the species population chart)
-        foreach (var entry in Parameters.World.Map.Patches)
+        foreach (var entry in Parameters.World3D.Map.Patches)
         {
             entry.Value.RecordSnapshot(true);
         }
 
-        var extinct = Parameters.World.Map.RemoveExtinctSpecies(playerCantGoExtinct);
+        var extinct = Parameters.World3D.Map.RemoveExtinctSpecies(playerCantGoExtinct);
 
         foreach (var species in extinct)
         {
-            Parameters.World.RemoveSpecies(species);
+            Parameters.World3D.RemoveSpecies(species);
         }
     }
 

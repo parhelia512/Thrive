@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Callbacks of the cell body plan editor
 /// </summary>
 [DeserializedCallbackTarget]

@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 
 /// <summary>
 ///   Converts markdown to bbcode for displaying

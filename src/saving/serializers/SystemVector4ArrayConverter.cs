@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Numerics;
 using Newtonsoft.Json;
@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 /// <summary>
 ///   Binary encodes Vector4[,] type for saving space in json
 /// </summary>
-public class SystemVector4ArrayConverter : JsonConverter
+public partial class SystemVector4ArrayConverter : JsonConverter
 {
     public override bool CanRead => true;
 

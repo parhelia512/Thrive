@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Newtonsoft.Json;
 
 /// <summary>
 ///   The info each mod's info JSON needs to contain
 /// </summary>
-public class ModInfo
+public partial class ModInfo
 {
     /// <summary>
     ///   Name of the mod. Needs to be user readable. Should be unique.

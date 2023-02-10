@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Methods of where a tooltip should be positioned on display.
@@ -45,7 +45,7 @@ public enum ToolTipTransitioning
 /// <remarks>
 ///   <para>
 ///     NOTE: if the tooltip is simple enough (just a single line of text), it's better to use
-///     a Control's HintTooltip property for displaying it as using a custom tooltip for that
+///     a Control's TooltipText property for displaying it as using a custom tooltip for that
 ///     will just be unnecessarily complicated.
 ///   </para>
 /// </remarks>

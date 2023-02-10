@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,14 +7,13 @@ using Godot;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 using Newtonsoft.Json;
-using Directory = Godot.Directory;
-using File = Godot.File;
+using FileAccess = Godot.FileAccess;
 using Path = System.IO.Path;
 
 /// <summary>
 ///    A species saved by the user. Contains helper methods for saving/loading species on the disk.
 /// </summary>
-public class FossilisedSpecies
+public partial class FossilisedSpecies
 {
     public const string SAVE_FOSSIL_JSON = "fossil.json";
     public const string SAVE_INFO_JSON = "info.json";
@@ -61,6 +60,7 @@ public class FossilisedSpecies
     /// <param name="orderByDate">Whether the returned list is ordered by date modified</param>
     public static List<string> CreateListOfFossils(bool orderByDate)
     {
+        /*
         var result = new List<string>();
 
         using (var directory = new Directory())
@@ -99,6 +99,8 @@ public class FossilisedSpecies
         }
 
         return result;
+        */
+        return new List<string>();
     }
 
     /// <summary>
@@ -167,8 +169,8 @@ public class FossilisedSpecies
 
     private static void WriteDataToFossilFile(string target, string justInfo, string serialized, Image? previewImage)
     {
-        using var file = new File();
-        if (file.Open(target, File.ModeFlags.Write) != Error.Ok)
+        using var file = FileAccess.Open(target, FileAccess.ModeFlags.Write);
+        if (file?.GetError() != Error.Ok)
         {
             GD.PrintErr("Cannot open file for writing: ", target);
             throw new IOException("Cannot open: " + target);
@@ -192,11 +194,8 @@ public class FossilisedSpecies
 
     private static (FossilisedSpeciesInformation Info, Species Species, Image? PreviewImage) LoadFromFile(string file)
     {
-        using (var directory = new Directory())
-        {
-            if (!directory.FileExists(file))
-                throw new ArgumentException("fossil with the given name doesn't exist");
-        }
+        if (!FileAccess.FileExists(file))
+            throw new ArgumentException("fossil with the given name doesn't exist");
 
         var (infoStr, fossilStr, previewImageData) = LoadDataFromFile(file);
 
@@ -233,10 +232,9 @@ public class FossilisedSpecies
         string? fossilStr = null;
         byte[]? previewImageData = null;
 
-        using var reader = new File();
-        reader.Open(file, File.ModeFlags.Read);
+        using var reader = FileAccess.Open(file, FileAccess.ModeFlags.Read);
 
-        if (!reader.IsOpen())
+        if (reader?.IsOpen() != true)
             throw new ArgumentException("couldn't open the file for reading");
 
         using var stream = new GodotFileStream(reader);

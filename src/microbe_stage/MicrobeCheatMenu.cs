@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Handles the microbe cheat menu
 /// </summary>
-public class MicrobeCheatMenu : CheatMenu
+public partial class MicrobeCheatMenu : CheatMenu
 {
     [Export]
     public NodePath? InfiniteCompoundsPath;
@@ -46,17 +46,17 @@ public class MicrobeCheatMenu : CheatMenu
         despawnAllEntities = GetNode<Button>(DespawnAllEntitiesPath);
         spawnEnemy = GetNode<Button>(SpawnEnemyPath);
 
-        playerDivide.Connect("pressed", this, nameof(OnPlayerDivideClicked));
-        spawnEnemy.Connect("pressed", this, nameof(OnSpawnEnemyClicked));
-        despawnAllEntities.Connect("pressed", this, nameof(OnDespawnAllEntitiesClicked));
+        playerDivide.Connect("pressed",new Callable(this,nameof(OnPlayerDivideClicked)));
+        spawnEnemy.Connect("pressed",new Callable(this,nameof(OnSpawnEnemyClicked)));
+        despawnAllEntities.Connect("pressed",new Callable(this,nameof(OnDespawnAllEntitiesClicked)));
         base._Ready();
     }
 
     public override void ReloadGUI()
     {
-        infiniteCompounds.Pressed = CheatManager.InfiniteCompounds;
-        godMode.Pressed = CheatManager.GodMode;
-        disableAI.Pressed = CheatManager.NoAI;
+        infiniteCompounds.ButtonPressed = CheatManager.InfiniteCompounds;
+        godMode.ButtonPressed = CheatManager.GodMode;
+        disableAI.ButtonPressed = CheatManager.NoAI;
         speed.Value = CheatManager.Speed;
     }
 

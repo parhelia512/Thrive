@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Base class for organelle components that position their model on a membrane edge
@@ -102,7 +102,7 @@ public abstract class ExternallyPositionedComponent : IOrganelleComponent
     /// <param name="delta">The difference between the cell middle and the external organelle position</param>
     protected float GetAngle(Vector3 delta)
     {
-        float angle = Mathf.Atan2(-delta.z, delta.x);
+        float angle = Mathf.Atan2(-delta.Z, delta.X);
         if (angle < 0)
         {
             angle += 2 * Mathf.Pi;
@@ -125,7 +125,7 @@ public abstract class ExternallyPositionedComponent : IOrganelleComponent
         return false;
     }
 
-    protected abstract void OnPositionChanged(Quat rotation, float angle,
+    protected abstract void OnPositionChanged(Quaternion rotation, float angle,
         Vector3 membraneCoords);
 
     private void CheckPositioningWithMembrane()
@@ -139,8 +139,8 @@ public abstract class ExternallyPositionedComponent : IOrganelleComponent
             relativeOrganellePosition = DefaultVisualPos;
 
         Vector3 exit = middle - relativeOrganellePosition;
-        var membraneCoords = membrane.GetVectorTowardsNearestPointOfMembrane(exit.x,
-            exit.z);
+        var membraneCoords = membrane.GetVectorTowardsNearestPointOfMembrane(exit.X,
+            exit.Z);
 
         if (!membraneCoords.Equals(lastCalculatedPosition) || NeedsUpdateAnyway())
         {

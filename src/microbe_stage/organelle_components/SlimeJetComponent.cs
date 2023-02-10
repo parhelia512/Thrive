@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
 ///   Slime-powered jet for adding bursts of speed
 /// </summary>
-public class SlimeJetComponent : ExternallyPositionedComponent
+public partial class SlimeJetComponent : ExternallyPositionedComponent
 {
     private bool active;
 
@@ -30,7 +30,7 @@ public class SlimeJetComponent : ExternallyPositionedComponent
             if (animation != null)
             {
                 // Play the animation if active, and vice versa
-                animation.PlaybackSpeed = active ? 1.0f : 0.0f;
+                animation.SpeedScale = active ? 1.0f : 0.0f;
             }
         }
     }
@@ -78,7 +78,7 @@ public class SlimeJetComponent : ExternallyPositionedComponent
         if (!Active)
             return Vector3.Zero;
 
-        var currentCellRotation = microbe.GlobalTransform.basis.Quat().Normalized();
+        var currentCellRotation = microbe.GlobalTransform.Basis.GetRotationQuaternion().Normalized();
         var direction = GetDirection();
 
         // Preview the amount of mucilage we'll eject to calculate force here
@@ -88,7 +88,7 @@ public class SlimeJetComponent : ExternallyPositionedComponent
 
         // Scale total added force by the amount ejected
         return Constants.MUCILAGE_JET_FACTOR * slimeToSecrete *
-            currentCellRotation.Xform(direction) / microbe.MassFromOrganelles;
+            currentCellRotation * direction / microbe.MassFromOrganelles;
     }
 
     public Vector3 GetDirection()
@@ -128,17 +128,17 @@ public class SlimeJetComponent : ExternallyPositionedComponent
         // it should be kept an eye on if it does. The engine for some reason doesnt update THIS basis
         // unless checked with some condition (if or return)
         // SEE: https://github.com/Revolutionary-Games/Thrive/issues/2906
-        return organelle!.OrganelleGraphics!.Transform.basis == Transform.Identity.basis;
+        return organelle!.OrganelleGraphics!.Transform.Basis == Transform3D.Identity.Basis;
     }
 
-    protected override void OnPositionChanged(Quat rotation, float angle,
+    protected override void OnPositionChanged(Quaternion rotation, float angle,
         Vector3 membraneCoords)
     {
-        organelle!.OrganelleGraphics!.Transform = new Transform(rotation, membraneCoords);
+        organelle!.OrganelleGraphics!.Transform = new Transform3D(new Basis(rotation), membraneCoords);
     }
 }
 
-public class SlimeJetComponentFactory : IOrganelleComponentFactory
+public partial class SlimeJetComponentFactory : IOrganelleComponentFactory
 {
     public IOrganelleComponent Create()
     {

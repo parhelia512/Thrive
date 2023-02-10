@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
 
 /// <summary>
@@ -121,7 +121,7 @@ public static class NodeHelpers
     }
 
     /// <summary>
-    ///   Changes parent of this <see cref="Spatial"/> to a new parent, while keeping the global position. The node
+    ///   Changes parent of this <see cref="Node3D"/> to a new parent, while keeping the global position. The node
     ///   needs to already have parent to use this.
     /// </summary>
     /// <remarks>
@@ -130,7 +130,7 @@ public static class NodeHelpers
     ///     available in upcoming Godot versions.
     ///   </para>
     /// </remarks>
-    public static void ReParentWithTransform(this Spatial node, Node newParent)
+    public static void ReParentWithTransform(this Node3D node, Node newParent)
     {
         var temp = node.GlobalTransform;
         node.ReParent(newParent);
@@ -145,7 +145,7 @@ public static class NodeHelpers
     /// <returns>The fully resolved path</returns>
     public static NodePath ResolveToAbsolutePath(this Node node, NodePath potentiallyRelativePath)
     {
-        if (potentiallyRelativePath.IsEmpty() || potentiallyRelativePath.IsAbsolute())
+        if (potentiallyRelativePath.IsEmpty || potentiallyRelativePath.IsAbsolute())
             return potentiallyRelativePath;
 
         return node.GetNode(potentiallyRelativePath).GetPath();
@@ -156,19 +156,19 @@ public static class NodeHelpers
     /// </summary>
     /// <param name="node">Node to get material from.</param>
     /// <param name="modelPath">Path to model within the scene. If null takes scene root as model.</param>
-    /// <returns>ShaderMaterial of the GeometryInstance.</returns>
+    /// <returns>ShaderMaterial of the GeometryInstance3D.</returns>
     public static ShaderMaterial GetMaterial(this Node node, NodePath? modelPath = null)
     {
-        GeometryInstance geometry;
+        GeometryInstance3D geometry;
 
         // Fetch the actual model from the scene
         if (string.IsNullOrEmpty(modelPath))
         {
-            geometry = (GeometryInstance)node;
+            geometry = (GeometryInstance3D)node;
         }
         else
         {
-            geometry = node.GetNode<GeometryInstance>(modelPath);
+            geometry = node.GetNode<GeometryInstance3D>(modelPath);
         }
 
         return (ShaderMaterial)geometry.MaterialOverride;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
@@ -23,7 +23,7 @@ public class RunOnAxisGroupAttribute : InputAttribute
     private readonly List<RunOnAxisAttribute> axes = new();
 
     // These two variables exist to make OnProcess more efficient
-    private readonly List<float> currentAxisValues = new();
+    private readonly List<double> currentAxisValues = new();
 
     /// <summary>
     ///   Cached call parameters object to not recreate this all the time.
@@ -57,7 +57,7 @@ public class RunOnAxisGroupAttribute : InputAttribute
         return wasUsed;
     }
 
-    public override void OnProcess(float delta)
+    public override void OnProcess(double delta)
     {
         // Read new axis values
         // TODO: could this run only if OnInput used something? (currently wouldn't work for mouse look)

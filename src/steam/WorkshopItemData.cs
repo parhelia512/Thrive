@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
-public class WorkshopItemData
+public partial class WorkshopItemData
 {
     public WorkshopItemData(ulong id, string title, string contentFolder, string previewImagePath)
     {

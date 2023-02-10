@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   The ordered phases of phagocytosis process.
 /// </summary>
 public enum PhagocytosisPhase

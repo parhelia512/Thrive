@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -16,7 +16,7 @@ using Godot;
 public partial class CellEditorComponent
 {
     [Signal]
-    public delegate void Clicked();
+    public delegate void ClickedEventHandler();
 
     /// <summary>
     ///   Detects presses anywhere to notify the name input to unfocus
@@ -302,13 +302,13 @@ public partial class CellEditorComponent
         if (energyBalance.FinalBalance > 0)
         {
             atpBalanceLabel.Text = TranslationServer.Translate("ATP_PRODUCTION");
-            atpBalanceLabel.AddColorOverride("font_color", new Color(1.0f, 1.0f, 1.0f));
+            atpBalanceLabel.AddThemeColorOverride("font_color", new Color(1.0f, 1.0f, 1.0f));
         }
         else
         {
             atpBalanceLabel.Text = TranslationServer.Translate("ATP_PRODUCTION") + " - " +
                 TranslationServer.Translate("ATP_PRODUCTION_TOO_LOW");
-            atpBalanceLabel.AddColorOverride("font_color", new Color(1.0f, 0.2f, 0.2f));
+            atpBalanceLabel.AddThemeColorOverride("font_color", new Color(1.0f, 0.2f, 0.2f));
         }
 
         atpProductionLabel.Text = string.Format(CultureInfo.CurrentCulture, "{0:F1}", energyBalance.TotalProduction);

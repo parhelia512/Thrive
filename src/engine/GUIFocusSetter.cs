@@ -1,28 +1,28 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
 /// <summary>
 ///   Manages setting the right GUI control to grab focus based on <see cref="FocusGrabber"/> Nodes that are visible
 /// </summary>
-public class GUIFocusSetter : Control
+public partial class GUIFocusSetter : Control
 {
     private static GUIFocusSetter? instance;
 
     private readonly List<FocusGrabber> activeGrabbers = new();
     private bool dirty = true;
-    private float elapsed;
+    private double elapsed;
 
     private GUIFocusSetter()
     {
         instance = this;
         MouseFilter = MouseFilterEnum.Ignore;
-        PauseMode = PauseModeEnum.Process;
+        ProcessMode = ProcessModeEnum.Always;
     }
 
     public static GUIFocusSetter Instance => instance ?? throw new InstanceNotLoadedYetException();
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         elapsed += delta;
 
@@ -71,7 +71,7 @@ public class GUIFocusSetter : Control
             return;
         }
 
-        var currentlyFocused = GetFocusOwner();
+        var currentlyFocused = GetViewport().GuiGetFocusOwner();
 
         if (currentlyFocused != null && currentlyFocused.IsVisibleInTree())
         {

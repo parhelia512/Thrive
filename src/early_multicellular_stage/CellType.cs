@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using Godot;
 using Newtonsoft.Json;
@@ -79,13 +79,13 @@ public class CellType : ICellProperties, IPhotographable, ICloneable
             TypeName = newName;
     }
 
-    public void ApplySceneParameters(Spatial instancedScene)
+    public void ApplySceneParameters(Node3D instancedScene)
     {
         new MicrobeSpecies(new MicrobeSpecies(int.MaxValue, string.Empty, string.Empty), this)
             .ApplySceneParameters(instancedScene);
     }
 
-    public float CalculatePhotographDistance(Spatial instancedScene)
+    public float CalculatePhotographDistance(Node3D instancedScene)
     {
         return PhotoStudio.CameraDistanceFromRadiusOfObject(((Microbe)instancedScene).Radius *
             Constants.PHOTO_STUDIO_CELL_RADIUS_MULTIPLIER);

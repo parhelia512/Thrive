@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
 /// <summary>
 ///   Base type for tutorial event arguments
 /// </summary>
-public class TutorialEventArgs : EventArgs
+public partial class TutorialEventArgs : EventArgs
 {
 }
 
-public class MicrobeEventArgs : TutorialEventArgs
+public partial class MicrobeEventArgs : TutorialEventArgs
 {
     public MicrobeEventArgs(Microbe microbe)
     {
@@ -19,7 +19,7 @@ public class MicrobeEventArgs : TutorialEventArgs
     public Microbe Microbe { get; }
 }
 
-public class RotationEventArgs : TutorialEventArgs
+public partial class RotationEventArgs : TutorialEventArgs
 {
     public RotationEventArgs(Basis rotation, Vector3 rotationInDegrees)
     {
@@ -38,7 +38,7 @@ public class RotationEventArgs : TutorialEventArgs
     public Vector3 RotationInDegrees { get; }
 }
 
-public class MicrobeMovementEventArgs : TutorialEventArgs
+public partial class MicrobeMovementEventArgs : TutorialEventArgs
 {
     public MicrobeMovementEventArgs(bool usesScreenRelativeMovement, Vector3 movementDirection, Vector3 lookVector)
     {
@@ -52,7 +52,7 @@ public class MicrobeMovementEventArgs : TutorialEventArgs
     public Vector3 LookVector { get; }
 }
 
-public class EntityPositionEventArgs : TutorialEventArgs
+public partial class EntityPositionEventArgs : TutorialEventArgs
 {
     public EntityPositionEventArgs(Vector3? position)
     {
@@ -62,7 +62,7 @@ public class EntityPositionEventArgs : TutorialEventArgs
     public Vector3? EntityPosition { get; }
 }
 
-public class CompoundBagEventArgs : TutorialEventArgs
+public partial class CompoundBagEventArgs : TutorialEventArgs
 {
     public CompoundBagEventArgs(CompoundBag compounds)
     {
@@ -72,7 +72,7 @@ public class CompoundBagEventArgs : TutorialEventArgs
     public CompoundBag Compounds { get; }
 }
 
-public class CompoundEventArgs : TutorialEventArgs
+public partial class CompoundEventArgs : TutorialEventArgs
 {
     public CompoundEventArgs(Dictionary<Compound, float> compounds)
     {
@@ -82,7 +82,7 @@ public class CompoundEventArgs : TutorialEventArgs
     public Dictionary<Compound, float> Compounds { get; }
 }
 
-public class StringEventArgs : TutorialEventArgs
+public partial class StringEventArgs : TutorialEventArgs
 {
     public StringEventArgs(string? data)
     {
@@ -92,7 +92,7 @@ public class StringEventArgs : TutorialEventArgs
     public string? Data { get; }
 }
 
-public class PatchEventArgs : TutorialEventArgs
+public partial class PatchEventArgs : TutorialEventArgs
 {
     public PatchEventArgs(Patch? patch)
     {
@@ -102,7 +102,7 @@ public class PatchEventArgs : TutorialEventArgs
     public Patch? Patch { get; }
 }
 
-public class CallbackEventArgs : TutorialEventArgs
+public partial class CallbackEventArgs : TutorialEventArgs
 {
     public CallbackEventArgs(Action data)
     {
@@ -112,7 +112,7 @@ public class CallbackEventArgs : TutorialEventArgs
     public Action Data { get; }
 }
 
-public class MicrobeColonyEventArgs : TutorialEventArgs
+public partial class MicrobeColonyEventArgs : TutorialEventArgs
 {
     public MicrobeColonyEventArgs(MicrobeColony? colony)
     {

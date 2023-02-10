@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using Godot;
 
 /// <summary>
 ///   Flagellum for making cells move faster
 /// </summary>
-public class MovementComponent : ExternallyPositionedComponent
+public partial class MovementComponent : ExternallyPositionedComponent
 {
     public float Momentum;
     public float Torque;
@@ -67,13 +67,13 @@ public class MovementComponent : ExternallyPositionedComponent
         // it should be kept an eye on if it does. The engine for some reason doesnt update THIS basis
         // unless checked with some condition (if or return)
         // SEE: https://github.com/Revolutionary-Games/Thrive/issues/2906
-        return organelle!.OrganelleGraphics!.Transform.basis == Transform.Identity.basis;
+        return organelle!.OrganelleGraphics!.Transform.Basis == Transform3D.Identity.Basis;
     }
 
-    protected override void OnPositionChanged(Quat rotation, float angle,
+    protected override void OnPositionChanged(Quaternion rotation, float angle,
         Vector3 membraneCoords)
     {
-        organelle!.OrganelleGraphics!.Transform = new Transform(rotation, membraneCoords);
+        organelle!.OrganelleGraphics!.Transform = new Transform3D(new Basis(rotation), membraneCoords);
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public class MovementComponent : ExternallyPositionedComponent
     {
         if (animation != null)
         {
-            animation.PlaybackSpeed = speed;
+            animation.SpeedScale = speed;
         }
     }
 
@@ -150,11 +150,11 @@ public class MovementComponent : ExternallyPositionedComponent
         // Rotate the 'thrust' based on our orientation
         if (microbe.Colony?.Master == null)
         {
-            direction = microbe.Transform.basis.Xform(direction);
+            direction = microbe.Transform.Basis * direction;
         }
         else
         {
-            direction = microbe.Colony.Master.Transform.basis.Xform(direction);
+            direction = microbe.Colony.Master.Transform.Basis * (direction);
         }
 
         SetSpeedFactor(animationSpeed);
@@ -163,7 +163,7 @@ public class MovementComponent : ExternallyPositionedComponent
     }
 }
 
-public class MovementComponentFactory : IOrganelleComponentFactory
+public partial class MovementComponentFactory : IOrganelleComponentFactory
 {
     public float Momentum;
     public float Torque;

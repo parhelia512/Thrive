@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Microbe editor tutorial
 /// </summary>
-public class MicrobeEditorTutorialGUI : Control, ITutorialGUI
+public partial class MicrobeEditorTutorialGUI : Control, ITutorialGUI
 {
     [Export]
     public NodePath? EditorEntryReportPath;
@@ -228,12 +228,12 @@ public class MicrobeEditorTutorialGUI : Control, ITutorialGUI
         CellEditorRedoHighlight = GetNode<ControlHighlight>(CellEditorRedoHighlightPath);
         AutoEvoPredictionHighlight = GetNode<ControlHighlight>(AutoEvoPredictionHighlightPath);
 
-        PauseMode = PauseModeEnum.Process;
+        ProcessMode = ProcessModeEnum.Always;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
-        TutorialHelper.ProcessTutorialGUI(this, delta);
+        TutorialHelper.ProcessTutorialGUI(this, (float)delta);
     }
 
     public void OnClickedCloseAll()

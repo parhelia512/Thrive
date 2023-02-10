@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Godot;
 using Newtonsoft.Json;
 
@@ -22,7 +22,7 @@ public class DayNightCycle
     ///   Current position in the day/night cycle, expressed as a fraction of the day elapsed so far.
     /// </summary>
     [JsonProperty]
-    private float fractionOfDayElapsed;
+    private double fractionOfDayElapsed;
 
     /// <summary>
     ///   Multiplier used for calculating DayLightFraction.
@@ -54,7 +54,7 @@ public class DayNightCycle
     ///   desmos: https://www.desmos.com/calculator/vrrk1bkac2
     /// </summary>
     [JsonIgnore]
-    public float DayLightFraction => isEnabled ? CalculatePointwiseSunlight(fractionOfDayElapsed) : 1.0f;
+    public double DayLightFraction => isEnabled ? CalculatePointwiseSunlight(fractionOfDayElapsed) : 1.0f;
 
     /// <summary>
     ///   Applies the world settings. This needs to be called when this object is created (and not loaded from JSON)
@@ -82,7 +82,7 @@ public class DayNightCycle
         AverageSunlight = isEnabled ? CalculateAverageSunlight() : 1.0f;
     }
 
-    public void Process(float delta)
+    public void Process(double delta)
     {
         if (isEnabled)
         {
@@ -97,7 +97,7 @@ public class DayNightCycle
     ///   If this equation is changed, <see cref="IntegratePointwiseSunlight"/> must also be updated.
     /// </remarks>
     /// <param name="x">Fraction of the day completed, between 0-1</param>
-    private float CalculatePointwiseSunlight(float x)
+    private double CalculatePointwiseSunlight(double x)
     {
         return Math.Max(1 - daytimeMultiplier * Mathf.Pow(x - 0.5f, 2), 0);
     }

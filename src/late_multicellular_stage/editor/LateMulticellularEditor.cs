@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 [JsonObject(IsReference = true)]
 [SceneLoadedClass("res://src/late_multicellular_stage/editor/LateMulticellularEditor.tscn")]
 [DeserializedCallbackTarget]
-public class LateMulticellularEditor : EditorBase<EditorAction, MulticellularStage>, IEditorReportData, ICellEditorData
+public partial class LateMulticellularEditor : EditorBase<EditorAction, MulticellularStage>, IEditorReportData, ICellEditorData
 {
     [Export]
     public NodePath? ReportTabPath;
@@ -54,10 +54,10 @@ public class LateMulticellularEditor : EditorBase<EditorAction, MulticellularSta
     private CellEditorComponent cellEditorTab = null!;
 
     private MicrobeCamera cellEditorCamera = null!;
-    private Light cellEditorLight = null!;
+    private Light3D cellEditorLight = null!;
 
-    private Camera body3DEditorCamera = null!;
-    private Light bodyEditorLight = null!;
+    private Camera3D body3DEditorCamera = null!;
+    private Light3D bodyEditorLight = null!;
 
     private Control noCellTypeSelected = null!;
 #pragma warning restore CA2213
@@ -203,10 +203,10 @@ public class LateMulticellularEditor : EditorBase<EditorAction, MulticellularSta
         noCellTypeSelected = GetNode<Control>(NoCellTypeSelectedPath);
 
         cellEditorCamera = GetNode<MicrobeCamera>(CellEditorCameraPath);
-        cellEditorLight = GetNode<Light>(CellEditorLightPath);
+        cellEditorLight = GetNode<Light3D>(CellEditorLightPath);
 
-        body3DEditorCamera = GetNode<Camera>(Body3DEditorCameraPath);
-        bodyEditorLight = GetNode<Light>(BodyEditorLightPath);
+        body3DEditorCamera = GetNode<Camera3D>(Body3DEditorCameraPath);
+        bodyEditorLight = GetNode<Light3D>(BodyEditorLightPath);
     }
 
     protected override void UpdateHistoryCallbackTargets(ActionHistory<EditorAction> actionHistory)

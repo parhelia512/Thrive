@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Accepts user input regarding the tutorial
 /// </summary>
 public interface ITutorialInput

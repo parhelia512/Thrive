@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using Godot;
 
-public class PatchExtinctionBox : Control
+public partial class PatchExtinctionBox : Control
 {
     [Export]
     public NodePath? PatchMapDrawerPath;
@@ -85,14 +85,14 @@ public class PatchExtinctionBox : Control
 
         animationPlayer.PlayBackwards();
 
-        TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, animLength, () =>
+        TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, (float)animLength, () =>
         {
             if (detailsPanel.SelectedPatch == null)
                 throw new InvalidOperationException("The patch must not be null at this point");
 
             OnMovedToNewPatch.Invoke(detailsPanel.SelectedPatch);
 
-            TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeIn, animLength);
+            TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeIn, (float)animLength);
             detailsPanel.MouseFilter = MouseFilterEnum.Stop;
         });
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 [SceneLoadedClass("res://src/microbe_stage/MicrobeStage.tscn")]
 [DeserializedCallbackTarget]
 [UseThriveSerializer]
-public class MicrobeStage : StageBase<Microbe>
+public partial class MicrobeStage : StageBase<Microbe>
 {
     [Export]
     public NodePath? GuidanceLinePath;
@@ -77,7 +77,7 @@ public class MicrobeStage : StageBase<Microbe>
     /// </summary>
     [JsonProperty]
     [AssignOnlyChildItemsOnDeserialize]
-    public MicrobeCamera Camera { get; private set; } = null!;
+    public MicrobeCamera Camera3D { get; private set; } = null!;
 
     [JsonProperty]
     [AssignOnlyChildItemsOnDeserialize]
@@ -113,7 +113,7 @@ public class MicrobeStage : StageBase<Microbe>
 
         tutorialGUI.Visible = true;
         HUD.Init(this);
-        HoverInfo.Init(Camera, Clouds);
+        HoverInfo.Init(Camera3D, Clouds);
 
         // Do stage setup to spawn things and setup all parts of the stage
         SetupStage();
@@ -143,7 +143,7 @@ public class MicrobeStage : StageBase<Microbe>
         HUD = GetNode<MicrobeHUD>("MicrobeHUD");
         tutorialGUI = GetNode<MicrobeTutorialGUI>("TutorialGUI");
         HoverInfo = GetNode<PlayerHoverInfo>("PlayerHoverInfo");
-        Camera = world.GetNode<MicrobeCamera>("PrimaryCamera");
+        Camera3D = world.GetNode<MicrobeCamera>("PrimaryCamera");
         Clouds = world.GetNode<CompoundCloudSystem>("CompoundClouds");
         guidanceLine = GetNode<GuidanceLine>(GuidanceLinePath);
 
@@ -196,23 +196,24 @@ public class MicrobeStage : StageBase<Microbe>
             "MicrobeStage");
     }
 
-    public override void _PhysicsProcess(float delta)
+    public override void _PhysicsProcess(double delta)
     {
-        FluidSystem.PhysicsProcess(delta);
+        FluidSystem.PhysicsProcess((float)delta);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
+        float fdelta = (float)delta;
 
-        FluidSystem.Process(delta);
-        TimedLifeSystem.Process(delta);
-        ProcessSystem.Process(delta);
-        floatingChunkSystem.Process(delta, Player?.Translation);
-        microbeAISystem.Process(delta);
-        microbeSystem.Process(delta);
+        FluidSystem.Process(fdelta);
+        TimedLifeSystem.Process(fdelta);
+        ProcessSystem.Process(fdelta);
+        floatingChunkSystem.Process(fdelta, Player?.Position);
+        microbeAISystem.Process(fdelta);
+        microbeSystem.Process(fdelta);
 
-        elapsedSinceLightLevelUpdate += delta;
+        elapsedSinceLightLevelUpdate += fdelta;
         if (elapsedSinceLightLevelUpdate > Constants.LIGHT_LEVEL_UPDATE_INTERVAL)
         {
             elapsedSinceLightLevelUpdate = 0;
@@ -235,11 +236,11 @@ public class MicrobeStage : StageBase<Microbe>
         if (Player != null)
         {
             var playerTransform = Player.GlobalTransform;
-            spawner.Process(delta, playerTransform.origin);
-            Clouds.ReportPlayerPosition(playerTransform.origin);
+            spawner.Process(fdelta, playerTransform.Origin);
+            Clouds.ReportPlayerPosition(playerTransform.Origin);
 
             TutorialState.SendEvent(TutorialEventType.MicrobePlayerOrientation,
-                new RotationEventArgs(Player.Transform.basis, Player.RotationDegrees), this);
+                new RotationEventArgs(Player.Transform.Basis, Player.RotationDegrees), this);
 
             TutorialState.SendEvent(TutorialEventType.MicrobePlayerCompounds,
                 new CompoundBagEventArgs(Player.Compounds), this);
@@ -253,7 +254,7 @@ public class MicrobeStage : StageBase<Microbe>
             TutorialState.SendEvent(TutorialEventType.MicrobePlayerColony,
                 new MicrobeColonyEventArgs(Player.Colony), this);
 
-            elapsedSinceEntityPositionCheck += delta;
+            elapsedSinceEntityPositionCheck += fdelta;
 
             if (elapsedSinceEntityPositionCheck > Constants.TUTORIAL_ENTITY_POSITION_UPDATE_INTERVAL)
             {
@@ -262,7 +263,7 @@ public class MicrobeStage : StageBase<Microbe>
                 if (TutorialState.WantsNearbyCompoundInfo())
                 {
                     TutorialState.SendEvent(TutorialEventType.MicrobeCompoundsNearPlayer,
-                        new EntityPositionEventArgs(Clouds.FindCompoundNearPoint(Player.GlobalTransform.origin,
+                        new EntityPositionEventArgs(Clouds.FindCompoundNearPoint(Player.GlobalTransform.Origin,
                             glucose)),
                         this);
                 }
@@ -281,18 +282,18 @@ public class MicrobeStage : StageBase<Microbe>
 
             if (guidancePosition != null)
             {
-                guidanceLine.Visible = true;
-                guidanceLine.LineStart = Player.GlobalTransform.origin;
+                // guidanceLine = true;
+                guidanceLine.LineStart = Player.GlobalTransform.Origin;
                 guidanceLine.LineEnd = guidancePosition.Value;
             }
             else
             {
-                guidanceLine.Visible = false;
+                // guidanceLine.Visible = false;
             }
         }
         else
         {
-            guidanceLine.Visible = false;
+            // guidanceLine.Visible = false;
         }
 
         UpdateLinePlayerPosition();
@@ -302,7 +303,7 @@ public class MicrobeStage : StageBase<Microbe>
     public void PauseKeyPressed()
     {
         // Check nothing else has keyboard focus and pause the game
-        if (HUD.GetFocusOwner() == null)
+        if (HUD.GetViewport().GuiGetFocusOwner() == null)
         {
             HUD.PauseButtonPressed(!HUD.Paused);
         }
@@ -330,7 +331,7 @@ public class MicrobeStage : StageBase<Microbe>
 
             var scene = SceneManager.Instance.LoadScene(MainGameState.EarlyMulticellularEditor);
 
-            sceneInstance = scene.Instance();
+            sceneInstance = scene.Instantiate();
             var editor = (EarlyMulticellularEditor)sceneInstance;
 
             editor.CurrentGame = CurrentGame;
@@ -350,7 +351,7 @@ public class MicrobeStage : StageBase<Microbe>
 
             var scene = SceneManager.Instance.LoadScene(MainGameState.MicrobeEditor);
 
-            sceneInstance = scene.Instance();
+            sceneInstance = scene.Instantiate();
             var editor = (MicrobeEditor)sceneInstance;
 
             editor.CurrentGame = CurrentGame;
@@ -421,7 +422,7 @@ public class MicrobeStage : StageBase<Microbe>
 
         var scene = SceneManager.Instance.LoadScene(MainGameState.EarlyMulticellularEditor);
 
-        var editor = (EarlyMulticellularEditor)scene.Instance();
+        var editor = (EarlyMulticellularEditor)scene.Instantiate();
 
         editor.CurrentGame = CurrentGame ?? throw new InvalidOperationException("Stage has no current game");
         editor.ReturnToStage = this;
@@ -467,7 +468,7 @@ public class MicrobeStage : StageBase<Microbe>
 
         var scene = SceneManager.Instance.LoadScene(MainGameState.LateMulticellularEditor);
 
-        var editor = (LateMulticellularEditor)scene.Instance();
+        var editor = (LateMulticellularEditor)scene.Instantiate();
 
         editor.CurrentGame = CurrentGame ?? throw new InvalidOperationException("Stage has no current game");
 
@@ -490,7 +491,7 @@ public class MicrobeStage : StageBase<Microbe>
         // Add a cloud of glucose if difficulty settings call for it
         if (GameWorld.WorldSettings.FreeGlucoseCloud)
         {
-            Clouds.AddCloud(glucose, 200000.0f, Player!.Translation + new Vector3(0.0f, 0.0f, -25.0f));
+            Clouds.AddCloud(glucose, 200000.0f, Player!.Position + new Vector3(0.0f, 0.0f, -25.0f));
         }
 
         // Check win conditions
@@ -617,14 +618,14 @@ public class MicrobeStage : StageBase<Microbe>
 
         Player.OnEngulfmentStorageFull = OnPlayerEngulfmentLimitReached;
 
-        Camera.ObjectToFollow = Player;
+        Camera3D.ObjectToFollow = Player;
 
         spawner.DespawnAll();
 
         if (spawnedPlayer)
         {
             // Random location on respawn
-            Player.Translation = new Vector3(
+            Player.Position = new Vector3(
                 random.Next(Constants.MIN_SPAWN_DISTANCE, Constants.MAX_SPAWN_DISTANCE), 0,
                 random.Next(Constants.MIN_SPAWN_DISTANCE, Constants.MAX_SPAWN_DISTANCE));
 
@@ -654,14 +655,14 @@ public class MicrobeStage : StageBase<Microbe>
     {
         base.GameOver();
 
-        guidanceLine.Visible = false;
+        // guidanceLine.Visible = false;
     }
 
     protected override void PlayerExtinctInPatch()
     {
         base.PlayerExtinctInPatch();
 
-        guidanceLine.Visible = false;
+        // guidanceLine.Visible = false;
     }
 
     protected override void AutoSave()
@@ -695,7 +696,7 @@ public class MicrobeStage : StageBase<Microbe>
 
     private void UpdateBackground()
     {
-        Camera.SetBackground(SimulationParameters.Instance.GetBackground(
+        Camera3D.SetBackground(SimulationParameters.Instance.GetBackground(
             GameWorld.Map.CurrentPatch!.BiomeTemplate.Background));
     }
 
@@ -710,12 +711,12 @@ public class MicrobeStage : StageBase<Microbe>
             var lightLevel = GameWorld.Map.CurrentPatch!.GetCompoundAmount("sunlight") * lightCycle.DayLightFraction;
 
             // Normalise by maximum light level in the patch
-            Camera.LightLevel = lightLevel / maxLightLevel;
+            Camera3D.LightLevel = (float)lightLevel / maxLightLevel;
         }
         else
         {
             // Don't change lighting for patches without day/night effects
-            Camera.LightLevel = 1.0f;
+            Camera3D.LightLevel = 1.0f;
         }
     }
 
@@ -735,7 +736,7 @@ public class MicrobeStage : StageBase<Microbe>
 
     private void OnFinishLoading()
     {
-        Camera.ObjectToFollow = Player;
+        Camera3D.ObjectToFollow = Player;
     }
 
     /// <summary>
@@ -769,7 +770,7 @@ public class MicrobeStage : StageBase<Microbe>
 
         var randomSpecies = species.Random(random);
 
-        var copyEntity = SpawnHelpers.SpawnMicrobe(randomSpecies, Player.Translation + Vector3.Forward * 20,
+        var copyEntity = SpawnHelpers.SpawnMicrobe(randomSpecies, Player.Position + Vector3.Forward * 20,
             rootOfDynamicallySpawned, SpawnHelpers.LoadMicrobeScene(), true, Clouds, spawner,
             CurrentGame!);
 
@@ -791,7 +792,7 @@ public class MicrobeStage : StageBase<Microbe>
             TutorialState.SendEvent(TutorialEventType.MicrobePlayerDied, EventArgs.Empty, this);
 
         Player = null;
-        Camera.ObjectToFollow = null;
+        Camera3D.ObjectToFollow = null;
     }
 
     [DeserializedCallbackAllowed]
@@ -841,7 +842,7 @@ public class MicrobeStage : StageBase<Microbe>
             GD.PrintErr("Chemoreception data reported for non-player cell");
 
         int currentLineIndex = 0;
-        var position = microbe.GlobalTransform.origin;
+        var position = microbe.GlobalTransform.Origin;
 
         foreach (var tuple in microbe.GetDetectedCompounds(Clouds))
         {
@@ -850,7 +851,7 @@ public class MicrobeStage : StageBase<Microbe>
             line.Colour = tuple.Colour;
             line.LineStart = position;
             line.LineEnd = tuple.Target;
-            line.Visible = true;
+            // line.Visible = true;
         }
 
         // Remove excess lines
@@ -859,8 +860,8 @@ public class MicrobeStage : StageBase<Microbe>
             var line = chemoreceptionLines[chemoreceptionLines.Count - 1];
             chemoreceptionLines.RemoveAt(chemoreceptionLines.Count - 1);
 
-            RemoveChild(line);
-            line.QueueFree();
+            // RemoveChild(line);
+            // line.QueueFree();
         }
     }
 
@@ -868,18 +869,18 @@ public class MicrobeStage : StageBase<Microbe>
     {
         if (Player == null || Player?.Dead == true)
         {
-            foreach (var chemoreceptionLine in chemoreceptionLines)
-                chemoreceptionLine.Visible = false;
+            // foreach (var chemoreceptionLine in chemoreceptionLines)
+            //     chemoreceptionLine.Visible = false;
 
             return;
         }
 
-        var position = Player!.GlobalTransform.origin;
+        var position = Player!.GlobalTransform.Origin;
 
         foreach (var chemoreceptionLine in chemoreceptionLines)
         {
-            if (chemoreceptionLine.Visible)
-                chemoreceptionLine.LineStart = position;
+            // if (chemoreceptionLine.Visible)
+            //     chemoreceptionLine.LineStart = position;
         }
     }
 
@@ -890,7 +891,7 @@ public class MicrobeStage : StageBase<Microbe>
             // The lines are created here and added as children of the stage because if they were in the microbe
             // then rotation and it moving cause implementation difficulties
             var line = new GuidanceLine();
-            AddChild(line);
+            // AddChild(line);
             chemoreceptionLines.Add(line);
         }
 

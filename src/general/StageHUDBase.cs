@@ -1,16 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
+using Godot.Collections;
 using Newtonsoft.Json;
 using Array = Godot.Collections.Array;
-using Object = Godot.Object;
+using Object = Godot.GodotObject;
 
 /// <summary>
 ///   Base HUD class for stages where the player moves a creature around
 /// </summary>
 /// <typeparam name="TStage">The type of the stage this HUD is for</typeparam>
 [JsonObject(MemberSerialization.OptIn)]
-public abstract class StageHUDBase<TStage> : Control, IStageHUD
+public abstract partial class StageHUDBase<TStage> : Control, IStageHUD
     where TStage : Object, IStage
 {
     [Export]
@@ -186,16 +187,16 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     public AudioStream MicrobePickupOrganelleSound = null!;
 
     [Export]
-    public Texture AmmoniaBW = null!;
+    public Texture2D AmmoniaBW = null!;
 
     [Export]
-    public Texture PhosphatesBW = null!;
+    public Texture2D PhosphatesBW = null!;
 
     [Export]
-    public Texture AmmoniaInv = null!;
+    public Texture2D AmmoniaInv = null!;
 
     [Export]
-    public Texture PhosphatesInv = null!;
+    public Texture2D PhosphatesInv = null!;
 
     [Export]
     public PackedScene ExtinctionBoxScene = null!;
@@ -261,11 +262,11 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     protected Button environmentPanelCompressButton = null!;
     protected Button compoundsPanelExpandButton = null!;
     protected Button compoundsPanelCompressButton = null!;
-    protected TextureProgress atpBar = null!;
-    protected TextureProgress healthBar = null!;
-    protected TextureProgress ammoniaReproductionBar = null!;
-    protected TextureProgress phosphateReproductionBar = null!;
-    protected Light2D editorButtonFlash = null!;
+    protected TextureProgressBar atpBar = null!;
+    protected TextureProgressBar healthBar = null!;
+    protected TextureProgressBar ammoniaReproductionBar = null!;
+    protected TextureProgressBar phosphateReproductionBar = null!;
+    protected PointLight2D editorButtonFlash = null!;
     protected PauseMenu menu = null!;
     protected Label atpLabel = null!;
     protected Label hpLabel = null!;
@@ -320,7 +321,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     private ProcessPanel processPanel = null!;
 #pragma warning restore CA2213
 
-    private Array? compoundBars;
+    private Array<Node>? compoundBars;
 
     /// <summary>
     ///   For toggling paused with the pause button.
@@ -349,10 +350,10 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
     // These signals need to be copied to inheriting classes for Godot editor to pick them up
     [Signal]
-    public delegate void OnOpenMenu();
+    public delegate void OnOpenMenuEventHandler();
 
     [Signal]
-    public delegate void OnOpenMenuToHelp();
+    public delegate void OnOpenMenuToHelpEventHandler();
 
     /// <summary>
     ///   Gets and sets the text that appears at the upper HUD.
@@ -435,11 +436,11 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
         oxytoxyBar = GetNode<ProgressBar>(OxytoxyBarPath);
         mucilageBar = GetNode<ProgressBar>(MucilageBarPath);
-        atpBar = GetNode<TextureProgress>(AtpBarPath);
-        healthBar = GetNode<TextureProgress>(HealthBarPath);
-        ammoniaReproductionBar = GetNode<TextureProgress>(AmmoniaReproductionBarPath);
-        phosphateReproductionBar = GetNode<TextureProgress>(PhosphateReproductionBarPath);
-        editorButtonFlash = GetNode<Light2D>(EditorButtonFlashPath);
+        atpBar = GetNode<TextureProgressBar>(AtpBarPath);
+        healthBar = GetNode<TextureProgressBar>(HealthBarPath);
+        ammoniaReproductionBar = GetNode<TextureProgressBar>(AmmoniaReproductionBarPath);
+        phosphateReproductionBar = GetNode<TextureProgressBar>(PhosphateReproductionBarPath);
+        editorButtonFlash = GetNode<PointLight2D>(EditorButtonFlashPath);
 
         atpLabel = GetNode<Label>(AtpLabelPath);
         hpLabel = GetNode<Label>(HpLabelPath);
@@ -517,7 +518,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         tutorialState.MicrobePressEditorButton.PressEditorButtonControl = editorButton;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (stage == null)
             return;
@@ -530,13 +531,13 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
             UpdateAbilitiesHotBar();
         }
 
-        UpdateATP(delta);
-        UpdateHealth(delta);
-        UpdateHoverInfo(delta);
+        UpdateATP((float)delta);
+        UpdateHealth((float)delta);
+        UpdateHoverInfo((float)delta);
 
         UpdatePopulation();
         UpdateProcessPanel();
-        UpdatePanelSizing(delta);
+        UpdatePanelSizing((float)delta);
 
         UpdateFossilisationButtons();
     }
@@ -584,9 +585,9 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
         editorButton.Disabled = false;
         editorButton.GetNode<TextureRect>("Highlight").Show();
-        editorButton.GetNode<TextureProgress>("ReproductionBar/PhosphateReproductionBar").TintProgress =
+        editorButton.GetNode<TextureProgressBar>("ReproductionBar/PhosphateReproductionBar").TintProgress =
             new Color(1, 1, 1, 1);
-        editorButton.GetNode<TextureProgress>("ReproductionBar/AmmoniaReproductionBar").TintProgress =
+        editorButton.GetNode<TextureProgressBar>("ReproductionBar/AmmoniaReproductionBar").TintProgress =
             new Color(1, 1, 1, 1);
         editorButton.GetNode<TextureRect>("ReproductionBar/PhosphateIcon").Texture = PhosphatesBW;
         editorButton.GetNode<TextureRect>("ReproductionBar/AmmoniaIcon").Texture = AmmoniaBW;
@@ -603,9 +604,9 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
         editorButton.GetNode<TextureRect>("Highlight").Hide();
         editorButton.GetNode<Control>("ReproductionBar").Show();
-        editorButton.GetNode<TextureProgress>("ReproductionBar/PhosphateReproductionBar").TintProgress =
+        editorButton.GetNode<TextureProgressBar>("ReproductionBar/PhosphateReproductionBar").TintProgress =
             new Color(0.69f, 0.42f, 1, 1);
-        editorButton.GetNode<TextureProgress>("ReproductionBar/AmmoniaReproductionBar").TintProgress =
+        editorButton.GetNode<TextureProgressBar>("ReproductionBar/AmmoniaReproductionBar").TintProgress =
             new Color(1, 0.62f, 0.12f, 1);
         editorButton.GetNode<TextureRect>("ReproductionBar/PhosphateIcon").Texture = PhosphatesInv;
         editorButton.GetNode<TextureRect>("ReproductionBar/AmmoniaIcon").Texture = AmmoniaInv;
@@ -681,7 +682,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
         winExtinctBoxHolder.Show();
 
-        extinctionBox = ExtinctionBoxScene.Instance<CustomDialog>();
+        extinctionBox = ExtinctionBoxScene.Instantiate<CustomDialog>();
         winExtinctBoxHolder.AddChild(extinctionBox);
         extinctionBox.Show();
     }
@@ -690,7 +691,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     {
         if (patchExtinctionBox == null)
         {
-            patchExtinctionBox = PatchExtinctionBoxScene.Instance<PatchExtinctionBox>();
+            patchExtinctionBox = PatchExtinctionBoxScene.Instantiate<PatchExtinctionBox>();
             winExtinctBoxHolder.AddChild(patchExtinctionBox);
 
             patchExtinctionBox.OnMovedToNewPatch = MoveToNewPatchAfterExtinctInCurrent;
@@ -834,8 +835,6 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
                 FossilisationButtonLayerPath.Dispose();
                 FossilisationDialogPath.Dispose();
             }
-
-            compoundBars?.Dispose();
         }
 
         base.Dispose(disposing);
@@ -864,35 +863,35 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
         if (environmentCompressed)
         {
-            environmentPanelCompressButton.Pressed = true;
+            environmentPanelCompressButton.ButtonPressed = true;
             environmentPanelBarContainer.Columns = 2;
-            environmentPanelBarContainer.AddConstantOverride("vseparation", 20);
-            environmentPanelBarContainer.AddConstantOverride("hseparation", 17);
+            environmentPanelBarContainer.AddThemeConstantOverride("vseparation", 20);
+            environmentPanelBarContainer.AddThemeConstantOverride("hseparation", 17);
 
             foreach (ProgressBar bar in bars)
             {
-                panelsTween?.InterpolateProperty(bar, "rect_min_size:x", 95, 73, 0.3f);
-                panelsTween?.Start();
+                panelsTween?.TweenProperty(bar, "rect_min_size:x", 73, 0.3f);
+                panelsTween?.Play();
 
                 bar.GetNode<Label>("Label").Hide();
-                bar.GetNode<Label>("Value").Align = Label.AlignEnum.Center;
+                bar.GetNode<Label>("Value").HorizontalAlignment = HorizontalAlignment.Center;
             }
         }
 
         if (!environmentCompressed)
         {
-            environmentPanelExpandButton.Pressed = true;
+            environmentPanelExpandButton.ButtonPressed = true;
             environmentPanelBarContainer.Columns = 1;
-            environmentPanelBarContainer.AddConstantOverride("vseparation", 4);
-            environmentPanelBarContainer.AddConstantOverride("hseparation", 0);
+            environmentPanelBarContainer.AddThemeConstantOverride("vseparation", 4);
+            environmentPanelBarContainer.AddThemeConstantOverride("hseparation", 0);
 
             foreach (ProgressBar bar in bars)
             {
-                panelsTween?.InterpolateProperty(bar, "rect_min_size:x", bar.RectMinSize.x, 162, 0.3f);
-                panelsTween?.Start();
+                panelsTween?.TweenProperty(bar, "rect_min_size:x", 162, 0.3f);
+                panelsTween?.Play();
 
                 bar.GetNode<Label>("Label").Show();
-                bar.GetNode<Label>("Value").Align = Label.AlignEnum.Right;
+                bar.GetNode<Label>("Value").HorizontalAlignment = HorizontalAlignment.Right;
             }
         }
     }
@@ -906,9 +905,9 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
         if (compoundCompressed)
         {
-            compoundsPanelCompressButton.Pressed = true;
-            compoundsPanelBarContainer.AddConstantOverride("vseparation", 20);
-            compoundsPanelBarContainer.AddConstantOverride("hseparation", 14);
+            compoundsPanelCompressButton.ButtonPressed = true;
+            compoundsPanelBarContainer.AddThemeConstantOverride("vseparation", 20);
+            compoundsPanelBarContainer.AddThemeConstantOverride("hseparation", 14);
 
             if (bars.Count < 4)
             {
@@ -921,8 +920,8 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
             foreach (ProgressBar bar in bars)
             {
-                panelsTween?.InterpolateProperty(bar, "rect_min_size:x", 90, 64, 0.3f);
-                panelsTween?.Start();
+                panelsTween?.TweenProperty(bar, "rect_min_size:x", 64, 0.3f);
+                panelsTween?.Play();
 
                 bar.GetNode<Label>("Label").Hide();
             }
@@ -930,15 +929,15 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
         if (!compoundCompressed)
         {
-            compoundsPanelExpandButton.Pressed = true;
+            compoundsPanelExpandButton.ButtonPressed = true;
             compoundsPanelBarContainer.Columns = 1;
-            compoundsPanelBarContainer.AddConstantOverride("vseparation", 5);
-            compoundsPanelBarContainer.AddConstantOverride("hseparation", 0);
+            compoundsPanelBarContainer.AddThemeConstantOverride("vseparation", 5);
+            compoundsPanelBarContainer.AddThemeConstantOverride("hseparation", 0);
 
             foreach (ProgressBar bar in bars)
             {
-                panelsTween?.InterpolateProperty(bar, "rect_min_size:x", bar.RectMinSize.x, 220, 0.3f);
-                panelsTween?.Start();
+                panelsTween?.TweenProperty(bar, "rect_min_size:x", 220, 0.3f);
+                panelsTween?.Play();
 
                 bar.GetNode<Label>("Label").Show();
             }
@@ -957,7 +956,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         GUICommon.SmoothlyUpdateBar(healthBar, hp, delta);
         var hpText = StringUtils.FormatNumber(Mathf.Round(hp)) + " / " + StringUtils.FormatNumber(maxHP);
         hpLabel.Text = hpText;
-        hpLabel.HintTooltip = hpText;
+        hpLabel.TooltipText = hpText;
     }
 
     protected abstract void ReadPlayerHitpoints(out float hp, out float maxHP);
@@ -1042,42 +1041,43 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     /// <summary>
     ///   Updates the compound bars with the correct values.
     /// </summary>
-    protected virtual void UpdateCompoundBars(float delta)
+    protected virtual void UpdateCompoundBars(double delta)
     {
         var compounds = GetPlayerStorage();
+        float fDelta = (float)delta;
 
         glucoseBar.MaxValue = compounds.GetCapacityForCompound(glucose);
-        GUICommon.SmoothlyUpdateBar(glucoseBar, compounds.GetCompoundAmount(glucose), delta);
+        GUICommon.SmoothlyUpdateBar(glucoseBar, compounds.GetCompoundAmount(glucose), fDelta);
         glucoseBar.GetNode<Label>("Value").Text =
             StringUtils.SlashSeparatedNumbersFormat(glucoseBar.Value, glucoseBar.MaxValue);
 
         ammoniaBar.MaxValue = compounds.GetCapacityForCompound(ammonia);
-        GUICommon.SmoothlyUpdateBar(ammoniaBar, compounds.GetCompoundAmount(ammonia), delta);
+        GUICommon.SmoothlyUpdateBar(ammoniaBar, compounds.GetCompoundAmount(ammonia), fDelta);
         ammoniaBar.GetNode<Label>("Value").Text =
             StringUtils.SlashSeparatedNumbersFormat(ammoniaBar.Value, ammoniaBar.MaxValue);
 
         phosphateBar.MaxValue = compounds.GetCapacityForCompound(phosphates);
-        GUICommon.SmoothlyUpdateBar(phosphateBar, compounds.GetCompoundAmount(phosphates), delta);
+        GUICommon.SmoothlyUpdateBar(phosphateBar, compounds.GetCompoundAmount(phosphates), fDelta);
         phosphateBar.GetNode<Label>("Value").Text =
             StringUtils.SlashSeparatedNumbersFormat(phosphateBar.Value, phosphateBar.MaxValue);
 
         hydrogenSulfideBar.MaxValue = compounds.GetCapacityForCompound(hydrogensulfide);
-        GUICommon.SmoothlyUpdateBar(hydrogenSulfideBar, compounds.GetCompoundAmount(hydrogensulfide), delta);
+        GUICommon.SmoothlyUpdateBar(hydrogenSulfideBar, compounds.GetCompoundAmount(hydrogensulfide), fDelta);
         hydrogenSulfideBar.GetNode<Label>("Value").Text =
             StringUtils.SlashSeparatedNumbersFormat(hydrogenSulfideBar.Value, hydrogenSulfideBar.MaxValue);
 
         ironBar.MaxValue = compounds.GetCapacityForCompound(iron);
-        GUICommon.SmoothlyUpdateBar(ironBar, compounds.GetCompoundAmount(iron), delta);
+        GUICommon.SmoothlyUpdateBar(ironBar, compounds.GetCompoundAmount(iron), fDelta);
         ironBar.GetNode<Label>("Value").Text =
             StringUtils.SlashSeparatedNumbersFormat(ironBar.Value, ironBar.MaxValue);
 
         oxytoxyBar.MaxValue = compounds.GetCapacityForCompound(oxytoxy);
-        GUICommon.SmoothlyUpdateBar(oxytoxyBar, compounds.GetCompoundAmount(oxytoxy), delta);
+        GUICommon.SmoothlyUpdateBar(oxytoxyBar, compounds.GetCompoundAmount(oxytoxy), fDelta);
         oxytoxyBar.GetNode<Label>("Value").Text =
             StringUtils.SlashSeparatedNumbersFormat(oxytoxyBar.Value, oxytoxyBar.MaxValue);
 
         mucilageBar.MaxValue = compounds.GetCapacityForCompound(mucilage);
-        GUICommon.SmoothlyUpdateBar(mucilageBar, compounds.GetCompoundAmount(mucilage), delta);
+        GUICommon.SmoothlyUpdateBar(mucilageBar, compounds.GetCompoundAmount(mucilage), fDelta);
         mucilageBar.GetNode<Label>("Value").Text =
             StringUtils.SlashSeparatedNumbersFormat(mucilageBar.Value, mucilageBar.MaxValue);
     }
@@ -1085,8 +1085,8 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     protected void UpdateReproductionProgress()
     {
         CalculatePlayerReproductionProgress(
-            out Dictionary<Compound, float> gatheredCompounds,
-            out Dictionary<Compound, float> totalNeededCompounds);
+            out System.Collections.Generic.Dictionary<Compound, float> gatheredCompounds,
+            out System.Collections.Generic.Dictionary<Compound, float> totalNeededCompounds);
 
         float fractionOfAmmonia = 0;
         float fractionOfPhosphates = 0;
@@ -1116,8 +1116,8 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         CheckPhosphateProgressHighlight(fractionOfPhosphates);
     }
 
-    protected abstract void CalculatePlayerReproductionProgress(out Dictionary<Compound, float> gatheredCompounds,
-        out Dictionary<Compound, float> totalNeededCompounds);
+    protected abstract void CalculatePlayerReproductionProgress(out System.Collections.Generic.Dictionary<Compound, float> gatheredCompounds,
+        out System.Collections.Generic.Dictionary<Compound, float> totalNeededCompounds);
 
     protected void UpdateATP(float delta)
     {
@@ -1144,7 +1144,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
 
         var atpText = StringUtils.SlashSeparatedNumbersFormat(atpAmount, maxATP);
         atpLabel.Text = atpText;
-        atpLabel.HintTooltip = atpText;
+        atpLabel.TooltipText = atpText;
     }
 
     protected abstract ICompoundStorage GetPlayerStorage();
@@ -1165,23 +1165,23 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         var compoundsPanelVBoxContainer = compoundsPanel.GetNode<VBoxContainer>("VBoxContainer");
         var agentsPanelVBoxContainer = agentsPanel.GetNode<VBoxContainer>("VBoxContainer");
 
-        environmentPanelVBoxContainer.RectSize = new Vector2(environmentPanelVBoxContainer.RectMinSize.x, 0);
-        compoundsPanelVBoxContainer.RectSize = new Vector2(compoundsPanelVBoxContainer.RectMinSize.x, 0);
-        agentsPanelVBoxContainer.RectSize = new Vector2(agentsPanelVBoxContainer.RectMinSize.x, 0);
+        environmentPanelVBoxContainer.Size = new Vector2(environmentPanelVBoxContainer.CustomMinimumSize.X, 0);
+        compoundsPanelVBoxContainer.Size = new Vector2(compoundsPanelVBoxContainer.CustomMinimumSize.X, 0);
+        agentsPanelVBoxContainer.Size = new Vector2(agentsPanelVBoxContainer.CustomMinimumSize.X, 0);
 
         // Multiply interpolation value with delta time to make it not be affected by framerate
-        var environmentPanelSize = environmentPanel.RectMinSize.LinearInterpolate(
-            new Vector2(environmentPanel.RectMinSize.x, environmentPanelVBoxContainer.RectSize.y), 5 * delta);
+        var environmentPanelSize = environmentPanel.CustomMinimumSize.Lerp(
+            new Vector2(environmentPanel.CustomMinimumSize.X, environmentPanelVBoxContainer.Size.Y), 5 * delta);
 
-        var compoundsPanelSize = compoundsPanel.RectMinSize.LinearInterpolate(
-            new Vector2(compoundsPanel.RectMinSize.x, compoundsPanelVBoxContainer.RectSize.y), 5 * delta);
+        var compoundsPanelSize = compoundsPanel.CustomMinimumSize.Lerp(
+            new Vector2(compoundsPanel.CustomMinimumSize.X, compoundsPanelVBoxContainer.Size.Y), 5 * delta);
 
-        var agentsPanelSize = agentsPanel.RectMinSize.LinearInterpolate(
-            new Vector2(agentsPanel.RectMinSize.x, agentsPanelVBoxContainer.RectSize.y), 5 * delta);
+        var agentsPanelSize = agentsPanel.CustomMinimumSize.Lerp(
+            new Vector2(agentsPanel.CustomMinimumSize.X, agentsPanelVBoxContainer.Size.Y), 5 * delta);
 
-        environmentPanel.RectMinSize = environmentPanelSize;
-        compoundsPanel.RectMinSize = compoundsPanelSize;
-        agentsPanel.RectMinSize = agentsPanelSize;
+        environmentPanel.CustomMinimumSize = environmentPanelSize;
+        compoundsPanel.CustomMinimumSize = compoundsPanelSize;
+        agentsPanel.CustomMinimumSize = agentsPanelSize;
     }
 
     /// <summary>
@@ -1281,7 +1281,7 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
     {
         hoveredCellsContainer.AddChild(new Label
         {
-            Valign = Label.VAlign.Center,
+            VerticalAlignment = VerticalAlignment.Center,
             Text = cellInfo,
         });
     }
@@ -1296,10 +1296,10 @@ public abstract class StageHUDBase<TStage> : Control, IStageHUD
         secreteSlimeHotkey.Visible = showSlime;
         signallingAgentsHotkey.Visible = showingSignaling;
 
-        engulfHotkey.Pressed = engulfOn;
-        fireToxinHotkey.Pressed = Input.IsActionPressed(fireToxinHotkey.ActionName);
-        secreteSlimeHotkey.Pressed = Input.IsActionPressed(secreteSlimeHotkey.ActionName);
-        signallingAgentsHotkey.Pressed = Input.IsActionPressed(signallingAgentsHotkey.ActionName);
+        engulfHotkey.ButtonPressed = engulfOn;
+        fireToxinHotkey.ButtonPressed = Input.IsActionPressed(fireToxinHotkey.ActionName);
+        secreteSlimeHotkey.ButtonPressed = Input.IsActionPressed(secreteSlimeHotkey.ActionName);
+        signallingAgentsHotkey.ButtonPressed = Input.IsActionPressed(signallingAgentsHotkey.ActionName);
     }
 
     protected void OpenMenu()

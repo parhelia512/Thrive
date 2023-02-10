@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -9,7 +9,7 @@ using Nito.Collections;
 ///   Spawns AI cells and other environmental things as the player moves around
 /// </summary>
 [JsonObject(IsReference = true)]
-public class SpawnSystem : ISpawnSystem
+public partial class SpawnSystem : ISpawnSystem
 {
     /// <summary>
     ///   Sets how often the spawn system runs and checks things
@@ -154,8 +154,8 @@ public class SpawnSystem : ISpawnSystem
         elapsed += delta;
         despawnElapsed += delta;
 
-        // Remove the y-position from player position
-        playerPosition.y = 0;
+        // RemoveAt the y-position from player position
+        playerPosition.Y = 0;
 
         float spawnsLeftThisFrame = Constants.MAX_SPAWNS_PER_FRAME;
 
@@ -228,7 +228,7 @@ public class SpawnSystem : ISpawnSystem
                     throw new Exception("Queued spawn enumerator returned null");
 
                 // Discard the whole spawn if we're too close to the player
-                var entityPosition = ((Spatial)enumerator.Current).GlobalTransform.origin;
+                var entityPosition = ((Node3D)enumerator.Current).GlobalTransform.Origin;
                 if ((playerPosition - entityPosition).Length() < Constants.SPAWN_SECTOR_SIZE)
                 {
                     enumerator.Current.DestroyDetachAndQueueFree();
@@ -269,8 +269,8 @@ public class SpawnSystem : ISpawnSystem
 
     private void SpawnAllTypes(Vector3 playerPosition, ref float spawnsLeftThisFrame)
     {
-        var playerCoordinatePoint = new Tuple<int, int>(Mathf.RoundToInt(playerPosition.x /
-            Constants.SPAWN_SECTOR_SIZE), Mathf.RoundToInt(playerPosition.z / Constants.SPAWN_SECTOR_SIZE));
+        var playerCoordinatePoint = new Tuple<int, int>(Mathf.RoundToInt(playerPosition.X /
+            Constants.SPAWN_SECTOR_SIZE), Mathf.RoundToInt(playerPosition.Z / Constants.SPAWN_SECTOR_SIZE));
 
         // Spawn for all sectors immediately outside a 3x3 box around the player
         var sectorsToSpawn = new List<Int2>(12);
@@ -322,8 +322,8 @@ public class SpawnSystem : ISpawnSystem
             if (SpawnsBlocked(spawnType))
                 continue;
 
-            var sectorCenter = new Vector3(sector.x * Constants.SPAWN_SECTOR_SIZE, 0,
-                sector.y * Constants.SPAWN_SECTOR_SIZE);
+            var sectorCenter = new Vector3(sector.X * Constants.SPAWN_SECTOR_SIZE, 0,
+                sector.Y * Constants.SPAWN_SECTOR_SIZE);
 
             // Distance from the sector center.
             var displacement = new Vector3(random.NextFloat() * Constants.SPAWN_SECTOR_SIZE -
@@ -445,7 +445,7 @@ public class SpawnSystem : ISpawnSystem
             // TODO: check if it would be better to remove the spawned group tag from colony members (and add it back
             // when leaving the colony) or this could only get direct descendants of the world root and ignore nested
             // nodes in the spawned group
-            var entityPosition = ((Spatial)spawned).GlobalTransform.origin;
+            var entityPosition = ((Node3D)spawned).GlobalTransform.Origin;
             var squaredDistance = (playerPosition - entityPosition).LengthSquared();
 
             // If the entity is too far away from the player, despawn it.

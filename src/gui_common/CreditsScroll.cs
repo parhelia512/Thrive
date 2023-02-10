@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Godot;
 
-public class CreditsScroll : Container
+public partial class CreditsScroll : Container
 {
     private const bool ShowAssociationName = true;
     private const bool ShowFullLicenseTexts = false;
@@ -55,7 +55,7 @@ public class CreditsScroll : Container
     private float normalScrollSpeed;
 
     [Signal]
-    public delegate void OnFinishedSignal();
+    public delegate void OnFinishedSignalEventHandler();
 
     private enum CreditsPhase
     {
@@ -116,12 +116,12 @@ public class CreditsScroll : Container
         }
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (!scrolling || phase == CreditsPhase.NotRunning)
             return;
 
-        scrollOffset += delta * ScrollSpeed;
+        scrollOffset += (float)delta * ScrollSpeed;
         smoothOffset = Mathf.Round(scrollOffset);
 
         switch (phase)
@@ -556,8 +556,8 @@ public class CreditsScroll : Container
         var hBox = new HBoxContainer
         {
             // 0.7 == 15% shrink of middle spacing for 2 columns and move position to center.
-            RectPosition = new Vector2(columns == 2 ? RectSize.x * 0.15f : 0, 0),
-            RectMinSize = new Vector2(columns == 2 ? RectSize.x * 0.7f : RectSize.x, 0),
+            Position = new Vector2(columns == 2 ? Size.X * 0.15f : 0, 0),
+            CustomMinimumSize = new Vector2(columns == 2 ? Size.X * 0.7f : Size.X, 0),
         };
 
         foreach (var columnText in splitTexts)
@@ -565,7 +565,7 @@ public class CreditsScroll : Container
             var label = new CustomExpandingWordWrappedLabel(columnText.ToString());
 
             if (overrideFont != null)
-                label.AddFontOverride("font", overrideFont);
+                label.AddThemeFontOverride("font", overrideFont);
 
             hBox.AddChild(label);
         }
@@ -581,12 +581,12 @@ public class CreditsScroll : Container
         var label = new DynamicPart(offset, new Label
         {
             Text = text,
-            RectMinSize = new Vector2(RectSize.x, 0),
-            Align = Label.AlignEnum.Center,
+            CustomMinimumSize = new Vector2(Size.X, 0),
+            HorizontalAlignment = HorizontalAlignment.Center,
         });
 
         if (overrideFont != null)
-            label.Control.AddFontOverride("font", overrideFont);
+            label.Control.AddThemeFontOverride("font", overrideFont);
 
         AddDynamicItem(label);
         return label;
@@ -609,9 +609,9 @@ public class CreditsScroll : Container
     private DynamicPart CreateFileLoadedPart(int offset, string file)
     {
         string text;
-        using var reader = new File();
+        using var reader = FileAccess.Open(file, FileAccess.ModeFlags.Read);
 
-        if (reader.Open(file, File.ModeFlags.Read) == Error.Ok)
+        if (reader?.GetError() == Error.Ok)
         {
             text = reader.GetAsText();
         }
@@ -629,10 +629,10 @@ public class CreditsScroll : Container
         var label = new DynamicPart(offset, new Label
         {
             Text = text,
-            RectMinSize = new Vector2(RectSize.x * LicenseTextWidthFraction, 0),
-            RectPosition = new Vector2(Mathf.Round(RectSize.x * (1.0f - LicenseTextWidthFraction)), 0),
-            Align = Label.AlignEnum.Left,
-            Autowrap = true,
+            CustomMinimumSize = new Vector2(Size.X * LicenseTextWidthFraction, 0),
+            Position = new Vector2(Mathf.Round(Size.X * (1.0f - LicenseTextWidthFraction)), 0),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            AutowrapMode = TextServer.AutowrapMode.WordSmart,
         });
 
         AddDynamicItem(label);
@@ -666,22 +666,22 @@ public class CreditsScroll : Container
 
     private void UpdateStaticItemPositions()
     {
-        logo.RectPosition = new Vector2(0, RectSize.y - smoothOffset);
-        revolutionaryGames.RectPosition = new Vector2(0, RectSize.y - smoothOffset + 200);
-        supportedBy.RectPosition = new Vector2(0, RectSize.y - smoothOffset + 250);
-        developersHeading.RectPosition = new Vector2(0, RectSize.y - smoothOffset + 325);
+        logo.Position = new Vector2(0, Size.Y - smoothOffset);
+        revolutionaryGames.Position = new Vector2(0, Size.Y - smoothOffset + 200);
+        supportedBy.Position = new Vector2(0, Size.Y - smoothOffset + 250);
+        developersHeading.Position = new Vector2(0, Size.Y - smoothOffset + 325);
     }
 
     private void AddDynamicItem(DynamicPart part)
     {
         AddChild(part.Control);
         dynamicParts.Add(part);
-        part.UpdatePosition(smoothOffset, RectSize.y);
+        part.UpdatePosition(smoothOffset, Size.Y);
     }
 
     private int GetNextDynamicSectionOffset()
     {
-        int height = (int)RectSize.y;
+        int height = (int)Size.Y;
         int offset = 0;
 
         foreach (var part in dynamicParts)
@@ -699,7 +699,7 @@ public class CreditsScroll : Container
 
     private void UpdateDynamicItems()
     {
-        var height = RectSize.y;
+        var height = Size.Y;
 
         foreach (var part in dynamicParts)
         {
@@ -746,8 +746,8 @@ public class CreditsScroll : Container
 
         public Action? OnBecomeVisible { get; set; }
 
-        public float Height => Control.RectSize.y;
-        public float Top => Control.RectPosition.y;
+        public float Height => Control.Size.Y;
+        public float Top => Control.Position.Y;
 
         // In the end nothing ended up using the set here, but it should work so it is kept here with a suppression
         // ReSharper disable once UnusedAutoPropertyAccessor.Local
@@ -761,7 +761,7 @@ public class CreditsScroll : Container
 
         public void UpdatePosition(float currentScroll, float containerHeight)
         {
-            Control.RectPosition = new Vector2(Control.RectPosition.x, containerHeight + startPosition - currentScroll);
+            Control.Position = new Vector2(Control.Position.X, containerHeight + startPosition - currentScroll);
         }
     }
 }

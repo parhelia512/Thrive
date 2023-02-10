@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Interface for all screen transitions.
 /// </summary>
 public interface ITransition

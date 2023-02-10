@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 using Newtonsoft.Json;
@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 /// </summary>
 [JSONAlwaysDynamicType]
 [SceneLoadedClass("res://src/microbe_stage/FloatingChunk.tscn", UsesEarlyResolve = false)]
-public class FloatingChunk : RigidBody, ISpawned, IEngulfable
+public partial class FloatingChunk : RigidBody3D, ISpawned, IEngulfable
 {
 #pragma warning disable CA2213 // a shared resource from the chunk definition
     [Export]
@@ -21,7 +21,7 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
     /// </summary>
     [Export]
     [JsonProperty]
-    public ConvexPolygonShape? ConvexPhysicsMesh;
+    public ConvexPolygonShape3D? ConvexPhysicsMesh;
 
     /// <summary>
     ///   The node path to the mesh of this chunk
@@ -39,7 +39,7 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
     private HashSet<Microbe> touchingMicrobes = new();
 
 #pragma warning disable CA2213
-    private MeshInstance? chunkMesh;
+    private MeshInstance3D? chunkMesh;
 #pragma warning restore CA2213
 
     [JsonProperty]
@@ -72,10 +72,10 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
     public float EntityWeight => 1.0f;
 
     [JsonIgnore]
-    public Spatial EntityNode => this;
+    public Node3D EntityNode => this;
 
     [JsonIgnore]
-    public GeometryInstance EntityGraphics => chunkMesh ?? throw new InstanceNotLoadedYetException();
+    public GeometryInstance3D EntityGraphics => chunkMesh ?? throw new InstanceNotLoadedYetException();
 
     [JsonIgnore]
     public int RenderPriority
@@ -357,7 +357,7 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
         // Vent all remaining compounds immediately
         if (Compounds.Compounds.Count > 0)
         {
-            var pos = Translation;
+            var pos = Position;
 
             var keys = new List<Compound>(Compounds.Compounds.Keys);
 
@@ -409,7 +409,7 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
         if (Compounds.Compounds.Count <= 0)
             return;
 
-        var pos = Translation;
+        var pos = Position;
 
         var keys = new List<Compound>(Compounds.Compounds.Keys);
 
@@ -473,7 +473,7 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
             throw new InvalidOperationException("Chunk without a mesh can't dissolve");
 
         if (chunkMesh.MaterialOverride is ShaderMaterial material)
-            material.SetShaderParam("dissolveValue", dissolveEffectValue);
+            material.SetShaderParameter("dissolveValue", dissolveEffectValue);
     }
 
     private void ApplyRenderPriority()
@@ -486,20 +486,20 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
 
     private void InitGraphics()
     {
-        var graphicsNode = GraphicsScene.Instance();
+        var graphicsNode = GraphicsScene.Instantiate();
         GetNode("NodeToScale").AddChild(graphicsNode);
 
         if (!string.IsNullOrEmpty(ModelNodePath))
         {
-            chunkMesh = graphicsNode.GetNode<MeshInstance>(ModelNodePath);
+            chunkMesh = graphicsNode.GetNode<MeshInstance3D>(ModelNodePath);
             return;
         }
 
-        if (graphicsNode.IsClass("MeshInstance"))
+        if (graphicsNode.IsClass("MeshInstance3D"))
         {
-            chunkMesh = (MeshInstance)graphicsNode;
+            chunkMesh = (MeshInstance3D)graphicsNode;
         }
-        else if (graphicsNode.IsClass("Particles"))
+        else if (graphicsNode.IsClass("GPUParticles3D"))
         {
             isParticles = true;
         }
@@ -512,11 +512,11 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
     private void InitPhysics()
     {
         // Apply physics shape
-        var shape = GetNode<CollisionShape>("CollisionShape");
+        var shape = GetNode<CollisionShape3D>("CollisionShape3D");
 
         if (ConvexPhysicsMesh == null)
         {
-            var sphereShape = new SphereShape { Radius = Radius };
+            var sphereShape = new SphereShape3D { Radius = Radius };
             shape.Shape = sphereShape;
         }
         else
@@ -531,9 +531,9 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
         // Needs physics callback when this is engulfable or damaging
         if (Damages > 0 || DeleteOnTouch || EngulfSize > 0)
         {
-            ContactsReported = Constants.DEFAULT_STORE_CONTACTS_COUNT;
-            Connect("body_shape_entered", this, nameof(OnContactBegin));
-            Connect("body_shape_exited", this, nameof(OnContactEnd));
+            MaxContactsReported = Constants.DEFAULT_STORE_CONTACTS_COUNT;
+            Connect("body_shape_entered", new Callable(this, nameof(OnContactBegin)));
+            Connect("body_shape_exited", new Callable(this, nameof(OnContactEnd)));
         }
     }
 
@@ -592,14 +592,14 @@ public class FloatingChunk : RigidBody, ISpawned, IEngulfable
         {
             isFadingParticles = true;
 
-            var particles = GetNode("NodeToScale").GetChild<Particles>(0);
+            var particles = GetNode("NodeToScale").GetChild<GpuParticles3D>(0);
 
             // Disable collisions
             CollisionLayer = 0;
             CollisionMask = 0;
 
             particles.Emitting = false;
-            particleFadeTimer = particles.Lifetime;
+            particleFadeTimer = (float)particles.Lifetime;
         }
         else if (!isParticles)
         {

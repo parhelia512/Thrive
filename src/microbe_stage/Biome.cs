@@ -1,11 +1,11 @@
-﻿using Godot;
+using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
 ///   Base microbe biome with some parameters that are used for a Patch.
 ///   Modifiable versions of a Biome are stored in patches.
 /// </summary>
-public class Biome : IRegistryType
+public partial class Biome : IRegistryType
 {
     /// <summary>
     ///   Name of the biome, for showing to the player in the GUI
@@ -31,7 +31,7 @@ public class Biome : IRegistryType
     public float CompoundCloudBrightness = 1.0f;
 
     [JsonIgnore]
-    public Texture? LoadedIcon;
+    public Texture2D? LoadedIcon;
 
     public BiomeConditions Conditions = null!;
 
@@ -85,7 +85,7 @@ public class Biome : IRegistryType
     {
         Conditions.Resolve(parameters);
 
-        LoadedIcon = GD.Load<Texture>(Icon);
+        LoadedIcon = GD.Load<Texture2D>(Icon);
     }
 
     public void ApplyTranslations()
@@ -98,7 +98,7 @@ public class Biome : IRegistryType
         return "Patch: " + Name;
     }
 
-    public class LightDetails
+    public partial class LightDetails
     {
         /// <summary>
         ///   Colour of the light

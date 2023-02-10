@@ -1,4 +1,4 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
@@ -6,7 +6,7 @@
     ///   When full on reproduction compounds the player needs to realize to leave a non-multicellular colony to
     ///   progress
     /// </summary>
-    public class LeaveColonyTutorial : TutorialPhase
+    public partial class LeaveColonyTutorial : TutorialPhase
     {
         private readonly Compound ammonia = SimulationParameters.Instance.GetCompound("ammonia");
         private readonly Compound phosphates = SimulationParameters.Instance.GetCompound("phosphates");

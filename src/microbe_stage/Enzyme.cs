@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 
 /// <summary>
 ///   Define enzymes in the game. Enzyme is an "upgrade" that grants specific ability to microbes.
 /// </summary>
 [TypeConverter(typeof(EnzymeStringConverter))]
-public class Enzyme : IRegistryType
+public partial class Enzyme : IRegistryType
 {
     /// <summary>
     ///   User visible pretty name

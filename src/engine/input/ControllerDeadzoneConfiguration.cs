@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
-public class ControllerDeadzoneConfiguration : CustomDialog
+public partial class ControllerDeadzoneConfiguration : CustomDialog
 {
     [Export]
     public NodePath? VisualizationContainerPath;
@@ -33,7 +33,7 @@ public class ControllerDeadzoneConfiguration : CustomDialog
 #pragma warning restore CA2213
 
     private bool calibrating;
-    private float timeRemaining;
+    private double timeRemaining;
     private List<float>? currentDeadzones;
 
     public delegate void ControlsChangedDelegate(List<float> data);
@@ -57,7 +57,7 @@ public class ControllerDeadzoneConfiguration : CustomDialog
         // TODO: add separate sliders in this GUI to manually tweak all deadzones
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (!Visible || !calibrating)
             return;
@@ -118,12 +118,12 @@ public class ControllerDeadzoneConfiguration : CustomDialog
         currentDeadzones = new List<float>(Settings.Instance.ControllerAxisDeadzoneAxes.Value);
 
         // Tweak to the right number of deadzones
-        while (currentDeadzones.Count > (int)JoystickList.AxisMax)
+        while (currentDeadzones.Count > (int)JoyAxis.Max)
         {
             currentDeadzones.RemoveAt(currentDeadzones.Count - 1);
         }
 
-        while (currentDeadzones.Count < (int)JoystickList.AxisMax)
+        while (currentDeadzones.Count < (int)JoyAxis.Max)
         {
             currentDeadzones.Add(currentDeadzones.Count > 0 ?
                 currentDeadzones[0] :

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,7 +8,7 @@ using Saving;
 /// <summary>
 ///   Handles the logic for the options menu GUI.
 /// </summary>
-public class OptionsMenu : ControlWithInput
+public partial class OptionsMenu : ControlWithInput
 {
     // GUI Control Paths
 
@@ -299,12 +299,12 @@ public class OptionsMenu : ControlWithInput
     [Export]
     public NodePath PatchNotesDisplayerPath = null!;
 
-    private static readonly List<string> LanguagesCache = TranslationServer.GetLoadedLocales().Cast<string>()
+    private static readonly List<string> LanguagesCache = TranslationServer.GetLoadedLocales()
         .OrderBy(i => i, StringComparer.InvariantCulture)
         .ToList();
 
     private static readonly List<string> AudioOutputDevicesCache = AudioServer
-        .GetDeviceList().OfType<string>().Where(d => d != Constants.DEFAULT_AUDIO_OUTPUT_DEVICE_NAME)
+        .GetOutputDeviceList().Where(d => d != Constants.DEFAULT_AUDIO_OUTPUT_DEVICE_NAME)
         .Prepend(Constants.DEFAULT_AUDIO_OUTPUT_DEVICE_NAME).ToList();
 
 #pragma warning disable CA2213
@@ -442,7 +442,7 @@ public class OptionsMenu : ControlWithInput
     // Signals
 
     [Signal]
-    public delegate void OnOptionsClosed();
+    public delegate void OnOptionsClosedEventHandler();
 
     public enum OptionsMode
     {
@@ -649,7 +649,7 @@ public class OptionsMenu : ControlWithInput
 
         // Set the state of the gui controls to match the settings.
         if (savedTutorialsEnabled)
-            tutorialsEnabled.Pressed = savedTutorialsEnabled;
+            tutorialsEnabled.ButtonPressed = savedTutorialsEnabled;
 
         ApplySettingsToControls(savedSettings);
         UpdateResetSaveButtonState();
@@ -667,32 +667,32 @@ public class OptionsMenu : ControlWithInput
         // while it is active
 
         // Graphics
-        vsync.Pressed = settings.VSync;
-        fullScreen.Pressed = settings.FullScreen;
+        vsync.ButtonPressed = settings.VSync;
+        fullScreen.ButtonPressed = settings.FullScreen;
         msaaResolution.Selected = MSAAResolutionToIndex(settings.MSAAResolution);
         maxFramesPerSecond.Selected = MaxFPSValueToIndex(settings.MaxFramesPerSecond);
         colourblindSetting.Selected = settings.ColourblindSetting;
         chromaticAberrationSlider.Value = settings.ChromaticAmount;
-        chromaticAberrationToggle.Pressed = settings.ChromaticEnabled;
+        chromaticAberrationToggle.ButtonPressed = settings.ChromaticEnabled;
         controllerPromptType.Selected = ControllerPromptTypeToIndex(settings.ControllerPromptType);
-        displayAbilitiesHotBarToggle.Pressed = settings.DisplayAbilitiesHotBar;
-        displayBackgroundParticlesToggle.Pressed = settings.DisplayBackgroundParticles;
-        guiLightEffectsToggle.Pressed = settings.GUILightEffectsEnabled;
-        displayPartNamesToggle.Pressed = settings.DisplayPartNames;
+        displayAbilitiesHotBarToggle.ButtonPressed = settings.DisplayAbilitiesHotBar;
+        displayBackgroundParticlesToggle.ButtonPressed = settings.DisplayBackgroundParticles;
+        guiLightEffectsToggle.ButtonPressed = settings.GUILightEffectsEnabled;
+        displayPartNamesToggle.ButtonPressed = settings.DisplayPartNames;
         DisplayResolution();
         DisplayGpuInfo();
 
         // Sound
         masterVolume.Value = ConvertDbToSoundBar(settings.VolumeMaster);
-        masterMuted.Pressed = settings.VolumeMasterMuted;
+        masterMuted.ButtonPressed = settings.VolumeMasterMuted;
         musicVolume.Value = ConvertDbToSoundBar(settings.VolumeMusic);
-        musicMuted.Pressed = settings.VolumeMusicMuted;
+        musicMuted.ButtonPressed = settings.VolumeMusicMuted;
         ambianceVolume.Value = ConvertDbToSoundBar(settings.VolumeAmbiance);
-        ambianceMuted.Pressed = settings.VolumeAmbianceMuted;
+        ambianceMuted.ButtonPressed = settings.VolumeAmbianceMuted;
         sfxVolume.Value = ConvertDbToSoundBar(settings.VolumeSFX);
-        sfxMuted.Pressed = settings.VolumeSFXMuted;
+        sfxMuted.ButtonPressed = settings.VolumeSFXMuted;
         guiVolume.Value = ConvertDbToSoundBar(settings.VolumeGUI);
-        guiMuted.Pressed = settings.VolumeGUIMuted;
+        guiMuted.ButtonPressed = settings.VolumeGUIMuted;
         UpdateSelectedLanguage(settings);
         UpdateSelectedAudioOutputDevice(settings);
 
@@ -704,9 +704,9 @@ public class OptionsMenu : ControlWithInput
         // Performance
         cloudInterval.Selected = CloudIntervalToIndex(settings.CloudUpdateInterval);
         cloudResolution.Selected = CloudResolutionToIndex(settings.CloudResolution);
-        runAutoEvoDuringGameplay.Pressed = settings.RunAutoEvoDuringGamePlay;
-        assumeHyperthreading.Pressed = settings.AssumeCPUHasHyperthreading;
-        useManualThreadCount.Pressed = settings.UseManualThreadCount;
+        runAutoEvoDuringGameplay.ButtonPressed = settings.RunAutoEvoDuringGamePlay;
+        assumeHyperthreading.ButtonPressed = settings.AssumeCPUHasHyperthreading;
+        useManualThreadCount.ButtonPressed = settings.UseManualThreadCount;
         threadCountSlider.Value = settings.ThreadCount;
         threadCountSlider.Editable = settings.UseManualThreadCount;
         maxSpawnedEntities.Selected = MaxEntitiesValueToIndex(settings.MaxSpawnedEntities);
@@ -714,25 +714,25 @@ public class OptionsMenu : ControlWithInput
         UpdateDetectedCPUCount();
 
         // Input
-        mouseAxisSensitivitiesBound.Pressed =
+        mouseAxisSensitivitiesBound.ButtonPressed =
             settings.HorizontalMouseLookSensitivity.Equals(settings.VerticalMouseLookSensitivity);
         mouseHorizontalSensitivity.Value = MouseInputSensitivityToBarValue(settings.HorizontalMouseLookSensitivity);
-        mouseHorizontalInverted.Pressed = settings.InvertHorizontalMouseLook;
-        mouseVerticalSensitivity.Editable = !mouseAxisSensitivitiesBound.Pressed;
+        mouseHorizontalInverted.ButtonPressed = settings.InvertHorizontalMouseLook;
+        mouseVerticalSensitivity.Editable = !mouseAxisSensitivitiesBound.ButtonPressed;
         mouseVerticalSensitivity.Value = MouseInputSensitivityToBarValue(settings.VerticalMouseLookSensitivity);
-        mouseVerticalInverted.Pressed = settings.InvertVerticalMouseLook;
+        mouseVerticalInverted.ButtonPressed = settings.InvertVerticalMouseLook;
         mouseWindowSizeScaling.Selected = MouseInputScalingToIndex(settings.ScaleMouseInputByWindowSize);
-        mouseWindowSizeScalingWithLogicalSize.Pressed = settings.InputWindowSizeIsLogicalSize;
+        mouseWindowSizeScalingWithLogicalSize.ButtonPressed = settings.InputWindowSizeIsLogicalSize;
 
-        controllerAxisSensitivitiesBound.Pressed =
+        controllerAxisSensitivitiesBound.ButtonPressed =
             settings.HorizontalControllerLookSensitivity.Equals(settings.VerticalControllerLookSensitivity);
         controllerHorizontalSensitivity.Value =
             ControllerInputSensitivityToBarValue(settings.HorizontalControllerLookSensitivity);
-        controllerHorizontalInverted.Pressed = settings.InvertHorizontalControllerLook;
-        controllerVerticalSensitivity.Editable = !controllerAxisSensitivitiesBound.Pressed;
+        controllerHorizontalInverted.ButtonPressed = settings.InvertHorizontalControllerLook;
+        controllerVerticalSensitivity.Editable = !controllerAxisSensitivitiesBound.ButtonPressed;
         controllerVerticalSensitivity.Value =
             ControllerInputSensitivityToBarValue(settings.VerticalControllerLookSensitivity);
-        controllerVerticalInverted.Pressed = settings.InvertVerticalControllerLook;
+        controllerVerticalInverted.ButtonPressed = settings.InvertVerticalControllerLook;
 
         twoDimensionalMovement.Selected = Movement2DToIndex(settings.TwoDimensionalMovement);
         threeDimensionalMovement.Selected = Movement3DToIndex(settings.ThreeDimensionalMovement);
@@ -740,23 +740,23 @@ public class OptionsMenu : ControlWithInput
         BuildInputRebindControls();
 
         // Misc
-        playIntro.Pressed = settings.PlayIntroVideo;
-        playMicrobeIntro.Pressed = settings.PlayMicrobeIntroVideo;
-        tutorialsEnabledOnNewGame.Pressed = settings.TutorialsEnabled;
-        cheats.Pressed = settings.CheatsEnabled;
-        autoSave.Pressed = settings.AutoSaveEnabled;
+        playIntro.ButtonPressed = settings.PlayIntroVideo;
+        playMicrobeIntro.ButtonPressed = settings.PlayMicrobeIntroVideo;
+        tutorialsEnabledOnNewGame.ButtonPressed = settings.TutorialsEnabled;
+        cheats.ButtonPressed = settings.CheatsEnabled;
+        autoSave.ButtonPressed = settings.AutoSaveEnabled;
         maxAutoSaves.Value = settings.MaxAutoSaves;
         maxAutoSaves.Editable = settings.AutoSaveEnabled;
         maxQuickSaves.Value = settings.MaxQuickSaves;
-        customUsernameEnabled.Pressed = settings.CustomUsernameEnabled;
+        customUsernameEnabled.ButtonPressed = settings.CustomUsernameEnabled;
         customUsername.Text = settings.CustomUsername.Value != null ?
             settings.CustomUsername :
             Settings.EnvironmentUserName;
         customUsername.Editable = settings.CustomUsernameEnabled;
-        webFeedsEnabled.Pressed = settings.ThriveNewsFeedEnabled;
-        showNewPatchNotes.Pressed = settings.ShowNewPatchNotes;
+        webFeedsEnabled.ButtonPressed = settings.ThriveNewsFeedEnabled;
+        showNewPatchNotes.ButtonPressed = settings.ShowNewPatchNotes;
         jsonDebugMode.Selected = JSONDebugModeToIndex(settings.JSONDebugMode);
-        unsavedProgressWarningEnabled.Pressed = settings.ShowUnsavedProgressWarning;
+        unsavedProgressWarningEnabled.ButtonPressed = settings.ShowUnsavedProgressWarning;
 
         UpdateDismissedNoticeCount();
         UpdateShownCommit();
@@ -934,9 +934,9 @@ public class OptionsMenu : ControlWithInput
         if (resolution == null)
             return;
 
-        var screenResolution = OS.WindowSize * OS.GetScreenScale();
+        var screenResolution = GetWindow().Size.ToVector2() * GetWindow().ContentScaleFactor;
         resolution.Text = TranslationServer.Translate("AUTO_RESOLUTION")
-            .FormatSafe(screenResolution.x, screenResolution.y);
+            .FormatSafe(screenResolution.X, screenResolution.Y);
     }
 
     /// <summary>
@@ -944,14 +944,15 @@ public class OptionsMenu : ControlWithInput
     /// </summary>
     private void DisplayGpuInfo()
     {
-        gpuName.Text = VisualServer.GetVideoAdapterName();
+        gpuName.Text = OS.GetVideoAdapterDriverInfo().ToString();
 
+        /*
         if (OS.GetCurrentVideoDriver() == OS.VideoDriver.Gles2)
         {
             // Gles2 is being used
             usedRendererName.Text = TranslationServer.Translate("GLES2");
         }
-        else if (OS.GetCurrentVideoDriver() == OS.VideoDriver.Gles3)
+        else if (OS.GetVideoAdapterDriverInfo() == OS.RenderingDriver.Opengl3) TODO: No method found
         {
             // Gles3 is being used
             usedRendererName.Text = TranslationServer.Translate("GLES3");
@@ -961,8 +962,9 @@ public class OptionsMenu : ControlWithInput
             // An unknown display driver is being used
             usedRendererName.Text = TranslationServer.Translate("UNKNOWN_DISPLAY_DRIVER");
         }
+        */
 
-        float videoMemoryInMebibytes = VisualServer.GetRenderInfo(VisualServer.RenderInfo.VideoMemUsed);
+        double videoMemoryInMebibytes = Performance.GetMonitor(Performance.Monitor.RenderVideoMemUsed);
 
         // Convert to mebibytes
         videoMemoryInMebibytes /= Constants.MEBIBYTE;
@@ -991,36 +993,36 @@ public class OptionsMenu : ControlWithInput
         miscTab.Hide();
 
         var invalidNodePath = new NodePath();
-        backButton.FocusNeighbourTop = invalidNodePath;
+        backButton.FocusNeighborTop = invalidNodePath;
         backButton.FocusPrevious = invalidNodePath;
 
         switch (selection)
         {
             case OptionsTab.Graphics:
                 graphicsTab.Show();
-                graphicsButton.Pressed = true;
+                graphicsButton.ButtonPressed = true;
                 break;
             case OptionsTab.Sound:
                 soundTab.Show();
-                soundButton.Pressed = true;
+                soundButton.ButtonPressed = true;
                 break;
             case OptionsTab.Performance:
                 performanceTab.Show();
-                performanceButton.Pressed = true;
+                performanceButton.ButtonPressed = true;
                 break;
             case OptionsTab.Inputs:
                 inputsTab.Show();
-                inputsButton.Pressed = true;
+                inputsButton.ButtonPressed = true;
 
                 // This needs different neighbours here to not mess with the inputs list as badly
                 var neighbourPath = mouseAxisSensitivitiesBound.GetPath();
-                backButton.FocusNeighbourTop = neighbourPath;
+                backButton.FocusNeighborTop = neighbourPath;
                 backButton.FocusPrevious = neighbourPath;
 
                 break;
             case OptionsTab.Miscellaneous:
                 miscTab.Show();
-                miscButton.Pressed = true;
+                miscButton.ButtonPressed = true;
                 break;
             default:
                 GD.PrintErr("Invalid tab");
@@ -1036,12 +1038,12 @@ public class OptionsMenu : ControlWithInput
     /// </summary>
     private float ConvertSoundBarToDb(float value)
     {
-        return GD.Linear2Db(value / 100.0f);
+        return Mathf.LinearToDb(value / 100.0f);
     }
 
     private float ConvertDbToSoundBar(float value)
     {
-        return GD.Db2Linear(value) * 100.0f;
+        return Mathf.DbToLinear(value) * 100.0f;
     }
 
     private int CloudIntervalToIndex(float interval)
@@ -1168,44 +1170,39 @@ public class OptionsMenu : ControlWithInput
         }
     }
 
-    private int MSAAResolutionToIndex(Viewport.MSAA resolution)
+    private int MSAAResolutionToIndex(Viewport.Msaa resolution)
     {
-        if (resolution == Viewport.MSAA.Disabled)
+        if (resolution == Viewport.Msaa.Disabled)
             return 0;
 
-        if (resolution == Viewport.MSAA.Msaa2x)
+        if (resolution == Viewport.Msaa.Msaa2X)
             return 1;
 
-        if (resolution == Viewport.MSAA.Msaa4x)
+        if (resolution == Viewport.Msaa.Msaa4X)
             return 2;
 
-        if (resolution == Viewport.MSAA.Msaa8x)
+        if (resolution == Viewport.Msaa.Msaa8X)
             return 3;
-
-        if (resolution == Viewport.MSAA.Msaa16x)
-            return 4;
 
         GD.PrintErr("invalid MSAA resolution value");
         return 0;
     }
 
-    private Viewport.MSAA MSAAIndexToResolution(int index)
+    private Viewport.Msaa MSAAIndexToResolution(int index)
     {
         switch (index)
         {
             case 0:
-                return Viewport.MSAA.Disabled;
+                return Viewport.Msaa.Disabled;
             case 1:
-                return Viewport.MSAA.Msaa2x;
+                return Viewport.Msaa.Msaa2X;
             case 2:
-                return Viewport.MSAA.Msaa4x;
+                return Viewport.Msaa.Msaa4X;
             case 3:
-                return Viewport.MSAA.Msaa8x;
-            case 4:
-                return Viewport.MSAA.Msaa16x;
+                return Viewport.Msaa.Msaa8X;
             default:
                 GD.PrintErr("invalid MSAA resolution index");
-                return Viewport.MSAA.Disabled;
+                return Viewport.Msaa.Disabled;
         }
     }
 
@@ -1532,7 +1529,7 @@ public class OptionsMenu : ControlWithInput
         if (optionsMode == OptionsMode.InGame)
         {
             gameProperties!.TutorialState.Enabled = savedTutorialsEnabled;
-            tutorialsEnabled.Pressed = savedTutorialsEnabled;
+            tutorialsEnabled.ButtonPressed = savedTutorialsEnabled;
         }
 
         UpdateResetSaveButtonState();
@@ -1595,7 +1592,7 @@ public class OptionsMenu : ControlWithInput
         if (optionsMode == OptionsMode.InGame)
         {
             gameProperties!.TutorialState.Enabled = savedTutorialsEnabled;
-            tutorialsEnabled.Pressed = savedTutorialsEnabled;
+            tutorialsEnabled.ButtonPressed = savedTutorialsEnabled;
         }
 
         backConfirmationBox.Hide();
@@ -1631,17 +1628,17 @@ public class OptionsMenu : ControlWithInput
     }
 
     // Graphics Button Callbacks
-    private void OnFullScreenToggled(bool pressed)
+    private void OnFullScreenToggled(bool ButtonPressed)
     {
-        Settings.Instance.FullScreen.Value = pressed;
+        Settings.Instance.FullScreen.Value = ButtonPressed;
         Settings.Instance.ApplyWindowSettings();
 
         UpdateResetSaveButtonState();
     }
 
-    private void OnVSyncToggled(bool pressed)
+    private void OnVSyncToggled(bool ButtonPressed)
     {
-        Settings.Instance.VSync.Value = pressed;
+        Settings.Instance.VSync.Value = ButtonPressed;
         Settings.Instance.ApplyWindowSettings();
 
         UpdateResetSaveButtonState();
@@ -1760,9 +1757,9 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnMasterMutedToggled(bool pressed)
+    private void OnMasterMutedToggled(bool ButtonPressed)
     {
-        Settings.Instance.VolumeMasterMuted.Value = pressed;
+        Settings.Instance.VolumeMasterMuted.Value = ButtonPressed;
         Settings.Instance.ApplySoundSettings();
 
         UpdateResetSaveButtonState();
@@ -1776,9 +1773,9 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnMusicMutedToggled(bool pressed)
+    private void OnMusicMutedToggled(bool ButtonPressed)
     {
-        Settings.Instance.VolumeMusicMuted.Value = pressed;
+        Settings.Instance.VolumeMusicMuted.Value = ButtonPressed;
         Settings.Instance.ApplySoundSettings();
 
         UpdateResetSaveButtonState();
@@ -1792,9 +1789,9 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnAmbianceMutedToggled(bool pressed)
+    private void OnAmbianceMutedToggled(bool ButtonPressed)
     {
-        Settings.Instance.VolumeAmbianceMuted.Value = pressed;
+        Settings.Instance.VolumeAmbianceMuted.Value = ButtonPressed;
         Settings.Instance.ApplySoundSettings();
 
         UpdateResetSaveButtonState();
@@ -1808,9 +1805,9 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnSFXMutedToggled(bool pressed)
+    private void OnSFXMutedToggled(bool ButtonPressed)
     {
-        Settings.Instance.VolumeSFXMuted.Value = pressed;
+        Settings.Instance.VolumeSFXMuted.Value = ButtonPressed;
         Settings.Instance.ApplySoundSettings();
 
         UpdateResetSaveButtonState();
@@ -1824,9 +1821,9 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnGUIMutedToggled(bool pressed)
+    private void OnGUIMutedToggled(bool ButtonPressed)
     {
-        Settings.Instance.VolumeGUIMuted.Value = pressed;
+        Settings.Instance.VolumeGUIMuted.Value = ButtonPressed;
         Settings.Instance.ApplySoundSettings();
 
         UpdateResetSaveButtonState();
@@ -1847,35 +1844,35 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnAutoEvoToggled(bool pressed)
+    private void OnAutoEvoToggled(bool ButtonPressed)
     {
-        Settings.Instance.RunAutoEvoDuringGamePlay.Value = pressed;
+        Settings.Instance.RunAutoEvoDuringGamePlay.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
         UpdateDetectedCPUCount();
     }
 
-    private void OnHyperthreadingToggled(bool pressed)
+    private void OnHyperthreadingToggled(bool ButtonPressed)
     {
-        Settings.Instance.AssumeCPUHasHyperthreading.Value = pressed;
+        Settings.Instance.AssumeCPUHasHyperthreading.Value = ButtonPressed;
         Settings.Instance.ApplyThreadSettings();
 
         UpdateResetSaveButtonState();
         UpdateDetectedCPUCount();
     }
 
-    private void OnManualThreadsToggled(bool pressed)
+    private void OnManualThreadsToggled(bool ButtonPressed)
     {
-        Settings.Instance.UseManualThreadCount.Value = pressed;
+        Settings.Instance.UseManualThreadCount.Value = ButtonPressed;
         Settings.Instance.ApplyThreadSettings();
 
-        threadCountSlider.Editable = pressed;
+        threadCountSlider.Editable = ButtonPressed;
 
         UpdateResetSaveButtonState();
         UpdateDetectedCPUCount();
 
         // Apply the current value to the slider to make sure it is showing the actual setting value
-        if (pressed)
+        if (ButtonPressed)
         {
             threadCountSlider.Value = Settings.Instance.ThreadCount.Value;
         }
@@ -1904,11 +1901,11 @@ public class OptionsMenu : ControlWithInput
     }
 
     // Input Callbacks
-    private void OnMouseAxesBoundToggled(bool pressed)
+    private void OnMouseAxesBoundToggled(bool ButtonPressed)
     {
-        mouseVerticalSensitivity.Editable = !pressed;
+        mouseVerticalSensitivity.Editable = !ButtonPressed;
 
-        if (pressed)
+        if (ButtonPressed)
         {
             mouseVerticalSensitivity.Value = mouseHorizontalSensitivity.Value;
         }
@@ -1918,7 +1915,7 @@ public class OptionsMenu : ControlWithInput
     {
         Settings.Instance.HorizontalMouseLookSensitivity.Value = MouseInputBarValueToSensitivity(value);
 
-        if (mouseAxisSensitivitiesBound.Pressed)
+        if (mouseAxisSensitivitiesBound.ButtonPressed)
         {
             mouseVerticalSensitivity.Value = mouseHorizontalSensitivity.Value;
         }
@@ -1926,9 +1923,9 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnInvertedMouseHorizontalToggled(bool pressed)
+    private void OnInvertedMouseHorizontalToggled(bool ButtonPressed)
     {
-        Settings.Instance.InvertHorizontalMouseLook.Value = pressed;
+        Settings.Instance.InvertHorizontalMouseLook.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
@@ -1940,9 +1937,9 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnInvertedMouseVerticalToggled(bool pressed)
+    private void OnInvertedMouseVerticalToggled(bool ButtonPressed)
     {
-        Settings.Instance.InvertVerticalMouseLook.Value = pressed;
+        Settings.Instance.InvertVerticalMouseLook.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
@@ -1954,18 +1951,18 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnMouseScaleLogicalWindowSizeToggled(bool pressed)
+    private void OnMouseScaleLogicalWindowSizeToggled(bool ButtonPressed)
     {
-        Settings.Instance.InputWindowSizeIsLogicalSize.Value = pressed;
+        Settings.Instance.InputWindowSizeIsLogicalSize.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
 
-    private void OnControllerAxesBoundToggled(bool pressed)
+    private void OnControllerAxesBoundToggled(bool ButtonPressed)
     {
-        controllerVerticalSensitivity.Editable = !pressed;
+        controllerVerticalSensitivity.Editable = !ButtonPressed;
 
-        if (pressed)
+        if (ButtonPressed)
         {
             controllerVerticalSensitivity.Value = controllerHorizontalSensitivity.Value;
         }
@@ -1975,7 +1972,7 @@ public class OptionsMenu : ControlWithInput
     {
         Settings.Instance.HorizontalControllerLookSensitivity.Value = ControllerInputBarValueToSensitivity(value);
 
-        if (controllerAxisSensitivitiesBound.Pressed)
+        if (controllerAxisSensitivitiesBound.ButtonPressed)
         {
             controllerVerticalSensitivity.Value = value;
         }
@@ -1983,9 +1980,9 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnInvertedControllerHorizontalToggled(bool pressed)
+    private void OnInvertedControllerHorizontalToggled(bool ButtonPressed)
     {
-        Settings.Instance.InvertHorizontalControllerLook.Value = pressed;
+        Settings.Instance.InvertHorizontalControllerLook.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
@@ -1997,9 +1994,9 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnInvertedControllerVerticalToggled(bool pressed)
+    private void OnInvertedControllerVerticalToggled(bool ButtonPressed)
     {
-        Settings.Instance.InvertVerticalControllerLook.Value = pressed;
+        Settings.Instance.InvertVerticalControllerLook.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
@@ -2089,31 +2086,31 @@ public class OptionsMenu : ControlWithInput
     }
 
     // Misc Button Callbacks
-    private void OnIntroToggled(bool pressed)
+    private void OnIntroToggled(bool ButtonPressed)
     {
-        Settings.Instance.PlayIntroVideo.Value = pressed;
+        Settings.Instance.PlayIntroVideo.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
 
-    private void OnMicrobeIntroToggled(bool pressed)
+    private void OnMicrobeIntroToggled(bool ButtonPressed)
     {
-        Settings.Instance.PlayMicrobeIntroVideo.Value = pressed;
+        Settings.Instance.PlayMicrobeIntroVideo.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
 
-    private void OnTutorialsOnNewGameToggled(bool pressed)
+    private void OnTutorialsOnNewGameToggled(bool ButtonPressed)
     {
-        Settings.Instance.TutorialsEnabled.Value = pressed;
+        Settings.Instance.TutorialsEnabled.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
 
-    private void OnCheatsToggled(bool pressed)
+    private void OnCheatsToggled(bool ButtonPressed)
     {
-        Settings.Instance.CheatsEnabled.Value = pressed;
-        if (!pressed)
+        Settings.Instance.CheatsEnabled.Value = ButtonPressed;
+        if (!ButtonPressed)
         {
             CheatManager.OnCheatsDisabled();
         }
@@ -2121,10 +2118,10 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnAutoSaveToggled(bool pressed)
+    private void OnAutoSaveToggled(bool ButtonPressed)
     {
-        Settings.Instance.AutoSaveEnabled.Value = pressed;
-        maxAutoSaves.Editable = pressed;
+        Settings.Instance.AutoSaveEnabled.Value = ButtonPressed;
+        maxAutoSaves.Editable = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
@@ -2143,7 +2140,7 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnTutorialsEnabledToggled(bool pressed)
+    private void OnTutorialsEnabledToggled(bool ButtonPressed)
     {
         if (gameProperties == null)
         {
@@ -2151,7 +2148,7 @@ public class OptionsMenu : ControlWithInput
             return;
         }
 
-        gameProperties.TutorialState.Enabled = pressed;
+        gameProperties.TutorialState.Enabled = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
@@ -2163,9 +2160,9 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnUnsavedProgressWarningToggled(bool pressed)
+    private void OnUnsavedProgressWarningToggled(bool ButtonPressed)
     {
-        Settings.Instance.ShowUnsavedProgressWarning.Value = pressed;
+        Settings.Instance.ShowUnsavedProgressWarning.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
@@ -2183,10 +2180,10 @@ public class OptionsMenu : ControlWithInput
             screenshotDirectoryWarningBox.PopupCenteredShrink();
     }
 
-    private void OnCustomUsernameEnabledToggled(bool pressed)
+    private void OnCustomUsernameEnabledToggled(bool ButtonPressed)
     {
-        Settings.Instance.CustomUsernameEnabled.Value = pressed;
-        customUsername.Editable = pressed;
+        Settings.Instance.CustomUsernameEnabled.Value = ButtonPressed;
+        customUsername.Editable = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
@@ -2205,16 +2202,16 @@ public class OptionsMenu : ControlWithInput
         UpdateResetSaveButtonState();
     }
 
-    private void OnWebFeedsEnabledToggled(bool pressed)
+    private void OnWebFeedsEnabledToggled(bool ButtonPressed)
     {
-        Settings.Instance.ThriveNewsFeedEnabled.Value = pressed;
+        Settings.Instance.ThriveNewsFeedEnabled.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }
 
-    private void OnPatchNotesEnabledToggled(bool pressed)
+    private void OnPatchNotesEnabledToggled(bool ButtonPressed)
     {
-        Settings.Instance.ShowNewPatchNotes.Value = pressed;
+        Settings.Instance.ShowNewPatchNotes.Value = ButtonPressed;
 
         UpdateResetSaveButtonState();
     }

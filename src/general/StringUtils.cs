@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
@@ -75,6 +75,11 @@ public static class StringUtils
             GD.PrintErr("Invalid translation format for current language in text: ", format, ", exception: ", e);
             return format;
         }
+    }
+
+    public static string FormatSafe(this StringName format, params object?[] formatArguments)
+    {
+        return format.ToString().FormatSafe(formatArguments);
     }
 
     /// <summary>

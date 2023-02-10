@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
+using Godot.Collections;
 using Newtonsoft.Json;
 using Array = Godot.Collections.Array;
 
@@ -18,7 +19,7 @@ public partial class Microbe
     private PackedScene cellBurstEffectScene = null!;
 #pragma warning restore CA2213
 
-    // private SphereShape pseudopodRangeSphereShape = null!;
+    // private SphereShape3D pseudopodRangeSphereShape = null!;
 
     /// <summary>
     ///   Contains the pili this microbe has for collision checking
@@ -61,7 +62,7 @@ public partial class Microbe
 
     // private HashSet<IEngulfable> engulfablesInPseudopodRange = new();
 
-    // private MeshInstance pseudopodTarget = null!;
+    // private MeshInstance3D pseudopodTarget = null!;
 
     /// <summary>
     ///   Controls for how long the flashColour is held before going
@@ -495,7 +496,7 @@ public partial class Microbe
             {
                 var newPriority = Mathf.Clamp(Hex.GetRenderPriority(organelle.Position) +
                     hostile.OrganelleMaxRenderPriority, 0, Material.RenderPriorityMax);
-                organelle.UpdateRenderPriority(newPriority);
+                organelle.UpdateRenderPriority((int)newPriority);
             }
         }
 
@@ -535,8 +536,8 @@ public partial class Microbe
 
             foreach (var chunk in droppedChunks)
             {
-                var direction = hostile.Transform.origin.DirectionTo(chunk.Transform.origin);
-                chunk.Translation += direction *
+                var direction = hostile.Transform.Origin.DirectionTo(chunk.Transform.Origin);
+                chunk.Position += direction *
                     Constants.EJECTED_PARTIALLY_DIGESTED_CELL_CORPSE_CHUNKS_SPAWN_OFFSET;
 
                 var impulse = direction * chunk.Mass * Constants.ENGULF_EJECTION_FORCE;
@@ -583,8 +584,8 @@ public partial class Microbe
     /// <returns>The offset</returns>
     public Vector3 GetOffsetRelativeToMaster()
     {
-        return (GlobalTransform.origin - Colony!.Master.GlobalTransform.origin).Rotated(Vector3.Down,
-            Colony.Master.Rotation.y);
+        return (GlobalTransform.Origin - Colony!.Master.GlobalTransform.Origin).Rotated(Vector3.Down,
+            Colony.Master.Rotation.Y);
     }
 
     /// <summary>
@@ -601,7 +602,7 @@ public partial class Microbe
         foreach (var entry in organelles.Organelles)
         {
             var cartesian = Hex.AxialToCartesian(entry.Position);
-            organellePositions.Add(new Vector2(cartesian.x, cartesian.z));
+            organellePositions.Add(new Vector2(cartesian.X, cartesian.Z));
         }
 
         Membrane.OrganellePositions = organellePositions;
@@ -684,7 +685,7 @@ public partial class Microbe
 
             ai?.ResetAI();
 
-            Mode = ModeEnum.Rigid;
+            // Mode = ModeEnum.Rigid;
 
             return;
         }
@@ -726,7 +727,7 @@ public partial class Microbe
 
             if (Colony.Master != this)
             {
-                Mode = ModeEnum.Static;
+                // Mode = ModeEnum.Static;
             }
 
             ReParentShapes(Colony.Master, GetOffsetRelativeToMaster());
@@ -788,7 +789,7 @@ public partial class Microbe
 
                 var agent = SpawnHelpers.SpawnAgent(props, Constants.MAXIMUM_AGENT_EMISSION_AMOUNT,
                     Constants.EMITTED_AGENT_LIFETIME,
-                    Translation, direction, GetStageAsParent(),
+                    Position, direction, GetStageAsParent(),
                     agentScene, this);
 
                 ModLoader.ModInterface.TriggerOnToxinEmitted(agent);
@@ -802,7 +803,7 @@ public partial class Microbe
         }
 
         // Eject the compounds that was in the microbe
-        var compoundsToRelease = new Dictionary<Compound, float>();
+        var compoundsToRelease = new System.Collections.Generic.Dictionary<Compound, float>();
 
         foreach (var type in SimulationParameters.Instance.GetCloudCompounds())
         {
@@ -864,7 +865,7 @@ public partial class Microbe
                 VentAmount = 0.1f,
 
                 // Add compounds
-                Compounds = new Dictionary<Compound, ChunkConfiguration.ChunkCompound>(),
+                Compounds = new System.Collections.Generic.Dictionary<Compound, ChunkConfiguration.ChunkCompound>(),
             };
 
             // They were added in order already so looping through this other thing is fine
@@ -916,7 +917,7 @@ public partial class Microbe
             chunkType.Meshes.Add(sceneToUse);
 
             // Finally spawn a chunk with the settings
-            var chunk = SpawnHelpers.SpawnChunk(chunkType, Translation + positionAdded, GetStageAsParent(),
+            var chunk = SpawnHelpers.SpawnChunk(chunkType, Position + positionAdded, GetStageAsParent(),
                 chunkScene, random);
             droppedCorpseChunks.Add(chunk);
 
@@ -992,7 +993,7 @@ public partial class Microbe
         var newTransform = GetNewRelativeTransform();
 
         Rotation = newTransform.Rotation;
-        Translation = newTransform.Translation;
+        Position = newTransform.Position;
 
         ChangeNodeParent(ColonyParent);
     }
@@ -1208,7 +1209,7 @@ public partial class Microbe
             if (engulfable == null)
                 continue;
 
-            var body = engulfable as RigidBody;
+            var body = engulfable as RigidBody3D;
             if (body == null)
             {
                 attemptingToEngulf.Remove(engulfable);
@@ -1216,7 +1217,7 @@ public partial class Microbe
                 continue;
             }
 
-            body.Mode = ModeEnum.Static;
+            body.FreezeMode = FreezeModeEnum.Static;
 
             if (engulfable.PhagocytosisStep == PhagocytosisPhase.Digested)
             {
@@ -1259,19 +1260,19 @@ public partial class Microbe
         /* Membrane engulf stretch debug code
         if (state == MicrobeState.Engulf)
         {
-            foreach (Spatial engulfable in engulfablesInPseudopodRange)
+            foreach (Node3D engulfable in engulfablesInPseudopodRange)
             {
-                pseudopodTarget.Translation = ToLocal(pseudopodTarget.GlobalTransform.origin.LinearInterpolate(
+                pseudopodTarget.Position = ToLocal(pseudopodTarget.GlobalTransform.origin.Lerp(
                     engulfable.GlobalTransform.origin, 0.5f * delta));
             }
         }
         else
         {
-            pseudopodTarget.Translation = ToLocal(
-                pseudopodTarget.GlobalTransform.origin.LinearInterpolate(GlobalTransform.origin, 0.5f * delta));
+            pseudopodTarget.Position = ToLocal(
+                pseudopodTarget.GlobalTransform.origin.Lerp(GlobalTransform.origin, 0.5f * delta));
         }
 
-        Membrane.EngulfPosition = pseudopodTarget.Translation;
+        Membrane.EngulfPosition = pseudopodTarget.Position;
         Membrane.EngulfRadius = ((SphereMesh)pseudopodTarget.Mesh).Radius;
         Membrane.EngulfOffset = 1.0f;
         */
@@ -1291,8 +1292,8 @@ public partial class Microbe
         {
             deathParticlesSpawned = true;
 
-            var cellBurstEffectParticles = (CellBurstEffect)cellBurstEffectScene.Instance();
-            cellBurstEffectParticles.Translation = Translation;
+            var cellBurstEffectParticles = (CellBurstEffect)cellBurstEffectScene.Instantiate();
+            cellBurstEffectParticles.Position = Position;
             cellBurstEffectParticles.Radius = Radius;
             cellBurstEffectParticles.AddToGroup(Constants.TIMED_GROUP);
 
@@ -1487,7 +1488,7 @@ public partial class Microbe
         if (target.PhagocytosisStep != PhagocytosisPhase.None)
             return;
 
-        var body = target as RigidBody;
+        var body = target as RigidBody3D;
         if (body == null)
         {
             // Engulfable must be of rigidbody type to be ingested
@@ -1509,7 +1510,7 @@ public partial class Microbe
         var targetRadiusNormalized = Mathf.Clamp(target.Radius / Radius, 0.0f, 1.0f);
 
         var nearestPointOfMembraneToTarget = Membrane.GetVectorTowardsNearestPointOfMembrane(
-            body.Translation.x, body.Translation.z);
+            body.Position.X, body.Position.Z);
 
         // The point nearest to the membrane calculation doesn't take being bacteria into account
         if (CellTypeProperties.IsBacteria)
@@ -1518,25 +1519,25 @@ public partial class Microbe
         // From the calculated nearest point of membrane above we then linearly interpolate it by the engulfed's
         // normalized radius to this cell's center in order to "shrink" the point relative to this cell's origin.
         // This will then act as a "maximum extent/edge" that qualifies as the interior of the engulfer's membrane
-        var viableStoringAreaEdge = nearestPointOfMembraneToTarget.LinearInterpolate(
+        var viableStoringAreaEdge = nearestPointOfMembraneToTarget.Lerp(
             Vector3.Zero, targetRadiusNormalized);
 
         // Get the final storing position by taking a value between this cell's center and the storing area edge.
         // This would lessen the possibility of engulfed things getting bunched up in the same position.
         var ingestionPoint = new Vector3(
-            random.Next(0.0f, viableStoringAreaEdge.x),
-            body.Translation.y,
-            random.Next(0.0f, viableStoringAreaEdge.z));
+            random.Next(0.0f, viableStoringAreaEdge.X),
+            body.Position.Y,
+            random.Next(0.0f, viableStoringAreaEdge.Z));
 
         var boundingBoxSize = target.EntityGraphics.GetAabb().Size;
 
         // In the case of flat mesh (like membrane) we don't want the endosome to end up completely flat
         // as it can cause unwanted visual glitch
-        if (boundingBoxSize.y < Mathf.Epsilon)
-            boundingBoxSize = new Vector3(boundingBoxSize.x, 0.1f, boundingBoxSize.z);
+        if (boundingBoxSize.Y < Mathf.Epsilon)
+            boundingBoxSize = new Vector3(boundingBoxSize.X, 0.1f, boundingBoxSize.Z);
 
         // Form phagosome
-        var phagosome = endosomeScene.Instance<Endosome>();
+        var phagosome = endosomeScene.Instantiate<Endosome>();
         phagosome.Transform = target.EntityGraphics.Transform.Scaled(Vector3.Zero);
         phagosome.Tint = CellTypeProperties.Colour;
         phagosome.RenderPriority = target.RenderPriority + engulfedObjects.Count + 1;
@@ -1584,7 +1585,7 @@ public partial class Microbe
 
         attemptingToEngulf.Remove(target);
 
-        var body = target as RigidBody;
+        var body = target as RigidBody3D;
         if (body == null)
         {
             // Engulfable must be of rigidbody type to be ejected
@@ -1599,7 +1600,7 @@ public partial class Microbe
 
         // The back of the microbe
         var exit = Hex.AxialToCartesian(new Hex(0, 1));
-        var nearestPointOfMembraneToTarget = Membrane.GetVectorTowardsNearestPointOfMembrane(exit.x, exit.z);
+        var nearestPointOfMembraneToTarget = Membrane.GetVectorTowardsNearestPointOfMembrane(exit.X, exit.Z);
 
         // The point nearest to the membrane calculation doesn't take being bacteria into account
         if (CellTypeProperties.IsBacteria)
@@ -1608,7 +1609,7 @@ public partial class Microbe
         // If engulfer cell is dead (us) or the engulfed is positioned outside any of our closest membrane, immediately
         // eject it without animation
         // TODO: Asses performance cost in massive cells?
-        if (Dead || !Membrane.Contains(body.Translation.x, body.Translation.z))
+        if (Dead || !Membrane.Contains(body.Position.X, body.Position.Z))
         {
             CompleteEjection(engulfedObject);
             body.Scale = engulfedObject.OriginalScale;
@@ -1757,7 +1758,7 @@ public partial class Microbe
         if (engulfed.Object.Value == null || engulfed.Phagosome.Value == null)
             return false;
 
-        var body = (RigidBody)engulfed.Object.Value;
+        var body = (RigidBody3D)engulfed.Object.Value;
 
         if (engulfed.AnimationTimeElapsed < engulfed.LerpDuration)
         {
@@ -1768,21 +1769,21 @@ public partial class Microbe
             // Ease out
             fraction = Mathf.Sin(fraction * Mathf.Pi * 0.5f);
 
-            if (engulfed.TargetValuesToLerp.Translation.HasValue)
+            if (engulfed.TargetValuesToLerp.Position.HasValue)
             {
-                body.Translation = engulfed.InitialValuesToLerp.Translation.LinearInterpolate(
-                    engulfed.TargetValuesToLerp.Translation.Value, fraction);
+                body.Position = engulfed.InitialValuesToLerp.Position.Lerp(
+                    engulfed.TargetValuesToLerp.Position.Value, fraction);
             }
 
             if (engulfed.TargetValuesToLerp.Scale.HasValue)
             {
-                body.Scale = engulfed.InitialValuesToLerp.Scale.LinearInterpolate(
+                body.Scale = engulfed.InitialValuesToLerp.Scale.Lerp(
                     engulfed.TargetValuesToLerp.Scale.Value, fraction);
             }
 
             if (engulfed.TargetValuesToLerp.EndosomeScale.HasValue)
             {
-                engulfed.Phagosome.Value.Scale = engulfed.InitialValuesToLerp.EndosomeScale.LinearInterpolate(
+                engulfed.Phagosome.Value.Scale = engulfed.InitialValuesToLerp.EndosomeScale.Lerp(
                     engulfed.TargetValuesToLerp.EndosomeScale.Value, fraction);
             }
 
@@ -1790,8 +1791,8 @@ public partial class Microbe
         }
 
         // Snap values
-        if (engulfed.TargetValuesToLerp.Translation.HasValue)
-            body.Translation = engulfed.TargetValuesToLerp.Translation.Value;
+        if (engulfed.TargetValuesToLerp.Position.HasValue)
+            body.Position = engulfed.TargetValuesToLerp.Position.Value;
 
         if (engulfed.TargetValuesToLerp.Scale.HasValue)
             body.Scale = engulfed.TargetValuesToLerp.Scale.Value;
@@ -1815,8 +1816,8 @@ public partial class Microbe
         if (resetElapsedTime)
             engulfedObject.AnimationTimeElapsed = 0;
 
-        var body = (RigidBody)engulfedObject.Object.Value;
-        engulfedObject.InitialValuesToLerp = (body.Translation, body.Scale, engulfedObject.Phagosome.Value.Scale);
+        var body = (RigidBody3D)engulfedObject.Object.Value;
+        engulfedObject.InitialValuesToLerp = (body.Position, body.Scale, engulfedObject.Phagosome.Value.Scale);
         engulfedObject.LerpDuration = duration;
         engulfedObject.Interpolate = true;
     }
@@ -1869,9 +1870,9 @@ public partial class Microbe
         engulfed.Phagosome.Value?.DestroyDetachAndQueueFree();
 
         // Ignore possible invalid cast as the engulfed node should be a rigidbody either way
-        var body = (RigidBody)engulfable;
+        var body = (RigidBody3D)engulfable;
 
-        body.Mode = ModeEnum.Rigid;
+        // body.Mode = ModeEnum.Rigid;
 
         // Re-parent to world node
         body.ReParentWithTransform(GetStageAsParent());
@@ -1880,7 +1881,7 @@ public partial class Microbe
         body.CollisionLayer = engulfed.OriginalCollisionLayer;
         body.CollisionMask = engulfed.OriginalCollisionMask;
 
-        var impulse = Transform.origin.DirectionTo(body.Transform.origin) * body.Mass *
+        var impulse = Transform.Origin.DirectionTo(body.Transform.Origin) * body.Mass *
             Constants.ENGULF_EJECTION_FORCE;
 
         // Apply outwards ejection force
@@ -1918,8 +1919,7 @@ public partial class Microbe
         }
 
         [JsonConstructor]
-        public EngulfedObject(IEngulfable @object, Endosome phagosome,
-            Dictionary<Compound, float> additionalEngulfableCompounds, float initialTotalEngulfableCompounds)
+        public EngulfedObject(IEngulfable @object, Endosome phagosome, System.Collections.Generic.Dictionary<Compound, float> additionalEngulfableCompounds, float initialTotalEngulfableCompounds)
         {
             Object = new EntityReference<IEngulfable>(@object);
             Phagosome = new EntityReference<Endosome>(phagosome);
@@ -1938,20 +1938,20 @@ public partial class Microbe
         public EntityReference<Endosome> Phagosome { get; private set; }
 
         [JsonProperty]
-        public Dictionary<Compound, float>? AdditionalEngulfableCompounds { get; private set; }
+        public System.Collections.Generic.Dictionary<Compound, float>? AdditionalEngulfableCompounds { get; private set; }
 
         [JsonProperty]
         public float? InitialTotalEngulfableCompounds { get; private set; }
 
         [JsonProperty]
-        public Array OriginalGroups { get; private set; } = new();
+        public Array<StringName>? OriginalGroups { get; private set; } = new();
 
         public bool Interpolate { get; set; }
         public float LerpDuration { get; set; }
         public float AnimationTimeElapsed { get; set; }
         public float TimeElapsedSinceEjection { get; set; }
-        public (Vector3? Translation, Vector3? Scale, Vector3? EndosomeScale) TargetValuesToLerp { get; set; }
-        public (Vector3 Translation, Vector3 Scale, Vector3 EndosomeScale) InitialValuesToLerp { get; set; }
+        public (Vector3? Position, Vector3? Scale, Vector3? EndosomeScale) TargetValuesToLerp { get; set; }
+        public (Vector3 Position, Vector3 Scale, Vector3 EndosomeScale) InitialValuesToLerp { get; set; }
         public Vector3 OriginalScale { get; set; }
         public int OriginalRenderPriority { get; set; }
 

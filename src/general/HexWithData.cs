@@ -1,4 +1,4 @@
-﻿public class HexWithData<T> : IPositionedHex, IActionHex
+public class HexWithData<T> : IPositionedHex, IActionHex
     where T : IActionHex
 {
     public HexWithData(T? data)

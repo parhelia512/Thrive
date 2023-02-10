@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Godot;
-using Array = Godot.Collections.Array;
 
 /// <summary>
 ///   Class managing the main menu and everything in it
 /// </summary>
-public class MainMenu : NodeWithInput
+public partial class MainMenu : NodeWithInput
 {
     /// <summary>
     ///   Index of the current menu.
@@ -20,7 +20,7 @@ public class MainMenu : NodeWithInput
 
     [SuppressMessage("ReSharper", "CollectionNeverUpdated.Global", Justification = "Set from editor")]
     [Export]
-    public List<Texture> MenuBackgrounds = null!;
+    public Godot.Collections.Array<Texture2D> MenuBackgrounds = null!;
 
     [Export]
     public NodePath FreebuildButtonPath = null!;
@@ -154,11 +154,11 @@ public class MainMenu : NodeWithInput
     private CustomCheckBox permanentlyDismissThanksDialog = null!;
 #pragma warning restore CA2213
 
-    private Array? menuArray;
+    private Godot.Collections.Array<Node>? menuArray;
 
     private bool introVideoPassed;
 
-    private float timerForStartupSuccess = Constants.MAIN_MENU_TIME_BEFORE_STARTUP_SUCCESS;
+    private double timerForStartupSuccess = Constants.MAIN_MENU_TIME_BEFORE_STARTUP_SUCCESS;
 
     /// <summary>
     ///   True when we are able to show the thanks for buying popup due to being a store version
@@ -213,7 +213,7 @@ public class MainMenu : NodeWithInput
         }
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -263,7 +263,7 @@ public class MainMenu : NodeWithInput
     {
         base._Notification(notification);
 
-        if (notification == NotificationWmQuitRequest)
+        if (notification == NotificationWMCloseRequest)
         {
             GD.Print("Main window close signal detected");
             Invoke.Instance.Queue(QuitPressed);
@@ -372,8 +372,6 @@ public class MainMenu : NodeWithInput
                 ThanksDialogTextPath.Dispose();
                 PermanentlyDismissThanksDialogPath.Dispose();
             }
-
-            menuArray?.Dispose();
         }
 
         base.Dispose(disposing);
@@ -442,8 +440,9 @@ public class MainMenu : NodeWithInput
         // Easter egg message
         thriveLogo.RegisterToolTipForControl("thriveLogoEasterEgg", "mainMenu");
 
-        if (OS.GetCurrentVideoDriver() == OS.VideoDriver.Gles2 && !IsReturningToMenu)
-            gles2Popup.PopupCenteredShrink();
+        // TODO: GLES2 removed in Godot 4
+        // if (OS.GetCurrentVideoDriver() == OS.VideoDriver.Gles2 && !IsReturningToMenu)
+        //     gles2Popup.PopupCenteredShrink();
 
         UpdateStoreVersionStatus();
         UpdateLauncherState();
@@ -466,12 +465,12 @@ public class MainMenu : NodeWithInput
     {
         Random rand = new Random();
 
-        var chosenBackground = MenuBackgrounds.Random(rand);
+        var chosenBackground = MenuBackgrounds.ToList().Random(rand);
 
         SetBackground(chosenBackground);
     }
 
-    private void SetBackground(Texture backgroundImage)
+    private void SetBackground(Texture2D backgroundImage)
     {
         background.Texture = backgroundImage;
     }
@@ -569,8 +568,9 @@ public class MainMenu : NodeWithInput
         thriveLogo.Hide();
 
         // Hide other menus and only show the one of the current index
-        foreach (Control menu in menuArray!)
+        foreach (var node in menuArray!)
         {
+            var menu = (Control)node;
             menu.Hide();
 
             if (menu.GetIndex() == CurrentMenuIndex)
@@ -696,7 +696,7 @@ public class MainMenu : NodeWithInput
             OnEnteringGame();
 
             // Instantiate a new editor scene
-            var editor = (MicrobeEditor)SceneManager.Instance.LoadScene(MainGameState.MicrobeEditor).Instance();
+            var editor = (MicrobeEditor)SceneManager.Instance.LoadScene(MainGameState.MicrobeEditor).Instantiate();
 
             // Start freebuild game
             editor.CurrentGame = GameProperties.StartNewMicrobeGame(new WorldGenerationSettings(), true);
@@ -891,11 +891,11 @@ public class MainMenu : NodeWithInput
 
     private void OnWebsitesButtonPressed()
     {
-        websiteButtonsContainer.ShowModal();
+        websiteButtonsContainer.Show();
 
         // A plain PopupPanel doesn't resize automatically and using other popup types will be overkill,
         // so we need to manually shrink it
-        websiteButtonsContainer.RectSize = Vector2.Zero;
+        websiteButtonsContainer.Size = Vector2I.Zero;
     }
 
     private void OnSocialMediaButtonPressed(string url)
@@ -906,13 +906,13 @@ public class MainMenu : NodeWithInput
 
     private void OnNoEnabledModsNoticeClosed()
     {
-        if (permanentlyDismissModsNotEnabledWarning.Pressed)
+        if (permanentlyDismissModsNotEnabledWarning.ButtonPressed)
             Settings.Instance.PermanentlyDismissNotice(DismissibleNotice.NoModsActiveButInstalled);
     }
 
     private void OnThanksDialogClosed()
     {
-        if (permanentlyDismissThanksDialog.Pressed)
+        if (permanentlyDismissThanksDialog.ButtonPressed)
             Settings.Instance.PermanentlyDismissNotice(DismissibleNotice.ThanksForBuying);
     }
 }

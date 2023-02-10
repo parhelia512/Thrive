@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 /// <summary>
 ///   Manages applying patch data and setting up spawns
 /// </summary>
-public class PatchManager : IChildPropertiesLoadCallback
+public partial class PatchManager : IChildPropertiesLoadCallback
 {
     // Currently active spawns
     private readonly List<CreatedSpawner> chunkSpawners = new();
@@ -19,7 +19,7 @@ public class PatchManager : IChildPropertiesLoadCallback
     private ProcessSystem processSystem;
     private CompoundCloudSystem compoundCloudSystem;
     private TimedLifeSystem timedLife;
-    private DirectionalLight worldLight;
+    private DirectionalLight3D worldLight;
     private DayNightCycle lightCycle;
 
     [JsonProperty]
@@ -34,7 +34,7 @@ public class PatchManager : IChildPropertiesLoadCallback
     private bool skipDespawn;
 
     public PatchManager(SpawnSystem spawnSystem, ProcessSystem processSystem,
-        CompoundCloudSystem compoundCloudSystem, TimedLifeSystem timedLife, DirectionalLight worldLight,
+        CompoundCloudSystem compoundCloudSystem, TimedLifeSystem timedLife, DirectionalLight3D worldLight,
         GameProperties? currentGame, DayNightCycle lightCycle)
     {
         this.spawnSystem = spawnSystem;
@@ -137,7 +137,7 @@ public class PatchManager : IChildPropertiesLoadCallback
             return;
 
         var multiplier = lightCycle.DayLightFraction;
-        compoundCloudSystem.SetBrightnessModifier(multiplier * (compoundCloudBrightness - 1.0f) + 1.0f);
+        compoundCloudSystem.SetBrightnessModifier((float)multiplier * (compoundCloudBrightness - 1.0f) + 1.0f);
 
         foreach (var patch in CurrentGame!.GameWorld.Map.Patches.Values)
         {
@@ -299,7 +299,7 @@ public class PatchManager : IChildPropertiesLoadCallback
 
     private void UpdateLight(Biome biome)
     {
-        worldLight.Translation = new Vector3(0, 0, 0);
+        worldLight.Position = new Vector3(0, 0, 0);
         worldLight.LookAt(biome.Sunlight.Direction, new Vector3(0, 1, 0));
 
         worldLight.ShadowEnabled = biome.Sunlight.Shadows;

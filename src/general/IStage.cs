@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 /// <summary>
 ///   See the documentation on <see cref="IStageHUD"/>

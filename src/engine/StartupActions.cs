@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using Godot;
@@ -8,7 +8,7 @@ using Path = System.IO.Path;
 ///   This is the first autoloaded class. Used to perform some actions that should happen
 ///   as the first things in the game
 /// </summary>
-public class StartupActions : Node
+public partial class StartupActions : Node
 {
     private StartupActions()
     {
@@ -19,7 +19,7 @@ public class StartupActions : Node
         // Add unhandled exception logger if debugger is not attached
         if (!Debugger.IsAttached)
         {
-            GD.UnhandledException += UnhandledExceptionLogger.OnUnhandledException;
+            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionLogger.OnUnhandledException;
             GD.Print("Unhandled exception logger attached");
         }
 

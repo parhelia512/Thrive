@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
@@ -11,7 +11,7 @@ public partial class DebugOverlays
 
 #pragma warning disable CA2213
     private Font smallerFont = null!;
-    private Camera? activeCamera;
+    private Camera3D? activeCamera;
 #pragma warning restore CA2213
 
     private bool showEntityLabels;
@@ -32,7 +32,7 @@ public partial class DebugOverlays
 
         if (!entity.AliveMarker.Alive)
         {
-            label.AddColorOverride("font_color", new Color(1.0f, 0.3f, 0.3f));
+            label.AddThemeColorOverride("font_color", new Color(1.0f, 0.3f, 0.3f));
             return;
         }
 
@@ -44,25 +44,25 @@ public partial class DebugOverlays
                 {
                     case Microbe.MicrobeState.Binding:
                     {
-                        label.AddColorOverride("font_color", new Color(0.2f, 0.5f, 0.0f));
+                        label.AddThemeColorOverride("font_color", new Color(0.2f, 0.5f, 0.0f));
                         break;
                     }
 
                     case Microbe.MicrobeState.Engulf:
                     {
-                        label.AddColorOverride("font_color", new Color(0.2f, 0.5f, 1.0f));
+                        label.AddThemeColorOverride("font_color", new Color(0.2f, 0.5f, 1.0f));
                         break;
                     }
 
                     case Microbe.MicrobeState.Unbinding:
                     {
-                        label.AddColorOverride("font_color", new Color(1.0f, 0.5f, 0.2f));
+                        label.AddThemeColorOverride("font_color", new Color(1.0f, 0.5f, 0.2f));
                         break;
                     }
 
                     default:
                     {
-                        label.AddColorOverride("font_color", new Color(1.0f, 1.0f, 1.0f));
+                        label.AddThemeColorOverride("font_color", new Color(1.0f, 1.0f, 1.0f));
                         break;
                     }
                 }
@@ -75,7 +75,7 @@ public partial class DebugOverlays
     private void UpdateEntityLabels()
     {
         if (activeCamera is not { Current: true })
-            activeCamera = GetViewport().GetCamera();
+            activeCamera = GetViewport().GetCamera3D();
 
         if (activeCamera == null)
             return;
@@ -86,11 +86,11 @@ public partial class DebugOverlays
             var node = entity.EntityNode;
             var label = pair.Value;
 
-            label.RectPosition = activeCamera.UnprojectPosition(node.GlobalTransform.origin);
+            label.Position = activeCamera.UnprojectPosition(node.GlobalTransform.Origin);
 
             UpdateLabelColour(entity, label);
 
-            if (!label.Text.Empty())
+            if (label.Text != string.Empty)
                 continue;
 
             // Update names
@@ -137,7 +137,7 @@ public partial class DebugOverlays
             case AgentProjectile:
             {
                 // To reduce the labels overlapping each other
-                label.AddFontOverride("font", smallerFont);
+                label.AddThemeFontOverride("font", smallerFont);
                 break;
             }
         }
@@ -145,7 +145,7 @@ public partial class DebugOverlays
 
     private void OnNodeRemoved(Node node)
     {
-        if (node is Camera camera)
+        if (node is Camera3D camera)
         {
             // When a camera is removed from the scene tree, it can't be active and will be disposed soon.
             // This makes sure the active camera is not disposed so we don't check it in _Process().
@@ -180,8 +180,8 @@ public partial class DebugOverlays
 
         SearchSceneTreeForEntity(rootTree.Root);
 
-        rootTree.Connect("node_added", this, nameof(OnNodeAdded));
-        rootTree.Connect("node_removed", this, nameof(OnNodeRemoved));
+        rootTree.Connect("node_added", new Callable(this, nameof(OnNodeAdded)));
+        rootTree.Connect("node_removed", new Callable(this, nameof(OnNodeRemoved)));
     }
 
     private void CleanEntityLabels()
@@ -192,7 +192,7 @@ public partial class DebugOverlays
         activeCamera = null;
 
         var rootTree = GetTree();
-        rootTree.Disconnect("node_added", this, nameof(OnNodeAdded));
-        rootTree.Disconnect("node_removed", this, nameof(OnNodeRemoved));
+        rootTree.Disconnect("node_added", new Callable(this, nameof(OnNodeAdded)));
+        rootTree.Disconnect("node_removed", new Callable(this, nameof(OnNodeRemoved)));
     }
 }

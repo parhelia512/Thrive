@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -142,7 +142,7 @@ public partial class CellEditorComponent :
 
 #pragma warning disable CA2213
 
-    // Light level controls
+    // Light3D level controls
     private Control topPanel = null!;
     private Button dayButton = null!;
     private Button nightButton = null!;
@@ -478,7 +478,7 @@ public partial class CellEditorComponent :
 
     public static void UpdateOrganelleDisplayerTransform(SceneDisplayer organelleModel, OrganelleTemplate organelle)
     {
-        organelleModel.Transform = new Transform(
+        organelleModel.Transform = new Transform3D(
             MathUtils.CreateRotationForOrganelle(1 * organelle.Orientation), organelle.OrganelleModelPosition);
 
         organelleModel.Scale = new Vector3(Constants.DEFAULT_HEX_SIZE, Constants.DEFAULT_HEX_SIZE,
@@ -762,7 +762,7 @@ public partial class CellEditorComponent :
         editedProperties.MembraneRigidity = Rigidity;
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -1286,7 +1286,7 @@ public partial class CellEditorComponent :
                 var cartesian = Hex.AxialToCartesian(absoluteHex);
 
                 // Get the min z-axis (highest point in the editor)
-                highestPointInMiddleRows = Mathf.Min(highestPointInMiddleRows, cartesian.z);
+                highestPointInMiddleRows = Mathf.Min(highestPointInMiddleRows, cartesian.Z);
             }
         }
 
@@ -1302,7 +1302,7 @@ public partial class CellEditorComponent :
             return;
         }
 
-        previewMicrobe = (Microbe)microbeScene.Instance();
+        previewMicrobe = (Microbe)microbeScene.Instantiate();
         previewMicrobe.IsForPreviewOnly = true;
         Editor.RootOfDynamicallySpawned.AddChild(previewMicrobe);
         previewMicrobeSpecies = new MicrobeSpecies(Editor.EditedBaseSpecies,
@@ -1520,7 +1520,7 @@ public partial class CellEditorComponent :
         // First prediction can be made only after population numbers from previous run are applied
         // so this is just here to guard against that potential programming mistake that may happen when code is
         // changed
-        if (!Editor.Ready)
+        if (!Editor.IsReady)
         {
             GD.PrintErr("Can't start auto-evo prediction before editor is ready");
             return;
@@ -1600,7 +1600,7 @@ public partial class CellEditorComponent :
 
             var organelleModel = hoverModels[usedHoverModel++];
 
-            organelleModel.Transform = new Transform(
+            organelleModel.Transform = new Transform3D(
                 MathUtils.CreateRotationForOrganelle(rotation),
                 cartesianPosition + shownOrganelle.CalculateModelOffset());
 
@@ -2032,7 +2032,7 @@ public partial class CellEditorComponent :
                 return;
             }
 
-            var control = (MicrobePartSelection)organelleSelectionButtonScene.Instance();
+            var control = (MicrobePartSelection)organelleSelectionButtonScene.Instantiate();
             control.Locked = organelle.Unimplemented;
             control.PartIcon = organelle.LoadedIcon ?? throw new Exception("Organelle with no icon");
             control.PartName = organelle.UntranslatedName;
@@ -2053,12 +2053,12 @@ public partial class CellEditorComponent :
             // Only add items with valid organelles to dictionary
             placeablePartSelectionElements.Add(organelle, control);
 
-            control.Connect(nameof(MicrobePartSelection.OnPartSelected), this, nameof(OnOrganelleToPlaceSelected));
+            control.Connect(nameof(MicrobePartSelection.OnPartSelected),new Callable(this,nameof(OnOrganelleToPlaceSelected)));
         }
 
         foreach (var membraneType in simulationParameters.GetAllMembranes().OrderBy(m => m.EditorButtonOrder))
         {
-            var control = (MicrobePartSelection)organelleSelectionButtonScene.Instance();
+            var control = (MicrobePartSelection)organelleSelectionButtonScene.Instantiate();
             control.PartIcon = membraneType.LoadedIcon;
             control.PartName = membraneType.UntranslatedName;
             control.SelectionGroup = membraneButtonGroup;
@@ -2071,7 +2071,7 @@ public partial class CellEditorComponent :
 
             membraneSelectionElements.Add(membraneType, control);
 
-            control.Connect(nameof(MicrobePartSelection.OnPartSelected), this, nameof(OnMembraneSelected));
+            control.Connect(nameof(MicrobePartSelection.OnPartSelected),new Callable(this,nameof(OnMembraneSelected)));
         }
     }
 
@@ -2194,21 +2194,21 @@ public partial class CellEditorComponent :
         {
             case LightLevelOption.Day:
             {
-                dayButton.Pressed = true;
+                dayButton.ButtonPressed = true;
                 Editor.LightLevel = Editor.CurrentPatch.Biome.MaximumCompounds[sunlight].Ambient;
                 break;
             }
 
             case LightLevelOption.Night:
             {
-                nightButton.Pressed = true;
+                nightButton.ButtonPressed = true;
                 Editor.LightLevel = Editor.CurrentPatch.Biome.MinimumCompounds[sunlight].Ambient;
                 break;
             }
 
             case LightLevelOption.Average:
             {
-                averageLightButton.Pressed = true;
+                averageLightButton.ButtonPressed = true;
                 Editor.LightLevel = Editor.CurrentPatch.Biome.AverageCompounds[sunlight].Ambient;
                 break;
             }
@@ -2244,7 +2244,7 @@ public partial class CellEditorComponent :
             case SelectionMenuTab.Structure:
             {
                 structureTab.Show();
-                structureTabButton.Pressed = true;
+                structureTabButton.ButtonPressed = true;
                 MicrobePreviewMode = false;
                 break;
             }
@@ -2252,7 +2252,7 @@ public partial class CellEditorComponent :
             case SelectionMenuTab.Membrane:
             {
                 appearanceTab.Show();
-                appearanceTabButton.Pressed = true;
+                appearanceTabButton.ButtonPressed = true;
                 MicrobePreviewMode = true;
                 break;
             }
@@ -2260,7 +2260,7 @@ public partial class CellEditorComponent :
             case SelectionMenuTab.Behaviour:
             {
                 behaviourEditor.Show();
-                behaviourTabButton.Pressed = true;
+                behaviourTabButton.ButtonPressed = true;
                 MicrobePreviewMode = false;
                 break;
             }

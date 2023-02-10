@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
@@ -51,7 +51,7 @@ public static class MembraneComputationHelpers
 ///     can still be using this object even when this is removed from the cache
 ///   </para>
 /// </remarks>
-public class ComputedMembraneData : IComputedMembraneData
+public partial class ComputedMembraneData : IComputedMembraneData
 {
     public ComputedMembraneData(List<Vector2> organellePositions, MembraneType type, List<Vector2> vertices2D,
         ArrayMesh mesh, int surfaceIndex)

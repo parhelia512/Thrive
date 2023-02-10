@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Settings for auto-evo that have been (potentially) tweaked
 /// </summary>
 [CustomizedRegistryType]

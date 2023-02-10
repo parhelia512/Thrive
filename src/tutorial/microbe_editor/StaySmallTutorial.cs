@@ -1,6 +1,6 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
-    public class StaySmallTutorial : EditorEntryCountingTutorial
+    public partial class StaySmallTutorial : EditorEntryCountingTutorial
     {
         public StaySmallTutorial()
         {

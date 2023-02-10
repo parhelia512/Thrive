@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Attribute for a method, that gets called when the defined key is pressed or released.
@@ -28,7 +28,7 @@ public class RunOnKeyChangeAttribute : RunOnKeyAttribute
         return CallMethod(HeldDown);
     }
 
-    public override void OnProcess(float delta)
+    public override void OnProcess(double delta)
     {
     }
 }

@@ -1,18 +1,18 @@
-﻿using Godot;
+using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
-///   Camera for handling a 3rd person camera in 3D space
+///   Camera3D for handling a 3rd person camera in 3D space
 ///   TODO: implement the camera rotating logic
 /// </summary>
-public class MulticellularCamera : Spatial, IGodotEarlyNodeResolve
+public partial class MulticellularCamera : Node3D, IGodotEarlyNodeResolve
 {
 #pragma warning disable CA2213
-    private Camera camera = null!;
-    private Listener listener = null!;
-    private Spatial offsetNode = null!;
+    private Camera3D camera = null!;
+    private AudioListener3D listener = null!;
+    private Node3D offsetNode = null!;
 
-    private SpringArm? arm;
+    private SpringArm3D? arm;
 #pragma warning restore CA2213
 
     private float armLength = 8;
@@ -109,7 +109,7 @@ public class MulticellularCamera : Spatial, IGodotEarlyNodeResolve
     [JsonIgnore]
     public bool NodeReferencesResolved { get; set; }
 
-    public Spatial? FollowedNode { get; set; }
+    public Node3D? FollowedNode { get; set; }
 
     public override void _Ready()
     {
@@ -126,11 +126,11 @@ public class MulticellularCamera : Spatial, IGodotEarlyNodeResolve
         if (NodeReferencesResolved)
             return;
 
-        camera = GetNode<Camera>("CameraPosition/SpringArm/Camera");
-        listener = GetNode<Listener>("CameraPosition/SpringArm/Camera/Listener");
+        camera = GetNode<Camera3D>("CameraPosition/SpringArm3D/Camera3D");
+        listener = GetNode<AudioListener3D>("CameraPosition/SpringArm3D/Camera3D/AudioListener3D");
 
-        offsetNode = GetNode<Spatial>("CameraPosition");
-        arm = GetNode<SpringArm>("CameraPosition/SpringArm");
+        offsetNode = GetNode<Node3D>("CameraPosition");
+        arm = GetNode<SpringArm3D>("CameraPosition/SpringArm3D");
 
         NodeReferencesResolved = true;
     }
@@ -147,7 +147,7 @@ public class MulticellularCamera : Spatial, IGodotEarlyNodeResolve
         InputManager.UnregisterReceiver(this);
     }
 
-    public override void _PhysicsProcess(float delta)
+    public override void _PhysicsProcess(double delta)
     {
         base._PhysicsProcess(delta);
 
@@ -156,19 +156,19 @@ public class MulticellularCamera : Spatial, IGodotEarlyNodeResolve
 
         // Move ourselves (the base node) to be on top of the target, our offset node will then position the camera
         // correctly
-        Transform = new Transform(Quat.Identity, FollowedNode.Translation);
+        Transform = new Transform3D(Basis.Identity, FollowedNode.Position);
 
         // Horizontal (yaw) rotation along the y axis is applied to the offset node to make things work nicer
         var up = new Vector3(0, 1, 0);
-        var yQuaternion = new Quat(up, YRotation);
-        offsetNode.Translation = yQuaternion.Xform(FollowOffset);
+        var yQuaternion = new Quaternion(up, YRotation);
+        offsetNode.Position = yQuaternion * FollowOffset;
 
         var right = new Vector3(1, 0, 0);
 
         // Some part of Y-rotation is also applied here to make for non-janky camera turning effect
-        var rotation = yQuaternion * new Quat(right, XRotation);
+        var rotation = yQuaternion * new Quaternion(right, XRotation);
 
-        arm!.Transform = new Transform(rotation, Vector3.Zero);
+        arm!.Transform = new Transform3D(new Basis(rotation), Vector3.Zero);
     }
 
     [RunOnAxis(new[] { "g_zoom_in", "g_zoom_out" }, new[] { -1.0f, 1.0f }, UseDiscreteKeyInputs = true, Priority = -1)]

@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using Godot;
 using Newtonsoft.Json;
 
-public class EditorCamera3D : Camera
+public partial class EditorCamera3D : Camera3D
 {
     /// <summary>
     ///   Minimum distance the camera can be at from the rotate point
@@ -95,7 +95,7 @@ public class EditorCamera3D : Camera
     ///   where their camera was
     /// </summary>
     [Signal]
-    public delegate void OnPositionChanged(Transform newPosition);
+    public delegate void OnPositionChangedEventHandler(Transform3D newPosition);
 
     public override void _EnterTree()
     {
@@ -212,7 +212,7 @@ public class EditorCamera3D : Camera
             if (!InvertedMousePanning)
                 mousePanDirection = -mousePanDirection;
 
-            PanCamera(new Vector3(mousePanDirection.x, mousePanDirection.y, 0));
+            PanCamera(new Vector3(mousePanDirection.X, mousePanDirection.Y, 0));
         }
         else
         {
@@ -221,7 +221,7 @@ public class EditorCamera3D : Camera
             if (!InvertedMouseRotation)
                 mouseDirection = -mouseDirection;
 
-            RotateCamera(mouseDirection.y, mouseDirection.x);
+            RotateCamera(mouseDirection.Y, mouseDirection.X);
         }
 
         mousePanningStart = newPosition;
@@ -293,21 +293,21 @@ public class EditorCamera3D : Camera
 
     private void PanCamera(Vector3 panAmount)
     {
-        var yAmount = panAmount.y;
-        panAmount.y = 0;
+        var yAmount = panAmount.Y;
+        panAmount.Y = 0;
 
         // Only left and right look rotation is taken into account for movement, so that it feels better
-        var rotation = new Quat(new Vector3(0, 1, 0), YRotation).Normalized();
+        var rotation = new Quaternion(new Vector3(0, 1, 0), YRotation).Normalized();
 
-        panAmount = rotation.Xform(panAmount);
+        panAmount = rotation * (panAmount);
         panOffset += panAmount;
 
         // Y-axis panning *does* take the full rotation of the camera into account
         if (yAmount != 0)
         {
-            rotation = Transform.basis.Quat().Normalized();
+            rotation = Transform.Basis.GetRotationQuaternion().Normalized();
 
-            panAmount = rotation.Xform(new Vector3(0, yAmount, 0));
+            panAmount = rotation * (new Vector3(0, yAmount, 0));
             panOffset += panAmount;
         }
 
@@ -331,13 +331,13 @@ public class EditorCamera3D : Camera
         var rotatedPosition = new Vector3(0, 0, ViewDistance).Rotated(right, XRotation).Rotated(up, YRotation) +
             RotateAroundPoint;
 
-        Translation = rotatedPosition;
+        Position = rotatedPosition;
 
         // "Up" being always up here makes the visuals a bit weird looking when going fully around
         // TODO: could add a mode that clamps the XRotation to ]-0.5 * FULL_CIRCLE, 0.5 * FULL_CIRCLE[
         LookAt(RotateAroundPoint, up);
 
-        var newTransform = new Transform(Transform.basis, rotatedPosition + panOffset);
+        var newTransform = new Transform3D(Transform.Basis, rotatedPosition + panOffset);
 
         if (newTransform != currentTransform)
         {

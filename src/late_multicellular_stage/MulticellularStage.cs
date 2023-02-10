@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 using Newtonsoft.Json;
@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 [SceneLoadedClass("res://src/late_multicellular_stage/MulticellularStage.tscn")]
 [DeserializedCallbackTarget]
 [UseThriveSerializer]
-public class MulticellularStage : StageBase<MulticellularCreature>
+public partial class MulticellularStage : StageBase<MulticellularCreature>
 {
     [JsonProperty]
     [AssignOnlyChildItemsOnDeserialize]
@@ -41,7 +41,7 @@ public class MulticellularStage : StageBase<MulticellularCreature>
 
         HUD.Init(this);
 
-        // HoverInfo.Init(Camera, Clouds);
+        // HoverInfo.Init(Camera3D, Clouds);
 
         SetupStage();
     }
@@ -88,7 +88,7 @@ public class MulticellularStage : StageBase<MulticellularCreature>
         base.StartNewGame();
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         base._Process(delta);
 
@@ -110,7 +110,7 @@ public class MulticellularStage : StageBase<MulticellularCreature>
     public void PauseKeyPressed()
     {
         // Check nothing else has keyboard focus and pause the game
-        if (HUD.GetFocusOwner() == null)
+        if (GetViewport().GuiGetFocusOwner() == null)
         {
             HUD.PauseButtonPressed(!HUD.Paused);
         }
@@ -129,7 +129,7 @@ public class MulticellularStage : StageBase<MulticellularCreature>
 
         var scene = SceneManager.Instance.LoadScene(MainGameState.LateMulticellularEditor);
 
-        Node sceneInstance = scene.Instance();
+        Node sceneInstance = scene.Instantiate();
         var editor = (LateMulticellularEditor)sceneInstance;
 
         editor.CurrentGame = CurrentGame;
@@ -279,7 +279,7 @@ public class MulticellularStage : StageBase<MulticellularCreature>
         if (spawnedPlayer)
         {
             // Random location on respawn
-            // Player.Translation = new Vector3(
+            // Player.Position = new Vector3(
             //     random.Next(Constants.MIN_SPAWN_DISTANCE, Constants.MAX_SPAWN_DISTANCE), 0,
             //     random.Next(Constants.MIN_SPAWN_DISTANCE, Constants.MAX_SPAWN_DISTANCE));
 

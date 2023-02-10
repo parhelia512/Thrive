@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 
 public class RunOnKeyToggleAttribute : RunOnKeyAttribute
 {
@@ -30,7 +30,7 @@ public class RunOnKeyToggleAttribute : RunOnKeyAttribute
         return false;
     }
 
-    public override void OnProcess(float delta)
+    public override void OnProcess(double delta)
     {
     }
 }

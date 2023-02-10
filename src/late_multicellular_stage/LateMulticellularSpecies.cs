@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using Newtonsoft.Json;
@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 [JSONDynamicTypeAllowed]
 [UseThriveConverter]
 [UseThriveSerializer]
-public class LateMulticellularSpecies : Species
+public partial class LateMulticellularSpecies : Species
 {
     public LateMulticellularSpecies(uint id, string genus, string epithet) : base(id, genus, epithet)
     {

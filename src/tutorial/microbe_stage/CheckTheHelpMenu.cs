@@ -1,9 +1,9 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
     using Newtonsoft.Json;
 
-    public class CheckTheHelpMenu : TutorialPhase
+    public partial class CheckTheHelpMenu : TutorialPhase
     {
         public const string TUTORIAL_NAME = "CheckTheHelpMenu";
 

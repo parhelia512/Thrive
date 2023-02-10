@@ -1,11 +1,11 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
 
     /// <summary>
     ///   Tells the player how to reproduce if they have taken a long while
     /// </summary>
-    public class MicrobeReproduction : TutorialPhase
+    public partial class MicrobeReproduction : TutorialPhase
     {
         public override string ClosedByName => "MicrobeReproduction";
 

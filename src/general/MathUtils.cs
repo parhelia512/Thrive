@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
@@ -41,28 +41,28 @@ public static class MathUtils
     ///     Rotation is now the number of 60 degree rotations
     ///   </para>
     /// </remarks>
-    public static Quat CreateRotationForOrganelle(float rotation)
+    public static Basis CreateRotationForOrganelle(float rotation)
     {
-        return new Quat(new Vector3(0, -1, 0), rotation * 60 * DEGREES_TO_RADIANS);
+        return new Basis(new Vector3(0, -1, 0), rotation * 60 * DEGREES_TO_RADIANS);
     }
 
     /// <summary>
     ///   This still takes the angle in degrees as this is used from
     ///   places that calculate the angle in degrees.
     /// </summary>
-    public static Quat CreateRotationForExternal(float angle)
+    public static Quaternion CreateRotationForExternal(float angle)
     {
-        return new Quat(new Vector3(0, 1, 0), 180 * DEGREES_TO_RADIANS) *
-            new Quat(new Vector3(0, 1, 0), angle * DEGREES_TO_RADIANS);
+        return new Quaternion(new Vector3(0, 1, 0), 180 * DEGREES_TO_RADIANS) *
+            new Quaternion(new Vector3(0, 1, 0), angle * DEGREES_TO_RADIANS);
     }
 
     /// <summary>
     ///   Rotation for the pilus physics cone
     /// </summary>
-    public static Quat CreateRotationForPhysicsOrganelle(float angle)
+    public static Quaternion CreateRotationForPhysicsOrganelle(float angle)
     {
-        return new Quat(new Vector3(-1, 0, 0), 90 * DEGREES_TO_RADIANS) *
-            new Quat(new Vector3(0, 0, -1), (180 - angle) * DEGREES_TO_RADIANS);
+        return new Quaternion(new Vector3(-1, 0, 0), 90 * DEGREES_TO_RADIANS) *
+            new Quaternion(new Vector3(0, 0, -1), (180 - angle) * DEGREES_TO_RADIANS);
     }
 
     /// <summary>
@@ -130,5 +130,15 @@ public static class MathUtils
         double average = sum / count;
         double standardDeviation = Math.Sqrt(sumOfSquares / count - average * average);
         return (average, standardDeviation);
+    }
+
+    public static Vector2I ToVector2I(this Vector2 vector2)
+    {
+        return new Vector2I((int)vector2.X, (int)vector2.Y);
+    }
+
+    public static Vector2 ToVector2(this Vector2I vector2I)
+    {
+        return new Vector2(vector2I.X, vector2I.Y);
     }
 }

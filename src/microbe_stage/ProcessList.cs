@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Godot;
 
 /// <summary>
 ///   Shows a list of processes in a container
 /// </summary>
-public class ProcessList : VBoxContainer
+public partial class ProcessList : VBoxContainer
 {
 #pragma warning disable CA2213
     private PackedScene chemicalEquationScene = null!;
@@ -34,7 +34,7 @@ public class ProcessList : VBoxContainer
         createdProcessControls = new ChildObjectCache<IProcessDisplayInfo, ChemicalEquation>(this, CreateEquation);
     }
 
-    public override void _Process(float delta)
+    public override void _Process(double delta)
     {
         if (!IsVisibleInTree())
             return;
@@ -64,7 +64,7 @@ public class ProcessList : VBoxContainer
 
     private ChemicalEquation CreateEquation(IProcessDisplayInfo process)
     {
-        var equation = (ChemicalEquation)chemicalEquationScene.Instance();
+        var equation = (ChemicalEquation)chemicalEquationScene.Instantiate();
         equation.ShowSpinner = ShowSpinners;
         equation.EquationFromProcess = process;
         equation.DefaultTitleColour = ProcessesTitleColour;

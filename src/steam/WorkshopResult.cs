@@ -1,7 +1,7 @@
-﻿/// <summary>
+/// <summary>
 ///   Interpreted response from Steam
 /// </summary>
-public class WorkshopResult
+public partial class WorkshopResult
 {
     public WorkshopResult(bool success, string? translatedError, bool termsOfServiceSigningRequired, ulong? itemId)
     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -7,7 +7,7 @@ using Godot;
 ///   Central store of game information for the player. Acts like a browser. Can be opened in-game and from the main
 ///   menu. Some pages relating to a game in progress are only available in-game.
 /// </summary>
-public class Thriveopedia : ControlWithInput
+public partial class Thriveopedia : ControlWithInput
 {
     [Export]
     public NodePath? BackButtonPath;
@@ -76,10 +76,10 @@ public class Thriveopedia : ControlWithInput
     private Stack<ThriveopediaPage> pageFuture = new();
 
     [Signal]
-    public delegate void OnThriveopediaClosed();
+    public delegate void OnThriveopediaClosedEventHandler();
 
     [Signal]
-    public delegate void OnSceneChanged();
+    public delegate void OnSceneChangedEventHandler();
 
     /// <summary>
     ///   The currently open Thriveopedia page. Defaults to the home page if none has been set.
@@ -274,8 +274,8 @@ public class Thriveopedia : ControlWithInput
 
         // For now, load by direct reference to the Godot scene. Could be generalised in future.
         var scene = GD.Load<PackedScene>($"res://src/thriveopedia/pages/Thriveopedia{name}Page.tscn");
-        var page = (ThriveopediaPage)scene.Instance();
-        page.Connect(nameof(ThriveopediaPage.OnSceneChanged), this, nameof(HandleSceneChanged));
+        var page = (ThriveopediaPage)scene.Instantiate();
+        page.Connect(nameof(ThriveopediaPage.OnSceneChanged),new Callable(this,nameof(HandleSceneChanged)));
         pageContainer.AddChild(page);
         allPages.Add(page, CreateTreeItem(page, parentName));
         page.Hide();

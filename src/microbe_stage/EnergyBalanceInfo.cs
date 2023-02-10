@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 /// <summary>
 ///   Info regarding a microbe's energy balance in a patch
@@ -8,7 +8,7 @@
 ///     This does not take special modes the microbe can be into account, for example engulfing or binding
 ///   </para>
 /// </remarks>
-public class EnergyBalanceInfo
+public partial class EnergyBalanceInfo
 {
     /// <summary>
     ///   The raw list of all energy consuming things related to the microbe. The key is the action name and the

@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Displays a scene based on its path. Also stores the previous path to avoid duplicate loads
 /// </summary>
-public class SceneDisplayer : Spatial
+public partial class SceneDisplayer : Node3D
 {
     private string? currentScene;
 
@@ -30,7 +30,7 @@ public class SceneDisplayer : Spatial
     ///   Get the material of this scene's model.
     /// </summary>
     /// <param name="modelPath">Path to model within the scene. If null takes scene root as model.</param>
-    /// <returns>ShaderMaterial of the GeometryInstance. Null if no scene.</returns>
+    /// <returns>ShaderMaterial of the GeometryInstance3D. Null if no scene.</returns>
     public ShaderMaterial? GetMaterial(NodePath? modelPath = null)
     {
         return currentlyShown?.GetMaterial(modelPath);
@@ -59,7 +59,7 @@ public class SceneDisplayer : Spatial
 
         var scene = GD.Load<PackedScene>(currentScene);
 
-        currentlyShown = scene.Instance();
+        currentlyShown = scene.Instantiate();
         AddChild(currentlyShown);
     }
 

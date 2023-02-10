@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 /// <summary>
 ///   Settings for auto-evo that are loaded from the configuration JSON

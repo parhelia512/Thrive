@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -22,7 +22,7 @@ public interface IEntity
     ///   The Node that this entity is in the game world as
     /// </summary>
     [JsonIgnore]
-    Spatial EntityNode { get; }
+    Node3D EntityNode { get; }
 
     void OnDestroyed();
 

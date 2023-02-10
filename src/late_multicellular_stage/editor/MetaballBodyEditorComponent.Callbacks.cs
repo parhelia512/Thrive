@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Callbacks for the metaball body editor
 /// </summary>
 [DeserializedCallbackTarget]

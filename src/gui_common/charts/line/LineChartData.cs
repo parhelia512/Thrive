@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Dataset to be visualized on <see cref="LineChart"/>. Contains series of data points.
 /// </summary>
 public class LineChartData : ChartDataSet

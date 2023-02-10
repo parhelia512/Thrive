@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -28,7 +28,7 @@ public static class NodeGroupSaveHelper
             var groups = value.GetGroups().Cast<string>().ToList();
 
             // Ignore inbuilt groups
-            groups.RemoveAll(item => item.BeginsWith("_") || IgnoredGroups.Contains(item));
+            groups.RemoveAll(item => item.StartsWith("_") || IgnoredGroups.Contains(item));
 
             serializer.Serialize(writer, groups.Count > 0 ? groups : null);
         }

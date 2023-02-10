@@ -9,8 +9,8 @@ __meta__ = {
 }
 
 [node name="Icon" type="TextureRect" parent="."]
-margin_right = 30.0
-margin_bottom = 30.0
+offset_right = 30.0
+offset_bottom = 30.0
 mouse_filter = 2
 expand = true
 __meta__ = {

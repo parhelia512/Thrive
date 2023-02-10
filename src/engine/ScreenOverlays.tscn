@@ -9,7 +9,7 @@
 [ext_resource path="res://src/gui_common/TransitionManager.cs" type="Script" id=8]
 
 [node name="ScreenOverlays" type="Node"]
-pause_mode = 2
+process_mode = 2
 process_priority = 2000
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
@@ -19,7 +19,7 @@ layer = 128
 visible = false
 
 [node name="TransitionManager" type="Control" parent="CanvasLayer"]
-pause_mode = 2
+process_mode = 2
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2

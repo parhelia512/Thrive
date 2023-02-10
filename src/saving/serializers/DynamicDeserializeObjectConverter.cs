@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 
 /// <summary>
 ///   A really hacky converter that returns can handle once for object
 /// </summary>
-public class DynamicDeserializeObjectConverter : BaseThriveConverter
+public partial class DynamicDeserializeObjectConverter : BaseThriveConverter
 {
     private readonly Type baseObjectType = typeof(object);
 

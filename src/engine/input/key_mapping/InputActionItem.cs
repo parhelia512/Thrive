@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -20,7 +20,7 @@ using Godot;
 ///     Handles the + button for adding new bindings.
 ///   </para>
 /// </remarks>
-public class InputActionItem : VBoxContainer
+public partial class InputActionItem : VBoxContainer
 {
     [Export]
     public NodePath? AddInputEventPath;
@@ -179,7 +179,7 @@ public class InputActionItem : VBoxContainer
         if (target == null)
             throw new ArgumentException("associatedGroup has no associated list");
 
-        var inputActionItem = (InputActionItem)target.InputActionItemScene.Instance();
+        var inputActionItem = (InputActionItem)target.InputActionItemScene.Instantiate();
 
         inputActionItem.InputName = data.InputName;
         inputActionItem.DisplayName = data.Name;
@@ -210,18 +210,18 @@ public class InputActionItem : VBoxContainer
     /// </summary>
     private void OnAddEventButtonPressed()
     {
-        var newInput = (InputEventItem)GroupList!.InputEventItemScene.Instance();
+        var newInput = (InputEventItem)GroupList!.InputEventItemScene.Instantiate();
         newInput.AssociatedAction = new WeakReference<InputActionItem>(this);
         newInput.JustAdded = true;
         Inputs.Add(newInput);
     }
 
-    private void OnInputsChanged(object sender, NotifyCollectionChangedEventArgs e)
+    private void OnInputsChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add:
-                foreach (InputEventItem newItem in e.NewItems)
+                foreach (InputEventItem newItem in e.NewItems!)
                 {
                     inputEventsContainer.AddChild(newItem);
                 }
@@ -230,7 +230,7 @@ public class InputActionItem : VBoxContainer
 
                 break;
             case NotifyCollectionChangedAction.Remove:
-                foreach (InputEventItem oldItem in e.OldItems)
+                foreach (InputEventItem oldItem in e.OldItems!)
                 {
                     inputEventsContainer.RemoveChild(oldItem);
                 }

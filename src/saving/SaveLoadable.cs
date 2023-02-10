@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
 /// <summary>
 ///   Helper for types that don't derive from anything else to be save loadable

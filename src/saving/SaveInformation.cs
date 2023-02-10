@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using Godot;
 using Newtonsoft.Json;
@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 /// <summary>
 ///   Info embedded in a save file
 /// </summary>
-public class SaveInformation
+public partial class SaveInformation
 {
     public enum SaveType
     {

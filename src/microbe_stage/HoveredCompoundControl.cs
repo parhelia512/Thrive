@@ -1,6 +1,6 @@
-﻿using Godot;
+using Godot;
 
-public class HoveredCompoundControl : HBoxContainer
+public partial class HoveredCompoundControl : HBoxContainer
 {
 #pragma warning disable CA2213
     private Label compoundName = null!;
@@ -33,7 +33,7 @@ public class HoveredCompoundControl : HBoxContainer
 
         MouseFilter = MouseFilterEnum.Ignore;
         TextureRect compoundIcon = GUICommon.Instance.CreateCompoundIcon(Compound.InternalName, 20, 20);
-        compoundName.SizeFlagsHorizontal = (int)SizeFlags.ExpandFill;
+        compoundName.SizeFlagsHorizontal = SizeFlags.ExpandFill;
         compoundName.Text = Compound.Name;
         AddChild(compoundIcon);
         AddChild(compoundName);

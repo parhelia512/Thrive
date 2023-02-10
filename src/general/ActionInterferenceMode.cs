@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   Describes how two actions interference with each other.
 /// </summary>
 /// <remarks>

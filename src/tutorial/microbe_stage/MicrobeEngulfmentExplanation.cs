@@ -1,10 +1,10 @@
-﻿namespace Tutorial
+namespace Tutorial
 {
     using System;
     using Godot;
     using Newtonsoft.Json;
 
-    public class MicrobeEngulfmentExplanation : TutorialPhase
+    public partial class MicrobeEngulfmentExplanation : TutorialPhase
     {
         [JsonProperty]
         private Vector3? chunkPosition;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 ///   The conditions of a biome that can change. This is a separate class to make serialization work regarding the biome
 /// </summary>
 [UseThriveSerializer]
-public class BiomeConditions : ICloneable, ISaveLoadable
+public partial class BiomeConditions : ICloneable, ISaveLoadable
 {
     // TODO: make this also a property / private
     public Dictionary<string, ChunkConfiguration> Chunks = null!;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Godot;
 
@@ -126,8 +126,8 @@ public struct Hex : IEquatable<Hex>
     public static Hex CartesianToAxial(Vector3 pos)
     {
         // Getting the cube coordinates.
-        float cx = pos.x * (2.0f / 3.0f) / Constants.DEFAULT_HEX_SIZE;
-        float cy = pos.z / (Constants.DEFAULT_HEX_SIZE * Mathf.Sqrt(3)) - cx / 2.0f;
+        float cx = pos.X * (2.0f / 3.0f) / Constants.DEFAULT_HEX_SIZE;
+        float cy = pos.Z / (Constants.DEFAULT_HEX_SIZE * Mathf.Sqrt(3)) - cx / 2.0f;
         float cz = -(cx + cy);
 
         // Rounding the result.
@@ -167,7 +167,7 @@ public struct Hex : IEquatable<Hex>
     /// <returns>hex coordinates.</returns>
     public static Hex CubeToAxial(Int3 cube)
     {
-        return new Hex(cube.x, cube.y);
+        return new Hex(cube.X, cube.Y);
     }
 
     /// <summary>
@@ -176,13 +176,13 @@ public struct Hex : IEquatable<Hex>
     /// </summary>
     public static Int3 CubeHexRound(Vector3 pos)
     {
-        float rx = Mathf.Round(pos.x);
-        float ry = Mathf.Round(pos.y);
-        float rz = Mathf.Round(pos.z);
+        float rx = Mathf.Round(pos.X);
+        float ry = Mathf.Round(pos.Y);
+        float rz = Mathf.Round(pos.Z);
 
-        float xDiff = Mathf.Abs(rx - pos.x);
-        float yDiff = Mathf.Abs(ry - pos.y);
-        float zDiff = Mathf.Abs(rz - pos.z);
+        float xDiff = Mathf.Abs(rx - pos.X);
+        float yDiff = Mathf.Abs(ry - pos.Y);
+        float zDiff = Mathf.Abs(rz - pos.Z);
 
         if (xDiff > yDiff && xDiff > zDiff)
         {
@@ -247,9 +247,9 @@ public struct Hex : IEquatable<Hex>
         return Q == other.Q && R == other.R;
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
     {
-        if (!(obj is Hex hex))
+        if (obj is not Hex hex)
             return false;
 
         return Equals(hex);

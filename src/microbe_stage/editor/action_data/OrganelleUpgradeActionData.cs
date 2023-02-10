@@ -1,8 +1,8 @@
-﻿using System;
+using System;
 using System.Linq;
 
 [JSONAlwaysDynamicType]
-public class OrganelleUpgradeActionData : EditorCombinableActionData
+public partial class OrganelleUpgradeActionData : EditorCombinableActionData
 {
     public OrganelleUpgrades NewUpgrades;
     public OrganelleUpgrades OldUpgrades;

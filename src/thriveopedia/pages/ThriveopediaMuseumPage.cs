@@ -1,9 +1,9 @@
-﻿using Godot;
+using Godot;
 
 /// <summary>
 ///   Thriveopedia page displaying fossilised (saved) organisms.
 /// </summary>
-public class ThriveopediaMuseumPage : ThriveopediaPage
+public partial class ThriveopediaMuseumPage : ThriveopediaPage
 {
     [Export]
     public NodePath? CardContainerPath;
@@ -65,10 +65,10 @@ public class ThriveopediaMuseumPage : ThriveopediaPage
             if (savedSpecies == null)
                 continue;
 
-            var card = (MuseumCard)museumCardScene.Instance();
+            var card = (MuseumCard)museumCardScene.Instantiate();
             card.SavedSpecies = savedSpecies.Species;
             card.FossilPreviewImage = savedSpecies.PreviewImage;
-            card.Connect(nameof(MuseumCard.OnSpeciesSelected), this, nameof(UpdateSpeciesPreview));
+            card.Connect(nameof(MuseumCard.OnSpeciesSelected),new Callable(this,nameof(UpdateSpeciesPreview)));
             cardContainer.AddChild(card);
         }
     }
@@ -107,7 +107,7 @@ public class ThriveopediaMuseumPage : ThriveopediaPage
         foreach (MuseumCard otherCard in cardContainer.GetChildren())
         {
             if (otherCard != card)
-                otherCard.Pressed = false;
+                otherCard.ButtonPressed = false;
         }
 
         var species = card.SavedSpecies;
@@ -154,7 +154,7 @@ public class ThriveopediaMuseumPage : ThriveopediaPage
         TransitionManager.Instance.AddSequence(ScreenFade.FadeType.FadeOut, 0.1f, () =>
         {
             // Instantiate a new editor scene
-            var editor = (MicrobeEditor)SceneManager.Instance.LoadScene(MainGameState.MicrobeEditor).Instance();
+            var editor = (MicrobeEditor)SceneManager.Instance.LoadScene(MainGameState.MicrobeEditor).Instantiate();
 
             // Start freebuild game with the selected species
             editor.CurrentGame = GameProperties.StartNewMicrobeGame(

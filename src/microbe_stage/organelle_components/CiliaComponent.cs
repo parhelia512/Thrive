@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Diagnostics.CodeAnalysis;
 using Godot;
 
 [SuppressMessage("Design", "CA1001:Types that own disposable fields should be disposable",
     Justification = "We don't dispose Godot scene-attached objects")]
-public class CiliaComponent : ExternallyPositionedComponent
+public partial class CiliaComponent : ExternallyPositionedComponent
 {
     private const string CILIA_PULL_UPGRADE_NAME = "pull";
 
@@ -14,12 +14,12 @@ public class CiliaComponent : ExternallyPositionedComponent
     private float targetSpeed;
 
     private float timeSinceRotationSample;
-    private Quat? previousCellRotation;
+    private Quaternion? previousCellRotation;
 
     private AnimationPlayer? animation;
 
-    private Area? attractorArea;
-    private SphereShape? attractorShape;
+    private Area3D? attractorArea;
+    private SphereShape3D? attractorShape;
 
     public override void UpdateAsync(float delta)
     {
@@ -34,7 +34,7 @@ public class CiliaComponent : ExternallyPositionedComponent
             return;
         }
 
-        var currentCellRotation = microbe.GlobalTransform.basis.Quat();
+        var currentCellRotation = microbe.GlobalTransform.Basis.GetRotationQuaternion();
 
         if (previousCellRotation == null)
         {
@@ -104,10 +104,10 @@ public class CiliaComponent : ExternallyPositionedComponent
             var enable = organelle!.ParentMicrobe!.State == Microbe.MicrobeState.Engulf &&
                 organelle.ParentMicrobe.PhagocytosisStep == PhagocytosisPhase.None;
 
-            // The approach of disabling the underlying collision shape or the Area's Monitoring property makes the
-            // Area lose its hold over any overlapping bodies once re-enabled. The following should be the proper way
+            // The approach of disabling the underlying collision shape or the Area3D's Monitoring property makes the
+            // Area3D lose its hold over any overlapping bodies once re-enabled. The following should be the proper way
             // to do it without side effects.
-            attractorArea.SpaceOverride = enable ? Area.SpaceOverrideEnum.Combine : Area.SpaceOverrideEnum.Disabled;
+            attractorArea.LinearDampSpaceOverride = enable ? Area3D.SpaceOverride.Combine : Area3D.SpaceOverride.Disabled;
         }
 
         if (attractorShape != null)
@@ -138,17 +138,17 @@ public class CiliaComponent : ExternallyPositionedComponent
 
         var microbe = organelle.ParentMicrobe!;
 
-        attractorArea = new Area
+        attractorArea = new Area3D
         {
             GravityPoint = true,
-            GravityDistanceScale = Constants.CILIA_PULLING_FORCE_FALLOFF_FACTOR,
+            GravityPointUnitDistance = Constants.CILIA_PULLING_FORCE_FALLOFF_FACTOR,
             Gravity = Constants.CILIA_PULLING_FORCE,
             CollisionLayer = 0,
             CollisionMask = microbe.CollisionMask,
-            Translation = Hex.AxialToCartesian(organelle.Position),
+            Position = Hex.AxialToCartesian(organelle.Position),
         };
 
-        attractorShape ??= new SphereShape();
+        attractorShape ??= new SphereShape3D();
         attractorArea.ShapeOwnerAddShape(attractorArea.CreateShapeOwner(attractorShape), attractorShape);
         microbe.AddChild(attractorArea);
     }
@@ -168,13 +168,13 @@ public class CiliaComponent : ExternallyPositionedComponent
         // it should be kept an eye on if it does. The engine for some reason doesnt update THIS basis
         // unless checked with some condition (if or return)
         // SEE: https://github.com/Revolutionary-Games/Thrive/issues/2906
-        return organelle!.OrganelleGraphics!.Transform.basis == Transform.Identity.basis;
+        return organelle!.OrganelleGraphics!.Transform.Basis == Transform3D.Identity.Basis;
     }
 
-    protected override void OnPositionChanged(Quat rotation, float angle,
+    protected override void OnPositionChanged(Quaternion rotation, float angle,
         Vector3 membraneCoords)
     {
-        organelle!.OrganelleGraphics!.Transform = new Transform(rotation, membraneCoords);
+        organelle!.OrganelleGraphics!.Transform = new Transform3D(new Basis(rotation), membraneCoords);
     }
 
     private void SetSpeedFactor(float speed)
@@ -183,12 +183,12 @@ public class CiliaComponent : ExternallyPositionedComponent
 
         if (animation != null)
         {
-            animation.PlaybackSpeed = speed;
+            animation.SpeedScale = speed;
         }
     }
 }
 
-public class CiliaComponentFactory : IOrganelleComponentFactory
+public partial class CiliaComponentFactory : IOrganelleComponentFactory
 {
     public IOrganelleComponent Create()
     {

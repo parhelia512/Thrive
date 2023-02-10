@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,7 +13,7 @@ using System.Linq;
 ///     TODO: this has a bit of microbe editor specific logic which should be generalized
 ///   </para>
 /// </remarks>
-public class EditorActionHistory<TAction> : ActionHistory<TAction>
+public partial class EditorActionHistory<TAction> : ActionHistory<TAction>
     where TAction : EditorAction
 {
     private List<EditorCombinableActionData>? cache;

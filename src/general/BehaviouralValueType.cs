@@ -1,4 +1,4 @@
-﻿/// <summary>
+/// <summary>
 ///   All behavioural values
 /// </summary>
 public enum BehaviouralValueType
