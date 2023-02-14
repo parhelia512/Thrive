@@ -16,9 +16,12 @@ using Environment = System.Environment;
 [DeserializedCallbackTarget]
 public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable
 {
+#pragma warning disable CA2213
     private HybridAudioPlayer engulfAudio = null!;
     private HybridAudioPlayer bindingAudio = null!;
     private HybridAudioPlayer movementAudio = null!;
+#pragma warning restore CA2213
+
     private List<AudioStreamPlayer3D> otherAudioPlayers = new();
     private List<AudioStreamPlayer> nonPositionalAudioPlayers = new();
 
@@ -76,10 +79,13 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
     [JsonProperty]
     private MicrobeAI? ai;
 
+#pragma warning disable CA2213
+
     /// <summary>
     ///   3d audio listener attached to this microbe if it is the player owned one.
     /// </summary>
     private Listener? listener;
+#pragma warning restore CA2213
 
     private MicrobeSpecies? cachedMicrobeSpecies;
     private EarlyMulticellularSpecies? cachedMulticellularSpecies;
@@ -787,10 +793,6 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
             GD.PrintErr("_Process was called for microbe that uses external processing");
             return;
         }
-
-        // https://github.com/Revolutionary-Games/Thrive/issues/1976
-        if (delta <= 0)
-            return;
 
         ProcessEarlyAsync(delta);
         ProcessSync(delta);

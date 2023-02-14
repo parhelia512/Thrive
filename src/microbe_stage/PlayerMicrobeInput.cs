@@ -13,14 +13,16 @@ using Godot;
 /// </remarks>
 public class PlayerMicrobeInput : PlayerInputBase
 {
+    /// <summary>
+    ///   A reference to the stage is kept to get to the player object and also the cloud spawning.
+    /// </summary>
     protected MicrobeStage Stage => stage as MicrobeStage ??
         throw new InvalidOperationException("Stage hasn't been set");
 
-    // TODO: when using controller movement this should be screen relative movement by default
     [RunOnAxis(new[] { "g_move_forward", "g_move_backwards" }, new[] { -1.0f, 1.0f })]
     [RunOnAxis(new[] { "g_move_left", "g_move_right" }, new[] { -1.0f, 1.0f })]
-    [RunOnAxisGroup(InvokeAlsoWithNoInput = true)]
-    public void OnMovement(float delta, float forwardMovement, float leftRightMovement)
+    [RunOnAxisGroup(InvokeAlsoWithNoInput = true, TrackInputMethod = true)]
+    public void OnMovement(float delta, float forwardMovement, float leftRightMovement, ActiveInputMethod inputMethod)
     {
         _ = delta;
         const float epsilon = 0.01f;
@@ -31,22 +33,58 @@ public class PlayerMicrobeInput : PlayerInputBase
             autoMove = false;
         }
 
-        if (Stage.Player != null)
+        var player = Stage.Player;
+        if (player != null)
         {
-            if (Stage.Player.State == Microbe.MicrobeState.Unbinding)
+            if (player.State == Microbe.MicrobeState.Unbinding)
             {
-                Stage.Player.MovementDirection = Vector3.Zero;
+                // It's probably fine to not update the tutorial state here with events as this state doesn't last
+                // that long and the player needs a pretty long time to get so far in the game as to get here
+                player.MovementDirection = Vector3.Zero;
                 return;
+            }
+
+            bool screenRelative = false;
+            var settingValue = Settings.Instance.TwoDimensionalMovement.Value;
+
+            if (settingValue == TwoDimensionalMovementMode.ScreenRelative ||
+                (settingValue == TwoDimensionalMovementMode.Automatic && inputMethod == ActiveInputMethod.Controller))
+            {
+                screenRelative = true;
             }
 
             var movement = new Vector3(leftRightMovement, 0, forwardMovement);
 
-            // TODO: change this line to only normalize when length exceeds 1 to make slowly moving with a controller
-            // work
-            var direction = autoMove ? new Vector3(0, 0, -1) : movement.Normalized();
+            if (inputMethod == ActiveInputMethod.Controller)
+            {
+                // TODO: look direction for controller input  https://github.com/Revolutionary-Games/Thrive/issues/4034
+                player.LookAtPoint = player.GlobalTranslation + new Vector3(0, 0, -10);
+            }
+            else
+            {
+                player.LookAtPoint = Stage.Camera.CursorWorldPos;
+            }
 
-            Stage.Player.MovementDirection = direction;
-            Stage.Player.LookAtPoint = Stage.Camera.CursorWorldPos;
+            // Rotate the inputs when we want to use screen relative movement to make it happen
+            if (screenRelative)
+            {
+                // Rotate the opposite of the player orientation to get back to screen
+                movement = player.GlobalTransform.basis.Quat().Inverse().Xform(movement);
+            }
+
+            if (autoMove)
+            {
+                player.MovementDirection = new Vector3(0, 0, -1);
+            }
+            else
+            {
+                // We only normalize when the length is over to make moving slowly with a controller work
+                player.MovementDirection = movement.Length() > 1 ? movement.Normalized() : movement;
+            }
+
+            Stage.TutorialState.SendEvent(TutorialEventType.MicrobePlayerMovement,
+                new MicrobeMovementEventArgs(screenRelative, player.MovementDirection,
+                    player.LookAtPoint - player.GlobalTranslation), this);
         }
     }
 

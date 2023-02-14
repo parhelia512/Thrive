@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 [SceneLoadedClass("res://src/microbe_stage/editor/CellEditorComponent.tscn")]
 public partial class CellEditorComponent :
     HexEditorComponentBase<ICellEditorData, CombinedEditorAction, EditorAction, OrganelleTemplate>,
-    IGodotEarlyNodeResolve
+    ICellEditorComponent, IGodotEarlyNodeResolve
 {
     [Export]
     public bool IsMulticellularEditor;
@@ -21,7 +21,7 @@ public partial class CellEditorComponent :
     public bool IsMicrobialArenaEditor;
 
     [Export]
-    public NodePath TopPanelPath = null!;
+    public NodePath? TopPanelPath;
 
     [Export]
     public NodePath DayButtonPath = null!;
@@ -31,6 +31,9 @@ public partial class CellEditorComponent :
 
     [Export]
     public NodePath AverageLightButtonPath = null!;
+
+    [Export]
+    public NodePath TabButtonsPath = null!;
 
     [Export]
     public NodePath StructureTabButtonPath = null!;
@@ -140,6 +143,8 @@ public partial class CellEditorComponent :
     [Export]
     public NodePath OrganelleUpgradeGUIPath = null!;
 
+#pragma warning disable CA2213
+
     // Light level controls
     private Control topPanel = null!;
     private Button dayButton = null!;
@@ -221,6 +226,9 @@ public partial class CellEditorComponent :
 
     private PackedScene organelleSelectionButtonScene = null!;
 
+    private PackedScene microbeScene = null!;
+#pragma warning restore CA2213
+
     private OrganelleDefinition protoplasm = null!;
     private OrganelleDefinition nucleus = null!;
     private OrganelleDefinition bindingAgent = null!;
@@ -265,15 +273,16 @@ public partial class CellEditorComponent :
     [JsonProperty]
     private string newName = "unset";
 
+#pragma warning disable CA2213
+
     /// <summary>
     ///   We're taking advantage of the available membrane and organelle system already present in
     ///   the microbe class for the cell preview.
     /// </summary>
     private Microbe? previewMicrobe;
+#pragma warning restore CA2213
 
     private MicrobeSpecies? previewMicrobeSpecies;
-
-    private PackedScene microbeScene = null!;
 
     [JsonProperty]
     private Color colour;
@@ -499,7 +508,12 @@ public partial class CellEditorComponent :
 
         ResolveNodeReferences();
 
-        // GUI setup part
+        // This works only after this is attached to the scene tree
+        var tabButtons = GetNode<TabButtons>(TabButtonsPath);
+        structureTabButton = GetNode<Button>(tabButtons.GetAdjustedButtonPath(TabButtonsPath, StructureTabButtonPath));
+        appearanceTabButton =
+            GetNode<Button>(tabButtons.GetAdjustedButtonPath(TabButtonsPath, AppearanceTabButtonPath));
+        behaviourTabButton = GetNode<Button>(tabButtons.GetAdjustedButtonPath(TabButtonsPath, BehaviourTabButtonPath));
 
         // Hidden in the Godot editor to make selecting other things easier
         organelleUpgradeGUI.Visible = true;
@@ -623,12 +637,9 @@ public partial class CellEditorComponent :
         averageLightButton = GetNode<Button>(AverageLightButtonPath);
 
         structureTab = GetNode<PanelContainer>(StructureTabPath);
-        structureTabButton = GetNode<Button>(StructureTabButtonPath);
 
         appearanceTab = GetNode<PanelContainer>(AppearanceTabPath);
-        appearanceTabButton = GetNode<Button>(AppearanceTabButtonPath);
 
-        behaviourTabButton = GetNode<Button>(BehaviourTabButtonPath);
         behaviourEditor = GetNode<BehaviourEditorSubComponent>(BehaviourTabPath);
 
         partsSelectionContainer = GetNode<VBoxContainer>(PartsSelectionContainerPath);
@@ -1090,6 +1101,68 @@ public partial class CellEditorComponent :
         UpdatePatchDependentBalanceData();
     }
 
+    public bool ApplyOrganelleUpgrade(OrganelleUpgradeActionData actionData)
+    {
+        actionData.CostMultiplier = CostMultiplier;
+
+        return EnqueueAction(new CombinedEditorAction(
+            new SingleEditorAction<OrganelleUpgradeActionData>(DoOrganelleUpgradeAction, UndoOrganelleUpgradeAction,
+                actionData)));
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            if (TopPanelPath != null)
+            {
+                TopPanelPath.Dispose();
+                DayButtonPath.Dispose();
+                NightButtonPath.Dispose();
+                AverageLightButtonPath.Dispose();
+                TabButtonsPath.Dispose();
+                StructureTabButtonPath.Dispose();
+                AppearanceTabButtonPath.Dispose();
+                BehaviourTabButtonPath.Dispose();
+                StructureTabPath.Dispose();
+                AppearanceTabPath.Dispose();
+                BehaviourTabPath.Dispose();
+                PartsSelectionContainerPath.Dispose();
+                MembraneTypeSelectionPath.Dispose();
+                SizeLabelPath.Dispose();
+                OrganismStatisticsPath.Dispose();
+                SpeedLabelPath.Dispose();
+                RotationSpeedLabelPath.Dispose();
+                HpLabelPath.Dispose();
+                StorageLabelPath.Dispose();
+                DigestionSpeedLabelPath.Dispose();
+                DigestionEfficiencyLabelPath.Dispose();
+                DigestionEfficiencyDetailsPath.Dispose();
+                GenerationLabelPath.Dispose();
+                AutoEvoPredictionPanelPath.Dispose();
+                TotalPopulationLabelPath.Dispose();
+                AutoEvoPredictionFailedLabelPath.Dispose();
+                WorstPatchLabelPath.Dispose();
+                BestPatchLabelPath.Dispose();
+                MembraneColorPickerPath.Dispose();
+                ATPBalanceLabelPath.Dispose();
+                ATPProductionLabelPath.Dispose();
+                ATPConsumptionLabelPath.Dispose();
+                ATPProductionBarPath.Dispose();
+                ATPConsumptionBarPath.Dispose();
+                RigiditySliderPath.Dispose();
+                NegativeAtpPopupPath.Dispose();
+                OrganelleMenuPath.Dispose();
+                CompoundBalancePath.Dispose();
+                AutoEvoPredictionExplanationPopupPath.Dispose();
+                AutoEvoPredictionExplanationLabelPath.Dispose();
+                OrganelleUpgradeGUIPath.Dispose();
+            }
+        }
+
+        base.Dispose(disposing);
+    }
+
     protected override int CalculateCurrentActionCost()
     {
         if (string.IsNullOrEmpty(ActiveActionName) || !Editor.ShowHover)
@@ -1303,7 +1376,7 @@ public partial class CellEditorComponent :
         organelleMenu.EnableMoveOption = MicrobeSize > 1;
 
         // Modify / upgrade possible when defined on the primary organelle definition
-        if (count > 0 && !string.IsNullOrEmpty(organelles.First().Definition.UpgradeGUI))
+        if (count > 0 && IsUpgradingPossibleFor(organelles.First().Definition))
         {
             organelleMenu.EnableModifyOption = true;
         }
@@ -1311,6 +1384,11 @@ public partial class CellEditorComponent :
         {
             organelleMenu.EnableModifyOption = false;
         }
+    }
+
+    private bool IsUpgradingPossibleFor(OrganelleDefinition organelleDefinition)
+    {
+        return !string.IsNullOrEmpty(organelleDefinition.UpgradeGUI) || organelleDefinition.AvailableUpgrades.Count > 0;
     }
 
     /// <summary>
@@ -1387,14 +1465,16 @@ public partial class CellEditorComponent :
                 }
                 else
                 {
-                    var replacedHex = editedMicrobeOrganelles.GetElementAt(hex);
                     var data = new OrganellePlacementActionData(organelle, hex, orientation)
                     {
                         CostMultiplier = CostMultiplier,
                     };
 
-                    if (replacedHex != null)
-                        data.ReplacedCytoplasm = new List<OrganelleTemplate> { replacedHex };
+                    var replacedHexes = organelle.RotatedHexes
+                        .Select(h => editedMicrobeOrganelles.GetElementAt(hex + h)).WhereNotNull().ToList();
+
+                    if (replacedHexes.Count > 0)
+                        data.ReplacedCytoplasm = replacedHexes;
 
                     action = new SingleEditorAction<OrganellePlacementActionData>(DoOrganellePlaceAction,
                         UndoOrganellePlaceAction, data);
@@ -1799,11 +1879,7 @@ public partial class CellEditorComponent :
 
         // Send to gui current status of cell
         UpdateSize(MicrobeHexSize);
-        UpdateSpeed(CalculateSpeed());
-        UpdateRotationSpeed(CalculateRotationSpeed());
-        UpdateStorage(CalculateStorage());
-        UpdateTotalDigestionSpeed(CalculateTotalDigestionSpeed());
-        UpdateDigestionEfficiencies(CalculateDigestionEfficiencies());
+        UpdateStats();
 
         UpdateCellVisualization();
 
@@ -1907,13 +1983,13 @@ public partial class CellEditorComponent :
         var targetOrganelle = organelleMenu.SelectedOrganelles.First();
         var upgradeGUI = targetOrganelle.Definition.UpgradeGUI;
 
-        if (string.IsNullOrEmpty(upgradeGUI))
+        if (!IsUpgradingPossibleFor(targetOrganelle.Definition))
         {
-            GD.PrintErr("Attempted to modify an organelle with no upgrade GUI known");
+            GD.PrintErr("Attempted to modify an organelle that can't be upgraded");
             return;
         }
 
-        organelleUpgradeGUI.OpenForOrganelle(targetOrganelle, upgradeGUI!, Editor);
+        organelleUpgradeGUI.OpenForOrganelle(targetOrganelle, upgradeGUI ?? string.Empty, this);
     }
 
     /// <summary>

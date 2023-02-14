@@ -14,16 +14,18 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
     where TPlayer : class
 {
     [Export]
-    public NodePath PauseMenuPath = null!;
+    public NodePath? PauseMenuPath;
 
     [Export]
     public NodePath HUDRootPath = null!;
 
+#pragma warning disable CA2213
     protected Node world = null!;
     protected Node rootOfDynamicallySpawned = null!;
     protected DirectionalLight worldLight = null!;
     protected PauseMenu pauseMenu = null!;
     protected Control hudRoot = null!;
+#pragma warning restore CA2213
 
     [JsonProperty]
     [AssignOnlyChildItemsOnDeserialize]
@@ -378,6 +380,20 @@ public abstract class StageBase<TPlayer> : NodeWithInput, IStage, IGodotEarlyNod
     {
         return GameWorld.Map.GetSpeciesGlobalGameplayPopulation(CurrentGame!.GameWorld.PlayerSpecies) <= 0 &&
             !CurrentGame.FreeBuild;
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            if (PauseMenuPath != null)
+            {
+                PauseMenuPath.Dispose();
+                HUDRootPath.Dispose();
+            }
+        }
+
+        base.Dispose(disposing);
     }
 
     /// <summary>

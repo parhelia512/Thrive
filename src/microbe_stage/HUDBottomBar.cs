@@ -3,7 +3,7 @@
 public class HUDBottomBar : HBoxContainer
 {
     [Export]
-    public NodePath PauseButtonPath = null!;
+    public NodePath? PauseButtonPath;
 
     [Export]
     public NodePath CompoundsButtonPath = null!;
@@ -17,12 +17,13 @@ public class HUDBottomBar : HBoxContainer
     [Export]
     public NodePath ChatButtonPath = null!;
 
+#pragma warning disable CA2213
     private PlayButton? pauseButton;
-
     private TextureButton? compoundsButton;
     private TextureButton? environmentButton;
     private TextureButton? processPanelButton;
     private TextureButton? chatButton;
+#pragma warning restore CA2213
 
     private bool compoundsPressed = true;
     private bool environmentPressed = true;
@@ -161,6 +162,23 @@ public class HUDBottomBar : HBoxContainer
         UpdateProcessPanelButton();
         UpdatePauseButton();
         UpdateChatButton();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            if (PauseButtonPath != null)
+            {
+                PauseButtonPath.Dispose();
+                CompoundsButtonPath.Dispose();
+                EnvironmentButtonPath.Dispose();
+                ProcessPanelButtonPath.Dispose();
+                ChatButtonPath.Dispose();
+            }
+        }
+
+        base.Dispose(disposing);
     }
 
     private void MenuPressed()
