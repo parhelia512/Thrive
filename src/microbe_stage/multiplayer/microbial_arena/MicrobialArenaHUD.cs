@@ -361,16 +361,18 @@ public class MicrobialArenaHUD : MultiplayerStageHUDBase<MicrobialArena>
 
     private void UpdateGameTime()
     {
+        var peer = NetworkManager.Instance;
+
         gameTime.Text = stage!.IsGameOver() ?
             TranslationServer.Translate("GAME_OVER") :
             TranslationServer.Translate("VALUE_SLASH_MAX_VALUE").FormatSafe(
-                NetworkManager.Instance.GameTimeFormatted,
-                StringUtils.FormatShortMinutesSeconds(NetworkManager.Instance.Settings!.SessionLength, 0));
+                peer.GameTimeFormatted, StringUtils.FormatShortMinutesSeconds(
+                    peer.ServerSettings.GetVar<uint>("SessionLength"), 0));
     }
 
     private void UpdateMinimap()
     {
-        map.MapRadius = stage!.Settings.ArenaRadius;
+        map.MapRadius = stage!.Settings.GetVar<int>("Radius");
         map.SpawnCoordinates = stage.SpawnCoordinates;
 
         if (stage.Player?.IsInsideTree() == true)

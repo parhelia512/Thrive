@@ -8,7 +8,6 @@
 [ext_resource path="res://src/microbe_stage/editor/EditorCommonBottomLeftButtons.tscn" type="PackedScene" id=6]
 [ext_resource path="res://src/networking/gui/ChatBox.tscn" type="PackedScene" id=7]
 
-
 [node name="MicrobialArenaEditor" type="Node"]
 script = ExtResource( 1 )
 PauseMenuPath = NodePath("PauseMenu")
@@ -36,11 +35,13 @@ CellEditorOnly = true
 
 [node name="ChatBox" parent="MicrobialArenaEditorGUI" instance=ExtResource( 7 )]
 anchor_left = 1.0
+anchor_top = 0.0
 anchor_right = 1.0
+anchor_bottom = 0.0
 margin_left = -285.0
-margin_top = -318.0
+margin_top = 402.0
 margin_right = -10.0
-margin_bottom = -159.0
+margin_bottom = 561.0
 
 [node name="PauseMenu" parent="." instance=ExtResource( 2 )]
 visible = true

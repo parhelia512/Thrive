@@ -79,6 +79,10 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
         }
     }
 
+    public void NetworkTick(float delta)
+    {
+    }
+
     public void NetworkSerialize(PackedBytesBuffer buffer)
     {
         // For now just hope everything sync nicely by themselves on the client side.
@@ -98,9 +102,9 @@ public class CloudBlob : Spatial, INetworkEntity, ISpawned, ITimedLife
         {
             chunk.InitialAmount = clouds!.AmountAvailable(Compound, chunk.Position, 1.0f);
 
-            var packed = new PackedBytesBuffer();
-            chunk.NetworkSerialize(packed);
-            buffer.Write(packed);
+            var chunkMsg = new PackedBytesBuffer();
+            chunk.NetworkSerialize(chunkMsg);
+            buffer.Write(chunkMsg);
         }
 
         buffer.Write(GlobalTranslation.x);

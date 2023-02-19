@@ -19,7 +19,7 @@ public enum NetworkPlayerStatus
     Active,
 
     /// <summary>
-    ///   Player is releasing the world and their data (but not the session information).
+    ///   Player is releasing the world and its data (but not the session information).
     /// </summary>
     Leaving,
 }

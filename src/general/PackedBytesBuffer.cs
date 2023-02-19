@@ -63,7 +63,7 @@ public class PackedBytesBuffer
     public int Length => buffer.Count;
 
     /// <summary>
-    ///   Writes a byte array to the buffer. Advances the position by the array's length.
+    ///   Writes a byte array to the buffer. Advances the position by that array's length.
     /// </summary>
     public void Write(byte[] buffer)
     {
@@ -72,7 +72,8 @@ public class PackedBytesBuffer
     }
 
     /// <summary>
-    ///   Writes a packed byte array to the buffer. Advances the position by the array's length + 4 byte header.
+    ///   Writes a <see cref="PackedBytesBuffer"/> to the buffer. Advances the position by that buffer's
+    ///   length + 4 byte header.
     /// </summary>
     /// <remarks>
     ///   <para>

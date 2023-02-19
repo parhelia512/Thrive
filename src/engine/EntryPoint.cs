@@ -13,7 +13,8 @@ public class EntryPoint : Node
         {
             GD.Print("Running as server");
 
-            NetworkManager.Instance.CreateServer(new ServerSettings { Address = "*" });
+            // TODO: Read from server configuration file
+            NetworkManager.Instance.CreateServer(new Vars());
             NetworkManager.Instance.Join();
         }
         else

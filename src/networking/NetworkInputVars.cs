@@ -3,18 +3,16 @@ using Godot;
 
 public struct NetworkInputVars : INetworkSerializable, IEquatable<NetworkInputVars>
 {
-    public ushort Id { get; set; }
-
     public Vector3 WorldLookAtPoint { get; set; }
 
     /// <summary>
     ///   We know that movement direction will always be in the range of (1, 1, 1) so we can just encode each axis plus
-    ///   sign bits in 6 bits.
+    ///   sign bits all in the space of 6 bits.
     /// </summary>
     public byte MovementDirection { get; set; }
 
     /// <summary>
-    ///   Bitmask of inputs.
+    ///   Bitmask of true/false value inputs. Maximum of 255 flags. TODO: Turn this into array?
     /// </summary>
     public byte Bools { get; set; }
 
@@ -55,9 +53,8 @@ public struct NetworkInputVars : INetworkSerializable, IEquatable<NetworkInputVa
 
     public void NetworkSerialize(PackedBytesBuffer buffer)
     {
-        // 16 bytes
+        // 14 bytes
 
-        buffer.Write(Id);
         buffer.Write(WorldLookAtPoint);
         buffer.Write(MovementDirection);
         buffer.Write(Bools);
@@ -65,7 +62,6 @@ public struct NetworkInputVars : INetworkSerializable, IEquatable<NetworkInputVa
 
     public void NetworkDeserialize(PackedBytesBuffer buffer)
     {
-        Id = buffer.ReadUInt16();
         WorldLookAtPoint = buffer.ReadVector3();
         MovementDirection = buffer.ReadByte();
         Bools = buffer.ReadByte();
@@ -86,7 +82,6 @@ public struct NetworkInputVars : INetworkSerializable, IEquatable<NetworkInputVa
     public override int GetHashCode()
     {
         int hashCode = -1311921306;
-        hashCode = hashCode * -1521134295 + Id.GetHashCode();
         hashCode = hashCode * -1521134295 + WorldLookAtPoint.GetHashCode();
         hashCode = hashCode * -1521134295 + MovementDirection.GetHashCode();
         hashCode = hashCode * -1521134295 + Bools.GetHashCode();

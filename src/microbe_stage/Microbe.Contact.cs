@@ -410,7 +410,7 @@ public partial class Microbe
             Hitpoints = 0.0f;
             Kill();
 
-            if (Dead && attackerPeerId.HasValue && NetworkManager.Instance.IsNetworked)
+            if (Dead && attackerPeerId.HasValue && NetworkManager.Instance.IsMultiplayer)
                 OnKilledByAnotherPlayer?.Invoke(attackerPeerId.Value, PeerId, source);
         }
     }
@@ -431,6 +431,10 @@ public partial class Microbe
     /// </summary>
     public bool CanEngulf(IEngulfable target)
     {
+        // Clients shouldn't be allowed to engulf to avoid weird problems (conflicts with server state)
+        if (NetworkManager.Instance.IsClient)
+            return false;
+
         if (target.PhagocytosisStep != PhagocytosisPhase.None)
             return false;
 
@@ -705,8 +709,6 @@ public partial class Microbe
 
             ai?.ResetAI();
 
-            Mode = ModeEnum.Rigid;
-
             return;
         }
 
@@ -745,11 +747,6 @@ public partial class Microbe
 
             OnIGotAddedToColony();
 
-            if (Colony.Master != this)
-            {
-                Mode = ModeEnum.Static;
-            }
-
             ReParentShapes(Colony.Master, GetOffsetRelativeToMaster());
         }
         else
@@ -771,6 +768,102 @@ public partial class Microbe
         GameWorld.AlterSpeciesPopulationInCurrentPatch(Species,
             Constants.CREATURE_KILL_POPULATION_GAIN,
             TranslationServer.Translate("SUCCESSFUL_KILL"));
+    }
+
+    protected override void OnContactBegin(Node body, int bodyShape, int localShape)
+    {
+        var thisOwnerId = ShapeFindOwner(localShape);
+        var thisMicrobe = GetMicrobeFromShape(localShape);
+
+        // localShape is invalid. This can happen during re-parenting
+        if (thisMicrobe == null)
+            return;
+
+        if (body is Microbe colonyLeader)
+        {
+            var touchedOwnerId = colonyLeader.ShapeFindOwner(bodyShape);
+            var touchedMicrobe = colonyLeader.GetMicrobeFromShape(bodyShape);
+
+            // bodyShape is invalid. This can happen during re-parenting
+            // Disabled this warning here as touchedMicrobe is used so diversely that it's much more convenient to
+            // do null check just once
+            // ReSharper disable once UseNullPropagationWhenPossible
+            if (touchedMicrobe == null)
+                return;
+
+            // TODO: does this need to check for disposed exception?
+            // https://github.com/Revolutionary-Games/Thrive/issues/2504
+            if (touchedMicrobe.Dead || (Colony != null && Colony == touchedMicrobe.Colony))
+                return;
+
+            bool otherIsPilus = touchedMicrobe.IsPilus(touchedOwnerId);
+            bool oursIsPilus = thisMicrobe.IsPilus(thisOwnerId);
+
+            // Pilus logic
+            if (otherIsPilus && oursIsPilus)
+            {
+                // Pilus on pilus doesn't deal damage and you can't engulf
+                return;
+            }
+
+            if (otherIsPilus || oursIsPilus)
+            {
+                // Us attacking the other microbe, or it is attacking us
+
+                // Disallow cannibalism
+                if (touchedMicrobe.Species == thisMicrobe.Species)
+                    return;
+
+                var target = otherIsPilus ? thisMicrobe : touchedMicrobe;
+                var inflicter = otherIsPilus ? touchedMicrobe : thisMicrobe;
+
+                Invoke.Instance.Perform(() => target.Damage(Constants.PILUS_BASE_DAMAGE, "pilus", inflicter.PeerId));
+                return;
+            }
+
+            // Pili don't stop engulfing
+            if (thisMicrobe.touchedEntities.Add(touchedMicrobe))
+            {
+                Invoke.Instance.Perform(() =>
+                {
+                    thisMicrobe.CheckStartEngulfingOnCandidate(touchedMicrobe);
+                    thisMicrobe.CheckBinding();
+                });
+            }
+
+            // Play bump sound if certain total collision impulse is reached (adjusted by mass)
+            if (thisMicrobe.collisionForce / Mass > Constants.CONTACT_IMPULSE_TO_BUMP_SOUND)
+            {
+                Invoke.Instance.Perform(() =>
+                    thisMicrobe.PlaySoundEffect("res://assets/sounds/soundeffects/microbe-collision.ogg"));
+            }
+        }
+        else if (body is IEngulfable engulfable)
+        {
+            if (thisMicrobe.touchedEntities.Add(engulfable))
+            {
+                thisMicrobe.CheckStartEngulfingOnCandidate(engulfable);
+            }
+        }
+    }
+
+    protected override void OnContactEnd(Node body, int bodyShape, int localShape)
+    {
+        _ = bodyShape;
+
+        if (body is IEngulfable engulfable)
+        {
+            // GetMicrobeFromShape returns null when it was provided an invalid shape id.
+            // This can happen when re-parenting is in progress.
+            // https://github.com/Revolutionary-Games/Thrive/issues/2504
+            var hitMicrobe = GetMicrobeFromShape(localShape) ?? this;
+
+            // TODO: should this also check for pilus before removing the collision?
+            hitMicrobe.touchedEntities.Remove(engulfable);
+
+            if (engulfable.PhagocytosisStep == PhagocytosisPhase.None)
+                hitMicrobe.attemptingToEngulf.Remove(engulfable);
+        }
     }
 
     /// <summary>
@@ -1153,13 +1246,6 @@ public partial class Microbe
     /// </summary>
     private void HandleEngulfing(float delta)
     {
-        if (NetworkManager.Instance.IsClient)
-        {
-            ProcessEngulfedObjects(delta);
-            HandleEngulfFeedback(delta);
-            return;
-        }
-
         if (State == MicrobeState.Engulf)
         {
             // Drain atp
@@ -1175,7 +1261,36 @@ public partial class Microbe
             attemptingToEngulf.Clear();
         }
 
-        HandleEngulfFeedback(delta);
+        // Play sound
+        if (State == MicrobeState.Engulf)
+        {
+            if (!engulfAudio.Playing)
+                engulfAudio.Play();
+
+            // To balance loudness, here the engulfment audio's max volume is reduced to 0.6 in linear volume
+
+            if (engulfAudio.Volume < 0.6f)
+            {
+                engulfAudio.Volume += delta;
+            }
+            else if (engulfAudio.Volume >= 0.6f)
+            {
+                engulfAudio.Volume = 0.6f;
+            }
+
+            // Flash the membrane blue.
+            Flash(1, new Color(0.2f, 0.5f, 1.0f, 0.5f));
+        }
+        else
+        {
+            if (engulfAudio.Playing && engulfAudio.Volume > 0)
+            {
+                engulfAudio.Volume -= delta;
+
+                if (engulfAudio.Volume <= 0)
+                    engulfAudio.Stop();
+            }
+        }
 
         // Movement modifier
         if (State == MicrobeState.Engulf)
@@ -1198,7 +1313,62 @@ public partial class Microbe
             }
         }
 
-        ProcessEngulfedObjects(delta);
+        for (int i = engulfedObjects.Count - 1; i >= 0; --i)
+        {
+            var engulfedObject = engulfedObjects[i];
+
+            var engulfable = engulfedObject.Object.Value;
+
+            // ReSharper disable once UseNullPropagation
+            if (engulfable == null)
+                continue;
+
+            if (engulfable is not PhysicsBody body)
+            {
+                attemptingToEngulf.Remove(engulfable);
+                engulfedObjects.Remove(engulfedObject);
+                continue;
+            }
+
+            if (engulfable.PhagocytosisStep == PhagocytosisPhase.Digested)
+            {
+                engulfedObject.TargetValuesToLerp = (null, null, Vector3.One * Mathf.Epsilon);
+                StartBulkTransport(engulfedObject, 1.5f, false);
+            }
+
+            if (!engulfedObject.Interpolate)
+                continue;
+
+            if (AnimateBulkTransport(delta, engulfedObject))
+            {
+                switch (engulfable.PhagocytosisStep)
+                {
+                    case PhagocytosisPhase.Ingestion:
+                        CompleteIngestion(engulfedObject);
+                        break;
+                    case PhagocytosisPhase.Digested:
+                        if (NetworkManager.Instance.IsServer)
+                            engulfable.DestroyAndQueueFree();
+
+                        engulfedObjects.Remove(engulfedObject);
+                        break;
+                    case PhagocytosisPhase.Exocytosis:
+                        engulfedObject.Phagosome.Value?.Hide();
+                        engulfedObject.TargetValuesToLerp = (null, engulfedObject.OriginalScale, null);
+                        StartBulkTransport(engulfedObject, 1.0f);
+                        engulfable.PhagocytosisStep = PhagocytosisPhase.Ejection;
+                        continue;
+                    case PhagocytosisPhase.Ejection:
+                        CompleteEjection(engulfedObject);
+                        break;
+                }
+            }
+        }
+
+        foreach (var expelled in expelledObjects)
+            expelled.TimeElapsedSinceEjection += delta;
+
+        expelledObjects.RemoveAll(e => e.TimeElapsedSinceEjection >= Constants.ENGULF_EJECTED_COOLDOWN);
 
         /* Membrane engulf stretch debug code
         if (state == MicrobeState.Engulf)
@@ -1260,7 +1430,7 @@ public partial class Microbe
 
         if (Membrane.DissolveEffectValue >= 1)
         {
-            if (NetworkManager.Instance.IsNetworked && !networkDeathInvoked && OnNetworkDeathFinished != null)
+            if (NetworkManager.Instance.IsMultiplayer && !networkDeathInvoked && OnNetworkDeathFinished != null)
             {
                 OnNetworkDeathFinished.Invoke(PeerId);
 
@@ -1314,105 +1484,6 @@ public partial class Microbe
         GlobalTransform = pos;
     }
 
-    private void OnContactBegin(int bodyID, Node body, int bodyShape, int localShape)
-    {
-        _ = bodyID;
-
-        var thisOwnerId = ShapeFindOwner(localShape);
-        var thisMicrobe = GetMicrobeFromShape(localShape);
-
-        // localShape is invalid. This can happen during re-parenting
-        if (thisMicrobe == null)
-            return;
-
-        if (body is Microbe colonyLeader)
-        {
-            var touchedOwnerId = colonyLeader.ShapeFindOwner(bodyShape);
-            var touchedMicrobe = colonyLeader.GetMicrobeFromShape(bodyShape);
-
-            // bodyShape is invalid. This can happen during re-parenting
-            // Disabled this warning here as touchedMicrobe is used so diversely that it's much more convenient to
-            // do null check just once
-            // ReSharper disable once UseNullPropagationWhenPossible
-            if (touchedMicrobe == null)
-                return;
-
-            // TODO: does this need to check for disposed exception?
-            // https://github.com/Revolutionary-Games/Thrive/issues/2504
-            if (touchedMicrobe.Dead || (Colony != null && Colony == touchedMicrobe.Colony))
-                return;
-
-            bool otherIsPilus = touchedMicrobe.IsPilus(touchedOwnerId);
-            bool oursIsPilus = thisMicrobe.IsPilus(thisOwnerId);
-
-            // Pilus logic
-            if (otherIsPilus && oursIsPilus)
-            {
-                // Pilus on pilus doesn't deal damage and you can't engulf
-                return;
-            }
-
-            if (otherIsPilus || oursIsPilus)
-            {
-                // Us attacking the other microbe, or it is attacking us
-
-                // Disallow cannibalism
-                if (touchedMicrobe.Species == thisMicrobe.Species)
-                    return;
-
-                var target = otherIsPilus ? thisMicrobe : touchedMicrobe;
-                var inflicter = otherIsPilus ? touchedMicrobe : thisMicrobe;
-
-                Invoke.Instance.Perform(() => target.Damage(Constants.PILUS_BASE_DAMAGE, "pilus", inflicter.PeerId));
-                return;
-            }
-
-            // Pili don't stop engulfing
-            if (thisMicrobe.touchedEntities.Add(touchedMicrobe))
-            {
-                Invoke.Instance.Perform(() =>
-                {
-                    thisMicrobe.CheckStartEngulfingOnCandidate(touchedMicrobe);
-                    thisMicrobe.CheckBinding();
-                });
-            }
-
-            // Play bump sound if certain total collision impulse is reached (adjusted by mass)
-            if (thisMicrobe.collisionForce / Mass > Constants.CONTACT_IMPULSE_TO_BUMP_SOUND)
-            {
-                Invoke.Instance.Perform(() =>
-                    thisMicrobe.PlaySoundEffect("res://assets/sounds/soundeffects/microbe-collision.ogg"));
-            }
-        }
-        else if (body is IEngulfable engulfable)
-        {
-            if (thisMicrobe.touchedEntities.Add(engulfable))
-            {
-                thisMicrobe.CheckStartEngulfingOnCandidate(engulfable);
-            }
-        }
-    }
-
-    private void OnContactEnd(int bodyID, Node body, int bodyShape, int localShape)
-    {
-        _ = bodyID;
-        _ = bodyShape;
-
-        if (body is IEngulfable engulfable)
-        {
-            // GetMicrobeFromShape returns null when it was provided an invalid shape id.
-            // This can happen when re-parenting is in progress.
-            // https://github.com/Revolutionary-Games/Thrive/issues/2504
-            var hitMicrobe = GetMicrobeFromShape(localShape) ?? this;
-
-            // TODO: should this also check for pilus before removing the collision?
-            hitMicrobe.touchedEntities.Remove(engulfable);
-
-            if (engulfable.PhagocytosisStep == PhagocytosisPhase.None)
-                hitMicrobe.attemptingToEngulf.Remove(engulfable);
-        }
-    }
-
     /*
     private void OnBodyEnteredPseudopodRange(Node body)
     {
@@ -1443,10 +1514,9 @@ public partial class Microbe
         if (target.PhagocytosisStep != PhagocytosisPhase.None)
             return;
 
-        var body = target as RigidBody;
-        if (body == null)
+        if (target is not PhysicsBody body)
         {
-            // Engulfable must be of rigidbody type to be ingested
+            // Can't operate on non physics bodies.
             return;
         }
 
@@ -1540,10 +1610,9 @@ public partial class Microbe
 
         attemptingToEngulf.Remove(target);
 
-        var body = target as RigidBody;
-        if (body == null)
+        if (target is not PhysicsBody body)
         {
-            // Engulfable must be of rigidbody type to be ejected
+            // Can't operate on non physics bodies.
             return;
         }
 
@@ -1713,7 +1782,8 @@ public partial class Microbe
         if (engulfed.Object.Value == null || engulfed.Phagosome.Value == null)
             return false;
 
-        var body = (RigidBody)engulfed.Object.Value;
+        // Ignore possible invalid cast as the engulfed node should be a physics body anyway
+        var body = (PhysicsBody)engulfed.Object.Value;
 
         if (engulfed.AnimationTimeElapsed < engulfed.LerpDuration)
         {
@@ -1771,7 +1841,9 @@ public partial class Microbe
         if (resetElapsedTime)
             engulfedObject.AnimationTimeElapsed = 0;
 
-        var body = (RigidBody)engulfedObject.Object.Value;
+        // Ignore possible invalid cast as the engulfed node should be a physics body anyway
+        var body = (PhysicsBody)engulfedObject.Object.Value;
+
         engulfedObject.InitialValuesToLerp = (body.Translation, body.Scale, engulfedObject.Phagosome.Value.Scale);
         engulfedObject.LerpDuration = duration;
         engulfedObject.Interpolate = true;
@@ -1784,103 +1856,6 @@ public partial class Microbe
     {
         engulfedObject.AnimationTimeElapsed = 0;
         engulfedObject.Interpolate = false;
-    }
-
-    private void ProcessEngulfedObjects(float delta)
-    {
-        for (int i = engulfedObjects.Count - 1; i >= 0; --i)
-        {
-            var engulfedObject = engulfedObjects[i];
-
-            var engulfable = engulfedObject.Object.Value;
-
-            // ReSharper disable once UseNullPropagation
-            if (engulfable == null)
-                continue;
-
-            var body = engulfable as RigidBody;
-            if (body == null)
-            {
-                attemptingToEngulf.Remove(engulfable);
-                engulfedObjects.Remove(engulfedObject);
-                continue;
-            }
-
-            body.Mode = ModeEnum.Static;
-
-            if (engulfable.PhagocytosisStep == PhagocytosisPhase.Digested)
-            {
-                engulfedObject.TargetValuesToLerp = (null, null, Vector3.One * Mathf.Epsilon);
-                StartBulkTransport(engulfedObject, 1.5f, false);
-            }
-
-            if (!engulfedObject.Interpolate)
-                continue;
-
-            if (AnimateBulkTransport(delta, engulfedObject))
-            {
-                switch (engulfable.PhagocytosisStep)
-                {
-                    case PhagocytosisPhase.Ingestion:
-                        CompleteIngestion(engulfedObject);
-                        break;
-                    case PhagocytosisPhase.Digested:
-                        if (NetworkManager.Instance.IsServer)
-                            engulfable.DestroyAndQueueFree();
-
-                        engulfedObjects.Remove(engulfedObject);
-                        break;
-                    case PhagocytosisPhase.Exocytosis:
-                        engulfedObject.Phagosome.Value?.Hide();
-                        engulfedObject.TargetValuesToLerp = (null, engulfedObject.OriginalScale, null);
-                        StartBulkTransport(engulfedObject, 1.0f);
-                        engulfable.PhagocytosisStep = PhagocytosisPhase.Ejection;
-                        continue;
-                    case PhagocytosisPhase.Ejection:
-                        CompleteEjection(engulfedObject);
-                        break;
-                }
-            }
-        }
-
-        foreach (var expelled in expelledObjects)
-            expelled.TimeElapsedSinceEjection += delta;
-
-        expelledObjects.RemoveAll(e => e.TimeElapsedSinceEjection >= Constants.ENGULF_EJECTED_COOLDOWN);
-    }
-
-    private void HandleEngulfFeedback(float delta)
-    {
-        // Play sound
-        if (State == MicrobeState.Engulf)
-        {
-            if (!engulfAudio.Playing)
-                engulfAudio.Play();
-
-            // To balance loudness, here the engulfment audio's max volume is reduced to 0.6 in linear volume
-
-            if (engulfAudio.Volume < 0.6f)
-            {
-                engulfAudio.Volume += delta;
-            }
-            else if (engulfAudio.Volume >= 0.6f)
-            {
-                engulfAudio.Volume = 0.6f;
-            }
-
-            // Flash the membrane blue.
-            Flash(1, new Color(0.2f, 0.5f, 1.0f, 0.5f));
-        }
-        else
-        {
-            if (engulfAudio.Playing && engulfAudio.Volume > 0)
-            {
-                engulfAudio.Volume -= delta;
-
-                if (engulfAudio.Volume <= 0)
-                    engulfAudio.Stop();
-            }
-        }
     }
 
     private void CompleteIngestion(EngulfedObject engulfed)
@@ -1921,10 +1896,8 @@ public partial class Microbe
 
         engulfed.Phagosome.Value?.DestroyDetachAndQueueFree();
 
-        // Ignore possible invalid cast as the engulfed node should be a rigidbody either way
-        var body = (RigidBody)engulfable;
-
-        body.Mode = ModeEnum.Rigid;
+        // Ignore possible invalid cast as the engulfed node should be a physics body anyway
+        var body = (PhysicsBody)engulfable;
 
         // Re-parent to world node
         body.ReParentWithTransform(GetStageAsParent());
@@ -1933,11 +1906,22 @@ public partial class Microbe
         body.CollisionLayer = engulfed.OriginalCollisionLayer;
         body.CollisionMask = engulfed.OriginalCollisionMask;
 
-        var impulse = Transform.origin.DirectionTo(body.Transform.origin) * body.Mass *
-            Constants.ENGULF_EJECTION_FORCE;
+        if (!NetworkManager.Instance.IsClient)
+        {
+            var impulse = Transform.origin.DirectionTo(body.Transform.origin) * Constants.ENGULF_EJECTION_FORCE;
 
-        // Apply outwards ejection force
-        body.ApplyCentralImpulse(impulse + LinearVelocity);
+            // Apply outwards ejection force
+            if (body is RigidBody rb)
+            {
+                impulse *= rb.Mass;
+                rb.ApplyCentralImpulse(impulse + LinearVelocity);
+            }
+            else if (body is NetworkCharacter character)
+            {
+                impulse *= character.Mass;
+                character.LinearVelocity += impulse + LinearVelocity;
+            }
+        }
 
         // We have our own engulfer and it wants to claim this object we've just expelled
         HostileEngulfer.Value?.IngestEngulfable(engulfable);

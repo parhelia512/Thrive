@@ -56,7 +56,10 @@ public static class SpawnHelpers
         var microbe = (Microbe)microbeScene.Instance();
 
         if (peerId.HasValue)
+        {
             microbe.PeerId = peerId.Value;
+            microbe.AddToGroup(Constants.NETWORKED_PLAYER_GROUP);
+        }
 
         // The second parameter is (isPlayer), and we assume that if the
         // cell is not AI controlled it is the player's cell

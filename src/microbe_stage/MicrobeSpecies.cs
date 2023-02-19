@@ -223,9 +223,9 @@ public class MicrobeSpecies : Species, ICellProperties, IPhotographable
         buffer.Write((ushort)Organelles.Count);
         foreach (var organelle in Organelles)
         {
-            var packed = new PackedBytesBuffer();
-            organelle.NetworkSerialize(packed);
-            buffer.Write(packed);
+            var organelleMsg = new PackedBytesBuffer();
+            organelle.NetworkSerialize(organelleMsg);
+            buffer.Write(organelleMsg);
         }
     }
 

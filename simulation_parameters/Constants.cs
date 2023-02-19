@@ -109,6 +109,8 @@ public static class Constants
 
     public const float CELL_BASE_THRUST = 50.6f;
 
+    public const float CELL_LINEAR_DAMP = 2.46f;
+
     public const float MICROBE_MOVEMENT_SOUND_EMIT_COOLDOWN = 1.3f;
 
     public const float CELL_BASE_ROTATION = 0.2f;
@@ -929,6 +931,8 @@ public static class Constants
 
     public const string PLAYER_GROUP = "player";
 
+    public const string NETWORKED_PLAYER_GROUP = "networked_player";
+
     public const string DELETION_HOLD_LOAD = "load";
     public const string DELETION_HOLD_MICROBE_EDITOR = "microbe_editor";
 
@@ -956,6 +960,8 @@ public static class Constants
     public const string STARTUP_ATTEMPT_INFO_FILE = "user://startup_attempt.json";
 
     public const string LAST_PLAYED_VERSION_FILE = "user://last_played_version.txt";
+
+    public const string SERVER_CONFIGURATION_FILE = "user://server_config.yml";
 
     public const string LICENSE_FILE = "res://LICENSE.txt";
     public const string STEAM_LICENSE_FILE = "res://doc/steam_license_readme.txt";
@@ -1139,18 +1145,19 @@ public static class Constants
 
     public const int FORCE_CLOSE_AFTER_TRIES = 3;
 
-    public const string DEFAULT_HOST_ADDRESS = "127.0.0.1";
+    public const string MULTIPLAYER_DEFAULT_HOST_ADDRESS = "127.0.0.1";
     public const int MULTIPLAYER_DEFAULT_PORT = 4242;
     public const int MULTIPLAYER_DEFAULT_MAX_PLAYERS = 20;
-    public const int MULTIPLAYER_DEFAULT_MAX_CLIENTS = 100;
     public const uint MULTIPLAYER_DEFAULT_SESSION_LENGTH = 60;
-    public const int MULTIPLAYER_DEFAULT_TIMEOUT_LIMIT_SECONDS = 32;
 
-    public const float DEFAULT_SERVER_TIME_STEP_SECONDS = 0.1f;
-    public const float DEFAULT_CLIENT_TIME_STEP_SECONDS = 0.1f;
+    public const int NETWORK_DEFAULT_TIMEOUT_LIMIT_SECONDS = 32;
+    public const int NETWORK_DEFAULT_MAX_CLIENTS = 100;
+    public const int NETWORK_DEFAULT_TICK_RATE = 40;
 
-    public const ulong NETWORK_PING_INTERVAL_MILISECONDS = 3000;
-    public const ulong NETWORK_PING_TIMEOUT_MILISECONDS = 5000;
+    public const long NETWORK_PING_INTERVAL_MILLISECONDS = 3000;
+    public const long NETWORK_PING_TIMEOUT_MILLISECONDS = 5000;
+
+    public const int BUFFER_MAX_TICKS = 1024;
 
     public const float MICROBIAL_ARENA_CLOUD_SPAWN_AMOUNT_SCALE_FACTOR = 0.003f;
 

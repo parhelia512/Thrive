@@ -16,6 +16,16 @@ using Environment = System.Environment;
 [DeserializedCallbackTarget]
 public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrobeAI, ISaveLoadedTracked, IEngulfable
 {
+    /// <summary>
+    ///   The point towards which the character will move to point to
+    /// </summary>
+    public Vector3 LookAtPoint = new(0, 0, -1);
+
+    /// <summary>
+    ///   The direction the character wants to move. Doesn't need to be normalized
+    /// </summary>
+    public Vector3 MovementDirection = new(0, 0, 0);
+
 #pragma warning disable CA2213
     private HybridAudioPlayer engulfAudio = null!;
     private HybridAudioPlayer bindingAudio = null!;
@@ -329,7 +339,7 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
     {
         base._Ready();
 
-        if (cloudSystem == null && !IsForPreviewOnly && !NetworkManager.Instance.IsNetworked)
+        if (cloudSystem == null && !IsForPreviewOnly && !NetworkManager.Instance.IsMultiplayer)
         {
             throw new InvalidOperationException("Microbe not initialized");
         }
@@ -342,11 +352,7 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
         tagBox = GetNode<MeshInstance>("TagBox");
 
         if (IsForPreviewOnly)
-        {
-            // Disable our physics to not cause issues with multiple preview cells bumping into each other
-            Mode = ModeEnum.Kinematic;
             return;
-        }
 
         atp = SimulationParameters.Instance.GetCompound("atp");
         glucose = SimulationParameters.Instance.GetCompound("glucose");
@@ -392,12 +398,8 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
         // pseudopodRange.Connect("body_entered", this, nameof(OnBodyEnteredPseudopodRange));
         // pseudopodRange.Connect("body_exited", this, nameof(OnBodyExitedPseudopodRange));
 
-        // Setup physics callback stuff
-        ContactsReported = Constants.DEFAULT_STORE_CONTACTS_COUNT;
-        Connect("body_shape_entered", this, nameof(OnContactBegin));
-        Connect("body_shape_exited", this, nameof(OnContactEnd));
-
         Mass = Constants.MICROBE_BASE_MASS;
+        LinearDamp = Constants.CELL_LINEAR_DAMP;
 
         if (IsLoadedFromSave)
         {
@@ -431,7 +433,6 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
                 ReParentShapes(Colony.Master, GetOffsetRelativeToMaster());
                 Colony.Master.AddCollisionExceptionWith(this);
                 AddCollisionExceptionWith(Colony.Master);
-                Mode = ModeEnum.Static;
                 Colony.Master.Mass += Mass;
             }
 
@@ -800,25 +801,8 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
 
     public override void _PhysicsProcess(float delta)
     {
-        base._PhysicsProcess(delta);
-
-        linearAcceleration = (LinearVelocity - lastLinearVelocity) / delta;
-
-        if (!NetworkManager.Instance.IsNetworked)
-        {
-            // Movement
-            if (ColonyParent == null && !IsForPreviewOnly)
-            {
-                HandleMovement(delta);
-            }
-            else
-            {
-                Colony?.Master.AddMovementForce(queuedMovementForce);
-            }
-        }
-
-        lastLinearVelocity = LinearVelocity;
-        lastLinearAcceleration = linearAcceleration;
+        if (!NetworkManager.Instance.IsMultiplayer)
+            NetworkTick(delta);
     }
 
     public override void _EnterTree()
@@ -854,28 +838,6 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
 #pragma warning restore CA1031
         {
             GD.PrintErr("Microbe AI failure! ", e);
-        }
-    }
-
-    public override void _IntegrateForces(PhysicsDirectBodyState physicsState)
-    {
-        if (ColonyParent != null || Dead)
-            return;
-
-        // TODO: should movement also be applied here?
-
-        physicsState.Transform = GetNewPhysicsRotation(physicsState.Transform);
-
-        // Reset total sum from previous collisions
-        collisionForce = 0.0f;
-
-        // Sum impulses from all contact points
-        for (var i = 0; i < physicsState.GetContactCount(); ++i)
-        {
-            // TODO: Godot currently does not provide a convenient way to access a collision impulse, this
-            // for example is luckily available only in Bullet which makes things a bit easier. Would need
-            // proper handling for this in the future.
-            collisionForce += physicsState.GetContactImpulse(i);
         }
     }
 
@@ -961,6 +923,47 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
             throw new InvalidOperationException("Scale can only be overridden for preview microbes");
 
         ApplyScale(new Vector3(scale, scale, scale));
+    }
+
+    public override void ApplyNetworkedInput(NetworkInputVars input)
+    {
+        LookAtPoint = input.WorldLookAtPoint;
+        MovementDirection = input.DecodeMovementDirection();
+
+        if ((input.Bools & (byte)InputFlag.EmitToxin) != 0)
+            QueueEmitToxin(SimulationParameters.Instance.GetCompound("oxytoxy"));
+
+        if ((input.Bools & (byte)InputFlag.SecreteSlime) != 0)
+            QueueSecreteSlime(GetPhysicsProcessDeltaTime());
+
+        var engulf = (input.Bools & (byte)InputFlag.Engulf) != 0;
+
+        if (engulf && !Membrane.Type.CellWall)
+        {
+            State = MicrobeState.Engulf;
+        }
+        else if (!engulf && State == MicrobeState.Engulf)
+        {
+            State = MicrobeState.Normal;
+        }
+    }
+
+    protected override void IntegrateForces(float delta)
+    {
+        if (ColonyParent != null || Dead)
+            return;
+
+        // Movement
+        if (ColonyParent == null && !IsForPreviewOnly)
+        {
+            HandleMovement(delta);
+        }
+        else
+        {
+            Colony?.Master.AddMovementForce(queuedMovementForce);
+        }
+
+        Transform = GetNewPhysicsRotation(Transform);
     }
 
     /// <summary>
@@ -1125,17 +1128,11 @@ public partial class Microbe : NetworkCharacter, ISpawned, IProcessable, IMicrob
         if (movement.x == 0.0f && movement.z == 0.0f)
             return;
 
-        var impulse = movement * delta;
-
-        if (NetworkManager.Instance.IsClient)
-        {
-            ApplyPredictiveCentralImpulse(impulse);
-            return;
-        }
-
         // Scale movement by delta time (not by framerate). We aren't Fallout 4
         // TODO: it seems that at low framerate (below 20 or so) cells get a speed boost for some reason
-        ApplyCentralImpulse(impulse);
+        var impulse = movement * delta;
+
+        LinearVelocity += impulse / Mass;
     }
 
     /// <summary>

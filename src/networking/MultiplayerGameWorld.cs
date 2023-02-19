@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 /// <summary>
-///   <inheritdoc />. Contains the necessary informations for a multiplayer game mode.
+///   <inheritdoc /> Contains the necessary informations for multiplayer.
 /// </summary>
 public class MultiplayerGameWorld : GameWorld
 {
@@ -30,7 +30,7 @@ public class MultiplayerGameWorld : GameWorld
     }
 
     /// <summary>
-    ///   Stores informations of registered players in relation to the current game session.
+    ///   Stores information of registered players in the current game session.
     /// </summary>
     public Dictionary<int, NetworkPlayerVars> PlayerVars { get; set; } = new();
 
@@ -49,6 +49,11 @@ public class MultiplayerGameWorld : GameWorld
         entities.Clear();
     }
 
+    /// <summary>
+    ///   Make the game world track the given entity.
+    /// </summary>
+    /// <param name="id">An explicit ID to be given to the entity.</param>
+    /// <param name="entity">The entity itself.</param>
     public void RegisterNetworkEntity(uint id, INetworkEntity entity)
     {
         entity.NetworkEntityId = id;
@@ -59,41 +64,73 @@ public class MultiplayerGameWorld : GameWorld
     }
 
     /// <summary>
-    ///   Registers the given entity to the game world.
+    ///   Make the game world track the given entity.
     /// </summary>
-    /// <returns>The entity's assigned ID.</returns>
+    /// <param name="entity">The entity itself.</param>
+    /// <returns>The entity's incrementally assigned sequential ID.</returns>
     public uint RegisterNetworkEntity(INetworkEntity entity)
     {
         RegisterNetworkEntity(++entityIdCounter, entity);
         return entityIdCounter;
     }
 
+    /// <summary>
+    ///   Untrack an entity from the game world.
+    /// </summary>
+    /// <param name="id">The entity's ID.</param>
     public void UnregisterNetworkEntity(uint id)
     {
         entities.Remove(id);
         entityIds.Remove(id);
     }
 
-    public bool TryGetNetworkEntity(uint id, out INetworkEntity entity)
+    /// <summary>
+    ///   Gets the networked entity associated with the given <paramref name="entityId"/>.
+    /// </summary>
+    /// <returns>True if value exists and is not freed; false otherwise.</returns>
+    public bool TryGetNetworkEntity(uint entityId, out INetworkEntity entity)
     {
-        if (entities.TryGetValue(id, out EntityReference<INetworkEntity> entityReference) &&
-            entityReference.Value != null)
+        try
         {
-            entity = entityReference.Value;
-            return true;
+            var retrieved = entities[entityId].Value;
+
+            if (retrieved == null)
+                throw new Exception();
+
+            entity = retrieved;
+        }
+        catch
+        {
+            entity = null!;
+            return false;
         }
 
-        entity = null!;
-        return false;
+        return true;
     }
 
-    public void UpdateSpecies(uint peerId, Species species)
+    /// <summary>
+    ///   Gets the player-character associated with the given <paramref name="peerId"/>.
+    /// </summary>
+    /// <returns>True if value exists, not freed, and is a <see cref="NetworkCharacter"/>; false otherwise.</returns>
+    public bool TryGetPlayerCharacter(int peerId, out NetworkCharacter player)
     {
-        worldSpecies[peerId] = species;
+        player = default!;
+
+        if (!PlayerVars.TryGetValue(peerId, out NetworkPlayerVars vars))
+            return false;
+
+        if (!TryGetNetworkEntity(vars.EntityId, out INetworkEntity entity))
+            return false;
+
+        if (entity is not NetworkCharacter casted)
+            return false;
+
+        player = casted;
+        return true;
     }
 
-    public void UpdateSpecies(int peerId, Species species)
+    public void SetSpecies(int peerId, Species species)
     {
-        UpdateSpecies((uint)peerId, species);
+        worldSpecies[(uint)peerId] = species;
     }
 }

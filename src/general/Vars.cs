@@ -1,38 +1,74 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
+using YamlDotNet.Serialization;
 
 /// <summary>
 ///   Network serializable variables.
 /// </summary>
+[JSONDynamicTypeAllowed]
 public class Vars : INetworkSerializable
 {
-    /// <summary>
-    ///   Currently serializable up to 255 entries.
-    /// </summary>
+    [YamlMember]
+    [JsonProperty]
     protected Dictionary<string, object> entries = new();
 
     /// <summary>
-    ///   Guaranteed to accept primitive types.
+    ///   Sets the value for the specified key. If null is given, removes the value for that key.
     /// </summary>
-    public virtual void SetVar(string key, object variant)
+    public virtual void SetVar<T>(string key, T? variant)
     {
-        entries[key] = variant;
+        if (variant == null)
+        {
+            entries.Remove(key);
+        }
+        else
+        {
+            entries[key] = variant;
+        }
     }
 
+    /// <summary>
+    ///   Gets the value associated with the given <paramref name="key"/>.
+    /// </summary>
+    /// <returns>Casted value of type <typeparamref name="T"/> or throws if not found/incorrect cast.</returns>
     public T GetVar<T>(string key)
     {
-        return (T)entries[key];
+        var entry = entries[key];
+
+        if (entry is T t)
+            return t;
+
+        return (T)Convert.ChangeType(entry, typeof(T));
     }
 
+    /// <summary>
+    ///   Gets the value associated with the given <paramref name="key"/>.
+    /// </summary>
+    /// <returns>
+    ///   True if <paramref name="value"/> exists and is of type <typeparamref name="T"/>, otherwise false.
+    /// </returns>
     public bool TryGetVar<T>(string key, out T value)
     {
-        if (entries.TryGetValue(key, out object retrieved))
+        try
         {
-            value = (T)retrieved;
-            return true;
+            value = GetVar<T>(key);
+        }
+        catch
+        {
+            value = default!;
+            return false;
         }
 
-        value = default(T)!;
-        return false;
+        return true;
+    }
+
+    /// <summary>
+    ///   Clears all the stored variables.
+    /// </summary>
+    public void Clear()
+    {
+        entries.Clear();
     }
 
     public virtual void NetworkSerialize(PackedBytesBuffer buffer)
@@ -54,5 +90,11 @@ public class Vars : INetworkSerializable
             var value = buffer.ReadVariant();
             entries[key] = value;
         }
+    }
+
+    public override string ToString()
+    {
+        // TODO: Use YAML
+        return JsonConvert.SerializeObject(entries, Formatting.Indented);
     }
 }

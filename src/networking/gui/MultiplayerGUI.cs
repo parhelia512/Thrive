@@ -167,14 +167,14 @@ public class MultiplayerGUI : CenterContainer
         if (loadingDialog.Visible)
             UpdateLoadingDialog(delta);
 
-        var network = NetworkManager.Instance;
+        var peer = NetworkManager.Instance;
 
         // Display game time
         var builder = new StringBuilder(100);
         builder.Append(" - ");
-        builder.Append(network.GameInSession ?
-            TranslationServer.Translate("LOBBY_ATTRIBUTE_IN_PROGRESS").FormatSafe(network.GameTimeHumanized,
-                network.Settings?.SessionLength) :
+        builder.Append(peer.GameInSession ?
+            TranslationServer.Translate("LOBBY_ATTRIBUTE_IN_PROGRESS").FormatSafe(peer.GameTimeHumanized,
+                peer.ServerSettings.GetVar<uint>("SessionLength")) :
             TranslationServer.Translate("LOBBY_ATTRIBUTE_PENDING"));
 
         serverAttributes.Text = builder.ToString();
@@ -220,19 +220,23 @@ public class MultiplayerGUI : CenterContainer
 
     private void UpdateLobby()
     {
-        var network = NetworkManager.Instance;
-        if (!network.IsNetworked)
+        var peer = NetworkManager.Instance;
+        if (!peer.IsMultiplayer)
             return;
 
         list.RefreshPlayers();
         list.SortHighestScoreFirst();
 
-        serverName.Text = network.Settings?.Name;
+        peer.ServerSettings.TryGetVar("Name", out string name);
+        peer.ServerSettings.TryGetVar("GameMode", out string gameModeName);
 
-        gameModeTitle.Text = network.Settings?.SelectedGameMode!.Name;
-        gameModeDescription.ExtendedBbcode = network.Settings?.SelectedGameMode!.Description;
+        serverName.Text = name;
 
-        foreach (var player in network.ConnectedPlayers)
+        var gameMode = SimulationParameters.Instance.GetMultiplayerGameMode(gameModeName);
+        gameModeTitle.Text = gameMode.Name;
+        gameModeDescription.ExtendedBbcode = gameMode.Description;
+
+        foreach (var player in peer.ConnectedPlayers)
             UpdateReadyStatus(player.Key, player.Value.LobbyReady);
 
         UpdateStartButton();
@@ -242,7 +246,7 @@ public class MultiplayerGUI : CenterContainer
     {
         nameBox.PlaceholderText = Settings.EnvironmentUserName;
         portBox.Text = Constants.MULTIPLAYER_DEFAULT_PORT.ToString(CultureInfo.CurrentCulture);
-        addressBox.Text = Constants.DEFAULT_HOST_ADDRESS;
+        addressBox.Text = Constants.MULTIPLAYER_DEFAULT_HOST_ADDRESS;
     }
 
     private void ValidateFields()
@@ -425,11 +429,11 @@ public class MultiplayerGUI : CenterContainer
     {
         currentJobStatus = ConnectionJob.Hosting;
 
-        ServerSettings parsedData;
+        Vars parsedData;
 
         try
         {
-            parsedData = ThriveJsonConverter.Instance.DeserializeObject<ServerSettings>(data) ??
+            parsedData = ThriveJsonConverter.Instance.DeserializeObject<Vars>(data) ??
                 throw new Exception("deserialized value is null");
         }
         catch (Exception e)
@@ -451,7 +455,7 @@ public class MultiplayerGUI : CenterContainer
             return;
         }
 
-        if (parsedData.UseUpnp)
+        if (parsedData.GetVar<bool>("UseUpnp"))
         {
             ShowLoadingDialog(
                 TranslationServer.Translate("UPNP_SETUP"),

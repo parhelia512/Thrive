@@ -1,10 +1,10 @@
 ﻿/// <summary>
-///   Specifies objects whose values can be transmitted across the network.
+///   Specifies object whose values can be transmitted across network under custom user-defined format.
 /// </summary>
 public interface INetworkSerializable
 {
     /// <summary>
-    ///   Packs informations/properties about the object as bytes to be sent across the network.
+    ///   Packs informations/properties about the object as bytes to be sent across network.
     /// </summary>
     public void NetworkSerialize(PackedBytesBuffer buffer);
 

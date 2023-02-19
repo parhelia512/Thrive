@@ -1,39 +1,38 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Godot;
+using Newtonsoft.Json;
 
 /// <summary>
 ///   A networked entity the player can control.
 /// </summary>
-public abstract class NetworkCharacter : NetworkRigidBody
+public abstract class NetworkCharacter : KinematicBody, INetworkEntity
 {
-    /// <summary>
-    ///   The point towards which the character will move to point to
-    /// </summary>
-    public Vector3 LookAtPoint = new(0, 0, -1);
-
-    /// <summary>
-    ///   The direction the character wants to move. Doesn't need to be normalized
-    /// </summary>
-    public Vector3 MovementDirection = new(0, 0, 0);
-
-    /// <summary>
-    ///   Specifies value for which an error from predicted state and incoming server state is tolerable.
-    /// </summary>
     [Export]
-    public float PredictionErrorToleranceThreshold = 0.05f;
+    public bool SyncRotationX;
 
     [Export]
-    public bool UseClientSidePrediction = true;
+    public bool SyncRotationY;
 
-    protected bool replaying;
+    [Export]
+    public bool SyncRotationZ;
 
-    private Tween? tween;
+    /// <summary>
+    ///   Enables state (position, rotation) interpolation to the newly incoming state.
+    ///   This adds delay, the amount of which equals to the server's tick rate.
+    /// </summary>
+    [Export]
+    public bool EnableStateInterpolations = true;
+
+    protected Queue<StateSnapshot> stateInterpolations = new();
+    protected float lerpTimer;
+
     private bool setup;
 
-    private Queue<IncomingState> stateBuffer = new();
-    private Queue<PredictedState> predictedStates = new();
+    private StateSnapshot? fromState;
 
-    private NetworkInputVars? latestPredictedInput;
+    private Dictionary<int, CollisionState> collisions = new();
 
     /// <summary>
     ///   The unique network ID self-assigned by the client. In gameplay context, this is used to differentiate
@@ -42,9 +41,32 @@ public abstract class NetworkCharacter : NetworkRigidBody
     public int PeerId { get; set; }
 
     /// <summary>
-    ///   Returns true if this network character owns our peer id i.e. the one we controls (local player).
+    ///   Returns true if this network character owns our peer id i.e. the one we control (local player).
     /// </summary>
-    public bool IsLocal => PeerId == NetworkManager.Instance.PeerId || !NetworkManager.Instance.IsNetworked;
+    public bool IsLocal => PeerId == NetworkManager.Instance.PeerId || !NetworkManager.Instance.IsMultiplayer;
+
+    public StateSnapshot LastReceivedState { get; private set; }
+
+    [Export]
+    public float Mass { get; set; }
+
+    [Export]
+    public float Bounce { get; set; }
+
+    [Export]
+    public float LinearDamp { get; set; }
+
+    public Vector3 LinearVelocity { get; set; }
+
+    [JsonIgnore]
+    public Spatial EntityNode => this;
+
+    [JsonIgnore]
+    public AliveMarker AliveMarker { get; } = new();
+
+    public abstract string ResourcePath { get; }
+
+    public uint NetworkEntityId { get; set; }
 
     public override void _Ready()
     {
@@ -54,132 +76,158 @@ public abstract class NetworkCharacter : NetworkRigidBody
             SetupNetworkCharacter();
     }
 
-    public override void _PhysicsProcess(float delta)
+    public void NetworkTick(float delta)
     {
-        base._PhysicsProcess(delta);
-
-        if (latestPredictedInput.HasValue)
-        {
-            predictedStates.Enqueue(new PredictedState
-            {
-                Input = latestPredictedInput.Value,
-                Result = ToSnapshot(),
-            });
-
-            latestPredictedInput = null;
-        }
-
-        if (stateBuffer.Count <= 0)
-        {
-            // Hasn't received any new updates from the server
-            return;
-        }
-
-        var incomingState = stateBuffer.Dequeue();
-
-        // Server reconciliation begins here
-
-        // Discard old inputs relative to the latest received server ack
-        while (predictedStates.Count > 0 && predictedStates.Peek().Input.Id < incomingState.LastAckedInputId)
-            predictedStates.Dequeue();
-
-        if (predictedStates.Count <= 0)
-        {
-            // No new inputs, just lerp to the server state
-            ApplyState(incomingState.State);
-            return;
-        }
-
-        var predictedState = predictedStates.Dequeue();
-
-        var positionError = incomingState.State.Position - predictedState.Result.Position;
-
-        if (positionError.LengthSquared() > PredictionErrorToleranceThreshold)
-        {
-            // Too much error, needs rewinding
-
-            NetworkLinearVelocity = incomingState.State.LinearVelocity;
-
-            // TODO: lerp just won't work right.
-            ClearInterpolations();
-            GlobalTransform = new Transform(incomingState.State.Rotation, incomingState.State.Position);
-
-            // Replay remaining inputs not yet acked by the server
-            foreach (var replay in predictedStates)
-            {
-                replaying = true;
-
-                ApplyInput(replay.Input);
-
-                // TODO: Fix super annoying jitters
-                PredictSimulation(delta);
-            }
-
-            replaying = false;
-        }
+        InterpolateStates(delta);
+        Simulate(delta);
     }
 
     public virtual void SetupNetworkCharacter()
     {
-        tween = new Tween();
-        AddChild(tween);
-
         setup = true;
     }
 
-    public override void NetworkDeserialize(PackedBytesBuffer buffer)
+    public virtual void NetworkSerialize(PackedBytesBuffer buffer)
     {
-        var ackedInputId = buffer.ReadUInt16();
-
-        if (!IsLocal || !UseClientSidePrediction)
+        var bools = new bool[7]
         {
-            // Other player characters don't need CSP and reconciliation, just interpolate them (if enabled)
-            base.NetworkDeserialize(buffer);
-            return;
+            !AxisLockMotionX,
+            !AxisLockMotionY,
+            !AxisLockMotionZ,
+            SyncRotationX,
+            SyncRotationY,
+            SyncRotationZ,
+            IsLocal,
+        };
+        buffer.Write(bools.ToByte());
+
+        if (!AxisLockMotionX)
+        {
+            if (IsLocal)
+                buffer.Write(LinearVelocity.x);
+
+            buffer.Write(GlobalTranslation.x);
         }
 
-        stateBuffer.Enqueue(new IncomingState
+        if (!AxisLockMotionY)
         {
-            LastAckedInputId = ackedInputId,
-            State = DecodePacket(buffer),
-        });
+            if (IsLocal)
+                buffer.Write(LinearVelocity.y);
+
+            buffer.Write(GlobalTranslation.y);
+        }
+
+        if (!AxisLockMotionZ)
+        {
+            if (IsLocal)
+                buffer.Write(LinearVelocity.z);
+
+            buffer.Write(GlobalTranslation.z);
+        }
+
+        if (SyncRotationX)
+            buffer.Write(GlobalRotation.x);
+
+        if (SyncRotationY)
+            buffer.Write(GlobalRotation.y);
+
+        if (SyncRotationZ)
+            buffer.Write(GlobalRotation.z);
     }
 
-    public override void PackSpawnState(PackedBytesBuffer buffer)
+    public StateSnapshot DecodePacket(PackedBytesBuffer buffer)
     {
-        base.PackSpawnState(buffer);
+        buffer.Position = 0;
 
-        buffer.Write(PeerId);
+        var bools = buffer.ReadByte();
+
+        float xPos, yPos, zPos, xRot, yRot, zRot, xVel, yVel, zVel;
+        xPos = yPos = zPos = xRot = yRot = zRot = xVel = yVel = zVel = 0;
+
+        if (bools.ToBoolean(0))
+        {
+            if (bools.ToBoolean(6))
+                xVel = buffer.ReadSingle();
+
+            xPos = buffer.ReadSingle();
+        }
+
+        if (bools.ToBoolean(1))
+        {
+            if (bools.ToBoolean(6))
+                yVel = buffer.ReadSingle();
+
+            yPos = buffer.ReadSingle();
+        }
+
+        if (bools.ToBoolean(2))
+        {
+            if (bools.ToBoolean(6))
+                zVel = buffer.ReadSingle();
+
+            zPos = buffer.ReadSingle();
+        }
+
+        if (bools.ToBoolean(3))
+            xRot = buffer.ReadSingle();
+
+        if (bools.ToBoolean(4))
+            yRot = buffer.ReadSingle();
+
+        if (bools.ToBoolean(5))
+            zRot = buffer.ReadSingle();
+
+        return new StateSnapshot
+        {
+            LinearVelocity = new Vector3(xVel, yVel, zVel),
+            Position = new Vector3(xPos, yPos, zPos),
+            Rotation = new Quat(new Vector3(xRot, yRot, zRot)),
+        };
     }
 
-    public override void OnRemoteSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
+    public virtual void NetworkDeserialize(PackedBytesBuffer buffer)
     {
-        base.OnRemoteSpawn(buffer, currentGame);
-
-        PeerId = buffer.ReadInt32();
+        LastReceivedState = DecodePacket(buffer);
 
         if (IsLocal)
         {
-            Mode = ModeEnum.Rigid;
-            interpolateStatesUntilNone = UseClientSidePrediction;
+            // Using CSP and reconciliation
+            return;
         }
+
+        ApplyState(LastReceivedState, EnableStateInterpolations);
+    }
+
+    public virtual void PackSpawnState(PackedBytesBuffer buffer)
+    {
+        buffer.Write(PeerId);
+    }
+
+    public virtual void OnRemoteSpawn(PackedBytesBuffer buffer, GameProperties currentGame)
+    {
+        PeerId = buffer.ReadInt32();
     }
 
     /// <summary>
-    ///   Applies an incoming networked input into this character.
+    ///   Applies a networked input to this character.
     /// </summary>
-    public virtual void ApplyInput(NetworkInputVars input)
+    public abstract void ApplyNetworkedInput(NetworkInputVars input);
+
+    public void ApplyState(StateSnapshot state, bool interpolate)
     {
-        if (NetworkManager.Instance.IsClient)
+        LinearVelocity = state.LinearVelocity;
+
+        if (interpolate)
         {
-            if (!UseClientSidePrediction)
-                return;
+            while (stateInterpolations.Count > 2)
+                stateInterpolations.Dequeue();
 
-            latestPredictedInput = input;
+            stateInterpolations.Enqueue(state);
         }
-
-        LookAtPoint = input.WorldLookAtPoint;
-        MovementDirection = input.DecodeMovementDirection();
+        else
+        {
+            GlobalTransform = new Transform(state.Rotation, state.Position);
+        }
     }
 
     /// <summary>
@@ -189,21 +237,198 @@ public abstract class NetworkCharacter : NetworkRigidBody
     {
         return new StateSnapshot
         {
-            LinearVelocity = NetworkLinearVelocity,
+            LinearVelocity = LinearVelocity,
             Position = GlobalTranslation,
             Rotation = GlobalTransform.basis.Quat(),
         };
     }
 
-    public struct IncomingState
+    public virtual void OnDestroyed()
     {
-        public ushort LastAckedInputId { get; set; }
-        public StateSnapshot State { get; set; }
+        AliveMarker.Alive = false;
     }
 
-    public struct PredictedState
+    protected abstract void IntegrateForces(float delta);
+
+    protected abstract void OnContactBegin(Node body, int bodyShape, int localShape);
+
+    protected abstract void OnContactEnd(Node body, int bodyShape, int localShape);
+
+    private void Simulate(float delta)
     {
-        public NetworkInputVars Input { get; set; }
-        public StateSnapshot Result { get; set; }
+        // Damping
+        LinearVelocity *= 1.0f - delta * LinearDamp;
+
+        IntegrateForces(delta);
+
+        var collision = MoveAndCollide(LinearVelocity * delta, false);
+
+        foreach (var entry in collisions)
+        {
+            foreach (var shapePair in entry.Value.Shapes)
+            {
+                // Untag potentially no longer colliding shapes
+                shapePair.Tagged = false;
+            }
+        }
+
+        if (collision != null)
+        {
+            if (collision.Collider is not CollisionObject otherBody)
+                return;
+
+            // Resolve collision with other bodies
+            // TODO: tweak and make these closer to original Rigidbody's behaviour
+
+            if (otherBody is NetworkCharacter otherCharacterBody)
+            {
+                otherCharacterBody.LinearVelocity += collision.Remainder / delta;
+            }
+            else if (otherBody is RigidBody otherRigidbody)
+            {
+                otherRigidbody.ApplyImpulse(collision.Position, collision.Remainder);
+            }
+
+            LinearVelocity -= collision.Remainder / delta;
+
+            var localShapeIndex = -1;
+
+            // Get index of the local shape
+            foreach (int owner in GetShapeOwners())
+            {
+                for (int i = 0; i < ShapeOwnerGetShapeCount((uint)owner); ++i)
+                {
+                    // There's ColliderShapeIndex but no LocalShapeIndex, why? We may never know...
+                    // In the meantime, just use this workaround
+                    if (collision.LocalShape == ShapeOwnerGetShape((uint)owner, i))
+                    {
+                        localShapeIndex = ShapeOwnerGetShapeIndex((uint)owner, i);
+                        break;
+                    }
+
+                    if (localShapeIndex != -1)
+                        break;
+                }
+            }
+
+            var colliderId = collision.ColliderRid.GetId();
+
+            var shape = new ShapePair(collision.ColliderShapeIndex, localShapeIndex);
+
+            if (!collisions.ContainsKey(colliderId))
+                collisions[colliderId] = new CollisionState(otherBody);
+
+            if (collisions[colliderId].Shapes.TryGetValue(shape, out ShapePair cachedShape))
+            {
+                // Still colliding
+                cachedShape.Tagged = true;
+            }
+            else
+            {
+                // Begins colliding
+                shape.Tagged = true;
+                collisions[colliderId].Shapes.Add(shape);
+                OnContactBegin(otherBody, collision.ColliderShapeIndex, localShapeIndex);
+            }
+        }
+
+        foreach (var entry in collisions.ToList())
+        {
+            var shapes = entry.Value.Shapes;
+
+            foreach (var shape in shapes.ToHashSet())
+            {
+                // Not colliding in the earlier step, safe to assume this shape is indeed has stopped colliding
+                if (!shape.Tagged)
+                {
+                    shapes.Remove(shape);
+                    OnContactEnd(entry.Value.Body, shape.BodyShape, shape.LocalShape);
+                }
+            }
+
+            if (shapes.Count <= 0)
+                collisions.Remove(entry.Key);
+        }
+    }
+
+    private void InterpolateStates(float delta)
+    {
+        if (!NetworkManager.Instance.IsClient)
+            return;
+
+        lerpTimer += delta;
+
+        var tickInterval = 1f / NetworkManager.Instance.ServerSettings.GetVar<int>("TickRate");
+
+        if (lerpTimer > tickInterval)
+        {
+            lerpTimer = 0;
+
+            if (stateInterpolations.Count > (IsLocal ? 0 : 1))
+                fromState = stateInterpolations.Dequeue();
+        }
+
+        if (stateInterpolations.Count <= 0 || !fromState.HasValue)
+            return;
+
+        var toState = stateInterpolations.Peek();
+
+        var weight = lerpTimer / tickInterval;
+
+        var position = fromState.Value.Position.LinearInterpolate(toState.Position, weight);
+        var rotation = fromState.Value.Rotation.Slerp(toState.Rotation, weight);
+
+        GlobalTransform = new Transform(rotation, position);
+    }
+
+    public struct StateSnapshot
+    {
+        public Vector3 LinearVelocity { get; set; }
+        public Vector3 Position { get; set; }
+        public Quat Rotation { get; set; }
+    }
+
+    private class CollisionState
+    {
+        public CollisionState(Node body)
+        {
+            Body = body;
+        }
+
+        public Node Body { get; set; }
+        public HashSet<ShapePair> Shapes { get; set; } = new();
+    }
+
+    private class ShapePair : IEquatable<ShapePair>
+    {
+        public ShapePair(int bodyShape, int localShape)
+        {
+            BodyShape = bodyShape;
+            LocalShape = localShape;
+        }
+
+        public int BodyShape { get; }
+        public int LocalShape { get; }
+        public bool Tagged { get; set; }
+
+        public bool Equals(ShapePair other)
+        {
+            return BodyShape == other.BodyShape && LocalShape == other.LocalShape;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ShapePair shape)
+            {
+                return Equals(shape);
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return BodyShape ^ LocalShape;
+        }
     }
 }

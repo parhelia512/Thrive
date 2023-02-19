@@ -99,8 +99,9 @@ public class NetworkPlayerList : VBoxContainer
         list.AddChild(log);
         playerLogs.Add(id, log);
 
-        playerCount.Text = $"{NetworkManager.Instance.ConnectedPlayers.Count}/" +
-            $"{NetworkManager.Instance.Settings?.MaxPlayers}";
+        var peer = NetworkManager.Instance;
+        peer.ServerSettings.TryGetVar("MaxPlayers", out int maxPlayers);
+        playerCount.Text = $"{peer.ConnectedPlayers.Count}/{maxPlayers}";
     }
 
     private void UnRegisterPlayer(int id)

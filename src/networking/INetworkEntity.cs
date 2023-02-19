@@ -13,6 +13,8 @@ public interface INetworkEntity : IEntity, INetworkSerializable
     /// </summary>
     public uint NetworkEntityId { get; set; }
 
+    public void NetworkTick(float delta);
+
     /// <summary>
     ///   Called client-side BEFORE the replicated entity is added to the scene tree.
     /// </summary>

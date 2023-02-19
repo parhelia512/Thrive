@@ -23,9 +23,15 @@ public class MicrobialArenaOptionsGUI : MarginContainer, IGameModeOptionsMenu
         }
     }
 
-    public IGameModeSettings ReadSettings()
+    public Vars ReadSettings()
     {
-        return new MicrobialArenaSettings(shownBiomes?[biomes.Selected].InternalName ??
+        var settings = new Vars();
+        settings.SetVar("Biome", shownBiomes?[biomes.Selected].InternalName ??
             SimulationParameters.Instance.GetBiome("tidepool").InternalName);
+
+        // TODO: Changing this requires adjusting MicrobialArena.COMPOUND_PLANE_SIZE_MAGIC_NUMBER
+        settings.SetVar("Radius", 1000);
+
+        return settings;
     }
 }

@@ -6,7 +6,7 @@ using Godot;
 using Newtonsoft.Json;
 
 /// <summary>
-///   All data regarding the game world of a thrive playthrough
+///   All data regarding the game world of a thrive playthrough.
 /// </summary>
 /// <remarks>
 ///   <para>

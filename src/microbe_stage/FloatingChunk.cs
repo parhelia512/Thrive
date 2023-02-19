@@ -278,9 +278,6 @@ public class FloatingChunk : NetworkRigidBody, ISpawned, IEngulfable
             throw new InvalidOperationException("Can't make a chunk without graphics scene");
 
         InitPhysics();
-
-        if (NetworkManager.Instance.IsServer)
-            SyncVelocity = false;
     }
 
     public void ProcessChunk(float delta, CompoundCloudSystem compoundClouds)

@@ -10,5 +10,14 @@ public interface IMultiplayerStage : IStage
     /// </summary>
     public event EventHandler? GameReady;
 
-    public bool TryGetPlayer(int peerId, out NetworkCharacter player);
+    public MultiplayerGameWorld MultiplayerWorld { get; }
+
+    /// <summary>
+    ///   The number of frames ticked since the start of this stage's network tick.
+    /// </summary>
+    public uint TickCount { get; }
+
+    public uint LastReceivedServerTick { get; }
+
+    public uint LastAckedInputTick { get; }
 }

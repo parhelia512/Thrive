@@ -139,10 +139,10 @@ public class PlayerMicrobialArenaInput : MultiplayerInputBase
             if (GetViewport().GetMousePosition() != lastMousePosition)
                 return true;
 
-            if (sampled.MovementDirection == 0 && lastSampledInput.MovementDirection != 0)
+            if (sampled.MovementDirection == 0 && PreviousInput.MovementDirection != 0)
                 return true;
 
-            if (sampled.Bools == 0 && lastSampledInput.Bools != 0)
+            if (sampled.Bools == 0 && PreviousInput.Bools != 0)
                 return true;
 
             return sampled.MovementDirection != 0 || sampled.Bools != 0;

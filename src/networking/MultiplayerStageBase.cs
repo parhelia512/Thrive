@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Godot;
 
 /// <summary>
@@ -21,6 +23,12 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     [Export]
     public NodePath MultiplayerInputPath = null!;
 
+    /// <summary>
+    ///   Specifies value for which an error from predicted state and incoming server state is tolerable.
+    /// </summary>
+    [Export]
+    public float PredictionErrorToleranceThreshold = 0.05f;
+
     protected MultiplayerInputBase playerInputHandler = null!;
 
     /// <summary>
@@ -28,9 +36,21 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     /// </summary>
     private int incomingEntitiesCount;
 
+    private float averageTickLead;
+
+    private WorldState[] localWorldStateBuffer = new WorldState[Constants.BUFFER_MAX_TICKS];
+
+    private Queue<Heartbeat> heartbeatBuffer = new();
+
     public event EventHandler? GameReady;
 
-    public MultiplayerGameWorld MultiplayerGameWorld => (MultiplayerGameWorld)GameWorld;
+    public uint TickCount { get; private set; }
+
+    public uint LastReceivedServerTick { get; private set; }
+
+    public uint LastAckedInputTick { get; private set; }
+
+    public MultiplayerGameWorld MultiplayerWorld => (MultiplayerGameWorld)GameWorld;
 
     /// <summary>
     ///   Information about the local player in relation to the current game session.
@@ -40,12 +60,17 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         get
         {
             var id = NetworkManager.Instance.PeerId;
-            if (MultiplayerGameWorld.PlayerVars.TryGetValue(id, out NetworkPlayerVars vars))
+            if (MultiplayerWorld.PlayerVars.TryGetValue(id, out NetworkPlayerVars vars))
                 return vars;
 
             throw new InvalidOperationException("Player hasn't been set");
         }
     }
+
+    /// <summary>
+    ///   The settings for this multiplayer stage.
+    /// </summary>
+    public Vars Settings => NetworkManager.Instance.ServerSettings.GetVar<Vars>("GameModeSettings");
 
     protected abstract string StageLoadingMessage { get; }
 
@@ -107,9 +132,9 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         {
             LoadingScreen.Instance.Show(TranslationServer.Translate("LOADING_ENTITIES"), MainGameState.Invalid,
                 TranslationServer.Translate("VALUE_SLASH_MAX_VALUE").FormatSafe(
-                    MultiplayerGameWorld.EntityCount, incomingEntitiesCount));
+                    MultiplayerWorld.EntityCount, incomingEntitiesCount));
 
-            if (MultiplayerGameWorld.EntityCount >= incomingEntitiesCount)
+            if (MultiplayerWorld.EntityCount >= incomingEntitiesCount)
             {
                 // All incoming entities replicated, now tell the server we're ready
                 incomingEntitiesCount = 0;
@@ -119,7 +144,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
         if (NetworkManager.Instance.IsServer && !gameOver && IsGameOver())
         {
-            // Only the server can truly set the game state to game over, clients can only predict
+            // Only the server can truly set the game state to game over, clients can only "predict"
             GameOver();
         }
     }
@@ -147,9 +172,9 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (!NetworkManager.Instance.IsServer)
             return;
 
-        var packed = new PackedBytesBuffer();
-        vars.NetworkSerialize(packed);
-        Rpc(nameof(SyncPlayerVars), peerId, packed.Data);
+        var msg = new PackedBytesBuffer();
+        vars.NetworkSerialize(msg);
+        Rpc(nameof(SyncPlayerVars), peerId, msg.Data);
     }
 
     public void ServerSyncPlayerVars(int peerId)
@@ -157,35 +182,19 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (!NetworkManager.Instance.IsServer)
             return;
 
-        if (MultiplayerGameWorld.PlayerVars.TryGetValue(peerId, out NetworkPlayerVars vars))
+        if (MultiplayerWorld.PlayerVars.TryGetValue(peerId, out NetworkPlayerVars vars))
             ServerSyncPlayerVars(peerId, vars);
     }
 
     public override bool IsGameOver()
     {
-        return NetworkManager.Instance.ElapsedGameTimeMinutes >= NetworkManager.Instance.Settings?.SessionLength;
-    }
-
-    public bool TryGetPlayer(int peerId, out NetworkCharacter player)
-    {
-        player = default!;
-
-        if (!MultiplayerGameWorld.PlayerVars.TryGetValue(peerId, out NetworkPlayerVars vars))
-            return false;
-
-        if (!MultiplayerGameWorld.TryGetNetworkEntity(vars.EntityId, out INetworkEntity entity))
-            return false;
-
-        if (entity is not TPlayer casted)
-            return false;
-
-        player = casted;
-        return true;
+        return NetworkManager.Instance.ElapsedGameTimeMinutes >=
+            NetworkManager.Instance.ServerSettings.GetVar<uint>("SessionLength");
     }
 
     public bool TryGetPlayer(int peerId, out TPlayer player)
     {
-        var result = TryGetPlayer(peerId, out NetworkCharacter character);
+        var result = MultiplayerWorld.TryGetPlayerCharacter(peerId, out NetworkCharacter character);
         player = (TPlayer)character;
         return result;
     }
@@ -230,53 +239,38 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     /// </summary>
     protected abstract void NetworkTick(float delta);
 
-    protected virtual void UpdateEntityState(int peerId, INetworkEntity entity)
-    {
-        if (!entity.EntityNode.IsInsideTree() || NetworkManager.Instance.IsClient)
-            return;
-
-        var buffer = new PackedBytesBuffer();
-        entity.NetworkSerialize(buffer);
-
-        if (buffer.Length > 0)
-        {
-            RpcUnreliableId(peerId, nameof(NotifyEntityStateUpdate),
-                entity.NetworkEntityId, playerInputHandler.PeersInputs[peerId].LastAckedInputId, buffer.Data);
-        }
-    }
-
     /// <summary>
-    ///   Registers incoming player to the server.
+    ///   Registers an incoming player to the server (joining).
     /// </summary>
     protected virtual void RegisterPlayer(int peerId)
     {
-        if (MultiplayerGameWorld.PlayerVars.ContainsKey(peerId) || NetworkManager.Instance.IsClient)
+        if (MultiplayerWorld.PlayerVars.ContainsKey(peerId) || NetworkManager.Instance.IsClient)
             return;
 
         // Register to the game world
-        MultiplayerGameWorld.PlayerVars.Add(peerId, new NetworkPlayerVars());
+        MultiplayerWorld.PlayerVars.Add(peerId, new NetworkPlayerVars());
 
         var species = CreateNewSpeciesForPlayer(peerId);
-        MultiplayerGameWorld.UpdateSpecies(peerId, species);
+        MultiplayerWorld.SetSpecies(peerId, species);
 
         foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
             if (player.Key == peerId || player.Value.Status != NetworkPlayerStatus.Active)
                 continue;
 
-            if (MultiplayerGameWorld.Species.TryGetValue((uint)player.Key, out Species otherSpecies))
+            if (MultiplayerWorld.Species.TryGetValue((uint)player.Key, out Species otherSpecies))
             {
-                // Send other players' species to the incoming player
-                var otherSpeciesBuffer = new PackedBytesBuffer();
-                otherSpecies.NetworkSerialize(otherSpeciesBuffer);
-                RpcId(peerId, nameof(SyncSpecies), player.Key, otherSpeciesBuffer.Data);
+                // Send species of other players to the incoming player
+                var otherSpeciesMsg = new PackedBytesBuffer();
+                otherSpecies.NetworkSerialize(otherSpeciesMsg);
+                RpcId(peerId, nameof(SyncSpecies), player.Key, otherSpeciesMsg.Data);
             }
         }
 
-        // Send the incoming player's species to all others
-        var speciesBuffer = new PackedBytesBuffer();
-        species.NetworkSerialize(speciesBuffer);
-        Rpc(nameof(SyncSpecies), peerId, speciesBuffer.Data);
+        // Send the incoming player's species to everyone
+        var speciesMsg = new PackedBytesBuffer();
+        species.NetworkSerialize(speciesMsg);
+        Rpc(nameof(SyncSpecies), peerId, speciesMsg.Data);
 
         SpawnPlayer(peerId);
     }
@@ -312,7 +306,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     /// </summary>
     protected virtual void OnNetEntityDestroy(uint entityId)
     {
-        if (!MultiplayerGameWorld.TryGetNetworkEntity(entityId, out INetworkEntity entity))
+        if (!MultiplayerWorld.TryGetNetworkEntity(entityId, out INetworkEntity entity))
             return;
 
         if (entityId == LocalPlayerVars.EntityId)
@@ -428,6 +422,223 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         NetworkManager.Instance.SetVar(peerId, "score", CalculateScore(peerId));
     }
 
+    private void OnNetworkTick(object sender, float delta)
+    {
+        playerInputHandler.NetworkTick(delta);
+
+        if (NetworkManager.Instance.IsClient)
+            RecordWorldState();
+
+        foreach (var entry in MultiplayerWorld.Entities.Values)
+        {
+            var entity = entry.Value;
+            if (entity == null)
+                continue;
+
+            if (!entity.EntityNode.IsInsideTree())
+                continue;
+
+            entity.NetworkTick(delta);
+        }
+
+        DebugOverlays.Instance.ReportTickCount(TickCount);
+        ++TickCount;
+
+        if (NetworkManager.Instance.IsServer)
+        {
+            RecordWorldState();
+
+            // TODO: Send at a fewer rate and fix weird jiggly motion that comes with it
+            BroadcastHeartbeat();
+        }
+        else
+        {
+            // TODO: fix buffer "overflowing" i.e. too many heartbeats stored in the buffer making the client
+            // running behind too far in the past
+            ProcessIncomingHeartbeat(delta);
+        }
+
+        NetworkTick(delta);
+    }
+
+    /// <summary>
+    ///   Returns a world state snapshot.
+    /// </summary>
+    private WorldState CreateWorldStateSnapshot()
+    {
+        var state = new WorldState();
+
+        for (int i = MultiplayerWorld.EntityIDs.Count - 1; i >= 0; --i)
+        {
+            var id = MultiplayerWorld.EntityIDs[i];
+            var entity = MultiplayerWorld.Entities[id].Value;
+
+            if (entity == null || !entity.EntityNode.IsInsideTree())
+                continue;
+
+            var msg = new PackedBytesBuffer();
+            entity.NetworkSerialize(msg);
+
+            state.EntityStates[id] = msg;
+        }
+
+        return state;
+    }
+
+    /// <summary>
+    ///   Records a snapshot of the world state for current tick.
+    /// </summary>
+    private void RecordWorldState()
+    {
+        localWorldStateBuffer[TickCount % Constants.BUFFER_MAX_TICKS] = CreateWorldStateSnapshot();
+    }
+
+    /// <summary>
+    ///   Sends a heartbeat of the current tick to all active players.
+    /// </summary>
+    private void BroadcastHeartbeat()
+    {
+        var heartbeat = new Heartbeat
+        {
+            Tick = TickCount,
+            WorldState = CreateWorldStateSnapshot(),
+        };
+
+        foreach (var player in NetworkManager.Instance.ConnectedPlayers)
+        {
+            if (player.Value.Status != NetworkPlayerStatus.Active ||
+                player.Key == NetworkManager.DEFAULT_SERVER_ID)
+            {
+                continue;
+            }
+
+            heartbeat.AckedInputTick = playerInputHandler.PeersInputs[player.Key].LatestSnapshot.Key;
+
+            var msg = new PackedBytesBuffer();
+            heartbeat.NetworkSerialize(msg);
+
+            RpcUnreliableId(player.Key, nameof(ReceiveServerHeartbeat), msg.Data);
+        }
+    }
+
+    private void ProcessIncomingHeartbeat(float delta)
+    {
+        if (heartbeatBuffer.Count <= 0)
+        {
+            // Hasn't received any new updates from the server (or we're not a client).
+            return;
+        }
+
+        var heartbeat = heartbeatBuffer.Dequeue();
+
+        LastReceivedServerTick = heartbeat.Tick;
+        LastAckedInputTick = heartbeat.AckedInputTick;
+
+        var tickLead = (int)LastAckedInputTick - (int)LastReceivedServerTick + 1;
+        averageTickLead = (0.7f * averageTickLead) + ((1 - 0.7f) * tickLead);
+        DebugOverlays.Instance.ReportTickLead(averageTickLead);
+        AdjustTickRate();
+
+        if (heartbeat.Tick >= TickCount)
+        {
+            TickCount = heartbeat.Tick;
+            return;
+        }
+
+        foreach (var entityState in heartbeat.WorldState.EntityStates)
+        {
+            if (!MultiplayerWorld.TryGetNetworkEntity(entityState.Key, out INetworkEntity entity))
+            {
+                // Entity is not found locally so we need to replicate (spawn) it
+                // TODO: Integrate entity spawn request with world state snapshot
+                RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(RequestEntitySpawn), entityState.Key);
+                continue;
+            }
+
+            if (!entity.EntityNode.IsInsideTree())
+                continue;
+
+            if (entity is NetworkCharacter character && character.IsLocal)
+                Reconcile(character, heartbeat, delta);
+
+            entity.NetworkDeserialize(entityState.Value);
+        }
+    }
+
+    private void Reconcile(NetworkCharacter character, Heartbeat serverHeartbeat, float delta)
+    {
+        var bufferPos = serverHeartbeat.Tick % Constants.BUFFER_MAX_TICKS;
+        var localWorldState = localWorldStateBuffer[bufferPos];
+
+        if (localWorldState == null)
+        {
+            NetworkManager.Instance.PrintError("World state doesn't exist for tick: ", serverHeartbeat.Tick);
+            return;
+        }
+
+        var serverSerialized = serverHeartbeat.WorldState.EntityStates[character.NetworkEntityId];
+        var serverPlayerState = character.DecodePacket(serverSerialized);
+
+        if (!localWorldState.EntityStates.TryGetValue(character.NetworkEntityId,
+            out PackedBytesBuffer localSerialized))
+        {
+            // Totally unexpected
+            return;
+        }
+
+        var localPlayerState = character.DecodePacket(localSerialized);
+
+        var positionError = serverPlayerState.Position - localPlayerState.Position;
+
+        if (positionError.LengthSquared() > PredictionErrorToleranceThreshold)
+        {
+            // Too much error, needs rewinding
+
+            NetworkManager.Instance.Print("Rewinding ", serverHeartbeat.Tick, ". Error: ",
+                (serverPlayerState.Position - localPlayerState.Position).Length(), ", Tick offset: ",
+                TickCount - serverHeartbeat.Tick);
+
+            // Rewind
+            character.ApplyState(serverPlayerState, false);
+
+            var tickToReplay = serverHeartbeat.Tick;
+
+            while (tickToReplay < TickCount)
+            {
+                // Replay
+
+                bufferPos = tickToReplay % Constants.BUFFER_MAX_TICKS;
+
+                var replayStateBuffer = new PackedBytesBuffer();
+                character.NetworkSerialize(replayStateBuffer);
+
+                localWorldStateBuffer[bufferPos].EntityStates[character.NetworkEntityId] = replayStateBuffer;
+
+                character.ApplyNetworkedInput(playerInputHandler.GetInputAtBuffer(bufferPos));
+                character.NetworkTick(delta);
+
+                ++tickToReplay;
+            }
+        }
+    }
+
+    private void AdjustTickRate()
+    {
+        var multiplier = 1f;
+
+        // TODO: Asses effectiveness
+        if (averageTickLead < -2)
+        {
+            multiplier = 0.96875f;
+        }
+        else if (averageTickLead >= 2)
+        {
+            multiplier = 1.015625f;
+        }
+
+        NetworkManager.Instance.TickIntervalMultiplier = multiplier;
+    }
+
     /// <summary>
     ///   Replicates the given server-side entity to the specified target peer.
     /// </summary>
@@ -436,42 +647,9 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (!NetworkManager.Instance.IsServer)
             return;
 
-        var spawnData = new PackedBytesBuffer();
-        entity.PackSpawnState(spawnData);
-        RpcId(targetPeerId, nameof(NotifyEntitySpawn), entity.NetworkEntityId, entity.ResourcePath, spawnData.Data);
-    }
-
-    private void OnNetworkTick(object sender, float delta)
-    {
-        if (NetworkManager.Instance.IsServer)
-            NetworkUpdateGameState(delta);
-
-        NetworkTick(delta);
-    }
-
-    private void NetworkUpdateGameState(float delta)
-    {
-        _ = delta;
-
-        for (int i = MultiplayerGameWorld.EntityIDs.Count - 1; i >= 0; --i)
-        {
-            var id = MultiplayerGameWorld.EntityIDs[i];
-
-            var entity = MultiplayerGameWorld.Entities[id].Value;
-            if (entity == null || !entity.EntityNode.IsInsideTree())
-                continue;
-
-            foreach (var player in NetworkManager.Instance.ConnectedPlayers)
-            {
-                if (player.Value.Status != NetworkPlayerStatus.Active ||
-                    player.Key == NetworkManager.DEFAULT_SERVER_ID)
-                {
-                    continue;
-                }
-
-                UpdateEntityState(player.Key, entity);
-            }
-        }
+        var msg = new PackedBytesBuffer();
+        entity.PackSpawnState(msg);
+        RpcId(targetPeerId, nameof(NotifyEntitySpawn), entity.NetworkEntityId, entity.ResourcePath, msg.Data);
     }
 
     private void OnNetEntitySpawned(INetworkEntity spawned)
@@ -479,7 +657,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (NetworkManager.Instance.IsClient)
             return;
 
-        MultiplayerGameWorld.RegisterNetworkEntity(spawned);
+        MultiplayerWorld.RegisterNetworkEntity(spawned);
 
         foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
@@ -495,7 +673,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         if (NetworkManager.Instance.IsClient)
             return;
 
-        MultiplayerGameWorld.UnregisterNetworkEntity(id);
+        MultiplayerWorld.UnregisterNetworkEntity(id);
 
         foreach (var player in NetworkManager.Instance.ConnectedPlayers)
         {
@@ -541,6 +719,20 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         }
     }
 
+    /// <summary>
+    ///   Buffer received server heartbeat.
+    /// </summary>
+    /// <param name="data">The heartbeat data</param>
+    [Puppet]
+    private void ReceiveServerHeartbeat(byte[] data)
+    {
+        var msg = new PackedBytesBuffer(data);
+        var heartbeat = new Heartbeat();
+        heartbeat.NetworkDeserialize(msg);
+
+        heartbeatBuffer.Enqueue(heartbeat);
+    }
+
     [Puppet]
     private void NotifyServerReady()
     {
@@ -558,31 +750,31 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     [PuppetSync]
     private void SyncPlayerVar(int peerId, string key, object value)
     {
-        if (!MultiplayerGameWorld.PlayerVars.ContainsKey(peerId))
-            MultiplayerGameWorld.PlayerVars[peerId] = new NetworkPlayerVars();
+        if (!MultiplayerWorld.PlayerVars.ContainsKey(peerId))
+            MultiplayerWorld.PlayerVars[peerId] = new NetworkPlayerVars();
 
-        MultiplayerGameWorld.PlayerVars[peerId].SetVar(key, value);
+        MultiplayerWorld.PlayerVars[peerId].SetVar(key, value);
     }
 
     [Puppet]
     private void SyncPlayerVars(int peerId, byte[] data)
     {
-        var buffer = new PackedBytesBuffer(data);
+        var msg = new PackedBytesBuffer(data);
         var vars = new NetworkPlayerVars();
-        vars.NetworkDeserialize(buffer);
-        MultiplayerGameWorld.PlayerVars[peerId] = vars;
+        vars.NetworkDeserialize(msg);
+        MultiplayerWorld.PlayerVars[peerId] = vars;
     }
 
     [PuppetSync]
     private void DestroyPlayerVars(int peerId)
     {
-        MultiplayerGameWorld.PlayerVars.Remove(peerId);
+        MultiplayerWorld.PlayerVars.Remove(peerId);
     }
 
     [Puppet]
     private void NotifyEntitySpawn(uint entityId, string resourcePath, byte[] data)
     {
-        if (MultiplayerGameWorld.Entities.ContainsKey(entityId))
+        if (MultiplayerWorld.Entities.ContainsKey(entityId))
             return;
 
         // TODO: Cache resource path
@@ -596,7 +788,7 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
         }
 
         rootOfDynamicallySpawned.AddChild(spawned.EntityNode);
-        MultiplayerGameWorld.RegisterNetworkEntity(entityId, spawned);
+        MultiplayerWorld.RegisterNetworkEntity(entityId, spawned);
         OnNetEntitySpawned(entityId, spawned);
     }
 
@@ -604,37 +796,15 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
     private void DestroySpawnedEntity(uint entityId)
     {
         OnNetEntityDestroy(entityId);
-        MultiplayerGameWorld.UnregisterNetworkEntity(entityId);
+        MultiplayerWorld.UnregisterNetworkEntity(entityId);
     }
 
-    /// <summary>
-    ///   Process received server entity state in this client.
-    /// </summary>
-    /// <param name="id">The entity's id</param>
-    /// <param name="ackedInputId">The most recent id of the input acked by the server</param>
-    /// <param name="data">The entity state</param>
-    [PuppetSync]
-    private void NotifyEntityStateUpdate(uint id, ushort ackedInputId, byte[] data)
+    [Puppet]
+    private void AdjustClientTick(uint tick)
     {
-        if (!MultiplayerGameWorld.TryGetNetworkEntity(id, out INetworkEntity entity))
-        {
-            // Entity is not found locally so we need to replicate (spawn) it
-            RpcId(NetworkManager.DEFAULT_SERVER_ID, nameof(RequestEntitySpawn), id);
-            return;
-        }
-
-        if (!entity.EntityNode.IsInsideTree())
-            return;
-
-        var packet = new PackedBytesBuffer();
-
-        if (entity is NetworkCharacter)
-            packet.Write(ackedInputId);
-
-        packet.Write(data);
-        packet.Position = 0;
-
-        entity.NetworkDeserialize(packet);
+        LastReceivedServerTick = tick;
+        TickCount = (uint)(tick + NetworkManager.Instance.Latency * 0.001f / GetPhysicsProcessDeltaTime()) + 4;
+        NetworkManager.Instance.Print("Adjusted client tick to ", TickCount, " with lead offset: ", TickCount - tick);
     }
 
     [Puppet]
@@ -656,20 +826,22 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
         var sender = GetTree().GetRpcSenderId();
 
+        RpcId(sender, nameof(AdjustClientTick), TickCount);
+
         // Upload player states
-        foreach (var state in MultiplayerGameWorld.PlayerVars)
+        foreach (var state in MultiplayerWorld.PlayerVars)
         {
-            var packed = new PackedBytesBuffer();
-            state.Value.NetworkSerialize(packed);
-            RpcId(sender, nameof(SyncPlayerVars), state.Key, packed.Data);
+            var msg = new PackedBytesBuffer();
+            state.Value.NetworkSerialize(msg);
+            RpcId(sender, nameof(SyncPlayerVars), state.Key, msg.Data);
         }
 
         RegisterPlayer(sender);
 
-        RpcId(sender, nameof(NotifyEntitiesDownload), MultiplayerGameWorld.EntityCount);
+        RpcId(sender, nameof(NotifyEntitiesDownload), MultiplayerWorld.EntityCount);
 
         // Upload entities to the client
-        foreach (var entity in MultiplayerGameWorld.Entities.Values)
+        foreach (var entity in MultiplayerWorld.Entities.Values)
         {
             if (entity.Value != null)
                 RemoteSpawnEntity(sender, entity.Value);
@@ -684,7 +856,28 @@ public abstract class MultiplayerStageBase<TPlayer> : StageBase<TPlayer>, IMulti
 
         var sender = GetTree().GetRpcSenderId();
 
-        if (MultiplayerGameWorld.TryGetNetworkEntity(entityId, out INetworkEntity entity))
+        if (MultiplayerWorld.TryGetNetworkEntity(entityId, out INetworkEntity entity))
             RemoteSpawnEntity(sender, entity);
+    }
+
+    public class Heartbeat : INetworkSerializable
+    {
+        public uint Tick { get; set; }
+        public uint AckedInputTick { get; set; }
+        public WorldState WorldState { get; set; } = new();
+
+        public void NetworkSerialize(PackedBytesBuffer buffer)
+        {
+            buffer.Write(Tick);
+            buffer.Write(AckedInputTick);
+            WorldState.NetworkSerialize(buffer);
+        }
+
+        public void NetworkDeserialize(PackedBytesBuffer buffer)
+        {
+            Tick = buffer.ReadUInt32();
+            AckedInputTick = buffer.ReadUInt32();
+            WorldState.NetworkDeserialize(buffer);
+        }
     }
 }

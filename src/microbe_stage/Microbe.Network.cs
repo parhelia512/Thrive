@@ -4,7 +4,7 @@ using System.Linq;
 using Godot;
 
 /// <summary>
-///   The networking part of Microbe class for state synchronizations.
+///   The networking part of Microbe class for state synchronization.
 /// </summary>
 public partial class Microbe
 {
@@ -13,7 +13,6 @@ public partial class Microbe
     private string? cloudSystemPath;
 
     private float lastHitpoints;
-    private NetworkInputVars lastAppliedInput;
 
     [Flags]
     public enum InputFlag : byte
@@ -23,7 +22,7 @@ public partial class Microbe
         Engulf = 1 << 2,
     }
 
-    public MultiplayerGameWorld? MultiplayerGameWorld => GameWorld as MultiplayerGameWorld;
+    public MultiplayerGameWorld MultiplayerGameWorld => (MultiplayerGameWorld)GameWorld;
 
     public override string ResourcePath => "res://src/microbe_stage/Microbe.tscn";
 
@@ -51,6 +50,8 @@ public partial class Microbe
     {
         // TODO: Find a way to compress this even further, look into delta encoding
 
+        // TODO: Don't sync transform when engulfed
+
         base.NetworkSerialize(buffer);
 
         buffer.Write((byte)Compounds.UsefulCompounds.Count());
@@ -75,13 +76,18 @@ public partial class Microbe
         buffer.Write((byte)State);
         buffer.Write(DigestedAmount);
 
-        var bools = new bool[2] { HostileEngulfer.Value != null, Dead };
+        var bools = new bool[3]
+        {
+            HostileEngulfer.Value != null,
+            PhagocytosisStep is PhagocytosisPhase.Ingestion or PhagocytosisPhase.Ingested or
+                PhagocytosisPhase.Digested,
+            Dead,
+        };
+
         buffer.Write(bools.ToByte());
 
         if (HostileEngulfer.Value != null)
             buffer.Write(HostileEngulfer.Value.NetworkEntityId);
-
-        buffer.Write((byte)PhagocytosisStep);
     }
 
     public override void NetworkDeserialize(PackedBytesBuffer buffer)
@@ -113,21 +119,28 @@ public partial class Microbe
 
         var bools = buffer.ReadByte();
 
-        if (bools.ToBoolean(0) && MultiplayerGameWorld!.TryGetNetworkEntity(
-                buffer.ReadUInt32(), out INetworkEntity entity) && entity is Microbe engulfer)
+        if (bools.ToBoolean(0) && MultiplayerGameWorld.TryGetNetworkEntity(buffer.ReadUInt32(),
+            out INetworkEntity entity) && entity is Microbe engulfer)
         {
-            // TODO: Mildly broken.
-            engulfer.IngestEngulfable(this);
+            if (bools.ToBoolean(1))
+            {
+                engulfer.IngestEngulfable(this);
+
+                // TODO: Floating chunks doesn't seem to get visually engulfed client-side
+                // TODO: Engulfee inflates back after ingested but this doesn't happen in singleplayer, why?
+            }
+            else
+            {
+                engulfer.EjectEngulfable(this);
+            }
         }
         else
         {
-            // TODO: Need proper handling when engulfer player leaves the game so it won't cause crash
             HostileEngulfer.Value?.EjectEngulfable(this);
         }
 
-        PhagocytosisStep = (PhagocytosisPhase)buffer.ReadByte();
-
-        Dead = bools.ToBoolean(1);
+        if (bools.ToBoolean(2))
+            Kill();
 
         if (Hitpoints < lastHitpoints)
             Flash(1.0f, new Color(1, 0, 0, 0.5f), 1);
@@ -145,11 +158,7 @@ public partial class Microbe
         // Sending 2-byte unsigned int... means our max deserialized organelle count will be 65535
         buffer.Write((ushort)organelles!.Count);
         foreach (var organelle in organelles!)
-        {
-            var packed = new PackedBytesBuffer();
-            organelle.NetworkSerialize(packed);
-            buffer.Write(packed);
-        }
+            organelle.NetworkSerialize(buffer);
 
         buffer.Write(allOrganellesDivided);
     }
@@ -167,8 +176,7 @@ public partial class Microbe
 
         Init(null!, null!, currentGame, true);
 
-        var world = (MultiplayerGameWorld)currentGame.GameWorld;
-        ApplySpecies(world.GetSpecies((uint)PeerId));
+        ApplySpecies(MultiplayerGameWorld.GetSpecies((uint)PeerId));
 
         organelles?.Clear();
         var organellesCount = buffer.ReadUInt16();
@@ -177,52 +185,17 @@ public partial class Microbe
             if (organelles == null)
                 break;
 
-            var packed = buffer.ReadBuffer();
             var organelle = new PlacedOrganelle();
-            organelle.NetworkDeserialize(packed);
+            organelle.NetworkDeserialize(buffer);
             organelles.Add(organelle);
         }
 
         allOrganellesDivided = buffer.ReadBoolean();
     }
 
-    public override void PredictSimulation(float delta)
-    {
-        if (ColonyParent == null && !Dead)
-            GlobalTransform = GetNewPhysicsRotation(GlobalTransform);
-
-        base.PredictSimulation(delta);
-    }
-
-    public override void ApplyInput(NetworkInputVars input)
-    {
-        base.ApplyInput(input);
-
-        if ((input.Bools & (byte)InputFlag.EmitToxin) != 0)
-            QueueEmitToxin(SimulationParameters.Instance.GetCompound("oxytoxy"));
-
-        if ((input.Bools & (byte)InputFlag.SecreteSlime) != 0)
-            QueueSecreteSlime(GetPhysicsProcessDeltaTime());
-
-        var engulf = (input.Bools & (byte)InputFlag.Engulf) != 0;
-
-        if (engulf && !Membrane.Type.CellWall)
-        {
-            State = MicrobeState.Engulf;
-        }
-        else if (!engulf && State == MicrobeState.Engulf)
-        {
-            State = MicrobeState.Normal;
-        }
-
-        HandleMovement(GetPhysicsProcessDeltaTime());
-
-        lastAppliedInput = input;
-    }
-
     private void UpdateNametag()
     {
-        if (!NetworkManager.Instance.IsNetworked)
+        if (!NetworkManager.Instance.IsMultiplayer)
             return;
 
         var tagBoxMesh = (QuadMesh)tagBox.Mesh;

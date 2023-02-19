@@ -1,5 +1,5 @@
 ﻿/// <summary>
-///   A single byte header to differentiate raw packets (non-RPC).
+///   A single byte header for differentiating raw packets (non-RPC).
 /// </summary>
 public enum RawPacketFlag
 {
@@ -12,4 +12,14 @@ public enum RawPacketFlag
     ///   Server-to-client.
     /// </summary>
     Pong,
+
+    /// <summary>
+    ///   A server heartbeat packet for a multiplayer world.
+    /// </summary>
+    WorldHeartbeat,
+
+    /// <summary>
+    ///   A client's input packet.
+    /// </summary>
+    InputBatch,
 }

@@ -31,7 +31,7 @@ public class ServerSetup : CustomDialog
     private TextureButton useUpnpHint = null!;
     private Container gameModeSpecificOptions = null!;
 
-    private ServerSettings? settings;
+    private Vars? settings;
     private string playerName = "unnamed";
     private string address = string.Empty;
     private int port;
@@ -91,31 +91,31 @@ public class ServerSetup : CustomDialog
 
     private void ResetForm()
     {
-        settings = new ServerSettings
-        {
-            Name = $"{playerName}'s server",
-            Address = address,
-            Port = port,
-            MaxPlayers = Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS,
-            SessionLength = Constants.MULTIPLAYER_DEFAULT_SESSION_LENGTH,
-            UseUpnp = false,
-            SelectedGameMode = SimulationParameters.Instance.GetMultiplayerGameMode("MicrobialArena"),
-        };
+        settings = new Vars();
+        settings.SetVar("Name", $"{playerName}'s server");
+        settings.SetVar("Address", address);
+        settings.SetVar("Port", port);
+        settings.SetVar("MaxPlayers", Constants.MULTIPLAYER_DEFAULT_MAX_PLAYERS);
+        settings.SetVar("SessionLength", Constants.MULTIPLAYER_DEFAULT_SESSION_LENGTH);
+        settings.SetVar("UseUpnp", false);
+        settings.SetVar("GameMode", SimulationParameters.Instance.GetMultiplayerGameMode("MicrobialArena").InternalName);
 
         ApplySettingsToControls();
     }
 
     private void ApplySettingsToControls()
     {
-        name.Text = settings!.Name;
-        maxPlayers.Value = settings.MaxPlayers;
-        sessionLength.Value = settings.SessionLength;
-        gameMode.Selected = settings.SelectedGameMode!.Index;
-        useUpnp.Pressed = settings.UseUpnp;
+        var simulationParameters = SimulationParameters.Instance;
+
+        name.Text = settings!.GetVar<string>("Name");
+        maxPlayers.Value = settings.GetVar<int>("MaxPlayers");
+        sessionLength.Value = settings.GetVar<uint>("SessionLength");
+        gameMode.Selected = simulationParameters.GetMultiplayerGameMode(settings.GetVar<string>("GameMode")).Index;
+        useUpnp.Pressed = settings.GetVar<bool>("UseUpnp");
 
         gameMode.Clear();
 
-        foreach (var mode in SimulationParameters.Instance.GetAllMultiplayerGameMode())
+        foreach (var mode in simulationParameters.GetAllMultiplayerGameMode())
         {
             gameMode.AddItem(mode.Name);
         }
@@ -136,12 +136,12 @@ public class ServerSetup : CustomDialog
 
     private void ReadControlsToSettings()
     {
-        settings!.Name = name.Text;
-        settings.MaxPlayers = (int)maxPlayers.Value;
-        settings.SessionLength = (uint)sessionLength.Value;
-        settings.SelectedGameMode = currentGameMode;
-        settings.UseUpnp = useUpnp.Pressed;
-        settings.GameModeSettings = gameModeOptions?.ReadSettings();
+        settings!.SetVar("Name", name.Text);
+        settings.SetVar("MaxPlayers", (int)maxPlayers.Value);
+        settings.SetVar("SessionLength", (uint)sessionLength.Value);
+        settings.SetVar("UseUpnp", useUpnp.Pressed);
+        settings.SetVar("GameMode", currentGameMode?.InternalName ?? string.Empty);
+        settings.SetVar("GameModeSettings", gameModeOptions?.ReadSettings() ?? new Vars());
     }
 
     private void CreateGameModeSpecificOptions(int index)
